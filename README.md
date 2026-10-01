@@ -14,17 +14,20 @@ The inference engine, expert caching, model-loading tools, and MTP (multi-token 
 
 This is the configuration validated by this fork. RX 5500 XT setup currently requires a manual Linux source build.
 
-## Measured generation speed
+## Measured request performance
 
 Measured September 30, 2026 on the hardware above. Each result is one observation; coding and writing ended before the 512-token cap.
 
-| Task | Output tokens | MTP off | MTP on |
-| --- | ---: | ---: | ---: |
-| Counting | 512 | 11.35 tok/s | 16.81 tok/s |
-| Coding | 125 | 10.45 tok/s | 15.30 tok/s |
-| Writing | 232 | 10.17 tok/s | 10.91 tok/s |
+| Task | MTP | Output tokens | Prefill tok/s | Prefill seconds | Generation tok/s | Total seconds | Effective tok/s |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Counting | Off | 512 | 97.71 | 83.84 | 11.35 | 128.96 | 3.97 |
+| Counting | On | 512 | 80.25 | 102.09 | 16.81 | 132.55 | 3.86 |
+| Coding | Off | 125 | 100.22 | 81.74 | 10.45 | 93.71 | 1.33 |
+| Coding | On | 125 | 82.89 | 98.83 | 15.30 | 107.01 | 1.17 |
+| Writing | Off | 232 | 100.10 | 81.84 | 10.17 | 104.64 | 2.22 |
+| Writing | On | 232 | 82.47 | 99.33 | 10.91 | 120.60 | 1.92 |
 
-These are generation rates. MTP's slower prefill made total completion time longer for all three fresh 8K requests. The report includes prefill, total time, and effective throughput.
+Total seconds includes prefill and generation, excluding model startup. Effective tok/s = output tokens / total seconds. MTP improved generation speed, but the additional prefill time made each of these fresh 8K requests take longer overall.
 
 **Checks:** 16 focused GPU tests and five real-expert parity checks passed; all six requests completed without runtime errors. The writing sample exceeded its requested word limit.
 
