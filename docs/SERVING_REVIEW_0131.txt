@@ -1,0 +1,19 @@
+Shared serving change split from PRs #323 and #336
+Base: upstream v0.1.31. Branch contrib/non-mtp-serving-0.1.31.
+Only core verify/generate changes: non-MTP serve and set_pcie_enabled.
+No gfx1012 compatibility changes, Pascal flags, or GEMM fallback.
+The rebase preserves upstream STRATA_LOGPOS teacher-forcing diagnostics.
+
+Stock and candidate CUDA builds completed on RTX PRO (sm120).
+Upstream tools/conversation_cache_disabled.py identity comparison is
+passed: same inputs/args, output token IDs, authoritative state hashes,
+prefix reuse and known answers. This local CUDA check does not establish
+identity for pageable resident memory on every ROCm card. The maintainer's
+identity gate remains required before acceptance; no claim it has passed.
+
+Eight requests per arm; spec4,32 filler paragraphs, all output/state/reuse
+and known-answer comparisons passed. No experimental performance flags.
+Non-MTP smoke:1024input/max128output counting/code/prose all completed;
+counting consecutive,125-token merge function passed six functional cases.
+This is local CUDA evidence only. ROCm7 compilation and pageable-resident
+ROCm identity remain unverified. No public push or PR submission made.
