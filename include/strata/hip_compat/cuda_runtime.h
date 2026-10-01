@@ -26,7 +26,7 @@
 #define cudaEventSynchronize hipEventSynchronize
 #define cudaEvent_t hipEvent_t
 #define cudaFree hipFree
-#define cudaFreeHost hipFreeHost
+#define cudaFreeHost hipHostFree
 #define cudaFuncAttributeMaxDynamicSharedMemorySize hipFuncAttributeMaxDynamicSharedMemorySize
 #define cudaGetDevice hipGetDevice
 #define cudaGetDeviceCount hipGetDeviceCount
@@ -41,9 +41,9 @@
 #define cudaGraphUpload hipGraphUpload
 #define cudaGraph_t hipGraph_t
 #define cudaHostAlloc hipHostMalloc
-#define cudaHostAllocDefault hipHostAllocDefault
-#define cudaHostAllocMapped hipHostAllocMapped
-#define cudaHostAllocPortable hipHostAllocPortable
+#define cudaHostAllocDefault hipHostMallocDefault
+#define cudaHostAllocMapped hipHostMallocMapped
+#define cudaHostAllocPortable hipHostMallocPortable
 #define cudaHostGetDevicePointer hipHostGetDevicePointer
 #define cudaHostRegister hipHostRegister
 #define cudaHostRegisterMapped hipHostRegisterMapped

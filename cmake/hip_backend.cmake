@@ -7,7 +7,7 @@ endif()
 # Validated on real cards: gfx1100 (RX 7900 XT / XTX) and gfx1201 (RX 9070 / 9070 XT, Radeon AI PRO R9700).
 # The other RDNA3 / RDNA4 wave32 chips have the same LDS limit and dot4 instruction and build the same code, but
 # the maintainers have not run them (community reports: gfx1102 #192, gfx1200 #176).
-set(_strata_hip_validated gfx1100 gfx1201)
+set(_strata_hip_validated gfx1012 gfx1100 gfx1201)
 set(_strata_hip_unvalidated gfx1101 gfx1102 gfx1200)
 set(STRATA_HIP_ARCH_LIST "")
 foreach(_arch IN LISTS CMAKE_HIP_ARCHITECTURES)
@@ -17,7 +17,7 @@ foreach(_arch IN LISTS CMAKE_HIP_ARCHITECTURES)
     message(WARNING "Strata HIP: ${_base} builds, but it is not validated on a real card yet; please report results")
   else()
     message(FATAL_ERROR
-      "Strata HIP supports wave32 gfx1100 and gfx1201 (unvalidated: ${_strata_hip_unvalidated}); "
+      "Strata HIP supports wave32 gfx1012, gfx1100 and gfx1201 (unvalidated: ${_strata_hip_unvalidated}); "
       "CMAKE_HIP_ARCHITECTURES is '${CMAKE_HIP_ARCHITECTURES}'")
   endif()
   list(APPEND STRATA_HIP_ARCH_LIST "${_base}")
@@ -33,6 +33,13 @@ string(REPLACE ";" "," STRATA_HIP_ARCHS "${STRATA_HIP_ARCH_LIST}")
 enable_language(HIP)
 find_package(hip CONFIG REQUIRED)
 find_package(hipblas CONFIG REQUIRED)
+# Older distro hipBLAS has no workspace API. The compatibility shim uses
+# rocBLAS directly for that version; newer hipBLAS keeps its existing path.
+set(STRATA_HIP_BLAS_TARGETS roc::hipblas)
+if(hipblas_VERSION VERSION_LESS "1.0")
+  find_package(rocblas CONFIG REQUIRED)
+  list(APPEND STRATA_HIP_BLAS_TARGETS roc::rocblas)
+endif()
 find_package(hipblaslt CONFIG QUIET)
 
 if(NOT TARGET hip::host)
@@ -56,6 +63,10 @@ add_library(strata_hip_runtime INTERFACE)
 target_include_directories(strata_hip_runtime BEFORE INTERFACE
   "${STRATA_HIP_COMPAT_INCLUDE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_definitions(strata_hip_runtime INTERFACE STRATA_USE_HIP=1 "STRATA_HIP_ARCHS=\"${STRATA_HIP_ARCHS}\"")
+option(STRATA_GFX1012_PORTABLE_DOT "Use the portable signed-byte dot control on gfx1012" OFF)
+if(STRATA_GFX1012_PORTABLE_DOT)
+  target_compile_definitions(strata_hip_runtime INTERFACE STRATA_GFX1012_PORTABLE_DOT=1)
+endif()
 target_link_libraries(strata_hip_runtime INTERFACE hip::host)
 foreach(_language IN ITEMS CXX HIP)
   target_compile_options(strata_hip_runtime INTERFACE
