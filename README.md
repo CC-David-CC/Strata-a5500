@@ -87,6 +87,9 @@ It needs an explicit packing conversion and is not an installer menu option.
 An **AMD Radeon RX 7900 XT / XTX, RX 9070 / 9070 XT or Radeon AI PRO R9700 on Linux** works too (experimental):
 `./setup.sh --backend hip`, chosen by itself on a PC with no NVIDIA card Strata can use. It installs ROCm without sudo
 and compiles the engine (one GPU, no images yet). Details: [AMD HIP](docs/AMD_HIP.md).
+The **AMD Radeon RX 5500 XT 8 GB consumer card** also has an experimental
+[manual Linux source-build path](docs/AMD_HIP.md#rdna1-rx-5500-xt-8-gb-gfx1012),
+with separate [MTP-off and MTP-on measurements](docs/AMD_HIP_PERFORMANCE.md#rx-5500-xt-8-gb-rdna1).
 
 ## Install
 

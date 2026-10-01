@@ -1,10 +1,11 @@
-# Opt-in HIP configuration. Strata's CUDA-shaped kernels target wave32 RDNA3 / RDNA4 (64 KiB LDS per workgroup,
-# the signed dot4 instruction). CMake/compiler discovery stays machine-independent; pass CMAKE_HIP_COMPILER when it
+# Opt-in HIP configuration. Strata's CUDA-shaped kernels target wave32 RDNA1 / RDNA3 / RDNA4 (64 KiB LDS per workgroup;
+# RDNA1 uses an SDWA signed-dot fallback). CMake/compiler discovery stays machine-independent; pass CMAKE_HIP_COMPILER when it
 # is not on PATH.
 if(NOT DEFINED CMAKE_HIP_ARCHITECTURES OR CMAKE_HIP_ARCHITECTURES STREQUAL "")
   set(CMAKE_HIP_ARCHITECTURES gfx1100 CACHE STRING "Strata HIP target architecture(s), e.g. gfx1100 or gfx1100;gfx1201")
 endif()
-# Validated on real cards: gfx1100 (RX 7900 XT / XTX) and gfx1201 (RX 9070 / 9070 XT, Radeon AI PRO R9700).
+# Validated on real cards: gfx1012 (consumer RX 5500 XT 8 GB), gfx1100 (RX 7900 XT / XTX),
+# and gfx1201 (RX 9070 / 9070 XT, Radeon AI PRO R9700).
 # The other RDNA3 / RDNA4 wave32 chips have the same LDS limit and dot4 instruction and build the same code, but
 # the maintainers have not run them (community reports: gfx1102 #192, gfx1200 #176).
 set(_strata_hip_validated gfx1012 gfx1100 gfx1201)

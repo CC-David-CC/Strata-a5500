@@ -1,9 +1,12 @@
-# Experimental AMD HIP backend (gfx1100, gfx1201)
+# Experimental AMD HIP backend (gfx1012, gfx1100, gfx1201)
 
 This is a Linux source build for the RX 7900 XT / XTX (RDNA3, gfx1100) and the
 RX 9070 / 9070 XT / Radeon AI PRO R9700 (RDNA4, gfx1201; see [RDNA4](#rdna4-gfx1201)).
 It is opt-in; the NVIDIA installer and CUDA build remain the default. Other AMD
 architectures, wave64, Windows HIP, and mixed AMD/NVIDIA execution are outside this contribution.
+The **AMD Radeon RX 5500 XT 8 GB consumer GPU (RDNA1, gfx1012)** has an experimental
+[manual source-build path](#rdna1-rx-5500-xt-8-gb-gfx1012) below. It is not added to
+setup's automatic ROCm-wheel installation.
 
 The backend maps the CUDA-shaped runtime and BLAS calls to HIP/hipBLAS, uses
 RDNA3/RDNA4's signed integer dot instruction for quantized kernels, and supplies
@@ -54,7 +57,7 @@ cmake -S . -B build-hip \
 cmake --build build-hip --target strata -j2
 ```
 
-`CMAKE_HIP_ARCHITECTURES` is `gfx1100`, `gfx1201`, or a list such as `"gfx1100;gfx1201"` (one binary for both).
+`CMAKE_HIP_ARCHITECTURES` is `gfx1012`, `gfx1100`, `gfx1201`, or a list such as `"gfx1100;gfx1201"` (one binary for both).
 gfx1101, gfx1102 and gfx1200 (the same wave32, 64 KiB LDS and dot4 instruction) build with a warning: they have
 not been validated on a real card here. At startup the engine and `strata-device` compare each GPU they use
 (`gcnArchName` up to the `:` feature suffix) with the architectures the binary was compiled for, and require
@@ -116,6 +119,76 @@ sizes itself automatically and leaves 1 GiB of VRAM headroom.
 The installer supports this backend (see "Install with setup" above). The vision helper is NVIDIA-only for now.
 Setup installs one AMD card; the engine's layer split also runs on two AMD cards when the config is written by hand
 (see RDNA4 below).
+
+## RDNA1: RX 5500 XT 8 GB (gfx1012)
+
+This target is the **AMD Radeon RX 5500 XT with 8 GB of VRAM, a consumer RDNA1
+GPU**. The test machine's local SSH alias was `a5500`; it does **not** identify
+an NVIDIA RTX A5500 or a different professional card.
+
+This is a manual Linux source build. The tested host used Ubuntu 24.04, distro
+HIP 5.7.1, clang 17, hipBLAS 0.54 and rocBLAS 2.47, a Ryzen 5 3600, 56 GB installed
+DDR4 at 1866 MT/s (about 54.8 GiB usable), and an NVMe SSD. The RX 5500 XT is not
+added to the automatic installer: do not install gfx1100/gfx1201 wheels or spoof
+the GPU architecture to run this target.
+
+With that toolchain already installed:
+
+```sh
+cmake -S . -B build-hip -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF \
+  -DCMAKE_HIP_ARCHITECTURES=gfx1012 \
+  -DCMAKE_HIP_COMPILER=/usr/bin/clang++-17 \
+  -DSTRATA_BUILD_TESTS=ON -DSTRATA_PREFILL_MMQ=OFF
+cmake --build build-hip --target strata -j4
+```
+
+For an offline build, add `-DSTRATA_GGML_DIR=/path/to/llama.cpp` using the exact
+revision in `third_party/ggml/VERSION.txt`. No llama.cpp source change is needed.
+HIP MMQ and a hipBLASLt tuning table were not used for the reported RDNA1 results.
+
+Copy [the example server configuration](../tools/hip/rx5500xt-iq3s.example.json)
+to a local file and replace all `/path/to/...` paths. Use the matching GSQ-RCO
+IQ3_S pack, GGUF shards, tokenizer and MTP runtime. The config allocates 9,216
+context tokens, enough for the measured 8,192-token input plus 512-token output.
+It does not establish a maximum supported context.
+
+```sh
+python3 tools/hip/bench_rdna1.py \
+  --config /path/to/local-rx5500xt.json --output /path/to/new-results-directory \
+  --input-tokens 8192 --output-tokens 512 --mode both
+```
+
+The benchmark runs one request at a time, first without MTP and then with MTP.
+Both modes use the same frozen input IDs and disable prompt reuse and suffix
+drafts. Coding and writing may stop before 512 tokens; the report records their
+actual lengths. Counting often has unusually high draft acceptance, so do not
+substitute its speed for ordinary prose. The benchmark is text-only and opens
+no network listener. See [RDNA1 results](AMD_HIP_PERFORMANCE.md#rx-5500-xt-8-gb-rdna1).
+
+For the usual HTTP server, use the same JSON with `serve/server.py --engine
+strata --config ... --host 127.0.0.1 --port 8095`. To run without MTP, remove the
+`--mtp` argument and its directory, use `--spec 2` for verifier buffer allocation,
+and retain `--suffix-draft 0`. Non-MTP serving currently requires
+`--conversation-cache-mib 0`; independent-conversation snapshots need a loaded
+drafter. Ordinary in-session prefix reuse is separate from that feature.
+
+### What changed, and what is configuration?
+
+| Area | Contribution |
+| --- | --- |
+| Strata HIP code | Accept gfx1012; provide RDNA1 signed-byte dot via SDWA with an early-clobber constraint; cover old-HIP wave synchronization, host-memory names and infinity constants. |
+| Strata BLAS compatibility | Use rocBLAS directly with hipBLAS 0.x to preserve explicit workspace and FP32 accumulation; newer hipBLAS retains its existing path. |
+| Strata serving code | Allow a no-MTP comparison; omit the empty PCIe expert graph path when the source cannot provide any such experts; separate prompt-tail profiling from decode. |
+| Existing Strata configuration | Adaptive expert cache every 8 steps with up to 64 swaps, five CPU pool workers, Q8 KV, mmap expert backing, SSD PLE, automatic prefill/cache sizing and a 768 MiB reserve. MTP is an existing Strata feature. |
+| llama.cpp / ggml | The pinned dependency supplies quant formats and CPU expert math. It is unchanged. The RDNA1 SDWA sequence is adapted inside Strata's compatibility layer with MIT attribution. This is not a standalone llama.cpp server or Vulkan run. |
+
+The experimental four-row dense-kernel tuning from the earlier prototype is
+not part of this contribution; it had mixed performance results. The port does
+not prune model experts or change model weights. Only the tested RX 5500 XT,
+single-GPU, text-only configuration is claimed here; there is no new validation
+claim for other AMD cards, CUDA, vision, or concurrent serving.
 
 ## RDNA4 (gfx1201)
 
