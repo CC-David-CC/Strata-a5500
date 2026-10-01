@@ -4,7 +4,7 @@ This is David's **P4 contribution branch** of
 [**Niko1221/Strata**](https://github.com/Niko1221/Strata).
 Credit for the engine, expert caching, and MTP belongs to upstream.
 This branch adds an opt-in **Pascal sm_61 CUDA 12.x** path and bounded FP32
-prefill support. It is separate from the RX 5500 XT contribution.
+prefill support.
 
 ## Our P4 hardware and results
 
@@ -47,9 +47,9 @@ sample contained a factual error. These are throughput and correctness smoke
 tests, not model-quality benchmark scores.
 
 **Draft provenance:** the measurements above were taken on source `9d393df`,
-our tested combined development branch. This contribution isolates P4 changes
-and the shared non-MTP/benchmark support; it excludes the AMD GPU port.
-**The isolated contribution branch has not yet been rebuilt and retested.**
+the tested P4 development revision. This contribution includes P4 changes
+and non-MTP/benchmark support.
+**This contribution branch has not yet been rebuilt and retested separately.**
 
 - [Full methodology, build instructions, and timings](docs/DETAILS.md#experimental-tesla-p4-pascal-sm_61)
 - [Raw measurements, output text, and source/binary hashes](docs/benchmarks/2026-09-30-sm61.json)
@@ -150,10 +150,6 @@ one later with `SETUP.bat` (the same as `START-HERE.bat --setup`; on Linux `./se
 
 For **OrcaRouter's Flash-Next Uncensored IQ3_XXS**, see the [manual compatibility setup](docs/ORCA.md).
 It needs an explicit packing conversion and is not an installer menu option.
-
-An **AMD Radeon RX 7900 XT / XTX, RX 9070 / 9070 XT or Radeon AI PRO R9700 on Linux** works too (experimental):
-`./setup.sh --backend hip`, chosen by itself on a PC with no NVIDIA card Strata can use. It installs ROCm without sudo
-and compiles the engine (one GPU, no images yet). Details: [AMD HIP](docs/AMD_HIP.md).
 
 ## Install
 

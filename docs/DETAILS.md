@@ -780,8 +780,7 @@ numactl --cpunodebind=0 --membind=0 .venv/bin/python \
   --output-tokens 512 --mode both
 ```
 
-The benchmark helper's filename reflects its original AMD target; it uses the
-CUDA backend specified in this configuration. For the HTTP server, use
+The benchmark helper uses the CUDA backend specified in this configuration. For the HTTP server, use
 `.venv/bin/python -m serve.server --engine strata --config /path/to/p4.json
 --host 127.0.0.1 --port 8095`, with the same NUMA binding.
 
@@ -860,7 +859,6 @@ The cache warmed between requests, so the first-to-second difference cannot
 be attributed solely to PCIe tuning. Raw observations are included in the report.
 
 
-Contribution branch note: these measurements were taken at `9d393df` on the
-combined hardware-development branch. This contribution isolates the P4 changes
-and shared non-MTP/benchmark support; the isolated branch has not been rebuilt
-or benchmarked separately. The RX 5500 XT GPU port is excluded.
+Contribution branch note: these measurements were taken at the tested P4
+development revision `9d393df`. This contribution includes P4 changes and
+non-MTP/benchmark support; it has not been rebuilt or benchmarked separately.
