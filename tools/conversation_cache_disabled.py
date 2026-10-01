@@ -23,9 +23,8 @@ NAMES = ('short', 'A', 'A-live', 'A-checkpoint', 'B', 'A-return', 'B-return', 'A
 # (not 'version': the gate also compares a new release with the previous one, where only the version differs)
 SETTINGS = ('context', 'kv', 'kv_resident', 'expert_slots', 'spec',
             'mtp_max', 'lookup', 'cvec', 'pcie_frac', 'spec_min_p', 'pool_workers')
-# Untouched upstream does not emit the indexer `dead` and `pooled_full` fields
-# added by this PR; `pooled` is the completed-row extent in both engines.
-# Draft scratch and unused page padding are not comparable authoritative state.
+# Compare authoritative main-model state shared by both engines. Draft scratch
+# and unused page padding are not comparable authoritative state.
 STATE_KEYS = ('L', 'gdn', 'ple', 'tail', 'pooled', 'kv', 'ple_prev')
 
 
@@ -35,17 +34,13 @@ def state_hashes(text, *, candidate=False):
         if 'STATE_HASH L=' in line:
             fields = dict(re.findall(r'(\w+)=([0-9a-f,-]+)', line))
             require(set(STATE_KEYS) <= fields.keys(), 'missing upstream-compatible state fields')
-            if candidate:
-                # Evidence that the candidate is a build with this change: it
-                # also fingerprints the spare row (compared by the cache-on gates).
-                require('pooled_full' in fields, 'candidate lacks the pooled_full fingerprint')
             hashes.append({key: fields[key] for key in STATE_KEYS})
     return hashes
 
 
 def common_args(cfg, spec):
-    # Upstream has no conversation-cache options. Omit them from EVERY arm so
-    # the candidates exercise their disabled default with identical arguments.
+    # Explicitly disable cross-conversation snapshots in every arm. In-session
+    # prefix reuse remains enabled to exercise continuation/checkpoint paths.
     args, i = [], 0
     while i < len(cfg['args']):
         arg = cfg['args'][i]
@@ -55,7 +50,7 @@ def common_args(cfg, spec):
         else:
             args.append(arg)
             i += 1
-    return args + ['--prompt-cache', '6', '--adapt-swaps', '0', '--spec', str(max(2, spec)),
+    return args + ['--conversation-cache-mib', '0', '--prompt-cache', '6', '--adapt-swaps', '0', '--spec', str(max(2, spec)),
                    '--mtp-max-t', str(spec), '--suffix-draft', '0', '--spec-min-p', '0']
 
 
