@@ -135,7 +135,11 @@ DeviceInfo device_info(int ordinal) {
     d.arch = base_arch(p.gcnArchName);
     if (const std::string why = arch_problem(p, ordinal); !why.empty()) throw CudaError(why, -1);
 #else
-    if (d.cc_major * 10 + d.cc_minor < 75) {
+    bool experimental_pascal = false;
+#if defined(STRATA_EXPERIMENTAL_SM61)
+    experimental_pascal = d.cc_major == 6 && d.cc_minor == 1;
+#endif
+    if (d.cc_major * 10 + d.cc_minor < 75 && !experimental_pascal) {
         throw CudaError("device " + d.name + " reports compute capability " + std::to_string(d.cc_major) +
                             "." + std::to_string(d.cc_minor) +
                             "; Strata needs compute capability 7.5 or newer (RTX 20 / 30 / 40 / 50 series)",

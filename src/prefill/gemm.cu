@@ -4,6 +4,9 @@
 
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
+#include "strata/kernels/bf16_bits.hpp"
+#include "strata/kernels/f16_bits.hpp"
+#include <algorithm>
 
 #if defined(__HIPCC__) && defined(STRATA_HIPBLASLT_AVAILABLE)
 // The HIP compatibility shim maps CUDA shuffle spellings to Strata helpers.
@@ -34,6 +37,16 @@
 
 namespace strata::prefill {
 namespace {
+#if !defined(__HIPCC__)
+constexpr int64_t pascal_half_elems = 4 * 1024 * 1024;
+// Both 16-bit formats expand exactly. Never narrow BF16 into FP16 on Pascal.
+template<bool BF16>
+__global__ void pascal_expand(const uint16_t* in, float* out, int64_t size) {
+    const int64_t i = int64_t(blockIdx.x) * blockDim.x + threadIdx.x;
+    if (i < size) out[i] = BF16 ? strata::kernels::f32_from_bf16(in[i])
+                              : strata::kernels::f32_from_f16(in[i]);
+}
+#endif
 
 void ck(cublasStatus_t s, const char* what) {
     if (s != CUBLAS_STATUS_SUCCESS) {
@@ -272,6 +285,7 @@ bool try_hipblaslt(void* opaque_state, strata::prefill::hipblaslt::InputType typ
 }  // namespace
 
 Gemm::~Gemm() {
+    if (pascal_scratch_) cudaFree(pascal_scratch_);
 #if defined(__HIPCC__) && defined(STRATA_HIPBLASLT_AVAILABLE)
     delete static_cast<HipLtState*>(hipblaslt_state_);
 #endif
@@ -298,7 +312,7 @@ bool Gemm::init_external(void* stream, uint16_t* scratch, int64_t scratch_elems,
 #if defined(__HIPCC__) && defined(STRATA_HIPBLASLT_AVAILABLE)
     hipblaslt_state_ = create_hipblaslt_state(workspace_, ws_bytes).release();
 #endif
-    return true;
+    return init_pascal(err);
 }
 
 void Gemm::rebind(uint16_t* scratch, int64_t scratch_elems, void* workspace, size_t ws_bytes) {
@@ -334,13 +348,64 @@ bool Gemm::init(void* stream, int64_t scratch_elems, std::string& err) {
         return false;
     }
     scratch_elems_ = scratch_elems;
+    return init_pascal(err);
+}
+
+bool Gemm::init_pascal(std::string& err) {
+#if !defined(__HIPCC__)
+    int device = 0;
+    cudaDeviceProp prop{};
+    if (cudaGetDevice(&device) != cudaSuccess || cudaGetDeviceProperties(&prop, device) != cudaSuccess) {
+        err = "prefill gemm: device properties";
+        return false;
+    }
+    if (prop.major == 6 && prop.minor == 1 && !pascal_scratch_) {
+        // Bounded 32 MiB conversion arena, separate from cuBLAS's workspace.
+        if (cudaMalloc((void**)&pascal_scratch_, 2 * pascal_half_elems * sizeof(float)) != cudaSuccess) {
+            err = "prefill gemm: Pascal FP32 conversion arena (32 MiB)";
+            return false;
+        }
+    }
+#else
+    (void)err;
+#endif
     return true;
+}
+
+void Gemm::pascal(const uint16_t* x, const uint16_t* w, float* y, int64_t t,
+                  int64_t n, int64_t k, int64_t ldy, float beta, bool bf16) {
+#if !defined(__HIPCC__)
+    if (k <= 0 || k > pascal_half_elems || ldy < n || ldy > INT_MAX) {
+        std::fprintf(stderr, "prefill gemm: invalid Pascal dimensions\n"); std::exit(1);
+    }
+    const int64_t rows = pascal_half_elems / k;
+    float* xf = pascal_scratch_;
+    float* wf = pascal_scratch_ + pascal_half_elems;
+    auto convert = [&](const uint16_t* in, float* out, int64_t size) {
+        if (bf16) pascal_expand<true><<<unsigned((size + 255) / 256),256,0,(cudaStream_t)stream_>>>(in,out,size);
+        else pascal_expand<false><<<unsigned((size + 255) / 256),256,0,(cudaStream_t)stream_>>>(in,out,size);
+        if (cudaGetLastError() != cudaSuccess) { std::fprintf(stderr,"Pascal conversion launch failed\n"); std::exit(1); }
+    };
+    const float alpha = 1.0f;
+    for (int64_t r = 0; r < t; r += rows) {
+        const int64_t nt = std::min(rows, t - r);
+        convert(x + r*k, xf, nt*k);
+        for (int64_t c = 0; c < n; c += rows) {
+            const int64_t nn = std::min(rows, n - c);
+            convert(w + c*k, wf, nn*k);
+            ck(cublasSgemm((cublasHandle_t)handle_,CUBLAS_OP_T,CUBLAS_OP_N,
+                           (int)nn,(int)nt,(int)k,&alpha,wf,(int)k,xf,(int)k,
+                           &beta,y+r*ldy+c,(int)ldy),"Pascal FP32 GEMM");
+        }
+    }
+#endif
 }
 
 void Gemm::bf16(const uint16_t* X, const uint16_t* W, float* Y, int64_t T, int64_t N, int64_t K, int64_t ldy,
                 float beta) {
     if (T <= 0 || N <= 0) return;
     if (ldy <= 0) ldy = N;
+    if (pascal_scratch_) { pascal(X,W,Y,T,N,K,ldy,beta,true); return; }
     const float alpha = 1.0f;
 #if defined(__HIPCC__) && defined(STRATA_HIPBLASLT_AVAILABLE)
     if (try_hipblaslt(hipblaslt_state_, strata::prefill::hipblaslt::InputType::bf16, X, W, Y, T, N, K, ldy,
@@ -359,6 +424,7 @@ void Gemm::f16(const uint16_t* X, const uint16_t* W, float* Y, int64_t T, int64_
                float beta) {
     if (T <= 0 || N <= 0) return;
     if (ldy <= 0) ldy = N;
+    if (pascal_scratch_) { pascal(X,W,Y,T,N,K,ldy,beta,false); return; }
     const float alpha = 1.0f;
 #if defined(__HIPCC__) && defined(STRATA_HIPBLASLT_AVAILABLE)
     if (try_hipblaslt(hipblaslt_state_, strata::prefill::hipblaslt::InputType::f16, X, W, Y, T, N, K, ldy,

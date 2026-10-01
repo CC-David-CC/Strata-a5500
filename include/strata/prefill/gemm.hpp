@@ -45,6 +45,10 @@ public:
     void* stream() const { return stream_; }
 
 private:
+    bool init_pascal(std::string& err);
+    void pascal(const uint16_t* x, const uint16_t* w, float* y, int64_t t,
+                int64_t n, int64_t k, int64_t ldy, float beta, bool bf16);
+    float* pascal_scratch_ = nullptr;
     void* handle_ = nullptr;
     void* stream_ = nullptr;
     uint16_t* scratch_ = nullptr;
