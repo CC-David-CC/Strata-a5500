@@ -33,6 +33,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 option(STRATA_ENABLE_CUDA "Build the CUDA targets (Phase 2+)" OFF)
+option(STRATA_EXPERIMENTAL_SM61 "Build experimental Pascal sm_61 support (Tesla P4)" OFF)
 option(STRATA_ENABLE_HIP "Build the HIP targets for wave32 AMD GPUs (gfx1012, gfx1100, gfx1201)" OFF)
 option(STRATA_PREFILL_MMQ "Build the optional GGML MMQ prefill path for HIP" OFF)
 if(STRATA_PREFILL_MMQ AND NOT STRATA_ENABLE_HIP)
@@ -83,11 +84,15 @@ if(STRATA_ENABLE_CUDA)
     # these kernels were written for, so two intrinsics are replaced for it - `__dp4a` (6.1+) and
     # `__nanosleep` (7.0+) - in include/strata/kernels/dp4a.hpp, which is bit-exact for the first and
     # merely a shorter pause for the second.  RTX 20/30/40/50 cards must use the release engine instead.
-    if(_base LESS 75 AND NOT STRATA_EXPERIMENTAL_SM60)
+    if(_base LESS 75 AND NOT STRATA_EXPERIMENTAL_SM60 AND
+       NOT (_base EQUAL 61 AND STRATA_EXPERIMENTAL_SM61))
       message(FATAL_ERROR
         "Strata needs an NVIDIA GPU of compute capability 7.5 or newer (RTX 20 / 30 / 40 / 50 series), but "
         "CMAKE_CUDA_ARCHITECTURES is '${CMAKE_CUDA_ARCHITECTURES}'.  (A Pascal build is "
-        "-DSTRATA_EXPERIMENTAL_SM60=ON; upstream does not support it.)")
+        "-DSTRATA_EXPERIMENTAL_SM61=ON for sm_61, or -DSTRATA_EXPERIMENTAL_SM60=ON for sm_60.)")
+    endif()
+    if(_base EQUAL 61 AND CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+      message(FATAL_ERROR "Pascal sm_61 requires a CUDA 12.x toolkit; CUDA 13 removed offline Pascal compilation")
     endif()
     # #220 / #224: RTX 50 engines built with CUDA 12.8 crashed in the prompt path on Linux (13.0 and newer did not)
     if(_base GREATER_EQUAL 120 AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 13.0)
@@ -95,6 +100,9 @@ if(STRATA_ENABLE_CUDA)
                       "CUDA 12.8 crashed on long prompts on these cards (issues #220, #224). Use CUDA 13.0 or newer.")
     endif()
   endforeach()
+  if(STRATA_EXPERIMENTAL_SM61)
+    add_compile_definitions(STRATA_EXPERIMENTAL_SM61=1)
+  endif()
   message(STATUS "Strata: CUDA enabled, arch ${CMAKE_CUDA_ARCHITECTURES}")
   set(_strata_gpu_runtime_target CUDA::cudart)
   set(_strata_gpu_blas_target CUDA::cublas)
@@ -848,4 +856,11 @@ if(STRATA_BUILD_TESTS)
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")
     add_subdirectory(tests)
   endif()
+endif()
+
+if(STRATA_ENABLE_CUDA AND STRATA_BUILD_TESTS)
+  add_executable(cuda_prefill_legacy tests/cuda/prefill_legacy.cpp)
+  target_include_directories(cuda_prefill_legacy PRIVATE ${_strata_gpu_include_directories})
+  target_link_libraries(cuda_prefill_legacy PRIVATE strata_prefill CUDA::cudart)
+  add_test(NAME cuda_prefill_legacy COMMAND cuda_prefill_legacy)
 endif()
