@@ -98,10 +98,14 @@ def main():
     ap.add_argument('--output', type=Path, required=True, help='new directory; existing paths refused')
     ap.add_argument('--paragraphs', type=int, default=128)
     ap.add_argument('--spec', type=int, choices=(1, 4), default=1)
+    ap.add_argument('--pcie-sequence', type=float, nargs='+',
+                    help='cycle request-level PCIe fractions; requires a GPU-visible host expert source')
     ap.add_argument('--run', action='store_true')
     a = ap.parse_args()
     if a.paragraphs < 1:
         ap.error('paragraphs must be positive')
+    if a.pcie_sequence and any(not 0 <= value <= 1 for value in a.pcie_sequence):
+        ap.error('PCIe fractions must be between 0 and 1')
     if not a.run:
         print('Dry run: upstream and disabled candidates; identical inputs/settings, known answers and state parity.')
         return
@@ -125,6 +129,8 @@ def main():
     env.pop('STRATA_SNAPSHOT_VERIFY', None)
     env['STRATA_STATE_HASH'] = '1'
     env['STRATA_MTP_BATCH'] = '1'
+    if a.pcie_sequence:
+        env['STRATA_DECODE_TIMING'] = '1'
     a.output.mkdir(mode=0o700, parents=False, exist_ok=False)
     results = {'config': cfg, 'paragraphs': a.paragraphs, 'spec': a.spec, 'arms': [], 'requests': [],
                'compared_state_fields': STATE_KEYS,
@@ -140,7 +146,10 @@ def main():
         with exe.open('rb') as source:
             arm['exe_sha256'] = hashlib.file_digest(source, 'sha256').hexdigest()
         def generate(request):
-            ids = [t for t in engine.generate(request['ids'], request['max_new'], {'temperature': 0},
+            sampling = {'temperature': 0}
+            if 'pcie_frac' in request:
+                sampling['strata_tune'] = {'pcie_frac': request['pcie_frac']}
+            ids = [t for t in engine.generate(request['ids'], request['max_new'], sampling,
                                              threading.Event()) if t is not None]
             arm['records'].append({'name': request['name'], 'ids': ids, **engine.last,
                                    'text': tok.decode(ids)})
@@ -149,6 +158,8 @@ def main():
             if index == 0:
                 def add(name, ids, max_new, expected=None):
                     request = dict(name=name, ids=ids, max_new=max_new, expected=expected)
+                    if a.pcie_sequence:
+                        request['pcie_frac'] = a.pcie_sequence[len(results['requests']) % len(a.pcie_sequence)]
                     results['requests'].append(request)
                     return generate(request)
                 add('short', prompt('What is 2 + 2? Reply with only the number.'), 16, '4')
@@ -177,6 +188,11 @@ def main():
                 log_file.close()
         arm['request_digest'] = hashlib.sha256(json.dumps(results['requests'], sort_keys=True).encode()).hexdigest()
         log_text = log.read_text(encoding='utf-8')
+        if a.pcie_sequence:
+            shares = [float(x) for x in re.findall(r'PCIe ([0-9.]+)', log_text)]
+            require(any(x > 0 for x in shares), f'{name}: no PCIe expert work was exercised')
+            require(any(x == 0 for x in shares), f'{name}: zero-PCIe request was not observed')
+            arm['observed_pcie_work'] = shares
         hashes = state_hashes(log_text, candidate=index != 0)
         require(len(hashes) == len(arm['records']), f'{name}: missing state hashes')
         for record, fingerprint in zip(arm['records'], hashes):
