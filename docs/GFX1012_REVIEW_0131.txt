@@ -1,0 +1,17 @@
+PR #323 hardware-only revision
+Base: upstream v0.1.31. Branch contrib/gfx1012-0.1.31.
+Consumer Radeon RX5500XT 8GB, gfx1012; community/unvalidated by upstream.
+No non-MTP serving or set_pcie_enabled changes in this branch.
+
+HIP API compatibility is version-gated: HIP_VERSION_MAJOR <7 uses
+hipHostFree and hipHostMalloc flag names; >=7 preserves upstream's
+hipFreeHost/hipHostAlloc flag names. Legacy BLAS compatibility remains
+version-gated separately. ROCm7 has not been built/tested locally in this
+revision; preserving upstream spellings is not a ROCm7 validation claim.
+
+HIP5.7.1/clang17 source build passed. hip_intrinsics and hip_prefill_gemm
+passed, including upstream byte-permutation coverage and RDNA1 shared-
+memory exchange. Isolated hardware branch, without shared serving patch,
+loaded IQ3_S and completed 1024input/128output MTP4/.5 Q8KV counting:
+16.452 output tok/s,17.508s prefill,25.289s total. Smoke test only; do not
+replace the earlier 8K measurements with this shorter test.
