@@ -1,3 +1,9 @@
+> **Experimental contribution:** this fork branch contains two optional GPU kernel
+> alternatives, based on upstream Strata 0.1.33. See the
+> [patch scope and validation status](docs/EXPERIMENTAL_KERNELS.md).
+> Credit for Strata belongs to [Niko1221/Strata](https://github.com/Niko1221/Strata).
+> The upstream introduction and its original measurements follow below.
+
 <h1 align="center">Strata</h1>
 
 <p align="center"><b>Run a 125-billion-parameter AI model on a normal gaming PC</b><br>
