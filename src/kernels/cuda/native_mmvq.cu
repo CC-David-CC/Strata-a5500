@@ -31,6 +31,7 @@
 #include <cuda_runtime.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -1046,6 +1047,16 @@ template<typename F, int NCOLS>
 void launch_multi_n(const void* weights, const void* x_q8_1, float* y, int n_in, int n_out, cudaStream_t s) {
     const auto* w = static_cast<const typename F::Block*>(weights);
     const auto* x = static_cast<const Q81Block*>(x_q8_1);
+    // Opt-in one-warp rows avoid cross-warp shared reduction. They change
+    // floating-point association, so validate with a numerical tolerance.
+    static const bool warp1 = [] {
+        const char* value = std::getenv("STRATA_MMVQ_WARP1");
+        return value && std::atoi(value) != 0;
+    }();
+    if (warp1) {
+        native_mmvq_multi_kernel<F, NCOLS, 1, 1><<<unsigned(n_out), dim3(WARP, 1), 0, s>>>(w, x, y, n_in, n_out);
+        return;
+    }
     if (!g_multi_exact) {
         constexpr int NW = NCOLS <= 4 ? 4 : 2;
         const unsigned blocks = unsigned((std::size_t(n_out) + 1) / 2);
