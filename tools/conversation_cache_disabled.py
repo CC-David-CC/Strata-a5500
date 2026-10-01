@@ -173,9 +173,13 @@ def main():
                 for request in results['requests']:
                     generate(request)
         finally:
+            # close() now clears engine.proc after waiting and closing its log.
+            proc, log_file = engine.proc, engine.log
             engine.close()
-            engine.proc.wait(timeout=30)
-            engine.log.close()
+            if proc is not None:
+                proc.wait(timeout=30)
+            if hasattr(log_file, 'close'):
+                log_file.close()
         arm['request_digest'] = hashlib.sha256(json.dumps(results['requests'], sort_keys=True).encode()).hexdigest()
         log_text = log.read_text(encoding='utf-8')
         hashes = state_hashes(log_text, candidate=index != 0)
