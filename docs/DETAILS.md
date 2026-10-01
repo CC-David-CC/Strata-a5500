@@ -732,3 +732,129 @@ Strata itself: [MIT](../LICENSE). The model files are not part of it; their lice
   `serve/web/fonts/OFL.txt`). Its Monitor tab started from @code-martin's dashboard idea (PR #22).
 - The experimental speed projection's vector (`data/experimental-speed-projection/`): Qwen Community License 1.0,
   made from the model's activations (see its README).
+
+
+## Experimental Tesla P4 (Pascal sm_61)
+
+The optional `STRATA_EXPERIMENTAL_SM61` source build enables the Tesla P4, an
+8 GB Pascal GPU. Validation used one P4 in a Dell R730xd with two Xeon E5-2697 v3
+CPUs and 256 GiB installed RAM (about 251 GiB usable). Only GPU 0 and NUMA node 0
+were used, with 13 CPU expert workers. ECC was enabled: the driver exposed
+7,680 MiB VRAM. This is single-GPU, text-only validation.
+
+The port enables the sm_61 runtime explicitly and uses the P4's native DP4A
+instructions. For prompt matrix products, BF16/F16 inputs expand exactly to
+FP32 and run through cuBLAS SGEMM in bounded tiles. BF16 is never narrowed to
+FP16. The conversion arena uses an additional 32 MiB of VRAM and is separate
+from cuBLAS workspace. Existing adaptive expert caching and MTP come from Strata.
+
+Use CUDA **12.x**; CUDA 13 cannot compile Pascal kernels. The measured build
+used CUDA 12.0, GCC 12, and NVIDIA driver 580.178.04. With the toolchain installed:
+
+```sh
+cmake -S . -B build-p4 -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=ON \
+  -DSTRATA_ENABLE_HIP=OFF -DSTRATA_EXPERIMENTAL_SM61=ON \
+  -DCMAKE_CUDA_ARCHITECTURES=61 \
+  -DCMAKE_CUDA_COMPILER=/usr/bin/nvcc \
+  -DCMAKE_CUDA_HOST_COMPILER=/usr/bin/g++-12 \
+  -DCMAKE_CXX_COMPILER=/usr/bin/g++-12 \
+  -DCMAKE_C_COMPILER=/usr/bin/gcc-12 -DSTRATA_BUILD_TESTS=ON
+cmake --build build-p4 -j8 --target strata strata-device cuda_prefill_legacy
+CUDA_VISIBLE_DEVICES=0 build-p4/cuda_prefill_legacy
+```
+
+Use the existing `tools/iq_pack.py` with the IQ3_S GGUF to create the native
+pack. This configuration loads the experts from GGUF into a resident RAM arena;
+it does not need an additional `experts.bin` copy. Keep the model's own n-gram
+shard, pack, tokenizer, and matching MTP runtime together.
+
+Copy [the P4 configuration](../tools/cuda/p4-iq3s.example.json), replace its
+placeholder paths, and use the node local to the chosen card. The measured
+R730's GPU 0 belongs to NUMA node 0:
+
+```sh
+numactl --cpunodebind=0 --membind=0 .venv/bin/python \
+  tools/hip/bench_rdna1.py --config /path/to/p4.json \
+  --output /path/to/new-results --input-tokens 8192 \
+  --output-tokens 512 --mode both
+```
+
+The benchmark helper's filename reflects its original AMD target; it uses the
+CUDA backend specified in this configuration. For the HTTP server, use
+`.venv/bin/python -m serve.server --engine strata --config /path/to/p4.json
+--host 127.0.0.1 --port 8095`, with the same NUMA binding.
+
+The measured model is **Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S**, Q8 KV, 9,216 allocated
+context tokens, 8,192 input tokens, and at most 512 output tokens. The CPU expert
+arena is 46.84 GiB. One observation per task/mode; no prompt KV reuse. Startup
+is excluded from request timings. A maximum context or multi-P4 scaling limit
+has not been measured by this port.
+
+### P4 measured results
+
+| Task | MTP | Output tokens | Prefill tok/s | Prefill seconds | Output tok/s | Total seconds | Effective tok/s |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Counting | Off | 512 | 128.02 | 63.99 | 13.76 | 101.20 | 5.06 |
+| Coding | Off | 125 | 127.55 | 64.23 | 13.17 | 73.72 | 1.70 |
+| Writing | Off | 233 | 127.30 | 64.35 | 13.01 | 82.27 | 2.83 |
+| Counting | On | 512 | 87.93 | 93.16 | 21.26 | 117.25 | 4.37 |
+| Coding | On | 125 | 87.99 | 93.10 | 18.85 | 99.74 | 1.25 |
+| Writing | On | 232 | 87.85 | 93.25 | 14.31 | 109.48 | 2.12 |
+
+Effective tok/s is output tokens divided by complete request wall time. MTP
+accelerated generation, but its slower prefill increased total time for all
+three fresh 8K requests. Counting accepted 383/384 drafts and is a favorable
+speculation workload. Do not treat its rate as typical prose performance.
+
+The 9 focused CUDA checks and real IQ3_S expert checks at layers 0, 8, 24, 40,
+and 47 passed. The dedicated prefill test passed nine numerical cases covering
+BF16 values outside FP16 range, partial tiles, strides, nonzero beta, output
+guards, and external buffers. Both generated merge functions passed six
+functional cases; counting was consecutive. Both writing samples exceeded the
+requested word count, and the MTP-off sample incorrectly described `apt update`
+as changing installed software. These throughput samples do not establish
+model quality.
+
+Startup free VRAM was 600 MiB without MTP and 588 MiB with MTP; these are not
+minimum headroom measurements. Expert caches were 2,150 and 1,258 MiB,
+respectively. No clock, power-limit, or ECC changes were made.
+
+Source revision: `9d393df`. The [raw measurements](benchmarks/2026-09-30-sm61.json)
+include the full revision, executable hash, settings, output text, and timings.
+
+### P4 cache tuning and matched llama.cpp control
+
+A second MTP suite used `--pcie-frac 0.10` and a measured
+`--vram-reserve-mib 512`, increasing the expert cache to 764 slots / 1,511 MiB.
+The process arguments and startup log are authoritative: a later configuration
+file contained 384, which is not the reserve measured in this run. The tuned
+example explicitly uses 512. Startup free VRAM was 336 MiB; the minimum sampled
+at one-second intervals was 261 MiB. Prefill still used 512-token chunks.
+
+| Task | Output tokens | Prefill tok/s | Prefill seconds | Output tok/s | Total seconds | Effective tok/s |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Counting | 512 | 88.08 | 93.00 | 22.09 | 116.19 | 4.41 |
+| Coding | 125 | 88.24 | 92.84 | 20.24 | 99.02 | 1.26 |
+| Writing | 233 | 88.10 | 92.99 | 14.94 | 108.59 | 2.15 |
+
+Counting and six coding functional cases passed again. The writing sample
+exceeded the requested word count. Each row is one observation, not a repeated
+statistical comparison. The settings modestly improved all three generation
+rates, but MTP-off remained faster end to end for these fresh 8K requests.
+Use the baseline for shorter total completion time; use the tuned MTP example
+when generation rate is the priority. Neither is a maximum-context guarantee.
+
+A matched stock llama.cpp b11118 control used the same IQ3_S weights, frozen
+8,192 counting input token IDs, 512 output tokens, Q8 KV, and 9,216 context.
+It ran on GPU 0 / NUMA 0 with 14 CPU threads, dense computation on GPU,
+all 48 expert layers on CPU, and the n-gram table mapped on CPU:
+**84.64 prefill tok/s, 7.87 output tok/s, 161.73 seconds total, 3.17 effective tok/s**.
+Strata baseline without MTP completed that request in 101.20 seconds;
+tuned MTP completed it in 116.19 seconds at 22.09 output tok/s.
+These are different engine/offload configurations, not an isolated kernel speedup.
+
+A smaller ordered PCIe probe (1,024 input / 256 output) measured 21.50, 24.64,
+23.06, and 23.84 output tok/s at fractions 0, 0.10, 0.25, and 0 again.
+The cache warmed between requests, so the first-to-second difference cannot
+be attributed solely to PCIe tuning. Raw observations are included in the report.
