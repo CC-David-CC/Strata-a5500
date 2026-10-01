@@ -253,3 +253,7 @@ Strata is open source under the [MIT License](LICENSE). A few parts carry their 
 (MIT, llama.cpp / ggml), the web app's font (SIL Open Font License 1.1) and the experimental speed projection's
 vector in `data/experimental-speed-projection` (Qwen Community License 1.0, from the model's activations). The
 models are not part of this repository; each model's own license applies to its files.
+
+
+Experimental Tesla P4 (8 GB, sm_61) manual build and measured results:
+[Pascal support report](docs/DETAILS.md#experimental-tesla-p4-pascal-sm_61).
