@@ -1,3 +1,70 @@
+# Experimental Tesla P4 8 GB support
+
+This is David's **P4 contribution branch** of
+[**Niko1221/Strata**](https://github.com/Niko1221/Strata).
+Credit for the engine, expert caching, and MTP belongs to upstream.
+This branch adds an opt-in **Pascal sm_61 CUDA 12.x** path and bounded FP32
+prefill support. It is separate from the RX 5500 XT contribution.
+
+## Our P4 hardware and results
+
+**One NVIDIA Tesla P4 8 GB**, ECC enabled (7,680 MiB exposed), in a Dell R730xd
+with two Xeon E5-2697 v3 CPUs and **256 GiB installed RAM**. The tests used
+GPU 0, NUMA node 0, and 13 CPU expert workers; the other P4s were idle.
+
+Model: **Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S**, text only, **Q8 KV**.
+Each request had **8,192 input tokens**, at most **512 output tokens**, and
+**9,216 allocated context**. Coding and writing stopped naturally.
+
+| Task | Configuration | Output tokens | Prefill tok/s | Output tok/s | Total seconds | Effective tok/s |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Counting | Strata, MTP off | 512 | 128.02 | 13.76 | 101.20 | 5.06 |
+| Coding | Strata, MTP off | 125 | 127.55 | 13.17 | 73.72 | 1.70 |
+| Writing | Strata, MTP off | 233 | 127.30 | 13.01 | 82.27 | 2.83 |
+| Counting | Strata, MTP on, baseline | 512 | 87.93 | 21.26 | 117.25 | 4.37 |
+| Coding | Strata, MTP on, baseline | 125 | 87.99 | 18.85 | 99.74 | 1.25 |
+| Writing | Strata, MTP on, baseline | 232 | 87.85 | 14.31 | 109.48 | 2.12 |
+| Counting | Strata, MTP on, tuned | 512 | 88.08 | **22.09** | 116.19 | 4.41 |
+| Coding | Strata, MTP on, tuned | 125 | 88.24 | **20.24** | 99.02 | 1.26 |
+| Writing | Strata, MTP on, tuned | 233 | 88.10 | **14.94** | 108.59 | 2.15 |
+| Counting | Stock llama.cpp b11118 control | 512 | 84.64 | 7.87 | 161.73 | 3.17 |
+
+Effective tok/s = output tokens / complete request wall time, excluding startup.
+**MTP increased generation speed but made these fresh 8K requests slower overall
+because prefill was slower.** Counting favors speculation; its rate is not
+representative of prose. Each row is one observation without prompt KV reuse.
+The llama.cpp control used identical counting token IDs and weights, dense work
+on GPU, and all 48 expert layers on CPU.
+
+The tuned Strata run used a 1,511 MiB GPU expert cache and a 46.84 GiB resident
+CPU expert arena. Minimum free VRAM sampled once per second was **261 MiB**.
+Larger contexts, concurrent requests, and multi-P4 scaling were not validated.
+
+Nine focused CUDA checks, nine prefill numerical cases, and real expert checks
+at five layers passed. Counting and six functional cases per generated merge
+function passed. Writing exceeded the requested word limit, and one baseline
+sample contained a factual error. These are throughput and correctness smoke
+tests, not model-quality benchmark scores.
+
+**Draft provenance:** the measurements above were taken on source `9d393df`,
+our tested combined development branch. This contribution isolates P4 changes
+and the shared non-MTP/benchmark support; it excludes the AMD GPU port.
+**The isolated contribution branch has not yet been rebuilt and retested.**
+
+- [Full methodology, build instructions, and timings](docs/DETAILS.md#experimental-tesla-p4-pascal-sm_61)
+- [Raw measurements, output text, and source/binary hashes](docs/benchmarks/2026-09-30-sm61.json)
+- [Baseline configuration](tools/cuda/p4-iq3s.example.json)
+- [Tuned MTP configuration](tools/cuda/p4-iq3s-mtp-tuned.example.json)
+
+Use the documented manual CUDA 12.x build for this experimental P4 path.
+
+---
+
+## Original upstream README
+
+The material below describes upstream Strata and its own hardware benchmarks.
+**Its RTX 5070 performance figures are not P4 results.**
+
 <h1 align="center">Strata</h1>
 
 <p align="center"><b>Run a 125-billion-parameter AI model on a normal gaming PC</b><br>
