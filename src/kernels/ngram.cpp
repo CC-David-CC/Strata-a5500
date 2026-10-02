@@ -217,12 +217,8 @@ bool PleTable::open(const std::string& gguf_path, std::string& err, const PleIoO
         close();
         return false;
     }
-    // Q5_0 direct reads are supported upstream; initially gate the new Q8_0 format separately.
-    if (impl_->encoding == Impl::Encoding::Q8_0 && io.mode == PleIo::Direct) {
-        err = std::string(t->type_name()) + " PLE requires --ple-io mmap";
-        close();
-        return false;
-    }
+    // Q5_0 and Q8_0 use the reader's runtime row width. ple_reader_test and
+    // ple_q8_parity cover direct batches, page straddles and row-cache keys.
     impl_->n_rows = t->shape[1];
 
     // THE CHECK THAT MAKES THE OFFSET FALSIFIABLE.  The manifest's `shard2_tensor.offset` is 0, but that is

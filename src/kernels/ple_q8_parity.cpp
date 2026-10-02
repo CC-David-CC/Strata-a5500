@@ -20,7 +20,8 @@ void append_le(std::vector<uint8_t>& bytes, uint64_t x, int n) {
     for (int i = 0; i < n; ++i) bytes.push_back((uint8_t) (x >> (8 * i)));
 }
 
-std::vector<uint8_t> fixture(uint32_t type = 8, uint64_t width = 160, uint64_t rows = 64) {
+constexpr uint64_t FIXTURE_ROWS = 4097; // covers every 170-byte row/page alignment twice
+std::vector<uint8_t> fixture(uint32_t type = 8, uint64_t width = 160, uint64_t rows = FIXTURE_ROWS) {
     std::vector<uint8_t> bytes;
     append_le(bytes, 0x46554747, 4); append_le(bytes, 3, 4);
     append_le(bytes, 1, 8); append_le(bytes, 0, 8);
@@ -30,8 +31,8 @@ std::vector<uint8_t> fixture(uint32_t type = 8, uint64_t width = 160, uint64_t r
     append_le(bytes, type, 4); append_le(bytes, 0, 8);
     while (bytes.size() % 32) bytes.push_back(0);
     const uint16_t scales[] = {0x0000, 0x8000, 0x0001, 0x0400, 0x3555, 0x3c00, 0xbc00, 0x7bff};
-    // Always 64 physical rows, so a malicious row count can be checked without allocating it.
-    for (int r = 0; r < 64; ++r)
+    // Fixed physical rows: a malicious row count must not drive an allocation.
+    for (int r = 0; r < (int) FIXTURE_ROWS; ++r)
         for (int b = 0; b < 5; ++b) {
             append_le(bytes, scales[(r + b) % 8], 2);
             for (int j = 0; j < 32; ++j) bytes.push_back((uint8_t) ((r * 97 + b * 31 + j * 17) & 255));
@@ -82,9 +83,43 @@ bool compare(const std::string& path) {
     table.close();
     if (table.is_open() || table.bytes_read() != 0) return false;
     if (!table.open(path, err, options)) return false;
-    k::PleIoOptions direct; direct.mode = k::PleIo::Direct;
-    if (table.open(path, err, direct) || table.is_open() || err.find("Q8_0 PLE requires --ple-io mmap") == std::string::npos)
-        return false;
+    // Independent original-byte oracle for direct I/O, not direct vs itself.
+    // Exercise cache on/off, worker/caller thread, one/many reads in flight,
+    // duplicates, neighbours, invalid indices and a short final file page.
+    if (table.rows() <= FIXTURE_ROWS)
+        for (uint32_t row = 0; row < table.rows(); ++row) probes.push_back(row);
+    probes.insert(probes.end(), {0, 0, 1, 1, (uint32_t) (table.rows()-1),
+                                 (uint32_t) table.rows(), UINT32_MAX});
+    for (bool threaded : {false, true})
+    for (uint64_t cache : {0ull, 4096ull})
+    for (uint32_t inflight : {1u, 64u}) {
+        k::PleIoOptions direct; direct.mode = k::PleIo::Direct;
+        direct.cache_rows = cache; direct.max_inflight = inflight; direct.io_thread = threaded;
+        if (!table.open(path, err, direct)) { std::fprintf(stderr, "direct: %s\n", err.c_str()); return false; }
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            for (size_t at = 0; at < probes.size(); at += 128) {
+                uint32_t batch[128];
+                for (int i = 0; i < 128; ++i) batch[i] = probes[(at+i)%probes.size()];
+                std::vector<float> guard(128*160+2, -1234.5f);
+                if (!table.gather_batch(batch, 8, guard.data()+1, err)) return false;
+                if (guard.front() != -1234.5f || guard.back() != -1234.5f) return false;
+                for (int i = 0; i < 128; ++i) {
+                    float want[160] = {};
+                    if (batch[i] < table.rows()) traits->to_float(bytes+(size_t)batch[i]*170, want, 160);
+                    if (std::memcmp(guard.data()+1+i*160, want, sizeof want)) {
+                        std::fprintf(stderr, "direct row %u differs (thread=%d cache=%llu inflight=%u)\n",
+                                     batch[i], threaded, (unsigned long long) cache, inflight);
+                        return false;
+                    }
+                }
+            }
+        }
+        if (!table.issue(rows) || !table.collect(issued, err) ||
+            std::memcmp(issued, gathered, sizeof issued)) return false;
+        std::printf("  direct Q8_0: worker=%d cache=%llu inflight=%u passed\n",
+                    threaded, (unsigned long long) cache, inflight);
+        table.close();
+    }
     std::printf("Q8_0 PLE: %zu probes, row/batch/issue-collect bit-identical to ggml\n", probes.size());
     return true;
 }
@@ -95,7 +130,7 @@ bool selftest() {
     bool ok = true;
     for (int arm = 0; arm < 5; ++arm) {
         auto bytes = fixture(arm == 3 ? 1 : 8, arm == 2 ? 159 : 160,
-                             arm == 4 ? UINT64_MAX : 64);
+                             arm == 4 ? UINT64_MAX : FIXTURE_ROWS);
         if (arm == 1) bytes.pop_back();
         const std::string path = prefix.string() + "-" + std::to_string(arm) + ".gguf";
         if (std::filesystem::exists(path)) return false;
