@@ -3,10 +3,11 @@
 This is experimental work in David's Strata fork, branch `perf/full-expert-q4-q8`.
 It builds on [Niko1221/Strata](https://github.com/Niko1221/Strata), release v0.1.34
 (`1678de3`), and the fork's `contrib/non-mtp-serving` branch (`12fa219`). Commit
-`2be5cf1` adds an experimental mapped Q8_0 PLE reader. Q8 now completes the first
-8K tests with MTP on and off. This does not establish a kernel speedup or robust
-long-context Q8 support. The shared serving dependency is intentional: it lets
-the same client test MTP on and off.
+`2be5cf1` added the first mapped Q8_0 PLE reader. The later `29cbc02` build
+completed Q8 mapped/direct comparisons at 64K and Q4 tests through 128K. The
+Q8 reader improves measured throughput, with output-repeatability limitations
+described below. This remains experimental support. The shared serving
+dependency is intentional: it lets the same client test MTP on and off.
 
 Start in Strata because it already runs the full Unsloth Q4 model, provides MTP,
 and has expert placement and timing machinery. Keep llama.cpp as the independent
@@ -74,12 +75,14 @@ The Q4 buffer intervention kept the prefill chunk at 8,192 and used
 prefill time fell 28-32%, and decode rates barely changed. MTP coding effective
 throughput improved from 183.43 to 192.32 tok/s (4.8%). This is a configuration
 result from one fixed-order pair, requiring repeated A/B/B/A trials before a
-robust speed claim. No new GPU kernel optimization has been measured yet.
+robust speed claim. No new GPU kernel optimization had been measured in this
+initial 8K experiment; the later 64K observations follow below.
 
 Q8 validation: 1,029 synthetic row probes and 1,059 real-model row probes decoded
 bit-for-bit identically to ggml; malformed-file checks and the existing direct
 reader self-test passed. Full-model IQ4/Q5/FP8 regression on the changed engine
-remains outstanding. Q8 direct PLE I/O is deliberately rejected pending tests.
+remains outstanding. At that initial revision, Q8 direct PLE I/O was rejected
+pending tests. The expanded direct-reader checks are reported below.
 
 Q8 fit: the GPU held 18,144 experts without MTP / 17,958 with it. The remaining
 31.28 / 32.19 GiB fitted in pinned system RAM. Decode expert-file counters were
@@ -107,7 +110,7 @@ per token in the routed GPU experts, out of about 10 ms total. Dense projections
 hyper-connection reads, attention and other operations account for the rest.
 The instrumented run's throughput is not the control's throughput.
 
-The private pre-swap queue first tests `STRATA_NATIVE_Q8_ROWS=0/1/2/4/8` and
+The private pre-swap queue first tested `STRATA_NATIVE_Q8_ROWS=0/1/2/4/8` and
 `STRATA_HC_DOWN_WARPS=8/4/2/1` individually, then repeats the selected combination
 with MTP off and on at 64K. Both keep quantized weights and reduction order.
 The row-tile fixture initially failed because its pageable weight upload used
@@ -116,12 +119,122 @@ The corrected row-tile tests, 148,480 existing matrix parity comparisons and
 all four HC warp-policy parity tests passed on this card. This establishes
 correctness coverage, not an application speed improvement.
 
-Q8's next candidate enables the existing parallel direct reader for 170-byte
+Q8's following candidate enabled the existing parallel direct reader for 170-byte
 Q8_0 PLE rows. Independent ggml byte/row oracles, every row/page alignment in a
 small synthetic file, cache on/off, worker on/off, queue depth 1/64 and actual
 shard probes gate its model tests. `STRATA_PLE_PROFILE=1` separately times lookup
-staging and, on Linux, counts the caller's faults during that lookup. Profiling
-is off in headline runs. No Q8 direct-read speed improvement is claimed yet.
+staging and, on Linux, counts the caller's faults during that lookup. PLE
+profiling is off in headline runs. The completed results follow.
+
+## Completed Q8 parallel-reader comparison (2026-10-02)
+
+Same llm-60 and full Unsloth Q8_0 model, 65,536 actual input tokens, 73,728
+allocated context, int8 KV, up to 4,096 output tokens. All prompts used the same
+frozen token IDs, with prompt and conversation reuse disabled. Separate prefill
+buffers, an 8,192-token prefill chunk and a 2,048 MiB VRAM reserve were held
+fixed. The engine was built from `29cbc02`; its SHA-256 is
+`62a267d635ffb725d6e652b23234cdfc9a0ecabdaabfc7d4206214bc5a8d5c6b`.
+
+Only `--ple-io mmap` versus `--ple-io direct` changed between each pair. The
+direct arm used the existing parallel reader and a bounded 1,048,576-row cache
+(about 170 MB of raw Q8 rows). Both arms used the same candidate kernel settings:
+`STRATA_NATIVE_Q8_ROWS=1`, `STRATA_HC_DOWN_WARPS=4`,
+`STRATA_HC_UP_COLS=16`, `STRATA_HC_STATIC_T=1`,
+`STRATA_VERIFY_DEVICE_PLAN=0`. PCIe expert fraction was auto-selected as 0.55
+in every compared engine. Adaptive expert residency remained enabled.
+
+Each mode ran A/B/B/A, two independent engine starts per arm. Values below are
+means of those two observations. These are local throughput/smoke results,
+not quality scores; the three-repeat publication gate has not been met.
+No OS cold-cache reset was performed. Raw observations, token hashes, prompt
+hashes, settings and diagnostics are in the
+[reader evidence JSON](benchmarks/full-expert-q8-reader-20261002.json).
+The engine's existing decode timing counters were enabled in every arm; the
+extra PLE timing/fault counters were enabled only in the separate diagnostics.
+
+| Mode / task | Mapped tok/s | Direct tok/s | Change | Mapped effective tok/s | Direct effective tok/s | Same output across all four |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| MTP off / counting | 70.78 | 81.62 | +15.3% | 57.42 | 64.72 | Yes, 3,893 tokens |
+| MTP off / coding | 59.82 | 77.59 | +29.7% | 42.53 | 56.34 | Yes, 2,529 tokens |
+| MTP off / prose | 47.63 | 82.44 | +73.1% | 35.57 | 52.35 | Yes, 1,759 tokens |
+| MTP on / counting | 127.81 | 161.91 | +26.7% | 88.34 | 105.71 | Yes, 3,893 tokens |
+| MTP on / coding | 84.28 | 129.35 | +53.5% observed | 57.36 | 79.30 | No; provisional comparison |
+| MTP on / prose | 48.16 | 110.84 | +130.2% observed | 33.05 | 55.77 | No; provisional comparison |
+
+All these requests completed with natural EOS. They did not emit exactly 4,096
+tokens. MTP coding produced 2,700/2,780 mapped versus 2,615/2,548 direct;
+prose produced 1,502/1,597 mapped versus 1,403/1,427 direct. The unchanged MTP
+baseline itself differed between repeats, so these mismatches do not isolate
+a reader error. They also do not prove equal quality or justify treating the
+MTP code/prose percentages as a matched-output speedup. The original failed
+strict comparisons remain recorded. The static-placement diagnostic below
+restored repeatability. This implicates the combined residency/CPU-GPU execution
+policy; it does not isolate which of its two changed settings caused the drift.
+
+The follow-up kept MTP on and used `--adapt-swaps 0 --pcie-frac 0` in both reader
+arms, with the same 64K prompt and allocated context. Each arm started one engine
+and ran two fresh requests per workload, up to 2,048 output tokens. All eight
+outputs matched their workload's reference token for token, across readers and
+repetitions: code emitted 2,048 tokens (budget reached), prose 1,359 (natural EOS).
+
+| Static-placement MTP diagnostic | Mapped tok/s | Direct tok/s | Change | Mapped effective tok/s | Direct effective tok/s |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Coding | 55.18 | 89.26 | +61.8% | 39.18 | 57.46 |
+| Prose | 52.05 | 118.41 | +127.5% | 34.81 | 56.46 |
+
+These means establish a matching-output reader speedup with MTP enabled in this
+static configuration. They must not replace the adaptive-placement observations
+above: the output budget and CPU/GPU policy differ. The result supports the
+reader change, while broader quality evaluation and publication repeats remain
+outstanding. Both raw evidence archives were copied locally and SHA-256 verified.
+
+Correctness gates passed: 5,163 synthetic row probes and 1,066 sampled real-shard
+probes matched independent ggml decoding bit for bit, including row, batch and
+issue/collect paths. All eight combinations of worker on/off, cache on/off and
+inflight limit 1/64 passed, as did the existing reader regression test. These
+are sampled row checks, not a new full-checkpoint hash verification. llm-49
+also passed the synthetic reader, matrix and HC kernel checks on its RTX 4090;
+no Q8 model-throughput result is claimed for that machine.
+
+The separate 1,024-output-token diagnostic explains the improvement:
+
+| PLE staging | Mapped | Direct with row cache disabled |
+| --- | ---: | ---: |
+| MTP off, milliseconds per token | 6.63-8.43 | 0.156-0.170 |
+| MTP on, milliseconds per verification window | 16.24-21.06 | 0.330-0.395 |
+
+Mapped reads recorded thousands of major faults in the calling thread. The
+cache-disabled direct arm recorded zero in that thread, while still performing
+storage I/O through the parallel reader. Thus zero caller faults does not mean
+the model stopped using the NVMe. The cache-disabled run retained almost all
+the throughput improvement, supporting parallel row I/O as the main cause;
+the bounded cache mainly shortened repeated lookup work. These diagnostic
+rates are not substituted for the longer unprofiled comparisons above.
+
+At this 64K allocation, the engine held 38.84 GiB of expert weights in RAM
+without MTP and 39.82 GiB with MTP; the separate Q8 PLE table is 50.664 GiB.
+This differs from the earlier, smaller-context 31-32 GiB RAM split. No expert
+blob reads from files were recorded during these requests. Keeping the whole
+table plus the RAM expert complement resident at 64K needs about 90.5 GiB
+before OS/buffers, supporting the planned 128 GB RAM configuration.
+
+### Q4 result from the same overnight build
+
+The combined opt-in kernel candidate (settings above) was also compared with
+the default kernel settings in A/B/B/A at actual 64K input. All output token IDs
+matched across controls, candidates and both MTP modes. Mean output rates:
+
+| Task | Default, MTP off | Candidate, MTP off | Default, MTP on | Candidate, MTP on |
+| --- | ---: | ---: | ---: | ---: |
+| Counting | 102.43 | 106.37 | 250.44 | 252.53 |
+| Coding | 102.33 | 106.26 | 221.07 | 223.41 |
+| Prose | 102.02 | 106.00 | 160.18 | 162.99 |
+
+The non-MTP gain was about 3.8%; MTP improved about 0.8-1.8%. Wider dense row
+tiles and device planning regressed in screening and were not selected.
+The candidate remains opt-in. This is a modest kernel gain, substantially
+below the weight-traffic reference; it does not establish that the roofline
+has been reached.
 
 ## What the roofline means
 
@@ -336,7 +449,8 @@ For PLE, use a format descriptor with block elements, block bytes, row elements,
 row bytes and decoder. Q8 has 170-byte rows, larger than upstream's 160-byte
 maximum. This branch raises scratch capacity, selects the existing Q8 decoder,
 checks offsets and file bounds, and validates unchanged rows against ggml.
-Mapped Q8 works in the first smoke tests; direct-reader support remains gated.
+Mapped and direct Q8 passed the row checks and model tests above; MTP output
+repeatability and broader format regression remain explicit limitations.
 
 ## Ordered implementation and acceptance gates
 
