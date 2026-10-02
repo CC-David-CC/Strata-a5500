@@ -217,9 +217,10 @@ bool PleTable::open(const std::string& gguf_path, std::string& err, const PleIoO
         close();
         return false;
     }
-    // Preserve Q5_0's existing mapped-only contract. Start Q8_0 mapped-only too;
-    // its 170-byte direct-I/O rows need a separate boundary/cache validation gate.
-    if ((impl_->encoding == Impl::Encoding::Q5_0 || impl_->encoding == Impl::Encoding::Q8_0) && io.mode == PleIo::Direct) {
+    // Preserve Q5_0's existing mapped-only contract. Q8_0 uses the reader's
+    // runtime row width (170 bytes), including page straddles and row-cache keys.
+    // ple_q8_parity checks direct batches against the original GGUF/ggml bytes.
+    if (impl_->encoding == Impl::Encoding::Q5_0 && io.mode == PleIo::Direct) {
         err = std::string(t->type_name()) + " PLE requires --ple-io mmap";
         close();
         return false;
