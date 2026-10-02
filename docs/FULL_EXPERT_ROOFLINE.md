@@ -535,10 +535,16 @@ Invariants:
    cancellation, EOS and cache eviction. A cache changes placement, not semantics.
 4. Keep prompts, output limits, KV format and MTP policy fixed within each A/B arm.
    A different acceptance threshold is a separate quality-sensitive experiment.
-5. Compare logits/state and greedy output against the unchanged same-quant engine.
-   Floating-point reordering needs an explicit error envelope; bit identity is the
-   default gate for changes that only move data. Existing MTP on/off differences
-   are not evidence that a new optimization is harmless.
+5. Compare logits/state and task correctness against the unchanged same-quant
+   engine. The user explicitly accepts floating-point variation and different
+   correct answers (2026-10-02). Token identity is a diagnostic, not a universal
+   acceptance gate. Data transport and decoding of unchanged packed weights must
+   still preserve their values; arithmetic reordering needs a measured error
+   envelope and task checks. Report generated-code test results, finite-value
+   checks, logit/state error and any unresolved quality uncertainty separately
+   from throughput. Existing MTP on/off differences alone establish neither a
+   regression nor acceptable quality. A token-match percentage is not an accuracy
+   score, and a faster result does not excuse incorrect state or memory access.
 6. Preserve other workloads. Use an idle window, private processes, and terminate
    only our process group when another GPU job appears. Never flush global caches.
 
