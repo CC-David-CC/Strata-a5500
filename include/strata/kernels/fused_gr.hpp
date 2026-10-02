@@ -62,6 +62,8 @@ void fused_gr_read_multi(const FusedGrArgs* a, int n_tok, float* xn_scratch, voi
 /// Experimental STRATA_HC_DOWN_WARPS=1/2/4/8 changes only the staged down
 /// kernel's rows per block; default 8. Each warp retains its full dot product
 /// and reduction order. The per-card check also covers the selected policy.
+/// STRATA_HC_UP_COLS=4/8/16/32 similarly groups independent up-projection
+/// columns per block; default 16. Neither policy changes the opt-in GR_V3 path.
 void fused_gr_check();
 int fused_gr_variant();
 

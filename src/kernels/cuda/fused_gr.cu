@@ -255,16 +255,17 @@ constexpr int UPM_BLOCKS = N / UPM_COLS;          // 160
 
 // `gr_up_kernel` for T tokens: each row of w_up read once; the T dots reduced by xor so every lane holds every
 // sum, and lane k runs token k's epilogue - the T epilogues in parallel instead of one after another.
+template <int COLS>
 __global__ void __launch_bounds__(THREADS) gr_up_multi_kernel(GrMulti m) {
     __shared__ __align__(16) float lo[kFusedGrMaxT][LR];
-    __shared__ float g[kFusedGrMaxT][HC][UPM_COLS];
+    __shared__ float g[kFusedGrMaxT][HC][COLS];
     const int t = threadIdx.x, lane = t & 31, warp = t >> 5;
     const int T = m.T;
-    const int d0 = blockIdx.x * UPM_COLS;
+    const int d0 = blockIdx.x * COLS;
     for (int i = t; i < T * LR; i += THREADS) lo[i / LR][i % LR] = m.a[i / LR].lo[i % LR];
     __syncthreads();
-    for (int r = warp; r < HC * UPM_COLS; r += WARPS) {
-        const int c = r / UPM_COLS, dd = r - c * UPM_COLS, i = c * N + d0 + dd;
+    for (int r = warp; r < HC * COLS; r += WARPS) {
+        const int c = r / COLS, dd = r - c * COLS, i = c * N + d0 + dd;
         const uint4* w4 = reinterpret_cast<const uint4*>(m.a[0].w_up + (size_t) i * LR);
         const uint4 wa = __ldg(w4 + lane);
         const uint4 wb = lane < LR / 8 - 32 ? __ldg(w4 + 32 + lane) : make_uint4(0, 0, 0, 0);
@@ -298,8 +299,8 @@ __global__ void __launch_bounds__(THREADS) gr_up_multi_kernel(GrMulti m) {
         }
     }
     __syncthreads();
-    for (int i = t; i < T * UPM_COLS; i += THREADS) {
-        const int k = i / UPM_COLS, col = i - k * UPM_COLS;
+    for (int i = t; i < T * COLS; i += THREADS) {
+        const int k = i / COLS, col = i - k * COLS;
         float s = 0.0f;
 #pragma unroll
         for (int c = 0; c < HC; ++c) s += g[k][c][col];
@@ -783,6 +784,21 @@ int staged_warps() {
     return value;
 }
 
+int up_cols() {
+    static const int value = [] {
+        const char* text = std::getenv("STRATA_HC_UP_COLS");
+        if (!text) return 16;
+        char* end = nullptr;
+        const long n = std::strtol(text, &end, 10);
+        if (end == text || *end != '\0' || (n != 4 && n != 8 && n != 16 && n != 32)) {
+            std::fprintf(stderr, "STRATA_HC_UP_COLS must be 4, 8, 16 or 32\n");
+            std::exit(2);
+        }
+        return (int) n;
+    }();
+    return value;
+}
+
 void launch_multi(const GrMulti& m, int variant, cudaStream_t st, unsigned long long* stamp_buf, int stamp_i0) {
     const int n_tok = m.T;
     if (variant >= kHcSplit) gr_norm_split_kernel<<<dim3((unsigned) n_tok, HC), THREADS, 0, st>>>(m);
@@ -815,7 +831,11 @@ void launch_multi(const GrMulti& m, int variant, cudaStream_t st, unsigned long 
         else gr_down_multi_kernel<2560><<<DOWN_BLOCKS + 1, THREADS, smem, st>>>(c);
     }
     if (stamp_buf) gpu_stamp(stamp_buf, stamp_i0 + 1, (void*) st);
-    gr_up_multi_kernel<<<UPM_BLOCKS, THREADS, 0, st>>>(m);
+    switch (up_cols()) {
+#define STRATA_HC_UP(C) case C: gr_up_multi_kernel<C><<<N/C, THREADS, 0, st>>>(m); break
+        STRATA_HC_UP(4); STRATA_HC_UP(8); STRATA_HC_UP(16); STRATA_HC_UP(32);
+#undef STRATA_HC_UP
+    }
 }
 
 /// STRATA_HC_SPLIT: unset or 2 = the newest the check accepts (staged), 1 = at most split, 0 = the plain read
