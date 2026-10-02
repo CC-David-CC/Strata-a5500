@@ -9,6 +9,11 @@ Q8 reader improves measured throughput, with output-repeatability limitations
 described below. This remains experimental support. The shared serving
 dependency is intentional: it lets the same client test MTP on and off.
 
+The subsequent 128 GB RAM comparison completed 32 requests at actual 64K input.
+Its complete offloaded expert complement stayed in RAM, with zero benchmark
+swap. Locking the entire Q8 PLE table added less than 1% to the fixed-placement
+comparison. See the post-swap results below; an earlier capped run is excluded.
+
 Start in Strata because it already runs the full Unsloth Q4 model, provides MTP,
 and has expert placement and timing machinery. Keep llama.cpp as the independent
 same-GGUF reference and the working Q8 baseline. A separate engine, vLLM port, or
@@ -236,6 +241,80 @@ The candidate remains opt-in. This is a modest kernel gain, substantially
 below the weight-traffic reference; it does not establish that the roofline
 has been reached.
 
+## Q8 with 128 GB host RAM (2026-10-02)
+
+Same `29cbc02` engine and 400 W GPU power limit. The user installed four 32 GB
+DDR5 DIMMs, now configured at 3600 MT/s; the earlier two-DIMM configuration ran
+at 4800 MT/s. The following reader arms share the new hardware configuration.
+Use within-run comparisons; a cross-boot rate difference is not a pure RAM
+capacity effect.
+
+Actual input was 65,536 tokens, allocated context 73,728, int8 KV, an 8,192-token
+prefill chunk, separate prefill buffers and a 2,048 MiB VRAM reserve. Each
+reader/mode started one engine and ran two fresh requests per task. MTP used
+window 4 and threshold 0.5. These are means, with natural EOS before the 4,096
+output limit in every row. Raw settings, request lengths, token hashes, timing
+counters and bandwidth calculations are in the
+[post-swap evidence JSON](benchmarks/full-expert-q8-ram-20261002.json).
+
+| Mode / task | Direct tok/s | PLE in RAM tok/s | Direct effective tok/s | PLE in RAM effective tok/s |
+| --- | ---: | ---: | ---: | ---: |
+| MTP off / counting | 79.92 | 79.83 | 63.73 | 63.65 |
+| MTP off / coding | 75.97 | 75.77 | 55.75 | 55.65 |
+| MTP off / prose | 80.18 | 80.45 | 50.78 | 50.89 |
+| MTP on / counting | 160.20 | 160.21 | 105.18 | 105.22 |
+| MTP on / coding | 126.58 | 130.22 | 78.75 | 82.45 |
+| MTP on / prose | 108.52 | 105.19 | 58.39 | 54.52 |
+
+Corresponding non-MTP requests matched token for token across readers, but the
+two sequential repetitions in each engine can differ as placement adapts. MTP
+code/prose outputs differ across readers, so their small rate differences are
+not evidence of a reader speedup. OS caches were not flushed: a direct-reader
+file access can be served from the OS page cache. This does not establish equal
+performance on cold storage or under competing memory pressure.
+
+The fixed-placement diagnostic kept `--adapt-swaps 0 --pcie-frac 0`, MTP on,
+64K actual input and up to 2,048 output tokens. All eight outputs were identical
+across readers and repetitions: 2,048 code tokens and 1,359 prose tokens.
+
+| Fixed-placement MTP task | Direct tok/s | PLE in RAM tok/s | Observed difference |
+| --- | ---: | ---: | ---: |
+| Coding | 77.59 | 78.22 | +0.8% |
+| Prose | 110.12 | 111.10 | +0.9% |
+
+That difference is too small, with this sample count, to establish a useful
+throughput gain. The parallel reader had already removed most measured lookup
+delay. GPU verification and CPU expert execution remain larger costs.
+
+| Resource at 64K input / 72K allocation | MTP off | MTP on |
+| --- | ---: | ---: |
+| GPU expert cache | 80.69 GiB | 79.71 GiB |
+| Complete expert complement in pinned RAM | 38.84 GiB | 39.82 GiB |
+| PLE table in the RAM-reader arm | 50.664 GiB | 50.664 GiB |
+| Free VRAM after load | about 3.2 GiB | about 3.2 GiB |
+
+All 32 requests completed. Expert blob file reads were zero in every request;
+the RAM arm confirmed its PLE table was locked. Benchmark cgroup swap was zero;
+sampled host available RAM never fell below 24.84 GiB. The post-swap engine
+probe still measured 28.9 GB/s host-to-device. The evidence archive was copied
+locally and SHA-256 verified; all temporary engines and collectors exited.
+The earlier 96 GiB address/random-value memory smoke passed, but was not a full
+memory endurance test. The host remains online.
+
+### Excluded capped attempt
+
+An earlier runner imposed a 118 GiB cgroup ceiling. Its accumulated active file
+cache made the engine's conservative admission guard reduce the expert RAM
+budget between arms, eventually to zero in one diagnostic. Those 34 requests
+completed, but the unequal expert placement confounds the reader comparison.
+Their evidence remains preserved and marked as diagnostic only.
+
+The corrected runner removed this artificial ceiling for its own temporary
+unit, retained `MemorySwapMax=0` and the engine's RAM headroom checks, and stopped
+its own process group if host available RAM fell below 3 GiB. It rejected a
+clamped complement or any expert blob file reads. No global memory policy,
+production service or engine code changed for this correction.
+
 ## What the roofline means
 
 Use bytes per **emitted** token, not file size, active parameter count alone, or
@@ -340,10 +419,57 @@ small ideal attention-read increase from 8K to 64K.
 
 Keep acceptance and cache hit rate fixed when interpreting these context columns.
 Real longer requests may change both; their larger allocation can displace hot
-experts. These Q4/Q8 branch runs have only tested 8K input so far. The older
-llama.cpp long-context results are not validation of this branch.
+experts. The completed 64K branch measurements above validate that input size
+for those specific launch settings. A formula at another context is not a load
+test at that context. The older llama.cpp results are separate engine evidence.
 
 ## Q8: separate the two disk paths
+
+### Updated 64K references and measured fractions
+
+The initial context table above used the early MTP window observations. The
+following estimates instead use the rounded verifier counters from the two
+Q4 64K candidate runs and the new Q8 RAM-reader runs. Q4's measured MTP windows
+were T/emitted/draft-ms = 4.00/3.99/1.64 counting, 3.70/3.31/1.56 coding, and
+3.00/2.23/1.37 prose. The Q8 observations are stored in the post-swap JSON.
+
+These remain partial bandwidth references, not measured GPU efficiency. They
+assume one dense-weight read per window and no expert reuse between candidate
+positions. The Q8 model assumes 96.5% GPU expert-byte hits, RAM for every miss,
+and GPU computation after transfer. The actual engine still executes some
+experts on CPU; CPU work is absent from these idealized references. Q8 ranges
+span serialized GPU/PCIe transfers through perfect overlap; they do not bound
+real application performance from below.
+
+| Quant / mode / task | Measured output tok/s | Effective output tok/s | Bandwidth reference tok/s | Fraction of the optimistic reference |
+| --- | ---: | ---: | ---: | ---: |
+| Q4 / off / coding | 106.26 | 73.91 | 259.3 | 41.0% |
+| Q4 / MTP / coding | 223.41 | 116.14 | 420.4 | 53.1% |
+| Q4 / MTP / prose | 162.99 | 79.59 | 316.4 | 51.5% |
+| Q4 / MTP / counting | 252.53 | 150.98 | 485.0 | 52.1% |
+| Q8 / off / coding | 75.77 | 55.65 | 133.3-224.0 | 33.8% |
+| Q8 / MTP / coding | 130.22 | 82.45 | 151.6-250.0 | 52.1% |
+| Q8 / MTP / prose | 105.19 | 54.52 | 118.6-200.4 | 52.5% |
+| Q8 / MTP / counting | 160.21 | 105.22 | 172.3-282.2 | 56.8% |
+
+Q4 here was measured before the RAM swap; Q8 after it. The Q4 reference based on
+original GGUF weight reads was 282.9 tok/s. The compatibility pack changes its
+dense representation, reducing that to 264.1, then the known 64K attention reads
+reduce it to 259.3. Use the representation actually executed when stating a
+percentage. Unmeasured activation/recurrent traffic and kernel instruction costs
+can reduce the achievable rate further.
+
+Expert reuse changes the MTP reference: if a coding window used 25 unique experts
+per layer, and the implementation read each just once, the same calculator gives
+482.0 tok/s for Q4 and 202.0-346.8 for Q8. That union size is hypothetical until
+route traces measure it. The number of experts in the checkpoint and the actual
+top-k routing must remain unchanged. This is a window scheduling experiment,
+not a change in model pruning or acceptance threshold.
+
+Effective throughput has a separate reference: `output_tokens / (prefill_seconds
++ output_tokens / decode_reference + request_overhead_seconds)`. Holding measured
+prefill fixed makes this an Amdahl-style estimate, not a prefill roofline. Decode
+percentages must not be applied to effective rates.
 
 ### Expert cache misses
 
@@ -480,10 +606,37 @@ judged separately from a kernel speedup; higher acceptance on an easier output
 does not count as a kernel improvement. Do not extend this phase to other fleet
 hardware before the RTX PRO evidence is understood.
 
+### Worktree split for further experiments
+
+There is currently one active full-expert performance worktree:
+`strata-full-expert-review`, branch `perf/full-expert-q4-q8`. Its measured binary
+is `29cbc02`; later commits record evidence. `strata-serving-review` holds the
+shared non-MTP serving work. `strata-roofline` is the older archived 0.1.33
+exploration, not the current Q4/Q8 implementation. llm-60's release `1678de3`,
+initial Q8 `2be5cf1`, and measured `29cbc02` directories are source archives and
+builds, not separate Git worktrees.
+
+These four additional worktrees are proposed, not created or tested yet:
+
+| Proposed branch / worktree | Main intervention | Required comparison |
+| --- | --- | --- |
+| `perf/q4-single-token` / `strata-q4-single-token` | Dense GEMV, HC reads, attention and measured launch gaps with T=1; all experts already fit on GPU | 64K Q4 off baseline; actual kernel bytes and time; identical outputs |
+| `perf/q4-mtp-window` / `strata-q4-mtp-window` | Read dense/expert tiles once across verified positions; grouped work and suitable tensor-core kernels | Q4 MTP baseline; expert unions, bytes per emitted token, draft time and unchanged acceptance policy |
+| `perf/q8-hybrid` / `strata-q8-hybrid` | Cache placement, CPU-vs-GPU miss execution, asynchronous RAM-to-GPU transfers and double buffering | Full expert RAM residency, measured transfer bytes/overlap, Q8 off baseline and subsequent MTP regression |
+| `perf/q8-mtp-window` / `strata-q8-mtp-window` | Fetch each distinct missed expert once/window and pipeline transfers with verification | Q8 MTP baseline; unique missed bytes per emitted token, verifier/draft time, rollback and EOS correctness |
+
+Start each from the same preserved working baseline and keep launch settings
+and measured wins specific to each quant/mode. Share a patch only after it passes
+the corresponding controls; a T=1 kernel can lose on a multi-position window,
+and a larger workspace can improve Q4 while evicting valuable Q8 experts. The
+next measurement is actual kernel/DRAM/launch profiling, followed by one causal
+intervention per worktree. No new profiler-derived speed claim has been made.
+
 Q4 is the easier whole-engine experiment: all 24,576 experts already fit in VRAM,
 and the smaller 26.82 GiB PLE table can fit in host memory. Q8_0's block decoder
 is simpler than Q4_K's packed scales/minima and nibbles, but Q8 crosses both the
-VRAM capacity limit and the current host-RAM limit for a fully resident PLE table.
+VRAM capacity limit and the former 64 GB host-RAM limit for a fully resident PLE
+table. The 128 GB tests above now cover the RAM-backed configuration.
 Both compatibility packs have about 5.28 GB of read-every-step dense weights;
 their selected-expert reads are about 1.50 GB for Q4 versus 2.51 GB for Q8 per
 non-MTP token. Thus the weight-only traffic estimate grows about 15%, while the
@@ -509,16 +662,19 @@ remain resident alongside the pinned experts.
 
 Keeping the current GPU split and the *entire* PLE table in RAM requires about
 82.9 GiB for just those two host-side parts with MTP. Allowing OS, buffers and
-larger-context reserves, target 128 GB installed RAM: 64 GB more than now. A
+larger-context reserves, the pre-swap recommendation was 128 GB installed RAM.
+That upgrade and the actual 64K RAM-backed comparison are now complete. A
 96 GB configuration would be tight and needs a measured budget before acceptance.
 This means no steady-state weight/table storage reads after loading, not keeping
 a redundant full copy of the GPU-resident expert weights in host RAM as well.
 An entire Q8 checkpoint copy in CPU RAM is approximately 175.3 GiB before runtime
 overheads and is a different capacity requirement.
 
-Read-only inventory on 2026-10-02: B650 GAMING X AX, 2 x 32 GB Corsair DDR5
+Pre-swap read-only inventory on 2026-10-02: B650 GAMING X AX, 2 x 32 GB Corsair DDR5
 CMK64GX5M2B6000C30, configured 4800 MT/s, two empty slots; SMBIOS reports a 128 GB
-maximum. No DIMM, clock, BIOS, driver or system-wide profiling settings were changed.
+maximum. The user subsequently installed the additional two DIMMs; the new
+four-DIMM configuration runs at 3600 MT/s. The benchmark did not change BIOS,
+driver, GPU power limit or system-wide profiling settings.
 
 ### Detailed gates
 
