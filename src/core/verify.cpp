@@ -48,6 +48,9 @@
 #include <cstring>
 #include <exception>
 #include <immintrin.h>
+#if defined(__linux__)
+#include <sys/resource.h>
+#endif
 
 namespace strata::core {
 namespace {
@@ -56,6 +59,7 @@ constexpr float EPS = 1e-6f;
 using Clock = std::chrono::steady_clock;
 double ms_since(Clock::time_point t) { return std::chrono::duration<double, std::milli>(Clock::now() - t).count(); }
 const bool g_dbg = std::getenv("STRATA_VERIFY_DEBUG") != nullptr;
+const bool g_ple_profile = std::getenv("STRATA_PLE_PROFILE") != nullptr;
 #define VDBG(...) do { if (g_dbg) { std::fprintf(stderr, "verify dbg: " __VA_ARGS__); std::fflush(stderr); } } while (0)
 
 struct Bump {
@@ -1049,7 +1053,21 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
             prev[0] = prev[1];
             prev[1] = tokens[t];
         }
-        if (!ss.ple.table->gather_batch(rows, (size_t) T, h_ple_, err)) return false;
+        if (g_ple_profile) {
+#if defined(__linux__)
+            rusage before{}, after{};
+            const bool have_before = getrusage(RUSAGE_THREAD, &before) == 0;
+#endif
+            const auto begin = Clock::now();
+            if (!ss.ple.table->gather_batch(rows, (size_t) T, h_ple_, err)) return false;
+            ms_ple += ms_since(begin);
+#if defined(__linux__)
+            if (getrusage(RUSAGE_THREAD, &after) == 0 && have_before) {
+                ple_major_faults += after.ru_majflt - before.ru_majflt;
+                ple_minor_faults += after.ru_minflt - before.ru_minflt;
+            }
+#endif
+        } else if (!ss.ple.table->gather_batch(rows, (size_t) T, h_ple_, err)) return false;
     }
     *(volatile uint32_t*) h_seq_ = 0;
     *(volatile uint32_t*) h_flag_ = 0;

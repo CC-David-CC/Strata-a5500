@@ -40,6 +40,8 @@ def main():
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--input-tokens", type=int, default=8192)
     ap.add_argument("--output-tokens", type=int, default=512)
+    ap.add_argument("--repetitions", type=int, default=1,
+                    help="repeat fresh requests in one engine; prompt reuse stays disabled")
     ap.add_argument("--mode", choices=["both", "off", "on"], default="both")
     ap.add_argument("--order", choices=["off-on", "on-off"], default="off-on")
     ap.add_argument("--workload", choices=["short", "long"], default="short")
@@ -49,6 +51,8 @@ def main():
     ap.add_argument("--cases", nargs="+", choices=["counting", "coding", "writing"],
                     default=["counting", "coding", "writing"])
     opt = ap.parse_args()
+    if opt.repetitions < 1:
+        ap.error("--repetitions must be positive")
     cfg = json.loads(opt.config.read_text(encoding="utf-8-sig"))
     base_args = list(cfg["args"])
     context = int(option(base_args, "--max-context", 0))
@@ -126,7 +130,7 @@ def main():
         "engine_sha256": hashlib.sha256(Path(cfg["exe"]).read_bytes()).hexdigest(),
         "input_tokens": opt.input_tokens, "maximum_output_tokens": opt.output_tokens,
         "context_allocation": context, "thinking": False, "cold_cache_control": False,
-        "workload": opt.workload, "order": opt.order,
+        "workload": opt.workload, "order": opt.order, "repetitions": opt.repetitions,
         "require_counting_budget": opt.require_counting_budget,
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "environment": {k: v for k, v in os.environ.items() if k.startswith("STRATA_")},
@@ -161,7 +165,8 @@ def main():
             run["startup_seconds"] = time.monotonic() - start
             run["engine_info"] = engine.info
             print(f"READY mtp={mode} " + json.dumps(engine.info), flush=True)
-            for name, ids in prompts.items():
+            for repetition, name, ids in ((rep, name, ids)
+                    for rep in range(1, opt.repetitions + 1) for name, ids in prompts.items()):
                 emitted, arrivals = [], []
                 start = time.monotonic()
                 last_progress = start
@@ -178,7 +183,8 @@ def main():
                 timing = dict(engine.last)
                 text = tokenizer.decode(emitted)
                 case = {
-                    "task": name, "input_tokens": len(ids), "output_tokens": len(emitted),
+                    "task": name, "repetition": repetition,
+                    "input_tokens": len(ids), "output_tokens": len(emitted),
                     "text": text, "timings": timing, "wall_seconds": wall,
                     "token_ids": emitted,
                     "first_token_seconds": arrivals[0] if arrivals else None,

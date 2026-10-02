@@ -5340,6 +5340,8 @@ int main(int argc, char** argv) {
                                drive.d.pcie_experts};
             };
             const DecSnap ds0 = dec_snap();
+            const double ple_ms0 = ver.ms_ple;
+            const int64_t ple_major0 = ver.ple_major_faults, ple_minor0 = ver.ple_minor_faults;
             double dt_run = 0, dt_commit = 0, dt_draft = 0;
             int64_t dec_windows = 0, dec_T = 0;
             const int64_t decode_hits0 = drive.d.cache_hits;
@@ -5471,6 +5473,11 @@ int main(int argc, char** argv) {
                              (d1.entries - ds0.entries) / (w * L), (d1.hits - ds0.hits) / (w * L), (d1.pcie - ds0.pcie) / (w * L));
                 const std::string pr = ver.profile_report();
                 if (!pr.empty()) std::fprintf(stderr, "strata decode GPU stages (ms/window):%s\n", pr.c_str());
+                if (std::getenv("STRATA_PLE_PROFILE") != nullptr)
+                    std::fprintf(stderr, "strata PLE staging: %.4f ms/window; Linux calling-thread faults: "
+                                         "%lld major, %lld minor across %lld windows\n",
+                                 (ver.ms_ple-ple_ms0)/w, (long long)(ver.ple_major_faults-ple_major0),
+                                 (long long)(ver.ple_minor_faults-ple_minor0), (long long)dec_windows);
             }
             if (!cancelled) {
                 // a prompt stopped halfway leaves the session somewhere between two chunks: nothing to continue from

@@ -158,6 +158,10 @@ public:
     void set_pcie_enabled(bool on) { pcie_enabled_ = on; }
 
     double ms_wait = 0, ms_pool = 0, ms_host = 0, ms_commit = 0;
+    /// Opt-in STRATA_PLE_PROFILE: CPU lookup time inside host staging. Linux
+    /// page-fault deltas cover only the calling thread during gather_batch.
+    double ms_ple = 0;
+    int64_t ple_major_faults = 0, ple_minor_faults = 0;
     int64_t windows = 0;
     /// STRATA_VERIFY_PROFILE=1 - GPU stage times of the windows since the last call (ms per
     /// window), as one line; empty when off.
