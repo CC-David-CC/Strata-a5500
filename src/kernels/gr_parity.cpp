@@ -271,9 +271,10 @@ int scalar_activation_contract() {
 }
 
 int fused_multi_lds_parity(const float* d_norm, const uint16_t* d_down, const uint16_t* d_up,
-                           const uint16_t* d_inject, float eps) {
+                           const uint16_t* d_inject, float eps, int T) {
     using namespace strata::kernels;
-    constexpr int N = 2560, HC = 4, LR = 320, D = N * HC, T = kFusedGrMaxT;
+    constexpr int N = 2560, HC = 4, LR = 320, D = N * HC;
+    std::printf("\n  fused multi read: T=%d\n", T);
     std::mt19937 rng(0x6f8a);
     std::normal_distribution<float> normal(0.0f, 0.3f);
     std::vector<float> r((size_t) T * D), bo((size_t) T * N), inj((size_t) T * HC);
@@ -338,11 +339,14 @@ int fused_multi_lds_parity(const float* d_norm, const uint16_t* d_down, const ui
     auto close = [](const std::vector<float>& x, const std::vector<float>& y) {
         double worst = 0.0, mag = 1e-30;
         for (size_t i = 0; i < x.size(); ++i) {
+            if (!std::isfinite(x[i]) || !std::isfinite(y[i])) {
+                std::printf("    tolerance: non-finite value at %zu\n", i);
+                return false;
+            }
             worst = std::max(worst, (double) std::fabs(x[i] - y[i]));
             mag = std::max(mag, (double) std::fabs(y[i]));
         }
-        if (worst > 2e-6 * mag)
-            std::printf("    tolerance: worst %.3e of max |ref| %.3e (rel %.3e), n %zu\n", worst, mag, worst / mag, x.size());
+        std::printf("    tolerance: worst %.3e of max |ref| %.3e (rel %.3e), n %zu\n", worst, mag, worst / mag, x.size());
         return worst <= 2e-6 * mag;
     };
     auto same = [&](const Snapshot& a, const Snapshot& b) {
@@ -756,7 +760,8 @@ int main(int argc, char** argv) {
                         activation_mode_name(mode), ok ? "pass" : "*** FAIL ***", rm, ri);
             if (!ok) ++bad;
         }
-        bad += fused_multi_lds_parity(dN, dD, dU, dJ, eps);
+        for (int t : {1, 2, 3, 4, strata::kernels::kFusedGrMaxT})
+            bad += fused_multi_lds_parity(dN, dD, dU, dJ, eps, t);
         select_activation_mode(0);
         cudaFree(rws_raw);
         cudaFree(dR); cudaFree(dN); cudaFree(dD); cudaFree(dU); cudaFree(dJ); cudaFree(dM); cudaFree(dI);
