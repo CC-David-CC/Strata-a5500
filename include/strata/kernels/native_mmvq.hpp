@@ -93,6 +93,13 @@ void native_q8_0_mmvq(const void* weights, const void* x_q8_1, float* y,
 void native_q8_0_f32(const void* weights, const float* x, void* scratch_q8_1,
                       float* y, int n_in, int n_out, int ncols, void* stream);
 
+// Experimental Q8_0 dense row tiling, set before graph capture (not thread-safe).
+// 0 keeps upstream dispatch; 1/2/4/8 select rows per four-warp block without
+// changing each output's reduction order in multi_exact mode. The initial value comes from
+// STRATA_NATIVE_Q8_ROWS, default 0. This also affects Q4 models' Q8_0 projections.
+void native_q8_0_set_rows_per_block(int rows);
+int native_q8_0_rows_per_block();
+
 void native_iq4_nl_mmvq(const void* weights, const void* x_q8_1, float* y,
                        int n_in, int n_out, int ncols, void* stream);
 

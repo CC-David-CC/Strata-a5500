@@ -31,9 +31,11 @@
 #include <cuda_runtime.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 namespace strata::kernels {
 namespace {
@@ -995,6 +997,25 @@ struct SmallTraits {
 // llama.cpp's generic multi-column table (ncols 2-4: 4 warps; 5-8: 2 warps; always 2 rows per block): faster,
 // equal to ncols = 1 only to float rounding (the cross-warp reduction groups partial sums differently).
 bool g_multi_exact = true;   // until the upstream layout is timed on an idle GPU (plan rule: default only what is measured)
+int g_q8_rows = -1;         // -1: read the opt-in environment policy on first use
+
+void validate_q8_rows(int rows) {
+    if (rows != 0 && rows != 1 && rows != 2 && rows != 4 && rows != 8)
+        throw std::invalid_argument("STRATA_NATIVE_Q8_ROWS must be 0, 1, 2, 4 or 8");
+}
+
+int q8_rows() {
+    if (g_q8_rows < 0) {
+        const char* value = std::getenv("STRATA_NATIVE_Q8_ROWS");
+        char* end = nullptr;
+        const long parsed = value ? std::strtol(value, &end, 10) : 0;
+        if (value && (end == value || *end != '\0' || parsed < 0 || parsed > 8))
+            throw std::invalid_argument("STRATA_NATIVE_Q8_ROWS must be 0, 1, 2, 4 or 8");
+        validate_q8_rows((int) parsed);
+        g_q8_rows = (int) parsed;
+    }
+    return g_q8_rows;
+}
 
 template<typename F, int NCOLS, int NW, int ROWS>
 __launch_bounds__(NW * WARP, 1)
@@ -1046,6 +1067,17 @@ template<typename F, int NCOLS>
 void launch_multi_n(const void* weights, const void* x_q8_1, float* y, int n_in, int n_out, cudaStream_t s) {
     const auto* w = static_cast<const typename F::Block*>(weights);
     const auto* x = static_cast<const Q81Block*>(x_q8_1);
+    if constexpr (std::is_same<typename F::Block, Q80Block>::value) {
+        // Change only how independent output rows share a block. Keep NW=4,
+        // lane assignment, partial sums and reduction order identical.
+        if (g_multi_exact) switch (q8_rows()) {
+#define STRATA_Q8_ROWS(R) case R: \
+            native_mmvq_multi_kernel<F, NCOLS, WARPS, R><<<unsigned((std::size_t(n_out)+R-1)/R), dim3(WARP, WARPS), 0, s>>>(w, x, y, n_in, n_out); return
+            STRATA_Q8_ROWS(1); STRATA_Q8_ROWS(2); STRATA_Q8_ROWS(4); STRATA_Q8_ROWS(8);
+#undef STRATA_Q8_ROWS
+            default: break;
+        }
+    }
     if (!g_multi_exact) {
         constexpr int NW = NCOLS <= 4 ? 4 : 2;
         const unsigned blocks = unsigned((std::size_t(n_out) + 1) / 2);
@@ -1107,6 +1139,14 @@ void small_mmvq(const void* weights, const void* x_q8_1, float* y,
     validate_pointer(x_q8_1);
     validate_pointer(y);
     validate_stream(stream);
+    if constexpr (std::is_same<Weight, Q80Block>::value) {
+        if (ncols == 1 && q8_rows() != 0) {
+            launch_multi_n<SmallTraits<Weight, Qi>, 1>(weights, x_q8_1, y, n_in, n_out,
+                                                     static_cast<cudaStream_t>(stream));
+            launch_check();
+            return;
+        }
+    }
     if (ncols > 1) {
         launch_multi<SmallTraits<Weight, Qi>>(weights, x_q8_1, y, n_in, n_out, ncols, stream);
         launch_check();
@@ -1143,6 +1183,8 @@ void small_f32(const void* weights, const float* x, void* scratch_q8_1,
 
 void native_mmvq_set_multi_exact(bool exact) { g_multi_exact = exact; }
 bool native_mmvq_multi_exact() { return g_multi_exact; }
+void native_q8_0_set_rows_per_block(int rows) { validate_q8_rows(rows); g_q8_rows = rows; }
+int native_q8_0_rows_per_block() { return q8_rows(); }
 
 std::size_t native_q8_1_bytes(int n_in, int ncols) {
     validate_shape(n_in, ncols);
