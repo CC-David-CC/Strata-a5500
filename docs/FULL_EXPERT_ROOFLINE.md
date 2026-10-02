@@ -87,6 +87,42 @@ zero; borrowed prefill slots still required file refills. Only 256 / 240 MiB VRA
 remained after load, so the next context test must reserve more headroom first.
 The n-gram table is mapped separately and can still fault from storage.
 
+## 64K Q4 control and current experiments (2026-10-02)
+
+Same RTX PRO 6000, original full Unsloth UD-Q4_K_XL experts, int8 KV, 65,536
+actual input tokens, 73,728 allocated context, up to 4,096 output tokens,
+MTP off. Binary from `2be5cf1`, harness from `1c7acf0`, separate prefill buffers,
+2,048 MiB reserve. All 24,576 experts occupied 71.73 GiB VRAM; none used CPU
+expert execution or expert-file reads. Startup reported 12,868 MiB free VRAM.
+
+| Workload | Actual output tokens | Decode tok/s | Effective output tok/s |
+|---|---:|---:|---:|
+| Counting | 3,893 | 101.69 | 80.25 |
+| Coding | 2,467 | 101.82 | 71.84 |
+| Prose | 1,588 | 101.49 | 61.58 |
+
+All three stopped naturally. These are single control observations, not an
+exact 4K-output claim. A separate instrumented 128-token run put about 1.3 ms
+per token in the routed GPU experts, out of about 10 ms total. Dense projections,
+hyper-connection reads, attention and other operations account for the rest.
+The instrumented run's throughput is not the control's throughput.
+
+The private pre-swap queue first tests `STRATA_NATIVE_Q8_ROWS=0/1/2/4/8` and
+`STRATA_HC_DOWN_WARPS=8/4/2/1` individually, then repeats the selected combination
+with MTP off and on at 64K. Both keep quantized weights and reduction order.
+The row-tile fixture initially failed because its pageable weight upload used
+a different, unsynchronized stream; the fixture was fixed in `89a3784`.
+The corrected row-tile tests, 148,480 existing matrix parity comparisons and
+all four HC warp-policy parity tests passed on this card. This establishes
+correctness coverage, not an application speed improvement.
+
+Q8's next candidate enables the existing parallel direct reader for 170-byte
+Q8_0 PLE rows. Independent ggml byte/row oracles, every row/page alignment in a
+small synthetic file, cache on/off, worker on/off, queue depth 1/64 and actual
+shard probes gate its model tests. `STRATA_PLE_PROFILE=1` separately times lookup
+staging and, on Linux, counts the caller's faults during that lookup. Profiling
+is off in headline runs. No Q8 direct-read speed improvement is claimed yet.
+
 ## What the roofline means
 
 Use bytes per **emitted** token, not file size, active parameter count alone, or
