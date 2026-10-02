@@ -1,7 +1,12 @@
 # Experimental GR and MMVQ alternatives
 
+Current base: **upstream 0.1.34**. See the
+[2026-10-02 rebase checks](benchmarks/2026-10-02-upstream-sync-experimental.md).
+The performance tables and fleet/context matrix below were measured on **0.1.33**,
+at the exact source commits listed. They remain historical evidence.
+
 This is a contribution to [Niko1221/Strata](https://github.com/Niko1221/Strata),
-based on 0.1.33 (`aeb35be`). Strata's model support, expert cache and MTP are
+based on 0.1.34 (`1678de3`). Strata's model support, expert cache and MTP are
 upstream work. This patch changes two optional kernel launch paths.
 
 Validation completed on all six fleet GPUs. Both alternatives remain opt-in.
