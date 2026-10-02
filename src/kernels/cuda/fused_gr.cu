@@ -255,12 +255,12 @@ constexpr int UPM_BLOCKS = N / UPM_COLS;          // 160
 
 // `gr_up_kernel` for T tokens: each row of w_up read once; the T dots reduced by xor so every lane holds every
 // sum, and lane k runs token k's epilogue - the T epilogues in parallel instead of one after another.
-template <int COLS>
+template <int COLS, int TOKENS = 0>
 __global__ void __launch_bounds__(THREADS) gr_up_multi_kernel(GrMulti m) {
     __shared__ __align__(16) float lo[kFusedGrMaxT][LR];
     __shared__ float g[kFusedGrMaxT][HC][COLS];
     const int t = threadIdx.x, lane = t & 31, warp = t >> 5;
-    const int T = m.T;
+    const int T = TOKENS ? TOKENS : m.T;
     const int d0 = blockIdx.x * COLS;
     for (int i = t; i < T * LR; i += THREADS) lo[i / LR][i % LR] = m.a[i / LR].lo[i % LR];
     __syncthreads();
@@ -618,11 +618,11 @@ __device__ __forceinline__ void stage_htile(const GrMulti& m, int T, int h, floa
     }
 }
 
-template <int BLOCK_WARPS>
+template <int BLOCK_WARPS, int TOKENS = 0>
 __global__ void __launch_bounds__(BLOCK_WARPS * 32) gr_down_staged_kernel(GrMulti m) {
     extern __shared__ __align__(16) float4 hbuf[];      // 2 buffers x [T][2][160] float4
     const int t = threadIdx.x, lane = t & 31, warp = t >> 5;
-    const int T = m.T;
+    const int T = TOKENS ? TOKENS : m.T;
     // Each warp still owns one entire dot product, in the same lane/chunk order.
     // Treat down and injection rows as one index space so 1/2-warp blocks also
     // cover all four injection rows. The original 8-warp policy is unchanged.
@@ -741,6 +741,11 @@ int down_chunk(bool staged, int* tile_out) {
         cudaFuncSetAttribute(gr_down_staged_kernel<4>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
         cudaFuncSetAttribute(gr_down_staged_kernel<2>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
         cudaFuncSetAttribute(gr_down_staged_kernel<1>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
+#define STRATA_HC_ATTR(W, T) cudaFuncSetAttribute(gr_down_staged_kernel<W, T>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged)
+#define STRATA_HC_ATTR_W(W) STRATA_HC_ATTR(W, 1); STRATA_HC_ATTR(W, 2); STRATA_HC_ATTR(W, 3); STRATA_HC_ATTR(W, 4)
+        STRATA_HC_ATTR_W(1); STRATA_HC_ATTR_W(2); STRATA_HC_ATTR_W(4); STRATA_HC_ATTR_W(8);
+#undef STRATA_HC_ATTR_W
+#undef STRATA_HC_ATTR
         cudaGetLastError();      // drop any error the attempt left behind
         // The opt-in is a promise a pre-Volta card does not keep: an sm_60 answers 65536 and accepts the
         // cudaFuncSetAttribute for 61440 B, then fails the LAUNCH with "invalid argument".  What such a card
@@ -799,6 +804,34 @@ int up_cols() {
     return value;
 }
 
+bool static_tokens() {
+    static const bool enabled = [] {
+        const char* text = std::getenv("STRATA_HC_STATIC_T");
+        return text != nullptr && std::atoi(text) != 0;
+    }();
+    return enabled;
+}
+
+template<int W>
+void launch_staged(const GrMulti& m, size_t smem, cudaStream_t st) {
+    if (static_tokens()) switch (m.T) {
+#define STRATA_HC_T(T) case T: gr_down_staged_kernel<W, T><<<(LR+HC+W-1)/W, W*32, smem, st>>>(m); return
+        STRATA_HC_T(1); STRATA_HC_T(2); STRATA_HC_T(3); STRATA_HC_T(4);
+#undef STRATA_HC_T
+    }
+    gr_down_staged_kernel<W><<<(LR+HC+W-1)/W, W*32, smem, st>>>(m);
+}
+
+template<int C>
+void launch_up(const GrMulti& m, cudaStream_t st) {
+    if (static_tokens()) switch (m.T) {
+#define STRATA_HC_T(T) case T: gr_up_multi_kernel<C, T><<<N/C, THREADS, 0, st>>>(m); return
+        STRATA_HC_T(1); STRATA_HC_T(2); STRATA_HC_T(3); STRATA_HC_T(4);
+#undef STRATA_HC_T
+    }
+    gr_up_multi_kernel<C><<<N/C, THREADS, 0, st>>>(m);
+}
+
 void launch_multi(const GrMulti& m, int variant, cudaStream_t st, unsigned long long* stamp_buf, int stamp_i0) {
     const int n_tok = m.T;
     if (variant >= kHcSplit) gr_norm_split_kernel<<<dim3((unsigned) n_tok, HC), THREADS, 0, st>>>(m);
@@ -822,7 +855,7 @@ void launch_multi(const GrMulti& m, int variant, cudaStream_t st, unsigned long 
         if (staged) {
             switch (staged_warps()) {
 #define STRATA_HC_WARPS(W) case W: \
-                gr_down_staged_kernel<W><<<(LR+HC+W-1)/W, W*32, smem, st>>>(c); break
+                launch_staged<W>(c, smem, st); break
                 STRATA_HC_WARPS(1); STRATA_HC_WARPS(2); STRATA_HC_WARPS(4); STRATA_HC_WARPS(8);
 #undef STRATA_HC_WARPS
             }
@@ -832,7 +865,7 @@ void launch_multi(const GrMulti& m, int variant, cudaStream_t st, unsigned long 
     }
     if (stamp_buf) gpu_stamp(stamp_buf, stamp_i0 + 1, (void*) st);
     switch (up_cols()) {
-#define STRATA_HC_UP(C) case C: gr_up_multi_kernel<C><<<N/C, THREADS, 0, st>>>(m); break
+#define STRATA_HC_UP(C) case C: launch_up<C>(m, st); break
         STRATA_HC_UP(4); STRATA_HC_UP(8); STRATA_HC_UP(16); STRATA_HC_UP(32);
 #undef STRATA_HC_UP
     }

@@ -64,6 +64,8 @@ void fused_gr_read_multi(const FusedGrArgs* a, int n_tok, float* xn_scratch, voi
 /// and reduction order. The per-card check also covers the selected policy.
 /// STRATA_HC_UP_COLS=4/8/16/32 similarly groups independent up-projection
 /// columns per block; default 16. Neither policy changes the opt-in GR_V3 path.
+/// STRATA_HC_STATIC_T=1 specializes staged down/up for 1..4 tokens, leaving the
+/// same per-token arithmetic. Default off; 5..8 tokens keep the dynamic kernel.
 void fused_gr_check();
 int fused_gr_variant();
 
