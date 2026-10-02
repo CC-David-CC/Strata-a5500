@@ -1,7 +1,12 @@
 # Community support for the Radeon RX 5500 XT 8GB
 
+Current base: **upstream 0.1.34**. See the
+[2026-10-02 rebase checks](benchmarks/2026-10-02-upstream-sync-hardware.md).
+The performance tables and fleet/context matrix below were measured on **0.1.33**,
+at the exact source commits listed. They remain historical evidence.
+
 This is the hardware split requested in [#323](https://github.com/Niko1221/Strata/pull/323),
-based on upstream **0.1.33, `aeb35be`**. The tested card is the **consumer AMD
+based on upstream **0.1.34, `1678de3`**. The tested card is the **consumer AMD
 Radeon RX 5500 XT 8GB (`gfx1012`)**. The host's name is `a5500`.
 It stays in the community/unvalidated architecture list.
 Credit for the engine, expert cache and MTP belongs to
