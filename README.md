@@ -1,3 +1,9 @@
+> **Serving contribution:** this fork branch adds serving without an MTP drafter
+> and skips unavailable PCIe expert paths. See the
+> [scope, measurements and validation status](docs/NON_MTP_SERVING_REVIEW.md).
+> Credit for Strata belongs to [Niko1221/Strata](https://github.com/Niko1221/Strata).
+> The upstream introduction and its original measurements follow below.
+
 <h1 align="center">Strata</h1>
 
 <p align="center"><b>Run a 125-billion-parameter AI model on your own gaming PC</b><br>
