@@ -2,9 +2,11 @@
 
 This is experimental work in David's Strata fork, branch `perf/full-expert-q4-q8`.
 It builds on [Niko1221/Strata](https://github.com/Niko1221/Strata), release v0.1.34
-(`1678de3`), and the fork's `contrib/non-mtp-serving` branch (`12fa219`). It does
-not yet establish a kernel speedup or add Q8 model support. The shared serving
-dependency is intentional: it lets the same client test MTP on and off.
+(`1678de3`), and the fork's `contrib/non-mtp-serving` branch (`12fa219`). Commit
+`2be5cf1` adds an experimental mapped Q8_0 PLE reader. Q8 now completes the first
+8K tests with MTP on and off. This does not establish a kernel speedup or robust
+long-context Q8 support. The shared serving dependency is intentional: it lets
+the same client test MTP on and off.
 
 Start in Strata because it already runs the full Unsloth Q4 model, provides MTP,
 and has expert placement and timing machinery. Keep llama.cpp as the independent
@@ -45,6 +47,46 @@ Previous llama.cpp evidence, different workloads and builds:
   of 64 experts per offloaded weight tensor. Cache misses were copied to the GPU.
 - Those are historical comparisons, not a controlled measurement of MTP speedup.
 
+### Matched 8K measurements on the experimental branch
+
+Fresh 8,192-token prompts, 16,384 allocated context, int8 KV, up to 2,048 output
+tokens, prefill chunk fixed at 8,192. Both modes use the same prompt hashes;
+MTP uses window 4, minimum draft probability 0.5. Each arm ran once in off/on
+order. Long prompts contain repetitive synthetic filler; these prefill rates
+are not representative of an arbitrary 8K document. Full results and hashes are
+summarized in [the evidence JSON](benchmarks/full-expert-q4-q8-initial.json).
+
+| Quant / task | MTP off output tok/s | MTP on output tok/s | Off effective tok/s | On effective tok/s |
+| --- | ---: | ---: | ---: | ---: |
+| Q4 / counting | 104.69 | 259.67 | 94.31 | 203.64 |
+| Q4 / coding | 104.66 | 220.33 | 95.73 | 183.43 |
+| Q4 / prose | 104.35 | 163.81 | 92.80 | 136.66 |
+| Q8 / counting | 66.18 | 121.83 | 55.27 | 80.85 |
+| Q8 / coding | 61.97 | 87.53 | 50.70 | 63.33 |
+| Q8 / prose | 52.25 | 51.87 | 42.34 | 42.85 |
+
+Counting and coding reached 2,048 tokens. Q4 prose produced 1,504 in either mode;
+Q8 prose stopped naturally at 1,542 off / 1,498 on. The prose rates therefore do
+not establish a matched-output MTP improvement. All temporary engines exited.
+
+The Q4 buffer intervention kept the prefill chunk at 8,192 and used
+`--no-prefill-borrow`. Across the six off/on cases, output token IDs were unchanged,
+prefill time fell 28-32%, and decode rates barely changed. MTP coding effective
+throughput improved from 183.43 to 192.32 tok/s (4.8%). This is a configuration
+result from one fixed-order pair, requiring repeated A/B/B/A trials before a
+robust speed claim. No new GPU kernel optimization has been measured yet.
+
+Q8 validation: 1,029 synthetic row probes and 1,059 real-model row probes decoded
+bit-for-bit identically to ggml; malformed-file checks and the existing direct
+reader self-test passed. Full-model IQ4/Q5/FP8 regression on the changed engine
+remains outstanding. Q8 direct PLE I/O is deliberately rejected pending tests.
+
+Q8 fit: the GPU held 18,144 experts without MTP / 17,958 with it. The remaining
+31.28 / 32.19 GiB fitted in pinned system RAM. Decode expert-file counters were
+zero; borrowed prefill slots still required file refills. Only 256 / 240 MiB VRAM
+remained after load, so the next context test must reserve more headroom first.
+The n-gram table is mapped separately and can still fault from storage.
+
 ## What the roofline means
 
 Use bytes per **emitted** token, not file size, active parameter count alone, or
@@ -63,10 +105,12 @@ application throughput. GB below is decimal; GiB is binary.
 | Original Q4 GGUF | 4.8302 | 1.5043 | 6.3344 | 282.9 |
 | Strata Q4 compatibility pack | 5.2806 | 1.5043 | 6.7848 | 264.1 |
 | Original Q8 GGUF | 4.7926 | 2.5068 | 7.2994 | 245.5 |
+| Strata Q8 compatibility pack | 5.2806 | 2.5068 | 7.7873 | 230.1 |
 
 The input embedding is one row, not a full vocabulary scan. The output head is a
 full scan. PLE reads selected rows, not the whole n-gram table. Strata's existing
-small-projection BF16 conversions add a net 450,396,160 bytes to Q4's estimate.
+small-projection BF16 conversions add a net 450,396,160 bytes to Q4's estimate
+and 487,936,000 bytes to Q8's estimate.
 Conversion error is already part of this compatibility baseline and must stay
 documented. Routed expert bytes are unchanged.
 
@@ -109,6 +153,47 @@ The observed verifier took 12.79–14.60 ms/window; drafting took 1.11–1.31 ms
 Investigate verifier memory traffic, quantized matrix kernels, and launch/wait
 structure before changing Q4's expert cache: that cache already hits 100%.
 
+### Context sensitivity and current estimates
+
+These are **partial bandwidth references**, not measured performance, a forecast,
+or a complete hardware roofline. Use one request on llm-60, int8 KV, peak 1,792
+GB/s VRAM bandwidth, measured 28.9 GB/s PCIe, and RAM for all expert misses.
+The context columns mean populated history, not unused allocated capacity.
+
+The source's sparse attention selects at most 2,051 cells. Across its 12 QSA
+layers, ideal int8 KV reads cost 12,672 bytes per selected cell, and pooled FP32
+indexer keys add 1,536 bytes per history token. The calculator includes these
+reads per verified position. Recurrent-state traffic, extra activation reads,
+dequantization, random PLE faults and synchronization are still omitted.
+
+| Model and execution assumption | 8K history tok/s | 16K history tok/s | 64K history tok/s |
+| --- | ---: | ---: | ---: |
+| Q4, no MTP, all experts GPU | 263 | 262 | 259 |
+| Q4, code-like MTP, no expert reuse between candidates | 432 | 431 | 422 |
+| Q8, no MTP, 96.5% GPU expert-byte hit rate | 134-226 | 134-226 | 133-224 |
+| Q8, code-like MTP, same hit rate, no expert reuse | 155-256 | 155-256 | 154-256 |
+| Q8, code-like MTP, same hit rate, 25 unique experts/layer/window | 210-362 | 210-362 | 208-362 |
+
+Q4 MTP assumes the observed release coding window: 3.63 verified, 3.16 emitted,
+1.24 ms serial drafting. Q8 uses its observed coding window: 3.75 verified, 3.34
+emitted, 1.65 ms drafting. Q8 ranges span serialized versus perfectly overlapped
+GPU and PCIe work; real performance can be below both references. The last row
+assumes routing reuse, which has not yet been measured. Dense weights are read
+once per window in this idealized model. Cold experts are transferred to GPU;
+the current engine also computes some on CPU, which needs a separate CPU term.
+
+The 96.5% Q8 byte hit rate is a sensitivity assumption near the measured off-mode
+expert counts, not a measured transfer-byte hit rate. In particular, the log's
+97-99% cache statistic excludes PCIe experts from its denominator and cannot be
+substituted directly. At only 90% byte hits, the 8K no-MTP reference drops to
+76-115 tok/s. Cache identity and transfer bytes matter much more here than the
+small ideal attention-read increase from 8K to 64K.
+
+Keep acceptance and cache hit rate fixed when interpreting these context columns.
+Real longer requests may change both; their larger allocation can displace hot
+experts. These Q4/Q8 branch runs have only tested 8K input so far. The older
+llama.cpp long-context results are not validation of this branch.
+
 ## Q8: separate the two disk paths
 
 ### Expert cache misses
@@ -136,9 +221,9 @@ Fetching 0.5 GB separately for each candidate removes that benefit.
 
 The preferred llm-60 layout is GPU hot/resident experts, the remaining experts in
 RAM, and PLE mapped from NVMe. Q8 need not read expert weights from disk each
-token if the GPU cache complement fits RAM. Approximately 35–45 GiB of RAM-backed
-experts is plausible, depending on cache/buffer/MTP allocation; measure the actual
-complement and total process memory before claiming it fits.
+token if the GPU cache complement fits RAM. The measured 8K configuration used
+31.28 GiB without MTP / 32.19 GiB with MTP for the complement; larger reserves,
+buffers and context allocations can increase that requirement.
 
 ### The PLE/n-gram table
 
@@ -212,10 +297,10 @@ results back in original token order. This makes duplicate routes and differing
 expert sizes explicit instead of special cases in a launch loop.
 
 For PLE, use a format descriptor with block elements, block bytes, row elements,
-row bytes and decoder. Q8 has 170-byte rows, larger than the current 160-byte
-maximum. A correct implementation must update scratch-buffer capacity, mmap and
-direct-reader validation, bounds checks, and tests—not just accept another dtype.
-Current Strata rejects Q8_0 PLE even though it has Q8 expert kernels.
+row bytes and decoder. Q8 has 170-byte rows, larger than upstream's 160-byte
+maximum. This branch raises scratch capacity, selects the existing Q8 decoder,
+checks offsets and file bounds, and validates unchanged rows against ggml.
+Mapped Q8 works in the first smoke tests; direct-reader support remains gated.
 
 ## Ordered implementation and acceptance gates
 
@@ -265,6 +350,7 @@ making total completion time worse for the intended workload.
 
 Initial research targets, not results: Q4 at 300+ code tok/s would be a useful step
 from 212; 400+ needs evidence of substantially better verification. For Q8, target
-the measured hybrid bound rather than 246 tok/s from an infeasible all-GPU model.
+the measured hybrid bound rather than the infeasible all-GPU reference (246 tok/s
+for original GGUF weights; 230 tok/s after the compatibility pack conversions).
 MTP can help both, but cache locality, expert reuse, acceptance and draft cost must
 demonstrate why the gain exists.
