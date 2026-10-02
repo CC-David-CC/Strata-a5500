@@ -45,7 +45,10 @@ void run(Shape shape, int columns, bool timing, cudaStream_t stream) {
     for (auto& v : x) v = dist(rng);
     const size_t yb = size_t(columns)*shape.out*sizeof(float);
     Device w(stride*copies), dx(x.size()*sizeof(float)), xq(sk::native_q8_1_bytes(shape.in, columns)), y(yb);
-    ck(cudaMemcpy(w.p, weights.data(), wb, cudaMemcpyHostToDevice));
+    // Keep initialization on the same nonblocking stream as the kernels. A
+    // pageable H2D copy on the default stream need not be complete when the
+    // host call returns, and this stream does not implicitly wait for it.
+    ck(cudaMemcpyAsync(w.p, weights.data(), wb, cudaMemcpyHostToDevice, stream));
     for (int i = 1; i < copies; ++i)
         ck(cudaMemcpyAsync((uint8_t*)w.p+stride*i, w.p, wb, cudaMemcpyDeviceToDevice, stream));
     ck(cudaMemcpyAsync(dx.p, x.data(), x.size()*sizeof(float), cudaMemcpyHostToDevice, stream));
@@ -72,6 +75,15 @@ void run(Shape shape, int columns, bool timing, cudaStream_t stream) {
         if (differences || nonfinite) {
             std::printf("FAIL in=%d out=%d T=%d rows=%d differences=%zu nonfinite=%zu\n",
                         shape.in, shape.out, columns, rows, differences, nonfinite);
+            size_t shown = 0;
+            for (size_t i = 0; i < result.size() && shown < 8; ++i) {
+                if (reference[i] == result[i]) continue;
+                float a, b;
+                std::memcpy(&a, &reference[i], 4); std::memcpy(&b, &result[i], 4);
+                std::printf("  index=%zu reference=%.9g (%08x) candidate=%.9g (%08x)\n",
+                            i, a, reference[i], b, result[i]);
+                ++shown;
+            }
             throw std::runtime_error("row tile changed output");
         }
         if (!timing) continue;
