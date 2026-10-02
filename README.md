@@ -2,6 +2,8 @@
 > and skips unavailable PCIe expert paths. See the
 > [scope, measurements and validation status](docs/NON_MTP_SERVING_REVIEW.md).
 > Credit for Strata belongs to [Niko1221/Strata](https://github.com/Niko1221/Strata).
+> Rebased on upstream **0.1.34**; [fresh checks](docs/benchmarks/2026-10-02-upstream-sync-serving.md).
+> Earlier performance tables retain their original 0.1.33 source identities.
 > The upstream introduction and its original measurements follow below.
 
 <h1 align="center">Strata</h1>

@@ -1,8 +1,13 @@
 # Serving with or without an MTP drafter
 
+Current base: **upstream 0.1.34**. See the
+[2026-10-02 rebase checks](benchmarks/2026-10-02-upstream-sync-serving.md).
+The performance tables and fleet/context matrix below were measured on **0.1.33**,
+at the exact source commits listed. They remain historical evidence.
+
 This is the shared serving split requested in [#323](https://github.com/Niko1221/Strata/pull/323)
 and [#336](https://github.com/Niko1221/Strata/pull/336), based on upstream
-**0.1.33, `aeb35be`**. Strata, its expert cache and MTP are the work of
+**0.1.34, `1678de3`**. Strata, its expert cache and MTP are the work of
 [Niko1221/Strata](https://github.com/Niko1221/Strata).
 
 The fleet matrix, eight serving identity/replay gates and selected context
