@@ -59,6 +59,9 @@ void fused_gr_read_multi(const FusedGrArgs* a, int n_tok, float* xn_scratch, voi
 /// plain read bit for bit; STRATA_HC_SPLIT=0 keeps the plain read, =1 stops at split.  It runs once per card
 /// (Verifier::init calls it) and prints which one runs.  On a card it has not checked, `fused_gr_variant` is the
 /// plain read unless STRATA_HC_SPLIT=1 or 2 names a variant.
+/// Experimental STRATA_HC_DOWN_WARPS=1/2/4/8 changes only the staged down
+/// kernel's rows per block; default 8. Each warp retains its full dot product
+/// and reduction order. The per-card check also covers the selected policy.
 void fused_gr_check();
 int fused_gr_variant();
 

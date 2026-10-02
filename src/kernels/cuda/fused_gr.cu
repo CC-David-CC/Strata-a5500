@@ -608,22 +608,29 @@ __device__ __forceinline__ float dot8v(const uint4 w, const float4 x0, const flo
 }
 
 // Stage tile `h` of every token into `buf`: [T][2 planes][160 chunks] float4, plane 0 = floats 0-3 of a chunk.
+template <int BLOCK_THREADS>
 __device__ __forceinline__ void stage_htile(const GrMulti& m, int T, int h, float4* buf, int t) {
-    for (int i = t; i < T * (H_TILE / 4); i += THREADS) {
+    for (int i = t; i < T * (H_TILE / 4); i += BLOCK_THREADS) {
         const int k = i / (H_TILE / 4), s4 = i - k * (H_TILE / 4);   // s4: float4 of the tile, chunk s4/2, half s4&1
         const float* src = m.xn + (size_t) k * D + (size_t) h * H_TILE + (size_t) s4 * 4;
         cp_async16(buf + (size_t) k * (H_TILE / 4) + (s4 & 1) * (H_TILE / 8) + (s4 >> 1), src);
     }
 }
 
-__global__ void __launch_bounds__(THREADS) gr_down_staged_kernel(GrMulti m) {
+template <int BLOCK_WARPS>
+__global__ void __launch_bounds__(BLOCK_WARPS * 32) gr_down_staged_kernel(GrMulti m) {
     extern __shared__ __align__(16) float4 hbuf[];      // 2 buffers x [T][2][160] float4
     const int t = threadIdx.x, lane = t & 31, warp = t >> 5;
     const int T = m.T;
-    const bool inject_block = blockIdx.x == DOWN_BLOCKS;
-    const int row = inject_block ? warp : blockIdx.x * WARPS + warp;
-    const bool active = !(inject_block && (m.a[0].w_inject == nullptr || warp >= HC));
-    const uint16_t* wrow = (inject_block ? m.a[0].w_inject : m.a[0].w_down) + (size_t) (active ? row : 0) * D;
+    // Each warp still owns one entire dot product, in the same lane/chunk order.
+    // Treat down and injection rows as one index space so 1/2-warp blocks also
+    // cover all four injection rows. The original 8-warp policy is unchanged.
+    const int combined_row = blockIdx.x * BLOCK_WARPS + warp;
+    const bool inject_block = combined_row >= LR;
+    const int row = inject_block ? combined_row - LR : combined_row;
+    const bool active = !inject_block || (m.a[0].w_inject != nullptr && row < HC);
+    const uint16_t* base = inject_block && m.a[0].w_inject ? m.a[0].w_inject : m.a[0].w_down;
+    const uint16_t* wrow = base + (size_t) (active ? row : 0) * D;
     const uint4* w4 = reinterpret_cast<const uint4*>(wrow);
     const size_t buf_f4 = (size_t) T * (H_TILE / 4);    // float4 per buffer (the second one follows the first)
     float acc[kFusedGrMaxT];
@@ -634,9 +641,9 @@ __global__ void __launch_bounds__(THREADS) gr_down_staged_kernel(GrMulti m) {
 #pragma unroll
         for (int q = 0; q < HQ; ++q) wv[q] = __ldg(w4 + lane + 32 * q);
     }
-    stage_htile(m, T, 0, hbuf, t);
+    stage_htile<BLOCK_WARPS * 32>(m, T, 0, hbuf, t);
     cp_async_commit();
-    stage_htile(m, T, 1, hbuf + buf_f4, t);
+    stage_htile<BLOCK_WARPS * 32>(m, T, 1, hbuf + buf_f4, t);
     cp_async_commit();
 #pragma unroll 1
     for (int h = 0; h < N_HTILES; ++h) {
@@ -662,7 +669,7 @@ __global__ void __launch_bounds__(THREADS) gr_down_staged_kernel(GrMulti m) {
             }
         }
         __syncthreads();                                // every warp is done with buffer h & 1
-        if (h + 2 < N_HTILES) stage_htile(m, T, h + 2, hbuf + (h & 1) * buf_f4, t);
+        if (h + 2 < N_HTILES) stage_htile<BLOCK_WARPS * 32>(m, T, h + 2, hbuf + (h & 1) * buf_f4, t);
         cp_async_commit();                              // an empty group at the end keeps the wait counts simple
         if (h + 1 < N_HTILES) {
 #pragma unroll
@@ -729,7 +736,10 @@ int down_chunk(bool staged, int* tile_out) {
         }
         int want_staged = (int) (2 * kFusedGrMaxT * H_TILE * sizeof(float));
         if (optin > 0 && want_staged > optin) want_staged = optin;
-        cudaFuncSetAttribute(gr_down_staged_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
+        cudaFuncSetAttribute(gr_down_staged_kernel<8>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
+        cudaFuncSetAttribute(gr_down_staged_kernel<4>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
+        cudaFuncSetAttribute(gr_down_staged_kernel<2>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
+        cudaFuncSetAttribute(gr_down_staged_kernel<1>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
         cudaGetLastError();      // drop any error the attempt left behind
         // The opt-in is a promise a pre-Volta card does not keep: an sm_60 answers 65536 and accepts the
         // cudaFuncSetAttribute for 61440 B, then fails the LAUNCH with "invalid argument".  What such a card
@@ -758,6 +768,21 @@ int down_chunk(bool staged, int* tile_out) {
 // many tokens as fit the card, the up projection; the profile's stamps after the norm and after the down projection.
 // kHcPlain is the default read exactly as before (never main's opt-in STRATA_GR_V3 path, which fused_gr_read_multi
 // takes first).
+int staged_warps() {
+    static const int value = [] {
+        const char* text = std::getenv("STRATA_HC_DOWN_WARPS");
+        if (!text) return 8;
+        char* end = nullptr;
+        const long n = std::strtol(text, &end, 10);
+        if (end == text || *end != '\0' || (n != 1 && n != 2 && n != 4 && n != 8)) {
+            std::fprintf(stderr, "STRATA_HC_DOWN_WARPS must be 1, 2, 4 or 8\n");
+            std::exit(2);
+        }
+        return (int) n;
+    }();
+    return value;
+}
+
 void launch_multi(const GrMulti& m, int variant, cudaStream_t st, unsigned long long* stamp_buf, int stamp_i0) {
     const int n_tok = m.T;
     if (variant >= kHcSplit) gr_norm_split_kernel<<<dim3((unsigned) n_tok, HC), THREADS, 0, st>>>(m);
@@ -778,7 +803,14 @@ void launch_multi(const GrMulti& m, int variant, cudaStream_t st, unsigned long 
             for (int k = 0; k < ct; ++k) c.a[k] = m.a[c0 + k];
         }
         const size_t smem = (size_t) ct * per_tok;
-        if (staged) gr_down_staged_kernel<<<DOWN_BLOCKS + 1, THREADS, smem, st>>>(c);
+        if (staged) {
+            switch (staged_warps()) {
+#define STRATA_HC_WARPS(W) case W: \
+                gr_down_staged_kernel<W><<<(LR+HC+W-1)/W, W*32, smem, st>>>(c); break
+                STRATA_HC_WARPS(1); STRATA_HC_WARPS(2); STRATA_HC_WARPS(4); STRATA_HC_WARPS(8);
+#undef STRATA_HC_WARPS
+            }
+        }
         else if (tv == 1280) gr_down_multi_kernel<1280><<<DOWN_BLOCKS + 1, THREADS, smem, st>>>(c);
         else gr_down_multi_kernel<2560><<<DOWN_BLOCKS + 1, THREADS, smem, st>>>(c);
     }
