@@ -1,3 +1,9 @@
+> **Community hardware contribution:** this fork branch adds support for the
+> consumer AMD Radeon RX 5500 XT **8GB**, with version-gated HIP compatibility.
+> See the [hardware, scope and validation status](docs/COMMUNITY_GFX1012_REVIEW.md).
+> Credit for Strata belongs to [Niko1221/Strata](https://github.com/Niko1221/Strata).
+> The upstream introduction and its original measurements follow below.
+
 <h1 align="center">Strata</h1>
 
 <p align="center"><b>Run a 125-billion-parameter AI model on your own gaming PC</b><br>
