@@ -980,7 +980,7 @@ void fused_gr_read(const FusedGrArgs& a, void* stream) {
 
 namespace {
 
-/// The plain read, split, staged and (for one token) the single-token read on random bf16 weights and random inputs,
+/// The plain read, split, staged and repeated single-token reads on random bf16 weights and random inputs,
 /// 1..8 tokens, with and without the pending write; every output of split and staged compared with the plain read's
 /// bit for bit (and the plain read's with the single-token read's).  `why[v]` gets the first difference of variant
 /// v; false if the check itself could not run.
@@ -1091,7 +1091,7 @@ bool fused_gr_selftest(bool ok_variant[4], std::string why[4]) {
                 m.T = T;
                 launch_multi(m, v + 1, st, nullptr, 0);
             }
-            if (T == 1) fused_gr_read(a[3][0], st);
+            for (int k = 0; k < T; ++k) fused_gr_read(a[3][k], st);
             if (cudaGetLastError() != cudaSuccess || cudaStreamSynchronize(st) != cudaSuccess) {
                 why[0] = "a kernel of the check failed";
                 ok = false;
@@ -1099,7 +1099,7 @@ bool fused_gr_selftest(bool ok_variant[4], std::string why[4]) {
             }
             if (ok_variant[2] && !all_same(set[0], set[1], T, apply, why[2])) ok_variant[2] = false;
             if (ok && ok_variant[3] && !all_same(set[0], set[2], T, apply, why[3])) ok_variant[3] = false;
-            if (ok && T == 1 && single_ok && !all_same(set[3], set[0], T, apply, why[1])) single_ok = false;
+            if (ok && single_ok && !all_same(set[3], set[0], T, apply, why[1])) single_ok = false;
         }
     }
     if (!single_ok && ok) {                            // the plain read itself disagrees with the single-token read
