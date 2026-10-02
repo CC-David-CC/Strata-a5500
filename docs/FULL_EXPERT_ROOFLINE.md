@@ -304,6 +304,74 @@ Mapped Q8 works in the first smoke tests; direct-reader support remains gated.
 
 ## Ordered implementation and acceptance gates
 
+### Current priority: Q4 -> Q8 -> Q4 on the RTX PRO
+
+The user set generation throughput at 64K as the initial objective. Prefill is
+recorded for reproducibility but is not the optimization target in this phase.
+Keep the same RTX PRO 6000, host RAM, storage, model family and frozen workloads.
+
+| Phase | Main target | Comparisons kept |
+| --- | --- | --- |
+| 1 | Q4 with MTP off, 65,536 actual prompt tokens, up to 4,096 output; all experts on GPU | Unchanged branch vs one intervention, unprofiled decode rate and output correctness |
+| 2 | Apply successful Q4 changes to MTP | Baseline off/on and changed off/on; record accepted/emitted tokens per window |
+| 3 | Q8 with its RAM-backed expert complement | Both modes, transferred bytes, CPU expert share, PLE faults and cache identities |
+| 4 | Reapply shared lessons to Q4 | Repeat the original 64K off/on cases; retain changes only when they help or are neutral |
+
+Start with timing evidence before kernel changes. The short existing verifier
+stage profiler is diagnostic only and has an unprofiled companion. Then measure
+the dominant kernels' actual memory traffic and instruction/occupancy limits.
+An existing all-resident device-planning switch is a candidate control for host
+handoffs; it is not a claimed speedup. Dense projections, expert GEMV layout,
+launch consolidation, and lookup batching are distinct interventions.
+
+Non-MTP remains the reference throughout. Test both modes after each candidate
+that survives the initial non-MTP screening. A change to MTP scheduling must be
+judged separately from a kernel speedup; higher acceptance on an easier output
+does not count as a kernel improvement. Do not extend this phase to other fleet
+hardware before the RTX PRO evidence is understood.
+
+Q4 is the easier whole-engine experiment: all 24,576 experts already fit in VRAM,
+and the smaller 26.82 GiB PLE table can fit in host memory. Q8_0's block decoder
+is simpler than Q4_K's packed scales/minima and nibbles, but Q8 crosses both the
+VRAM capacity limit and the current host-RAM limit for a fully resident PLE table.
+Both compatibility packs have about 5.28 GB of read-every-step dense weights;
+their selected-expert reads are about 1.50 GB for Q4 versus 2.51 GB for Q8 per
+non-MTP token. Thus the weight-only traffic estimate grows about 15%, while the
+placement problem becomes much harder. Quantized weights remain packed in VRAM;
+unpacking into registers does not imply storing one 32-bit word per 4-bit weight.
+
+### RAM capacity for avoiding Q8 storage reads
+
+Measured Q8 expert placement at 16K allocation / 8K input:
+
+| Resource | MTP off | MTP on |
+| --- | ---: | ---: |
+| Experts in VRAM | 88.25 GiB | 87.34 GiB |
+| Experts pinned in system RAM | 31.28 GiB | 32.19 GiB |
+| Separate disk-mapped Q8 PLE table | 50.664 GiB | 50.664 GiB |
+| VRAM free after complete load | 256 MiB | 240 MiB |
+
+Peak sampled total GPU memory over both modes was 97,085 MiB (94.81 GiB), including
+dense weights, the optional drafter, KV, workspaces and runtime overhead. The
+expert-cache figures are not total GPU use. Minimum system MemAvailable was
+21.36 GiB; some PLE pages were cached, but the whole 50.664 GiB table could not
+remain resident alongside the pinned experts.
+
+Keeping the current GPU split and the *entire* PLE table in RAM requires about
+82.9 GiB for just those two host-side parts with MTP. Allowing OS, buffers and
+larger-context reserves, target 128 GB installed RAM: 64 GB more than now. A
+96 GB configuration would be tight and needs a measured budget before acceptance.
+This means no steady-state weight/table storage reads after loading, not keeping
+a redundant full copy of the GPU-resident expert weights in host RAM as well.
+An entire Q8 checkpoint copy in CPU RAM is approximately 175.3 GiB before runtime
+overheads and is a different capacity requirement.
+
+Read-only inventory on 2026-10-02: B650 GAMING X AX, 2 x 32 GB Corsair DDR5
+CMK64GX5M2B6000C30, configured 4800 MT/s, two empty slots; SMBIOS reports a 128 GB
+maximum. No DIMM, clock, BIOS, driver or system-wide profiling settings were changed.
+
+### Detailed gates
+
 1. **Baseline:** build the branch; Q4 MTP off/on at 8K, 2K output; collect identical
    frozen prompts and actual output lengths. First controlled intervention is
    `--no-prefill-borrow` with the chunk explicitly held at 8,192 (auto otherwise

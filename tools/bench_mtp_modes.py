@@ -43,6 +43,8 @@ def main():
     ap.add_argument("--mode", choices=["both", "off", "on"], default="both")
     ap.add_argument("--order", choices=["off-on", "on-off"], default="off-on")
     ap.add_argument("--workload", choices=["short", "long"], default="short")
+    ap.add_argument("--require-counting-budget", action="store_true",
+                    help="fail if counting stops naturally before the output budget")
     ap.add_argument("--source-commit", default=None, help="verified archive commit when .git is absent")
     ap.add_argument("--cases", nargs="+", choices=["counting", "coding", "writing"],
                     default=["counting", "coding", "writing"])
@@ -125,6 +127,7 @@ def main():
         "input_tokens": opt.input_tokens, "maximum_output_tokens": opt.output_tokens,
         "context_allocation": context, "thinking": False, "cold_cache_control": False,
         "workload": opt.workload, "order": opt.order,
+        "require_counting_budget": opt.require_counting_budget,
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "environment": {k: v for k, v in os.environ.items() if k.startswith("STRATA_")},
         "prompt_sha256": {name: hashlib.sha256(json.dumps(ids).encode()).hexdigest()
@@ -182,15 +185,19 @@ def main():
                     "prefill_tps": len(ids) * 1000 / timing["prompt_ms"] if timing["prompt_ms"] else None,
                     "decode_tps": len(emitted) * 1000 / timing["decode_ms"] if timing["decode_ms"] else None,
                     "effective_output_tps": len(emitted) / wall,
+                    "output_budget_reached": len(emitted) == opt.output_tokens,
+                    "natural_stop": timing.get("finish") == "stop",
                 }
                 run["cases"].append(case)
                 save()
                 assert timing.get("reused", 0) == 0, timing
                 if mode == "off":
                     assert timing.get("drafts_offered", 0) == 0, timing
-                if name == "counting":
+                if name == "counting" and opt.require_counting_budget:
                     assert len(emitted) == opt.output_tokens, case
                 assert emitted, case
+                if len(emitted) < opt.output_tokens:
+                    assert timing.get("finish") == "stop", case
                 print("RESULT " + json.dumps(case), flush=True)
             run["completed"] = True
         except Exception as exc:
