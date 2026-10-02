@@ -31,7 +31,9 @@ int main(int argc,char**argv) {
   int ni=(int)t.shape[0],no=(int)t.shape[1];
   const int block=type==42?64:(type==2||type==6||type==8||type==20)?32:256;
   if(ni%block || no<1)continue;
-  size_t bytes=native_mmvq_weight_bytes(type,ni,no);if(bytes>256*1024*1024)continue;
+  // Include the ~497 MiB native output head as well as the layer matrices.
+  // The test loads only one tensor at a time, including on an 8 GiB card.
+  size_t bytes=native_mmvq_weight_bytes(type,ni,no);if(bytes>1024u*1024*1024)continue;
   if(all_shapes && !seen.emplace(type,ni,no).second)continue;
   void*w;float*x,*y,*ref;void*q;
   ck(cudaMalloc(&w,bytes));ck(cudaMemcpy(w,file.tensor_data(t),bytes,cudaMemcpyHostToDevice));
