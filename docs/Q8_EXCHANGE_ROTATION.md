@@ -17,7 +17,8 @@ recycles A's former RAM slot as the next eviction buffer.
 
 Enable with `STRATA_EXCHANGE_ROTATE=1`. Unset or `0` retains the original copy
 path. The RAM and exchange allocations keep their original lifetime owners;
-only descriptors containing host and CUDA device addresses move. The model
+expert ownership moves by atomic slot IDs into an immutable table of host and
+CUDA device addresses. Background router lookahead reads those IDs safely. The model
 weights, resident expert count, cache replacement policy and quantization stay
 the same. The GPU-to-host eviction transfer is still required.
 
@@ -60,7 +61,8 @@ close/reopen and byte equality. Run under Compute Sanitizer memcheck.
 1. Component tests, source API tests and GPU memory checks.
 2. Old binary versus new binary with rotation disabled, 8K input/256 output.
 3. Rotation off/on for serial, MTP, n-gram and combined modes, **64K input +
-   1,024 output**, 73,728 allocation, FP16 KV, fresh coding/editing requests.
+   1,024 output**, 73,728 allocation, FP16 KV, coding then editing requests with fresh prompt state. The adaptive expert cache
+   persists between those two requests, identically in the comparison arms.
 4. Fixed 16,400 GPU slots for serial/n-gram and 16,192 for MTP/combined; automatic
    CPU/PCIe split, 96 adaptive swaps, completion waits enabled, ESP disabled.
 5. Exact token IDs, first divergence, resource telemetry, copy counters and

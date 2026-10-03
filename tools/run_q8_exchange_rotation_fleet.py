@@ -130,7 +130,7 @@ def main():
         while True:
             try:fcntl.flock(lock.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB);break
             except BlockingIOError:r.check_time();time.sleep(5)
-        r.cpu('component-build',['g++','-std=c++17','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer',
+        r.cpu('component-build',['g++','-std=c++17','-pthread','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer',
             '-I'+str(R/'include'),R/'tests/core/exchange_storage_test.cpp','-o',R/'exchange-storage-sanitized'])
         r.cpu('component-sanitizers',[R/'exchange-storage-sanitized'])
         r.cpu('configure',['cmake','-S',R,'-B',R/'build','-G','Ninja','-DCMAKE_BUILD_TYPE=Release',

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <random>
 #include <set>
+#include <thread>
 #include <stdexcept>
 #include <vector>
 
@@ -33,6 +34,29 @@ void exercise(size_t bytes, size_t rounds) {
     std::set<uint8_t*> original;
     for (size_t i = 0; i < n; ++i) if (auto p = storage.resident(i).host) original.insert(p);
     for (size_t q = 0; q < spare_count; ++q) original.insert(storage.spare(q).host);
+    // A lookahead thread may inspect residency while ownership is committed.
+    // It only observes immutable address pairs, never reads mutable expert bytes.
+    std::atomic<bool> stop{false}, reader_failed{false};
+    std::atomic<uint64_t> observations{0};
+    std::vector<ExchangeStorage::View> valid;
+    for (size_t i = 0; i < n; ++i) if (storage.resident(i).host) valid.push_back(storage.resident(i));
+    for (size_t q = 0; q < spare_count; ++q) valid.push_back(storage.spare(q));
+    std::thread reader([&] {
+        while (!stop.load()) {
+            for (size_t i = 0; i < n; ++i) {
+                const auto view = storage.resident(i);
+                if (view.host && std::none_of(valid.begin(), valid.end(), [&](auto v) {
+                        return v.host == view.host && v.device == view.device; })) reader_failed.store(true);
+            }
+            ++observations;
+        }
+    });
+    struct Join {
+        std::atomic<bool>& stop; std::thread& reader;
+        void finish() { stop.store(true); if (reader.joinable()) reader.join(); }
+        ~Join() { finish(); }
+    } join{stop, reader};
+    while (!observations.load()) std::this_thread::yield();
     uint64_t exchanges = 0;
     for (size_t round = 0; round < rounds; ++round) {
         std::vector<size_t> ins, outs;
@@ -79,6 +103,8 @@ void exercise(size_t bytes, size_t rounds) {
             std::all_of(spare.end() - guard, spare.end(), [](auto x) { return x == 0xef; }), "guard overwritten");
     require(!storage.initialize(offsets, arena.data() + guard, aliases.data(), resident * bytes,
         spare.data() + guard, spare_aliases.data(), spare_count, bytes, error), "live storage reinitialized");
+    join.finish();
+    require(!reader_failed.load() && observations.load(), "concurrent residency reader observed invalid alias");
     storage.clear();
     require(!storage.active() && !storage.resident(0).host && !storage.spare(0).host &&
             !storage.exchanges() && !storage.avoided_bytes(), "clear retained state");
