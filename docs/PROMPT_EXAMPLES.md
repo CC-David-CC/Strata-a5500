@@ -5,6 +5,14 @@ start a fresh attempt with one example, then two, then three. Each attempt keeps
 its own request, response and result. A hinted success does not replace a failed
 baseline. The server does not retry, repair calls, or add hidden demonstrations.
 
+Start with the readable [empty-call example](codex/prompt-examples/windows-tools-get_goal.txt),
+[PowerShell example](codex/prompt-examples/windows-tools-exec_command.txt), and
+[Ubuntu Bash example](codex/prompt-examples/ubuntu-tools-exec_command.txt).
+The committed profiles include [Windows baseline](codex/prompt-examples/windows/codex-instructions-0.txt),
+[Windows with three examples](codex/prompt-examples/windows/codex-instructions-3.txt),
+[Ubuntu baseline](codex/prompt-examples/ubuntu/codex-instructions-0.txt), and
+[Ubuntu with three examples](codex/prompt-examples/ubuntu/codex-instructions-3.txt).
+
 This removes the automatic empty-call hint used at the
 [earlier qualification checkpoint](gbnf-evidence/schema-inventory/REPORT.md).
 The protocol adapter still validates output normally. Examples cannot enable an
@@ -18,9 +26,10 @@ Generate the complete paired fixture set with the same code used by the probes:
 python tools/responses_prompt_examples.py --out <new-directory>
 ```
 
-The export contains 170 request variants with readable `examples.txt` files:
+The export contains 266 request variants with readable `examples.txt` files:
 12 captured Codex tools on each of Windows/PowerShell and Ubuntu/Bash, with
-zero through three examples; all 30 JSON schemas with zero or one example; and
+zero through three examples, both captured non-strict and synthetic strict
+variants; all 30 JSON schemas with zero or one example; and
 seven output modes with zero or one example (text, SSE, visible reasoning,
 summary request, JSON object, GBNF, and GBNF with reasoning). Eight matched Codex
 instruction files cover both operating systems and all four counts.

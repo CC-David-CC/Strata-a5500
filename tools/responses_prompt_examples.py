@@ -21,6 +21,8 @@ def dump(value):
 
 
 def attempts(example_count, hint_on_failure, available=MAX_EXAMPLES):
+    if not 0 <= available <= MAX_EXAMPLES:
+        raise ValueError('at most three demonstrations are available')
     if not 0 <= example_count <= min(MAX_EXAMPLES, available):
         raise ValueError('example count exceeds the available demonstrations (maximum three)')
     if hint_on_failure and example_count:
@@ -108,6 +110,35 @@ def schema_examples(case):
     # One sample, deliberately not presented as three independent examples.
     return [{'task': 'Return this fixture value as JSON: ' + json.dumps(case['sample'], ensure_ascii=False),
              'answer': dump(case['sample'])}]
+
+
+def strict_variant(function, sample, examples):
+    """Synthetic explicit-strict variants of the captured non-strict declarations."""
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from serve.responses_json import prepare_function_schema
+    function = copy.deepcopy(function)
+    function.pop('strict', None)
+    prepare_function_schema(function, 'tools', normalize=True)
+    if function['strict'] is not True:
+        raise ValueError('this declaration cannot be normalized to strict')
+
+    def fill(schema, value=None):
+        if schema.get('type') == 'object':
+            value = value or {}
+            return {key: fill(child, value.get(key)) for key, child in schema.get('properties', {}).items()}
+        if value is not None:
+            return [fill(schema.get('items', {}), item) for item in value] if schema.get('type') == 'array' else value
+        if 'enum' in schema:
+            return schema['enum'][0]
+        return {'string': 'fixture', 'integer': 1, 'number': 1.0, 'boolean': False, 'array': []}.get(schema.get('type'))
+
+    strict_examples = []
+    for example in examples:
+        wire = example['wire']
+        name = (wire['namespace'] + '.' if wire.get('namespace') else '') + wire['name']
+        strict_examples.append(tool_example(name, fill(function['parameters'], example['arguments']), example['task']))
+    return function, fill(function['parameters'], sample), strict_examples
 
 
 def example_prefix(examples, count):
@@ -203,6 +234,12 @@ def export(out):
                 sample = sample_arguments(name, samples[name], platform)
                 save(platform + '/tools/' + name, {'model': 'qwen3.8-flash-next', 'store': False,
                     'input': tool_task(name, sample), 'tools': declarations}, examples)
+                strict, strict_sample, strict_examples = strict_variant(function, sample, examples)
+                for example in strict_examples:
+                    Draft202012Validator(strict['parameters']).validate(example['arguments'])
+                strict_declarations = [{**group, 'tools': [strict]}] if namespace else [strict]
+                save(platform + '/strict-tools/' + name, {'model': 'qwen3.8-flash-next', 'store': False,
+                    'input': tool_task(name, strict_sample), 'tools': strict_declarations}, strict_examples)
         for count in range(4):
             (out / platform / ('codex-instructions-' + str(count) + '.txt')).write_text(coding_instructions(platform, count), encoding='utf-8')
     for case in json.loads((ROOT / 'docs/json-schema-examples.json').read_text(encoding='utf-8')):

@@ -66,7 +66,7 @@ class PromptExamples(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             out = Path(temp) / 'fixtures'
             rows = export(out)
-            self.assertEqual(len(rows), 170)  # 2 OS * 12 tools * 4 + 30 schemas * 2 + 7 modes * 2
+            self.assertEqual(len(rows), 266)  # 2 OS * 12 tools * 4 * 2 strictness + 30 schemas * 2 + 7 modes * 2
             for row in rows:
                 request = json.loads((out / row['file']).read_text(encoding='utf-8'))
                 baseline = json.loads((out / row['fixture'] / 'baseline.json').read_text(encoding='utf-8'))
