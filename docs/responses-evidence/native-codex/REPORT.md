@@ -125,8 +125,14 @@ Lark custom tools. The pinned client emits its fallback-model-metadata warning;
 the warning is retained and no hosted model is impersonated. Existing unsupported
 capabilities still fail explicitly. G6 recovery remains deferred.
 
+A later [native coding checkpoint](coding-task/REPORT.md) qualifies real client
+shell tools and a complete repair/test task with a pinned local-tool profile.
+Its [plain-text transcript](coding-task/TOOL_LOOP.txt) and raw captures include
+failed attempts, parser fixes and successful verification. The greeting's source,
+binary and measurements above remain this earlier checkpoint's own evidence.
+
 The private LAN orchestration needed two local setup corrections before it ran:
 an f-string delimiter fix and removal of an unnecessary local crypto-package
 dependency. Neither attempt launched a server or exercised Strata. The actual
 native Codex attempt above passed without changes to production code or client
-request fields. Local commits only; nothing has been pushed or published.
+request fields.

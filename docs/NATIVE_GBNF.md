@@ -18,6 +18,11 @@ parallel-tool and Chat tests. Its [plain-text transcript](gbnf-evidence/tool-sco
 shows the requests, reasoning/call items, arbitrary tool results and constrained
 final answers, including the client's explicit final-turn `tool_choice: "none"`.
 
+The [native Codex coding checkpoint](responses-evidence/native-codex/coding-task/REPORT.md)
+adds a real client read/edit/verify task with actual shell results. Codex's own
+requests contain no grammar extension. A separate request on that same server
+checks GBNF after cancelled prefill, queued and decoding requests have drained.
+
 ## G0: persistent target-only generation
 
 In the existing server configuration's `args` array, use `"--spec", "1"` and

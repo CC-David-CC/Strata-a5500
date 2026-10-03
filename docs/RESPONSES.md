@@ -77,7 +77,7 @@ Configured sampling defaults remain in effect when a request omits them.
 | `client_metadata` | Diagnostic strings in the existing optional monitor; never instructions or inference settings. |
 | `prompt_cache_key` | Routing hint to the sole engine, echoed in the response. No separate cache partitions, billing, or retention guarantee. |
 | Image/audio, hosted tools, compaction, WebSockets | Unsupported; rejected. |
-| Raw GBNF | This stacked branch adds the [native GBNF extension](NATIVE_GBNF.md), requiring a qualified native build and explicit reasoning off. The guide covers target-only and G5 speculative modes. The frozen R4 Responses-only checkpoint rejects it. |
+| Raw GBNF | This stacked branch adds the [native GBNF extension](NATIVE_GBNF.md), requiring a qualified native build. The guide covers plain answers, reasoning/tool scopes and target-only/G5 speculative modes with their capability limits. The frozen R4 Responses-only checkpoint rejects it. |
 
 To continue, append the previous response's complete `output` items and the new
 user message to your supplied history. Resend any instructions you still want.
@@ -112,7 +112,8 @@ Raw thinking is emitted as a reasoning item's `content`, with typed
 `response.reasoning_text.delta/done` events. A requested summary is produced by
 an additional answer-only generation through the same service after the primary
 generation releases the FIFO. It is not copied raw thinking. This costs another
-prefill and generation pass. The initial pass reserves one quarter of the output
+prefill and generation pass. Tool-like markup in this summary pass is literal
+text, not a function call. The initial pass reserves one quarter of the output
 allowance, capped at 128/256/512 tokens for concise/auto/detailed; the summary can
 use the remaining allowance. Both passes count toward `max_output_tokens`.
 Output following reasoning is buffered until its summary finishes so Codex sees
@@ -124,6 +125,9 @@ counts generated tokens while the existing parser is in its reasoning region,
 including the closing delimiter and any existing configured thinking-budget wrap.
 `cached_tokens` counts native reused prompt tokens; `cache_write_tokens` is the
 newly prefilled portion. These are local engine counts, not OpenAI billing data.
+Known limitation: reasoning-budget continuation can misattribute reused tokens
+to the original prompt. The native coding qualification does not establish
+correct cache accounting for that path.
 Usage is null when failure or cancellation prevents complete accounting.
 
 Completed reasoning includes an authenticated encrypted replay token. Strata
@@ -132,8 +136,10 @@ The token contains the actual reasoning content, summary, item ID, model ID and
 completion status. Only a server with the same deployment key can restore it.
 Foreign tokens, tampering, mismatched IDs/models and conflicting visible fields
 produce an error before generation. There is no attempt to decode another
-provider's state. Returned visible content remains usable without encryption;
-a summary alone cannot substitute for the underlying reasoning.
+provider's state. To replay visible raw `content` without `encrypted_content`,
+also omit a nonempty `summary`; the current validator rejects that combination.
+A summary alone cannot substitute for the underlying reasoning. Replaying the
+full returned item preserves all fields and is the qualified Codex path.
 
 Enabling the route reads `STRATA_RESPONSES_REPLAY_KEY` from the server environment.
 No secret file is created. This follows the handoff's environment-only key rule.
@@ -198,8 +204,18 @@ ran the real pinned Codex client against Strata's Coder IQ1_M model on llm-49 ov
 an authenticated LAN tunnel. It returned `Hello world` and completed its turn
 with external HTTP requests blocked locally. The report includes the exact
 profile, native logs, captured request/response, enablement commands and a
-reusable probe. This establishes the greeting session; native tool use and
-broader client compatibility remain unqualified.
+reusable probe. This establishes the greeting session.
+
+The subsequent [native coding checkpoint](responses-evidence/native-codex/coding-task/REPORT.md)
+qualifies a real read/edit/verify task with Codex 0.160.0 and an explicit
+[local-tool profile](responses-evidence/native-codex/coding-task/codex-profile.example.toml).
+Eight Responses requests and nine real shell calls repaired a parser; 12 task
+tests, 45 independent checks and 19 companion native HTTP probes passed. The
+[plain-text transcript](responses-evidence/native-codex/coding-task/TOOL_LOOP.txt)
+shows actual calls, failures, recovery and reasoning without decrypting replay
+blobs. The stock fallback profile failed an earlier attempt; the report records
+that limitation and the two literal-markup parser fixes it exposed. This is a
+specific client/model/profile qualification, not universal Codex compatibility.
 
 Protocol references: [Responses](https://developers.openai.com/api/reference/resources/responses),
 [typed streaming](https://developers.openai.com/api/docs/guides/streaming-responses),
