@@ -100,7 +100,7 @@ timing is not a full-model Q8 speed measurement. The CPU fixture separately
 includes Q8's 5,222,400-byte expert blocks.
 
 The old `080891d` binary and the new `1a50d91` binary with rotation disabled
-produced identical 256-token outputs at 8K input. The remaining comparison
+produced identical 256-token outputs at 8K input. The model comparison below
 enables rotation at 64K input using the model's native RoPE settings, without
 YaRN extension. Evidence:
 `~/fleet-downloads/rtxpro-q8-exchange-rotation-20261003-r2`.
@@ -124,6 +124,12 @@ RAM blob reads, proposed drafts and accepted drafts also match within each pair.
 Two pairs are evidence for these workloads, not a confidence interval or a
 universal speed claim. The MTP copy control varied between runs; both results
 are reported.
+
+Including prompt processing, effective output throughput improved by 3.6-3.9%
+for plain coding, 4.2-4.3% for plain editing, 5.8-8.0% for MTP coding and 8.4-9.3%
+for MTP editing. The 1,061 resource samples recorded no foreign GPU process and
+at least 22.88 GiB available host RAM; maximum sampled GPU allocation was
+94,025 MiB. The private unit disabled swap and no allocation error occurred.
 
 The plain request pair avoids 5,354 copies / **27.96 GB** of memcpy payload;
 MTP avoids 7,247 copies / **37.85 GB**. These are cumulative across coding and
