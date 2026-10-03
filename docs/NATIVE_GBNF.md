@@ -12,6 +12,12 @@ The same prompt produced ordinary prose without a grammar and `color=blue;count=
 with a grammar, in both target-only and MTP modes. The recorded checks also cover
 Responses JSON/SSE, Chat JSON, Unicode, token limits and invalid grammar rejection.
 
+The later [reasoning/tool-loop qualification](gbnf-evidence/tool-scope/REPORT.md)
+adds 16 native HTTP cases with mocked external tool results, plus synthetic
+parallel-tool and Chat tests. Its [plain-text transcript](gbnf-evidence/tool-scope/TOOL_LOOP.txt)
+shows the requests, reasoning/call items, arbitrary tool results and constrained
+final answers, including the client's explicit final-turn `tool_choice: "none"`.
+
 ## G0: persistent target-only generation
 
 In the existing server configuration's `args` array, use `"--spec", "1"` and
