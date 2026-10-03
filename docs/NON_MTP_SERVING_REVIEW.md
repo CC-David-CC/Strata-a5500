@@ -30,6 +30,33 @@ success are retained in the evidence below.
 Hardware support and optional performance kernels are separate contributions.
 MTP is selected when the engine starts; this patch adds no per-request switch.
 
+## Start the server without MTP
+
+Build this branch for your GPU, then copy your working run config to
+`config.no-mtp.json`. Keep its model, tokenizer and hardware settings. Set `exe`
+to the absolute path of the newly built `strata` executable. In its `args` array:
+
+1. Remove `"--mtp"` and the following directory value.
+2. Set `"--spec", "2"` and `"--conversation-cache-mib", "0"`, replacing any
+   existing values. Two is the allocation minimum; verification uses one token
+   without a drafter. Live-prefix reuse remains available.
+
+Restart the server using Strata's Python environment:
+
+```sh
+python -m serve.server --engine strata --config config.no-mtp.json --host 127.0.0.1 --port 8080
+```
+
+The existing config with `--mtp DIR` still starts with MTP. To restore it, stop
+the server and restart with that original config. There is no automatic mode
+selection and no new build-time opt-in. The PCIe graph fix applies automatically
+when the expert source has no GPU-visible host aliases.
+
+To verify the selected mode with the benchmark helper, use
+`python tools/bench_mtp_modes.py --config config.no-mtp.json --output result-no-mtp --mode off`.
+Its `READY mtp=False` line and saved launch arguments identify the drafter-free
+run. See the reproduction section for controlled comparisons with MTP enabled.
+
 ## Measurements and correctness
 
 [Full matrix, settings and retained failures](benchmarks/2026-10-01-serving.md).
