@@ -56,6 +56,7 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt AND EXISTS ${CMAKE_CU
 endif()
 option(STRATA_BUILD_TESTS "Build the test suite" ${_strata_tests_default})
 option(STRATA_BUILD_CONVERSATION_TESTS "Build standalone conversation cache tests" OFF)
+option(STRATA_ENABLE_GBNF "Build the pinned native GBNF compiler and matcher" OFF)
 option(STRATA_WERROR "Treat compiler warnings as errors" OFF)
 
 if(STRATA_BUILD_CONVERSATION_TESTS)
@@ -1076,6 +1077,10 @@ if(STRATA_BUILD_TESTS)
     target_link_libraries(direct_file_async_test PRIVATE Threads::Threads)
     add_test(NAME direct_file_async_test COMMAND direct_file_async_test)
   endif()
+endif()
+
+if(STRATA_ENABLE_GBNF)
+  include(cmake/xgrammar.cmake)
 endif()
 
 if(STRATA_BUILD_TESTS)

@@ -39,11 +39,29 @@ Its [cursor audit](gbnf-evidence/G0/CURSOR.md) explains the pending feedback
 token. Windows native, HIP and multi-GPU execution need their own qualification.
 The Windows Python API regression suite is separate from native hardware tests.
 
+## G1: native grammar library
+
+The optional native library is disabled at build time by default. Prepare its
+pinned dependencies once, then enable it in the existing build:
+
+```text
+python tools/prepare_xgrammar.py --out build/xgrammar
+cmake -S . -B <native-build> <existing-native-options> -DSTRATA_ENABLE_GBNF=ON -DSTRATA_XGRAMMAR_DIR=<absolute-prepared-directory>
+cmake --build <native-build> --target strata grammar_native_test
+```
+
+Choose a new dependency directory if an incomplete or different pin exists.
+CMake/server startup does not download dependencies. See the
+[backend decision](gbnf-evidence/G1/grammar-backend-decision.md) for supported
+syntax, licenses and resource limits, and the [native test report](gbnf-evidence/G1/REPORT.md)
+for the parser, recursive grammar, tokenizer-byte and sanitizer results.
+
+G1 provides compilation and private matcher state. It does not yet enable the
+`grammar` HTTP request field or constrain model selection.
+
 ## Remaining grammar gates
 
-G1 selects and pins one native grammar parser/matcher and verifies the supplied
-recursive grammar corpus against the actual tokenizer. G2 enforces legality
-before native selection. G3 connects the raw `grammar` extension to both HTTP
+G2 enforces legality before native selection. G3 connects the raw `grammar` extension to both HTTP
 adapters. G4 adds inspection and state-derived application contracts. G5
 qualifies constrained MTP/suffix execution; G6 recovery is deferred.
 
