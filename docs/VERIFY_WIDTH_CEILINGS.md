@@ -1,7 +1,7 @@
 # Verification width and graph setup diagnostics
 
 This branch tests the Q4 full-expert model on llm-60 (RTX PRO 6000 Blackwell
-96 GB, 128 GB system RAM). It does not claim a measured speedup yet.
+96 GB, 128 GB system RAM). Controlled width measurements are recorded below.
 It builds on the output-boundary fix and the checked forced-rollback oracle.
 
 There are four real decoding paths: serial, MTP, prompt/history n-gram, and
@@ -74,3 +74,74 @@ cannot propose past the known stop. This extra knowledge belongs only to the
 oracle ceiling experiment. Real proposal paths keep their original output
 budget. The engine binary and emitted reference answer are unchanged. Both
 the requested budget and the actual engine limit are recorded.
+
+## Measured widths (2026-10-03)
+
+Full Unsloth **UD-Q4_K_XL**, int8 KV, 65,536 actual input tokens and 73,728
+allocated context. All arms allocate eight verifier positions. The engine is
+`8591dc7`; the EOS-aware harness is `70ca7c2`. Graph preparation is enabled in
+every arm and included in prompt/request time. Prompt and conversation reuse
+are disabled. Real MTP uses minimum draft probability **0.0** to expose the
+width limit; these are not measurements of the usual 0.5 policy.
+
+[The evidence JSON](benchmarks/q4-verify-widths-20261003.json) contains 95
+observations, command arguments, environment, prompt/output/binary hashes,
+acceptance and window histograms, timings, and raw-file hashes. Every observation
+passed its exact-output and committed-count checks against the frozen answer.
+These are performance and smoke tests on synthetic workloads, not quality scores.
+The unchanged engine passed earlier state/rollback gates; the speed runs did not
+collect a new per-step state trace.
+
+### Real predictors: 1,024-token screen
+
+Output tok/s; one observation per cell. Larger windows improve editing but hurt
+MTP on code and prose. A width chosen from this screen needs a matched repeat.
+
+| Path / workload | T=1 | T=2 | T=3 | T=4 | T=8 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| MTP / code | 99.55 | 164.59 | 194.97 | 209.57 | 194.47 |
+| MTP / prose | 98.22 | 144.01 | 156.82 | 151.74 | 108.03 |
+| MTP / editing | 101.78 | 175.86 | 219.53 | 254.14 | 284.48 |
+| N-gram / code | 103.94 | 113.84 | 115.93 | 115.99 | 115.84 |
+| N-gram / prose | 103.47 | 103.66 | 103.68 | 103.72 | 103.57 |
+| N-gram / editing | 104.78 | 176.95 | 219.72 | 249.99 | 329.84 |
+| MTP + n-gram / code | 99.48 | 165.29 | 194.08 | 209.94 | 192.13 |
+| MTP + n-gram / prose | 98.23 | 144.23 | 157.26 | 151.79 | 107.80 |
+| MTP + n-gram / editing | 101.74 | 176.00 | 219.59 | 254.50 | 302.49 |
+
+### Selected widths: completed ABBA repeats
+
+Fresh engine per request, two observations per arm, 4,096-token requested limit.
+Prose stopped naturally at **1,588 tokens** and editing at **1,238** in every arm;
+these are not 4,096-output-token measurements. Each compared group emitted an
+identical token stream. The incomplete pre-pause group is excluded; all four
+observations in each group below were run after resuming.
+
+| Path / workload | Width change | Output tok/s, before -> after | Effective output tok/s, before -> after |
+| --- | --- | ---: | ---: |
+| MTP / prose | 4 -> 3 | 153.80 -> 158.51 | 77.03 -> 78.30 |
+| MTP / editing | 4 -> 8 | 255.67 -> 283.64 | 81.32 -> 83.65 |
+| N-gram / editing | 4 -> 8 | 249.59 -> 330.34 | 80.70 -> 87.65 |
+| MTP + n-gram / prose | 4 -> 3 | 153.48 -> 158.39 | 76.72 -> 77.94 |
+| MTP + n-gram / editing | 4 -> 8 | 255.34 -> 300.25 | 81.11 -> 84.99 |
+
+Effective rate divides emitted tokens by measured prompt plus generation time,
+excluding engine startup. For n-gram editing, wall request time fell from
+15.35 to 14.13 seconds. Sampled peak VRAM across the repeat phase was 85,531 MiB;
+minimum available host RAM was 116.27 GiB. No foreign GPU process was observed.
+
+### Known-answer oracle: verification capacity
+
+Output tok/s, mean of two observations in reversed width order. Both proposed
+tokens and the stop position are supplied from the saved answer. These numbers
+measure verifier capacity and cannot be presented as usable generation speed.
+
+| Workload | T=1 | T=2 | T=3 | T=4 | T=8 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Code | 104.25 | 183.22 | 239.85 | 285.88 | 391.95 |
+| Prose | 103.91 | 183.19 | 239.61 | 285.23 | 391.98 |
+| Editing | 104.78 | 182.13 | 236.53 | 280.63 | 383.37 |
+
+All oracle outputs matched, with full proposal acceptance. There is no 400+
+tok/s observation in this set. Widths beyond eight belong to the separate
+`perf/q4-wide-verify24` experiment; its results are not implied by this table.
