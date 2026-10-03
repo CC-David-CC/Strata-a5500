@@ -1,4 +1,4 @@
-# Experimental Q8: about 20% faster MTP through buffer ownership
+# Experimental Q8: about 20% faster MTP at 64K; +8.2% at 1M
 
 An experimental fork of **[Niko1221/Strata](https://github.com/Niko1221/Strata)**.
 Credit for Strata, its model support, kernels and serving engine belongs to the
@@ -30,16 +30,39 @@ Two values in a cell are the first run and reverse-order repeat. Rows marked
 | MTP + n-gram / coding * | 107.91 | 131.06 | +21.5% * |
 | MTP + n-gram / editing * | 88.30 | 106.45 | +20.5% * |
 
-**\* Provisional:** coding first differed at token index 415 for n-gram and 95
-for combined mode. Editing tokens matched, but the preceding coding requests
-left different adaptive cache histories. These rows have not passed the full
-exact-output gate or a reverse-order repeat. Diagnosis is queued; the coding
-rates are not equivalent-output speed comparisons.
+**\* Single paired measurement:** editing output tokens matched. Coding first
+differed at token index 415 for n-gram and 95 for combined mode, so the coding
+rates compare different outputs. The preceding coding requests also left
+different adaptive cache histories for editing. No reverse-order performance
+repeat was collected for these rows.
 
 These are output-generation rates. Including prompt processing, MTP effective
 throughput improved **5.8-8.0% for coding** and **8.4-9.3% for editing**.
 Startup is excluded. Two pairs are evidence for these requests, not a confidence
 interval or a promise of the same gain on other workloads or hardware.
+
+## 1M YaRN comparison
+
+Same Q8_0 model and FP16 KV, **MTP enabled in both arms**. YaRN factor 4,
+1,048,576 allocated positions, **1,044,472 actual input tokens** and a 4,096-token
+output budget. Both fresh-engine runs produced the **same 2,787 tokens and
+stopped naturally**, with matching cache, RAM/file-read and draft counters.
+
+| Buffer ownership | Output tok/s | Prefill seconds | Total request seconds | Effective tok/s |
+| --- | ---: | ---: | ---: | ---: |
+| Off: original copy | 41.45 | 1,041.56 | 1,108.95 | 2.513 |
+| On | **44.85** | 1,030.47 | 1,092.76 | **2.550** |
+
+**Generation improved 8.2%; effective throughput improved 1.48%.** This is one
+paired comparison, without a reverse-order repeat or confidence interval.
+The small prefill difference is unreplicated and is not attributed to ownership.
+Startup is excluded. The earlier **41.36 tok/s** 1M result predates this change;
+the new control reproduced its exact output and work counters.
+
+Ownership remained active with **10,874 GPU expert slots, 56 GiB of RAM experts
+and about 10.64 GiB of experts on the file tier**, avoiding **67.49 GB** of RAM-copy
+payload. [Full 1M conditions and results](docs/Q8_EXCHANGE_ROTATION.md#1m-yarn-ownership-comparison)
+include placement, resource samples and the limitations of logical file-read counts.
 
 ## What changed
 
@@ -61,21 +84,31 @@ export STRATA_EXCHANGE_ROTATE=1
 ```
 
 Unset it, or set it to `0`, to use the original copy path. The first implementation
-requires uniform expert-block sizes and a fully pinned/mapped RAM complement.
-Unsupported layouts explicitly retain the copy path. Only the hardware and
-configuration above have full-model measurements in this branch.
+requires uniform expert-block sizes and fully pinned/mapped resident RAM buffers.
+Other experts may remain on the file tier. Unsupported layouts explicitly
+retain the copy path. Full-model measurements in this branch cover the hardware
+and configurations reported above.
 
-## N-gram results are provisional
+A separate fresh editing-only check, with ownership enabled, found **3.9-4.0%**
+faster combined-mode output with `--pcie-frac 0` than automatic CPU/PCIe miss
+placement. Both pairs matched output tokens. This is a workload-specific
+configuration result; [conditions and numbers](docs/Q8_EXCHANGE_ROTATION.md#fresh-editing-placement-follow-up)
+differ from the coding-then-editing table above.
+
+## N-gram editing matched; coding has a caveat
 
 The first n-gram editing pair improved **88.4 -> 108.1 tok/s (+22.3%)** with
 identical tokens. Coding improved **70.6 -> 76.3 tok/s**, but first diverged at
 output token index **415**, so that pair is not an exact-output speed claim.
 Combined MTP + n-gram also had a coding divergence, at index **95**.
 
-The suffix policy uses measured timings to select verification batches. Those
-choices changed between runs; first-divergence diagnosis is queued. The prior
-coding request also changes editing's cache history. These paths have not
-passed the full exact-token gate or a reverse-order performance repeat.
+The suffix policy uses measured timings to select verification batches. A
+separate diagnostic found batch choices changing before output divergence;
+ordered expert IDs matched while batch schedules still matched. N-gram also
+diverged between two runs of the original copy path. This supports investigating
+the timing-dependent policy, but does not prove numerical or state equivalence
+after schedules diverge. The matched editing measurements are included with
+the limitations above. See the [diagnostic report](docs/Q8_EXCHANGE_ROTATION.md#suffix-trace-follow-up).
 
 ## Evidence and limits
 
@@ -84,11 +117,12 @@ passed the full exact-token gate or a reverse-order performance repeat.
 - The new build with rotation disabled matched the old binary on the 8K gate.
 - All eight plain/MTP task pairs matched output tokens, cache hits, lookups,
   RAM reads, proposed drafts and accepted drafts.
+- The 1M MTP pair also matched all output tokens and recorded work counters.
 - This is a throughput/correctness experiment, not a model-quality benchmark.
 
-[Full report, conditions and limitations](docs/Q8_EXCHANGE_ROTATION.md) ?
-[Machine-readable results](bench/results/2026-10-03-q8-buffer-rotation/summary.json) ?
-[Implementation](include/strata/core/exchange_storage.hpp) ?
+[Full report, conditions and limitations](docs/Q8_EXCHANGE_ROTATION.md) |
+[Machine-readable results](bench/results/2026-10-03-q8-buffer-rotation/summary.json) |
+[Implementation](include/strata/core/exchange_storage.hpp) |
 [Upstream installation instructions](https://github.com/Niko1221/Strata#readme)
 
 Benchmark engine source: `1a50d913bf910a1f63fbc1a0788a7083e3ca5f8c`.

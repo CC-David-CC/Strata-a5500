@@ -1,13 +1,15 @@
 # Q8 expert exchange buffer experiment
 
-Branch: `perf/q8-exchange-buffer-rotation`.
+Published branch: `experimental/rtxpro-q8-buffer-ownership`.
+Development branch: `perf/q8-exchange-buffer-rotation`.
 Target: llm-60, NVIDIA RTX PRO 6000 Blackwell Workstation Edition **96 GB**,
 Ryzen 9 7950X, 128 GB installed RAM. Full Unsloth Q8_0, FP16 KV.
 
 **Status: model comparisons completed. Plain decoding and MTP improved in two
 paired runs with exact outputs and matching work counters.** N-gram and combined
-coding outputs diverged; those paths need first-divergence diagnosis before
-accepting an exact-output claim. All fixture and memory checks passed.
+editing outputs matched and are included as single-pair measurements. Coding
+outputs diverged; the trace follow-up below found verification schedules
+changing first. All fixture and memory checks passed.
 
 ## The change
 
@@ -25,7 +27,9 @@ weights, resident expert count, cache replacement policy and quantization stay
 the same. The GPU-to-host eviction transfer is still required.
 
 This first implementation accepts **equal-size expert blocks with the entire
-resident complement pinned and mapped**. Partial pinning, pageable memory and
+allocated resident RAM region pinned and mapped**. It can cover only part of
+the GPU cache complement; other experts may remain on the file tier.
+Partial pinning of that RAM allocation, pageable memory and
 mixed block sizes explicitly fall back to the copy path. The maximum exchange
 capacity must be reserved before rotation is initialized; later growth is
 rejected because the original exchange allocation may contain live experts.
@@ -71,9 +75,11 @@ close/reopen and byte equality. Run under Compute Sanitizer memcheck.
    unprofiled decode speed. Reverse-order repeat for any exact-output candidate
    with a first-run task improvement of at least 3%.
 
-A semantic mismatch remains a failed gate for that path, even if throughput
-increases. The storage fixtures and model comparison answer different questions;
-both are required before accepting the change. Public serving is unaffected.
+A token mismatch prevents an exact-output speed claim for that pair. It does
+not by itself establish a model-quality regression. The storage fixtures and
+model comparison answer different questions. Editing is assessed independently
+from coding; its matched results are reported with their single-pair and cache
+history limitations. Public serving is unaffected.
 
 ## Initial validation, 2026-10-03
 
@@ -146,19 +152,131 @@ RAM, change weight values, or skip synchronization.
 | MTP + n-gram coding | 107.91 | 131.06 | 95 |
 | MTP + n-gram editing | 88.30 | 106.45 | None |
 
-These paths did **not** pass the full exact-token gate and were not promoted
-for the reverse-order performance repeat. N-gram coding first changes the
+The original full-mode gate did not select these paths for reverse-order
+performance repeats because coding differed. The editing pairs did match and
+are accepted as the single-pair results reported above. N-gram coding changes the
 docstring word `expiry` to `deadline`; later differences are not counted as
 independent events. Window counts and draft choices differ. Timing-driven draft
 policy decisions are a hypothesis for the divergence, not a proven explanation.
 The preceding coding requests also leave different adaptive cache histories
-for editing, so the editing gains need independent confirmation.
+for editing; a separate editing-only placement follow-up removes that history.
 
 `tools/trace_q8_exchange_policy.py` records window position/width and ordered
 expert IDs with the frozen engine, including a copy-versus-copy repeat. Its
-instrumented rates will not be used as throughput claims. The existing serving
+instrumented rates are not used as throughput claims. The existing serving
 routing dump stores placeholder weights; it cannot establish route-weight,
 logit-margin or committed-state equality.
+
+### Suffix trace follow-up
+
+Completed with the same frozen `1a50d913` binary: native 65,536-token input,
+512 output tokens, 73,728 allocation, Q8_0 and FP16 KV, coding only. Each mode
+ran copy, rotation, then a second copy from fresh engine state. All six reached
+512 outputs without file-tier expert reads. These instrumented runs are not
+new speed measurements.
+
+| Comparison | First different window (zero-based) | Position; copy/candidate width | First different output token |
+| --- | ---: | --- | ---: |
+| N-gram: copy vs rotation | 164 | 65,700; 2 / 1 | 412 |
+| N-gram: copy vs copy repeat | 165 | 65,702; 2 / 4 | 412 |
+| Combined: copy vs rotation | 23 | 65,578; 2 / 4 | 95 |
+| Combined: copy vs copy repeat | None | Same schedule | None |
+
+Ordered expert IDs match before the first batch-schedule difference in every
+comparison. The n-gram copy-only repeat shows that output divergence is not
+unique to buffer ownership. This is consistent with timing-driven draft policy
+changing verification shapes; it does not establish the exact numerical or
+state cause after the schedules differ. No route-weight, logit-margin or
+committed-state trace was captured. The 512-token trace and original 1,024-token
+benchmark have different output budgets, so their first differing indices need
+not match.
+
+[Machine-readable trace summary](../bench/results/2026-10-03-q8-buffer-rotation/policy-trace.json).
+
+### Fresh editing placement follow-up
+
+With ownership enabled, a separate configuration-only comparison ran **editing
+alone from a fresh engine** in each arm. This removes the preceding coding
+request's cache history. Q8_0, FP16 KV, native 65,536-token input + 1,024 output,
+73,728 allocation, MTP + n-gram, 16,192 GPU expert slots, 96 adaptive swaps and
+the same frozen binary. CPU-only miss execution means `--pcie-frac 0`; GPU
+resident experts still execute on the GPU.
+
+| Pair | Auto miss placement tok/s | CPU-only misses tok/s | Decode gain | Effective gain |
+| --- | ---: | ---: | ---: | ---: |
+| Auto then CPU | 89.30 | 92.80 | +3.92% | +2.01% |
+| CPU then auto | 89.36 | 92.90 | +3.96% | +1.65% |
+
+All four requests completed their 1,024 outputs, both pairs matched every
+output token, rotation activated, and expert file-read counters were zero.
+Effective throughput includes prefill. These fresh-engine speeds are not
+directly comparable with the earlier coding-then-editing ownership table;
+do not multiply the two gains or promote CPU-only misses for every workload.
+
+[Machine-readable placement summary](../bench/results/2026-10-03-q8-buffer-rotation/fresh-edit-placement.json).
+
+## 1M YaRN ownership comparison
+
+The user requested this comparison after accepting the 64K result, with both
+positive and negative outcomes to be published. Same hardware and frozen
+`1a50d913` binary as above; the only arm setting changed is
+`STRATA_EXCHANGE_ROTATE=0` versus `1`. **MTP is on in both arms**, n-gram drafts
+are off, Q8_0 weights and FP16 KV are unchanged, and ESP remains disabled.
+
+- YaRN factor 4, original context 262,144; 1,048,576 allocated positions.
+- Actual input 1,044,472, output budget 4,096, plus eight reserved positions.
+- The same coding prompt, natural EOS allowed, fresh engine in each arm.
+- Fixed 10,874 GPU expert slots, a 56 GiB resident RAM expert budget, PLE in RAM.
+- Automatic CPU/PCIe miss placement, 96 adaptive swaps, completion waits enabled.
+- A short 8K-input/128-output probe first confirmed allocation and rotation at
+  the full 1M allocation. It is not a 1M-input throughput result.
+
+| Ownership | Actual output | Prefill seconds | Decode seconds | Output tok/s | Total request seconds | Effective output tok/s |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Off: original copy | 2,787, natural EOS | 1,041.56 | 67.23 | 41.45 | 1,108.95 | 2.513 |
+| On | 2,787, natural EOS | 1,030.47 | 62.14 | **44.85** | 1,092.76 | **2.550** |
+
+**Decode gain: 8.20%. Effective gain including prefill: 1.48%.** Startup was
+98.80 seconds for the control and 97.42 seconds for rotation, excluded from the
+request columns. This is one off/on pair; no reverse-order performance repeat
+or confidence interval. The unreplicated prefill difference is not attributed
+to the storage change. The 64K 17-24% result does not generalize to 1M as a
+20% claim.
+
+All 2,787 output IDs matched. Each run recorded 1,362,886 cache hits / 1,443,017
+lookups, 101,586 RAM blob reads, 18,209 file blob reads, 2,264 proposed drafts
+and 1,962 accepted drafts. Both executed 825 decode windows, averaging 3.38
+committed tokens per window. The exact output-token digest is
+`a230262da355dda856b2a7d1721789608fdaf416191722d11ab5d1ab5d2b4441`
+(SHA-256 of the UTF-8 compact JSON token-ID array).
+
+Rotation activated and avoided **12,924 host copies / 67,494,297,600 bytes** of
+copy payload. The GPU cache held 52.89 GiB of experts; 11,513 expert blocks
+occupied 56 GiB of pinned/mapped RAM, leaving about 10.64 GiB on the file tier.
+The PLE table occupies another 50.664 GiB of RAM. This also confirms that the
+ownership path can operate with file-tier experts: its allocated RAM region
+must be fully pinned/mapped, rather than holding every expert absent from VRAM.
+
+The logged 47,936.4 MB of file reads is **logical expert-file traffic**, not a
+measurement of physical NVMe reads. The old generic resident-mode startup
+message says "no file reads" even for this partial budget; the actual counters
+above establish file-tier use. Different context allocation and expert residency
+prevent treating 64K versus 1M as a pure RoPE or KV-kernel comparison.
+
+Both requests completed without an allocation error. The private unit had
+`MemorySwapMax=0` and finished with exit 0. Across 1,229 telemetry samples, minimum
+available host RAM was 7.83 GiB and maximum sampled GPU allocation was 94,109 MiB;
+there were no foreign-GPU samples. These are sampled values, not continuous maxima.
+
+The historical **41.36 output tok/s** 1M result used `e359f448`, before ownership.
+The new off control reproduced its complete output, prompt and recorded work
+counters exactly, at 41.45 tok/s. The matched comparison in the table uses the
+same new binary in both arms and provides the new 8.2% result.
+
+Harness: `tools/run_q8_rotation_1m_fleet.py`, source
+`dc37021c7f77050894ab92246ad9e61621a0be65`.
+Evidence: `~/fleet-downloads/rtxpro-q8-rotation-1m-20261003`.
+[Machine-readable 1M results](../bench/results/2026-10-03-q8-buffer-rotation/rotation-1m.json).
 
 Machine-readable [result summary](../bench/results/2026-10-03-q8-buffer-rotation/summary.json)
 includes exact source/binary hashes, per-request prefill and decode timings,
