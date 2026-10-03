@@ -110,7 +110,8 @@ Raw thinking is emitted as a reasoning item's `content`, with typed
 `response.reasoning_text.delta/done` events. A requested summary is produced by
 an additional answer-only generation through the same service after the primary
 generation releases the FIFO. It is not copied raw thinking. This costs another
-prefill and generation pass. The initial pass reserves one quarter of the output
+prefill and generation pass. Tool-like markup in this summary pass is literal
+text, not a function call. The initial pass reserves one quarter of the output
 allowance, capped at 128/256/512 tokens for concise/auto/detailed; the summary can
 use the remaining allowance. Both passes count toward `max_output_tokens`.
 Output following reasoning is buffered until its summary finishes so Codex sees
@@ -122,6 +123,9 @@ counts generated tokens while the existing parser is in its reasoning region,
 including the closing delimiter and any existing configured thinking-budget wrap.
 `cached_tokens` counts native reused prompt tokens; `cache_write_tokens` is the
 newly prefilled portion. These are local engine counts, not OpenAI billing data.
+Known limitation: reasoning-budget continuation can misattribute reused tokens
+to the original prompt. The native coding qualification does not establish
+correct cache accounting for that path.
 Usage is null when failure or cancellation prevents complete accounting.
 
 Completed reasoning includes an authenticated encrypted replay token. Strata
@@ -130,8 +134,10 @@ The token contains the actual reasoning content, summary, item ID, model ID and
 completion status. Only a server with the same deployment key can restore it.
 Foreign tokens, tampering, mismatched IDs/models and conflicting visible fields
 produce an error before generation. There is no attempt to decode another
-provider's state. Returned visible content remains usable without encryption;
-a summary alone cannot substitute for the underlying reasoning.
+provider's state. To replay visible raw `content` without `encrypted_content`,
+also omit a nonempty `summary`; the current validator rejects that combination.
+A summary alone cannot substitute for the underlying reasoning. Replaying the
+full returned item preserves all fields and is the qualified Codex path.
 
 Enabling the route reads `STRATA_RESPONSES_REPLAY_KEY` from the server environment.
 No secret file is created. This follows the handoff's environment-only key rule.
@@ -188,6 +194,12 @@ other capabilities and will get explicit errors. The
 [R0 report](responses-evidence/R0/REPORT.md) describes the original capture-time
 blockers; R3 implements the namespaces, summaries and replay it observed. GBNF
 work still requires a separately recorded passing R4 checkpoint.
+
+The later [parser-fix receipt](responses-evidence/parser-fixes/REPORT.md) records
+two literal-tool-markup bugs found by a real native Codex task on the stacked
+GBNF branch, their fixes in this branch, and 195 passing Python regressions. The
+receipt distinguishes this checkout's tests from the native run and its explicit
+local-tool profile.
 
 Protocol references: [Responses](https://developers.openai.com/api/reference/resources/responses),
 [typed streaming](https://developers.openai.com/api/docs/guides/streaming-responses),
