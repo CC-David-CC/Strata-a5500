@@ -28,6 +28,9 @@ At the native XML parsing boundary, explicitly boolean parameters accept Qwen's
 JSON value before argument deltas are emitted. String and undeclared parameters
 retain their existing interpretation; no Python evaluation or post-stream repair
 is involved. All byte-split positions and strict JSON/SSE equality are tested.
+The native prompt also shows the exact empty call form for closed functions with
+no parameters, such as `get_goal`. It does not add an `arguments` parameter or
+remove invented parameters from model output.
 
 This is validation at the function-call completion boundary. Native token masks
 constrain the final answer when `text.format` requests JSON; they do not constrain

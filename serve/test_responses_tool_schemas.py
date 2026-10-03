@@ -12,7 +12,7 @@ from jsonschema import Draft202012Validator
 from serve.responses import create_response, execute_response, native_tools, validate_request, RequestError
 from serve.test_responses import ROOT, service, request, listening, http, normalized, sse_events, function_tool, function_script
 from serve.responses_json import native_schema, prepare_json_output
-from serve.frontend import OutputParser, parse_tool_call
+from serve.frontend import ChatTemplate, OutputParser, parse_tool_call
 
 TOOLS = json.loads((ROOT/'docs/codex/tool-declarations-0.160.0.json').read_text(encoding='utf-8'))
 SAMPLES = json.loads((ROOT/'docs/codex/tool-argument-examples-0.160.0.json').read_text(encoding='utf-8'))
@@ -26,6 +26,19 @@ def script(name, arguments):
 
 
 class CapturedToolSchemas(unittest.TestCase):
+    def test_zero_parameter_prompt_example_round_trips_without_invented_arguments(self):
+        tool = next(native for native, _, _ in native_tools(TOOLS) if native['name'] == 'get_goal')
+        template = ChatTemplate(ROOT / 'serve/chat_template.jinja')
+        prompt = template.render([{'role': 'user', 'content': 'Read the goal.'}], [tool], enable_thinking=False)
+        call = '<tool_call>\n<function=get_goal>\n</function>\n</tool_call>'
+        self.assertIn(call, prompt)
+        parser = OutputParser(thinking=False, tools=[tool], stream_tools=True)
+        events = parser.feed(call) + parser.finish()
+        self.assertEqual(''.join(e.text for e in events if e.kind == 'tool_args'), '{}')
+        self.assertEqual(next(e.call.arguments for e in events if e.kind == 'tool_call'), {})
+        open_tool = {**tool, 'parameters': {**tool['parameters'], 'additionalProperties': True}}
+        self.assertNotIn(call, template.render([{'role': 'user', 'content': 'Read the goal.'}], [open_tool]))
+
     def test_xml_boolean_reaches_strict_response_without_rewriting_stream(self):
         tool = function_tool(name='fixture', strict=True, parameters={'type': 'object',
             'properties': {'value': {'type': 'boolean'}}, 'required': ['value'], 'additionalProperties': False})
