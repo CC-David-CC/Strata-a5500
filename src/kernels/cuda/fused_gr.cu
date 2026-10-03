@@ -743,8 +743,12 @@ int down_chunk(bool staged, int* tile_out) {
         cudaFuncSetAttribute(gr_down_staged_kernel<2>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
         cudaFuncSetAttribute(gr_down_staged_kernel<1>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged);
 #define STRATA_HC_ATTR(W, T) cudaFuncSetAttribute(gr_down_staged_kernel<W, T>, cudaFuncAttributeMaxDynamicSharedMemorySize, want_staged)
-#define STRATA_HC_ATTR_W(W) STRATA_HC_ATTR(W, 1); STRATA_HC_ATTR(W, 2); STRATA_HC_ATTR(W, 3); STRATA_HC_ATTR(W, 4)
+#define STRATA_HC_ATTR_W(W) STRATA_HC_ATTR(W, 1); STRATA_HC_ATTR(W, 2); STRATA_HC_ATTR(W, 3); STRATA_HC_ATTR(W, 4); \
+        STRATA_HC_ATTR(W, 5); STRATA_HC_ATTR(W, 6); STRATA_HC_ATTR(W, 7); STRATA_HC_ATTR(W, 8)
         STRATA_HC_ATTR_W(1); STRATA_HC_ATTR_W(2); STRATA_HC_ATTR_W(4); STRATA_HC_ATTR_W(8);
+#if STRATA_VERIFY_MAX_T > 8
+        STRATA_HC_ATTR(1, 9); STRATA_HC_ATTR(2, 9); STRATA_HC_ATTR(4, 9); STRATA_HC_ATTR(8, 9);
+#endif
 #undef STRATA_HC_ATTR_W
 #undef STRATA_HC_ATTR
         cudaGetLastError();      // drop any error the attempt left behind
