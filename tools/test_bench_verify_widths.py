@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Counter/denominator guards for the verification-width experiment."""
 import unittest
-from bench_verify_widths import parse_histogram, validate_observation
+from bench_verify_widths import parse_histogram, validate_observation, request_limit
 
 
 class WidthObservationTest(unittest.TestCase):
+    def test_only_oracle_knows_stop_position(self):
+        self.assertEqual(request_limit('oracle', 4096, 1588), 1588)
+        self.assertEqual(request_limit('oracle', 512, 1588), 512)
+        for path in ('serial', 'mtp', 'ngram', 'mtp-ngram'):
+            self.assertEqual(request_limit(path, 4096, 1588), 4096)
+
     def check(self, **changes):
         values = dict(job={'path': 'oracle', 'width': 3}, tokens=[10, 11, 12, 13],
                       expected=[10, 11, 12, 13], timings={'reused': 0, 'drafts_accepted': 2, 'drafts_offered': 2},

@@ -28,6 +28,14 @@ def digest(value):
     return hashlib.sha256(json.dumps(value).encode()).hexdigest()
 
 
+def request_limit(path, budget, expected_count):
+    # The perfect predictor knows the EOS location as well as its token. Trim
+    # its final window at that location, rather than proposing padding past EOS
+    # and mistaking the discarded positions for incorrect proposals. Real
+    # predictors retain the original requested budget and natural stopping.
+    return min(budget, expected_count) if path == 'oracle' else budget
+
+
 def read_reference(path):
     data = json.loads(path.read_text())
     cases = {}
@@ -155,7 +163,8 @@ def run(manifest_path, output):
                     startup_s = time.monotonic() - startup
                     arrivals, tokens = [], []
                     start = time.monotonic()
-                    for token in engine.generate(ids, maximum, {'temperature': 0}, threading.Event()):
+                    actual_limit = request_limit(path, maximum, len(expected))
+                    for token in engine.generate(ids, actual_limit, {'temperature': 0}, threading.Event()):
                         if token is not None:
                             tokens.append(token)
                             arrivals.append(time.monotonic() - start)
@@ -169,6 +178,7 @@ def run(manifest_path, output):
                 observation = {'task': name, 'args': args,
                                'env': {k: v for k, v in env.items() if k.startswith('STRATA_') or k in cfg.get('env', {})},
                                'input_tokens': len(ids), 'prompt_sha256': digest(ids),
+                               'requested_output_budget': maximum, 'engine_output_limit': actual_limit,
                                'token_ids': tokens, 'token_sha256': digest(tokens),
                                'output_tokens': len(tokens), 'timings': timings,
                                'startup_seconds': startup_s, 'wall_seconds': wall,

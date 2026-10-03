@@ -64,3 +64,13 @@ must audit fixed arrays, graph tables, per-token scratch, grouped-expert slots,
 MMVQ dispatch, recurrent-state snapshots and rollback before using T=16 or
 larger. A larger shape must pass arithmetic and committed-state checks before
 its performance is compared. A smaller optimum remains a valid result.
+# Oracle EOS accounting
+
+The first full sweep stopped on a harness assertion after an otherwise exact
+T=2 prose answer: 793 proposals counted as committed out of 794 offered. The
+last proposal was discarded by the natural EOS boundary. The corrected oracle
+harness caps the request at the known reference length, so its final window
+cannot propose past the known stop. This extra knowledge belongs only to the
+oracle ceiling experiment. Real proposal paths keep their original output
+budget. The engine binary and emitted reference answer are unchanged. Both
+the requested budget and the actual engine limit are recorded.
