@@ -6,6 +6,9 @@ When disabled, the Responses routes return 404 and no Responses store is opened.
 The flag enables the ordinary `/v1/responses` interface; requests have no
 Strata-specific fields. Existing Chat Completions and Anthropic routes keep their
 behavior. All Responses routes use the existing API key and CORS settings.
+They also inherit the server's Host protection and browser-origin checks:
+without an API key, an unapproved browser origin cannot create a response.
+SDK and command-line requests without an Origin header keep their behavior.
 
 ## Enable and verify
 
@@ -242,6 +245,14 @@ including all 39 Responses tests and 114 server tests. This checks the combined
 Python service with mock/scripted engines, including upstream's newer engine
 recovery behavior. The native GPU measurements above retain their 0.1.34 source.
 [Merge inputs, source hashes and module outcomes](benchmarks/2026-10-03-responses-merge-check.json).
+
+Upstream sync on 2026-10-03: the branch now includes upstream 0.1.38 (`99f3dbd`).
+Its browser-origin check runs before Responses dispatch, and its Host check
+covers all Responses methods. Eight serving/security modules passed:
+**231 passed, 5 skipped**, including 41 Responses, 118 server and 21 security
+tests. Two new HTTP regressions cover these protections for Responses. This is
+a mock/scripted-engine check; the earlier native GPU result remains on 0.1.34.
+[Sync details, source hashes and module outcomes](benchmarks/2026-10-03-responses-upstream-0138.json).
 
 Contract sources:
 [Responses creation](https://developers.openai.com/api/reference/python/resources/responses/methods/create),

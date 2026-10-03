@@ -621,6 +621,39 @@ class HTTPTests(ResponseFixture):
         self.assertEqual(deleted, {"id": response["id"], "object": "response.deleted", "deleted": True})
         self.assertEqual(self.request("GET", path)[0], 404)
 
+    def test_keyless_host_guard_covers_responses_routes(self):
+        _, _, response = self.post()
+        path = "/v1/responses/" + response["id"]
+        self.svc.api_key = ""
+        for method, route, body in (("POST", "/v1/responses", {"model": self.svc.model, "input": "hi"}),
+                                    ("GET", path, None), ("GET", path + "/input_items", None),
+                                    ("DELETE", path, None), ("OPTIONS", path, None)):
+            with self.subTest(method=method, route=route):
+                code, _, _ = self.request(method, route, body, headers={"Host": "rebind.example"})
+                self.assertEqual(code, 403)
+        self.assertEqual(self.controller.get_response(response["id"]), response)
+        self.assertEqual(len(self.store.records()), 1)
+
+    def test_keyless_create_preserves_upstream_browser_guard(self):
+        self.svc.api_key = ""
+        body = {"model": self.svc.model, "input": "hi", "stream": True}
+        for origin in ("https://foreign.example", "null"):
+            for content_type in ("text/plain", "application/json"):
+                with self.subTest(origin=origin, content_type=content_type):
+                    code, headers, _ = self.request(body=body, headers={
+                        "Origin": origin, "Content-Type": content_type})
+                    self.assertEqual(code, 403)
+                    self.assertNotEqual(headers.get("Content-Type"), "text/event-stream")
+        self.assertEqual(self.request(body=body, headers={"Content-Type": "text/plain"})[0], 415)
+        self.assertEqual(self.store.records(), [])
+        self.assertFalse(self.controller.active)
+        body["stream"] = False
+        for headers in ({}, {"Origin": "", "Content-Type": "text/plain"}):
+            # An explicitly allowed browser page, and an SDK/curl request with no Origin.
+            code, _, response = self.request(body=body, headers=headers)
+            self.assertEqual(code, 200)
+            self.assertEqual(response["status"], "completed")
+
     def test_input_pagination_defaults_and_cursors(self):
         inputs = [{"role": "user", "content": str(i)} for i in range(23)]
         _, _, response = self.post(input=inputs)
