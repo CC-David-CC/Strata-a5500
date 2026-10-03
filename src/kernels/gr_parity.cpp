@@ -297,6 +297,9 @@ int fused_multi_lds_parity(const float* d_norm, const uint16_t* d_down, const ui
     check(cudaMemcpy(d_r, r.data(), r.size() * sizeof(float), cudaMemcpyHostToDevice), "multi copy R");
     check(cudaMemcpy(d_bo, bo.data(), bo.size() * sizeof(float), cudaMemcpyHostToDevice), "multi copy bo");
     check(cudaMemcpy(d_inj, inj.data(), inj.size() * sizeof(float), cudaMemcpyHostToDevice), "multi copy inj");
+    // Pageable host copies may return before their DMA finishes. The kernel stream below is
+    // nonblocking, so it needs an explicit dependency on these default-stream transfers.
+    check(cudaStreamSynchronize(nullptr), "multi input copies ready");
 
     std::vector<FusedGrArgs> args(T);
     for (int t = 0; t < T; ++t) {
