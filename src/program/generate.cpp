@@ -5746,6 +5746,9 @@ int main(int argc, char** argv) {
                     }
                 }
                 const bool timed_round = !first_window;
+                // The output limit also bounds the state we may commit. A full
+                // speculative window can otherwise consume unreported tokens.
+                T = (int) std::min<int64_t>(T, max_new - produced_n);
                 const Clock::time_point round0 = Clock::now();
                 if (p + T > o.max_context) break;
                 window[0] = x;
@@ -5776,6 +5779,10 @@ int main(int argc, char** argv) {
                 }
                 int a = 0;
                 while (a < T - 1 && window[(size_t) a + 1] == outv[(size_t) a]) ++a;
+                for (int i = 0; i <= a; ++i)
+                    if (std::find(o.eos_ids.begin(), o.eos_ids.end(), (int64_t) outv[(size_t) i]) != o.eos_ids.end()) {
+                        a = i; break;   // no state from beyond the emitted EOS
+                    }
                 if (from_sfx) { ++sfx_windows; sfx_drafts += T - 1; sfx_ok += a; }
                 const Clock::time_point tw1 = Clock::now();
                 std::thread adapt_thr;   // the adaptive tier beside the commit and the draft (as in generate)
@@ -6596,6 +6603,7 @@ int main(int argc, char** argv) {
                 }
             }
             const bool timed_round = !first_window;
+            T = (int) std::min<int64_t>(T, o.max_new - (int64_t) produced.size());
             ++window_hist[(size_t) T];
             if (p + T > o.max_context) {
                 std::fprintf(stderr, "strata generate: ran out of context at position %lld\n", (long long) p);
@@ -6628,6 +6636,11 @@ int main(int argc, char** argv) {
             }
             int a = 0;
             while (a < T - 1 && window[(size_t) a + 1] == outv[(size_t) a]) ++a;
+            if (o.stop_eos)
+                for (int i = 0; i <= a; ++i)
+                    if (std::find(o.eos_ids.begin(), o.eos_ids.end(), (int64_t) outv[(size_t) i]) != o.eos_ids.end()) {
+                        a = i; break;
+                    }
             if (first_window) {
                 first_window = false;
                 ttft_ms = std::chrono::duration<double, std::milli>(Clock::now() - t_start).count();
