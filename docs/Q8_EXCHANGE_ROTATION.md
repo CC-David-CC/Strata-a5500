@@ -4,8 +4,8 @@ Branch: `perf/q8-exchange-buffer-rotation`.
 Target: llm-60, NVIDIA RTX PRO 6000 Blackwell Workstation Edition **96 GB**,
 Ryzen 9 7950X, 128 GB installed RAM. Full Unsloth Q8_0, FP16 KV.
 
-**Status: implementation prepared; validation and throughput results pending.**
-There is no measured model speedup for this change yet.
+**Status: CPU fixtures and the CUDA engine build passed; GPU source-API and
+model throughput tests are queued.** No model speedup is measured yet.
 
 ## The change
 
@@ -72,3 +72,20 @@ close/reopen and byte equality. Run under Compute Sanitizer memcheck.
 A semantic mismatch remains a failed gate for that path, even if throughput
 increases. The storage fixtures and model comparison answer different questions;
 both are required before accepting the change. Public serving is unaffected.
+
+## Initial validation, 2026-10-03
+
+Engine source `1a50d913bf910a1f63fbc1a0788a7083e3ca5f8c` built successfully on
+llm-60 (CUDA SM120 Release). Binary SHA-256:
+`d14ed6b69a1814ce4b5c08932a47d6921a55fa0aa8dea50427ccf0782d1ad997`.
+
+The standalone ownership fixture passed all **12,304 exchanges** under
+AddressSanitizer and UndefinedBehaviorSanitizer, including concurrent metadata
+readers, exact resident bytes, alias pairs, buffer reuse and malformed commits.
+This does not yet validate CUDA transfers or model generation; those tests remain
+required. The CPU fixture and compiler overlapped the separate retrieval quality
+check, with bounded memory/CPU use; that check's timing is not a controlled speed
+comparison. No GPU benchmark overlapped the compilation.
+
+Evidence: `~/fleet-downloads/rtxpro-exchange-cpu-check-20261003` and
+`~/fleet-downloads/rtxpro-exchange-build-ahead-20261003`.
