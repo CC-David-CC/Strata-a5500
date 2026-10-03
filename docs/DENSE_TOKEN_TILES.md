@@ -1,4 +1,4 @@
-# Dense token tiles: component results, model validation pending
+# Dense token tiles: measured shape tradeoffs
 
 Target: **RTX PRO 6000 Blackwell Workstation Edition, 96 GB**, using the full
 Unsloth UD-Q4_K_XL model. This changes the Q8_0 **dense projections inside Q4**;
@@ -59,6 +59,71 @@ faster than subsequent identical-kernel controls (493.68 versus about 735
 microseconds); the raw record preserves this timing drift. Do not interpret
 that unchanged-kernel difference as an optimization effect.
 
-Real model state gates, oracle and all four real generation paths are running.
-Actual DRAM measurements remain pending. No new model TPS claim is made here.
+The model-state and oracle checks are complete below. The broad four-path
+comparison and actual DRAM measurements remain in progress.
 See [component observations](benchmarks/q4-dense-token-tiles-components-20261003.json).
+
+## Model state and oracle checks
+
+The tiled engine matched the previous target's output tokens and all collected
+committed-state fields at output caps 23, 24, 25 and 51, both serial and MTP,
+with an 8,192-token prompt and 16,384 allocated context.
+
+The oracle uses known target answers and their stopping length. At 65,536
+actual input tokens, 73,728 allocated context and int8 KV, it generated the
+same 2,467-token code answer:
+
+| Verification width | Untiled output tok/s | Tile 12 output tok/s |
+| --- | ---: | ---: |
+| 8 | 369.39 | 369.23 |
+| 16 | 420.93 | 404.95 |
+| 24 | 402.85 | 431.30 |
+
+These are one observation per cell, not usable generation rates. The T24
+improvement supports the component hypothesis; the T16 regression rules out
+turning this dispatch on indiscriminately.
+
+## Real n-gram combination screen
+
+The same source (`f5f183c`) includes the finite-cost wide-policy fix and the
+independently gated HC/BF16 active-width policies. A randomized editing screen
+compared them separately and together, using fresh engines. Here `active`
+means both active-width policies; `tiled` means only the 12-column dense tile.
+Every response stopped naturally at 1,238 tokens within a 4,096-token budget,
+with the frozen reference's exact token hash.
+
+| Variant | Maximum width | Output tok/s |
+| --- | ---: | ---: |
+| active | 12 | 337.28 |
+| control | 12 | 329.18 |
+| active | 24 | 319.50 |
+| both | 24 | 335.66 |
+| control | 24 | 310.55 |
+| tiled | 24 | 299.04 |
+
+The oracle gain did not translate directly to real adaptive n-gram decoding:
+tiling alone regressed. Its measured timings can change the policy's choice
+of future verification widths, so this is an end-to-end result rather than an
+isolated fixed-width kernel comparison. The exact output still matched.
+
+Width 12 with active-width policies was selected and repeated A/B/B/A against
+width 12 with all three kernel flags off:
+
+| Variant | Mean output tok/s | Mean effective tok/s | Mean wall tok/s |
+| --- | ---: | ---: | ---: |
+| control | 329.83 | 87.50 | 87.45 |
+| active | 337.40 | 87.96 | 87.90 |
+
+This is about 2.3% more decode throughput on the selected editing workload.
+Effective throughput includes engine prefill + decode; wall throughput also
+includes request protocol overhead. Both exclude engine startup. Two repeats
+per arm are a useful confirmation, not a broad confidence interval or a claim
+that code/prose improve by the same amount.
+
+The selected configuration is compiled with `STRATA_VERIFY_MAX_T=24`, uses
+`STRATA_HC_ACTIVE_T=1`, `STRATA_BF16_ACTIVE_T=1` and
+`STRATA_NATIVE_Q8_TOKEN_TILE=0`, and caps n-gram verification at 12. The exact
+arguments, environment, request hashes and histograms are retained in the
+[structured observations](benchmarks/q4-shape-combinations-20261003.json).
+All experts remain resident on the GPU. This is the full Unsloth UD-Q4_K_XL,
+not a full Q8-model measurement or a pruned GSQ IQ3 benchmark.
