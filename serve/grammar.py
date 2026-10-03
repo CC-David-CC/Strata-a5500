@@ -75,8 +75,8 @@ class GrammarOutput:
         return events
 
     def finish(self, outcome):
-        if outcome == "length" and self.parser.state == "call" and self.parser.scall is None:
-            # Budget ended inside the name/envelope, before any item was sent.
+        if outcome == "length" and self.parser.buf and self.parser.scall is None:
+            # Budget ended inside the delimiter/name, before any item was sent.
             # It is incomplete protocol, not an unconstrained assistant answer.
             return []
         return self._tools_only(self.parser.finish())

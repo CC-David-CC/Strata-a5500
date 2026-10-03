@@ -542,6 +542,20 @@ class OutputParser:
                         out.append(Event("content", self.buf[:j]))
                         self.buf = self.buf[j:]
                     return out
+                body = self.buf[i + len(CALL_START):].lstrip()
+                if not body.startswith("<function="):
+                    if "<function=".startswith(body):
+                        # Decide after the preamble arrives; retain separator
+                        # newlines until we know whether this is a real call.
+                        safe = len(self.buf[:i].rstrip("\n"))
+                        if safe:
+                            out.append(Event("content", self.buf[:safe]))
+                            self.buf = self.buf[safe:]
+                        return out
+                    end = i + len(CALL_START)
+                    out.append(Event("content", self.buf[:end]))
+                    self.buf = self.buf[end:]
+                    continue
                 if i and self.buf[:i].strip():
                     out.append(Event("content", self.buf[:i].rstrip("\n")))
                 self.buf = self.buf[i + len(CALL_START):]
