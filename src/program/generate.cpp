@@ -4685,6 +4685,30 @@ int main(int argc, char** argv) {
         if (use_mtp && S_mtp < S) mtp.set_max_drafts(S_mtp - 1);
         strata::spec::SuffixDrafter sfx(std::max(1, o.suffix_draft), 64, (size_t) o.max_context + 4096);
         strata::spec::DraftPolicy policy(S);   // MTP or lookup window, learned over the whole process
+        // Diagnostic proposal replay: the target still verifies every row.
+        // An oracle replaces only proposals, never logits or accepted outputs.
+        std::vector<int64_t> serve_oracle;
+        int reject_depth = -1;
+        if (!o.spec_oracle.empty()) {
+            std::ifstream in(o.spec_oracle);
+            const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+            std::string e;
+            if (!in || !parse_i64_list(text.c_str(), serve_oracle, e) || serve_oracle.empty() ||
+                std::any_of(serve_oracle.begin(), serve_oracle.end(), [&](int64_t t) { return t < 0 || t >= n_vocab; })) {
+                std::fprintf(stderr, "strata serve: invalid diagnostic --spec-oracle\n");
+                return 2;
+            }
+            if (const char* text_depth = std::getenv("STRATA_VERIFY_REJECT_DEPTH")) {
+                char* end = nullptr;
+                const long v = std::strtol(text_depth, &end, 10);
+                if (end == text_depth || *end != '\0' || v < -1 || v >= S - 1) {
+                    std::fprintf(stderr, "strata serve: reject depth must be -1 or a draft index below spec-1\n");
+                    return 2;
+                }
+                reject_depth = (int) v;
+            }
+            std::fprintf(stderr, "strata serve: diagnostic oracle proposals active, reject_depth=%d\n", reject_depth);
+        }
         // The vision path (--vision): GENI <max_new> <embeddings file> <id,id,...> carries images.  The file is one
         // or more strata-vision records (int32 'SVE1', n, nx, ny, n_embd, then n x n_embd floats) in prompt order;
         // each image's rows go to its run of <|image_pad|> tokens, whose M-RoPE positions are mtmd's: t = p,
@@ -4761,6 +4785,11 @@ int main(int argc, char** argv) {
                 continue;
             }
             const int64_t n = (int64_t) ids.size();
+            if (!serve_oracle.empty() && max_new > (int64_t) serve_oracle.size()) {
+                std::printf("ERR diagnostic oracle shorter than output budget\n");
+                std::fflush(stdout);
+                continue;
+            }
             req_imgs.clear();
             if (geni && !o.vision) { std::printf("ERR this engine was started without --vision\n"); continue; }
             if (geni || !mrope_identity) {
@@ -5373,6 +5402,7 @@ int main(int argc, char** argv) {
                     }
                 }
                 const bool timed_round = !first_window;
+                if (!serve_oracle.empty() && !first_window) { T = S; from_sfx = false; }
                 // The output limit also bounds the state we may commit. A full
                 // speculative window can otherwise consume unreported tokens.
                 T = (int) std::min<int64_t>(T, max_new - produced_n);
@@ -5380,6 +5410,16 @@ int main(int argc, char** argv) {
                 if (p + T > o.max_context) break;
                 window[0] = x;
                 for (int i = 1; i < T; ++i) window[(size_t) i] = from_sfx ? sbuf[(size_t) i - 1] : drafts[(size_t) i - 1];
+                bool injected_reject = false;
+                if (!serve_oracle.empty()) {
+                    for (int i = 1; i < T; ++i)
+                        window[(size_t) i] = (int32_t) serve_oracle[(size_t) (produced_n + i - 1)];
+                    if (reject_depth >= 0 && reject_depth < T - 1) {
+                        int32_t& d = window[(size_t) reject_depth + 1];
+                        d = (d + 1) % (int32_t) n_vocab;
+                        injected_reject = true;
+                    }
+                }
                 drive.d.layers = 0;
                 drive.d.experts = 0;
                 drive.d.failed = false;
@@ -5408,6 +5448,9 @@ int main(int argc, char** argv) {
                         a = i; break;   // no state from beyond the emitted EOS
                     }
                 if (from_sfx) { ++sfx_windows; sfx_drafts += T - 1; sfx_ok += a; }
+                if (!serve_oracle.empty())
+                    std::fprintf(stderr, "strata serve: ORACLE_WINDOW produced=%lld T=%d accepted=%d injected=%d\n",
+                                 (long long) produced_n, T, a, (int) injected_reject);
                 const Clock::time_point tw1 = Clock::now();
                 std::thread adapt_thr;   // the adaptive tier beside the commit and the draft (as in generate)
                 bool adapt_ok = true;

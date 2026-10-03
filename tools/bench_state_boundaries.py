@@ -22,7 +22,12 @@ def main():
     ap.add_argument("--caps", type=int, nargs="+", default=[1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 17])
     ap.add_argument("--eos-id", type=int,
                     help="Use a known early reference token as EOS to test stopping inside a verified prefix")
+    ap.add_argument("--verify-window", type=int, default=4, choices=range(2, 9))
+    ap.add_argument("--oracle-sweep", action="store_true")
+    ap.add_argument("--reject-depth", type=int, default=-1)
     opt = ap.parse_args()
+    if opt.oracle_sweep and (len(opt.caps) != 1 or opt.eos_id is not None):
+        ap.error("Oracle replay requires exactly one cap and the ordinary EOS configuration")
     opt.output.mkdir(parents=True, exist_ok=False)
     cfg = json.loads(opt.config.read_text())
     original = json.loads(opt.prompt.read_text())
@@ -37,6 +42,8 @@ def main():
         "prompt_sha256": hashlib.sha256(json.dumps(ids).encode()).hexdigest(),
         "input_tokens": len(ids), "runs": [],
         "eos_id": opt.eos_id,
+        "verify_window": opt.verify_window, "oracle_sweep": opt.oracle_sweep,
+        "reject_depth": opt.reject_depth,
         "note": "State hash instrumentation invalidates throughput; stale/dead/MTP state is reported separately.",
     }
     def save():
@@ -44,7 +51,7 @@ def main():
     save()
     for mode in ("off", "on"):
         args = list(cfg["args"])
-        for name, value in [("--spec", 4), ("--mtp-max-t", 4), ("--suffix-draft", 0),
+        for name, value in [("--spec", opt.verify_window), ("--mtp-max-t", 4), ("--suffix-draft", 0),
                             ("--spec-min-p", 0), ("--max-context", 16384),
                             ("--prompt-cache", 1), ("--prompt-cache-every", 0),
                             ("--prompt-cache-root", 0), ("--turn-token", -1),
@@ -56,6 +63,11 @@ def main():
             set_option(args, "--eos-ids", opt.eos_id)
         env = child_env(cfg)
         env["STRATA_STATE_HASH"] = "1"
+        if opt.oracle_sweep and mode == "on":
+            oracle = opt.output / "reference.tokens.txt"
+            oracle.write_text(",".join(map(str, result["runs"][0]["cases"][0]["token_ids"])))
+            set_option(args, "--spec-oracle", oracle)
+            env["STRATA_VERIFY_REJECT_DEPTH"] = str(opt.reject_depth)
         log = opt.output / f"engine-{mode}.log"
         run = {"mtp": mode == "on", "args": args, "cases": []}
         result["runs"].append(run)
@@ -78,6 +90,9 @@ def main():
                 case = {"cap": cap, "token_ids": tokens, "timings": dict(engine.last),
                         "state": state, "expected_consumed": expected,
                         "consumed_matches_emitted": int(state["L"]) == expected}
+                windows = [{k:int(v) for k,v in re.findall(r"(\w+)=(-?\d+)", line)}
+                           for line in new_log.splitlines() if "strata serve: ORACLE_WINDOW " in line]
+                case["oracle_windows"] = windows
                 run["cases"].append(case)
                 save()
                 if engine.last.get("reused", 0):
@@ -87,6 +102,13 @@ def main():
                         raise RuntimeError("Custom EOS control did not stop before its cap")
                 elif len(tokens) != cap:
                     raise RuntimeError("Short boundary prompt stopped before its cap")
+                if opt.oracle_sweep and mode == "on":
+                    if not windows or (opt.reject_depth >= 0 and not any(w["injected"] for w in windows)):
+                        raise RuntimeError("Requested oracle rejection path was not exercised")
+                    for w in windows:
+                        expected_a = opt.reject_depth if w["injected"] else w["T"] - 1
+                        if w["accepted"] != expected_a:
+                            raise RuntimeError(f"Unexpected oracle acceptance: {w}, expected {expected_a}")
                 print(json.dumps({k: v for k, v in case.items() if k not in ("token_ids", "timings")}), flush=True)
             run["completed"] = True
         finally:
