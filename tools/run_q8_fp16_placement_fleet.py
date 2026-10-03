@@ -13,8 +13,8 @@ import sys
 import time
 
 H=Path.home();R=Path(__file__).resolve().parents[1]
-D=H/'fleet-downloads/rtxpro-q8-fp16-placement-20261003'
-PRIOR=H/'fleet-downloads/rtxpro-synthetic-q8-20261003/status.json'
+D=Path(os.environ.get('FLEET_Q8_PLACEMENT_OUTPUT',H/'fleet-downloads/rtxpro-q8-fp16-placement-20261003'))
+PRIOR=Path(os.environ.get('FLEET_Q8_PLACEMENT_AFTER',H/'fleet-downloads/rtxpro-synthetic-q8-20261003/status.json'))
 CONTROL=H/'src/strata-q8-parallel-ple-e359f44'
 PY=H/'src/Strata/.venv/bin/python'
 MODES={'serial':('off',0),'mtp':('on',0),'ngram':('off',3),'mtp-ngram':('on',3)}
