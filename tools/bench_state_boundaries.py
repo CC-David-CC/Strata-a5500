@@ -19,6 +19,9 @@ def main():
     ap.add_argument("--config", type=Path, required=True)
     ap.add_argument("--prompt", type=Path, required=True)
     ap.add_argument("--output", type=Path, required=True)
+    ap.add_argument("--caps", type=int, nargs="+", default=[1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 17])
+    ap.add_argument("--eos-id", type=int,
+                    help="Use a known early reference token as EOS to test stopping inside a verified prefix")
     opt = ap.parse_args()
     opt.output.mkdir(parents=True, exist_ok=False)
     cfg = json.loads(opt.config.read_text())
@@ -33,6 +36,7 @@ def main():
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "prompt_sha256": hashlib.sha256(json.dumps(ids).encode()).hexdigest(),
         "input_tokens": len(ids), "runs": [],
+        "eos_id": opt.eos_id,
         "note": "State hash instrumentation invalidates throughput; stale/dead/MTP state is reported separately.",
     }
     def save():
@@ -48,6 +52,8 @@ def main():
             set_option(args, name, value)
         if mode == "off":
             set_option(args, "--mtp", None)
+        if opt.eos_id is not None:
+            set_option(args, "--eos-ids", opt.eos_id)
         env = child_env(cfg)
         env["STRATA_STATE_HASH"] = "1"
         log = opt.output / f"engine-{mode}.log"
@@ -57,7 +63,7 @@ def main():
         try:
             engine = StrataEngine(cfg["exe"], args, cfg.get("cwd", str(ROOT)), str(log), env)
             run["info"] = engine.info
-            for cap in (1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 17):
+            for cap in opt.caps:
                 offset = log.stat().st_size
                 tokens = [t for t in engine.generate(ids, cap, {"temperature": 0}, threading.Event()) if t is not None]
                 with log.open("rb") as f:
@@ -76,7 +82,10 @@ def main():
                 save()
                 if engine.last.get("reused", 0):
                     raise RuntimeError("State control unexpectedly reused a prefix")
-                if len(tokens) != cap:
+                if opt.eos_id is not None:
+                    if not tokens or tokens[-1] != opt.eos_id or len(tokens) >= cap:
+                        raise RuntimeError("Custom EOS control did not stop before its cap")
+                elif len(tokens) != cap:
                     raise RuntimeError("Short boundary prompt stopped before its cap")
                 print(json.dumps({k: v for k, v in case.items() if k not in ("token_ids", "timings")}), flush=True)
             run["completed"] = True
