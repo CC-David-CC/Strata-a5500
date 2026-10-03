@@ -68,6 +68,9 @@ cmake --build <native-build> --target strata grammar_native_test
 ```
 
 Choose a new dependency directory if an incomplete or different pin exists.
+The current `xgrammar-0.2.8-strata-budget1-json1` pin adds the JSON dynamic-property
+correction; a directory prepared with the earlier `budget1` pin must be replaced
+in the build configuration by a newly prepared directory.
 CMake/server startup does not download dependencies. See the
 [backend decision](gbnf-evidence/G1/grammar-backend-decision.md) for supported
 syntax, licenses and resource limits, and the [native test report](gbnf-evidence/G1/REPORT.md)

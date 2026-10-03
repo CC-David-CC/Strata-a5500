@@ -74,6 +74,13 @@ work, with the existing per-operation deadline. Raw GBNF's budgets are unchanged
 Unsatisfiable or unrepresentable schemas can
 fail preflight, and validation failures are not silently retried.
 
+The dependency pin `xgrammar-0.2.8-strata-budget1-json1` also corrects the native
+compiler's handling of `patternProperties` together with `additionalProperties`
+when no named properties are present. Earlier builds could forbid valid extra
+keys. Prepare a new dependency directory with `tools/prepare_xgrammar.py` and
+rebuild; the existing dependency directory is preserved. The original schema
+still governs final validation, including overlapping patterns and duplicate keys.
+
 The legacy Chat Completions `response_format` implementation is unchanged. The
 Responses-only branch still has no native JSON decoder; use the stacked GBNF branch
 for this feature. The [local Codex profile](CODEX_LOCAL.md) uses it automatically

@@ -1,8 +1,8 @@
 """Prepare the one pinned native grammar dependency at build time, never server startup.
 
-No Git operations, Python bindings, TVM, CUDA extension or schema frontend.
-Preserves upstream licenses. Applies only the listed cooperative resource guards;
-the archive hashes and original/patched file hashes are recorded in PIN.json.
+No Git operations, Python bindings, TVM or CUDA extension.
+Preserves upstream licenses. Applies the listed cooperative resource guards and
+the dynamic-object schema correction; original/patched hashes are in PIN.json.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ XGRAMMAR = ("mlc-ai/xgrammar", "97787376faee5ed8466cfad57c99855e4ce2f6aa",
             "87bc16759aadc535e3585551cfc086d0db704a1c12d0a97a3261650a62731719")
 DLPACK = ("dmlc/dlpack", "bbd2f4d32427e548797929af08cfe2a9cbb3cf12",
           "f5dcb30f8a3d1a41d48b5d5b3fe1631dfce11de76f9e7e5bd22c6dc75a758885")
-BACKEND = "xgrammar-0.2.8-strata-budget1"
+BACKEND = "xgrammar-0.2.8-strata-budget1-json1"
 
 
 def extract(pin, dest):
@@ -101,6 +101,38 @@ def patch(dest):
         path.write_bytes(result)
         changed[name] = {"original_sha256": hashlib.sha256(raw).hexdigest(),
                          "patched_sha256": hashlib.sha256(result).hexdigest()}
+    # The pinned converter omits additionalProperties when patternProperties is
+    # present without named properties. Keep the extra-key branch, as its named
+    # properties path already does. Full final validation still checks overlap
+    # between patterns and additional values, and property-name restrictions.
+    path = dest / "cpp/json_schema_converter.cc"
+    raw = path.read_bytes()
+    text = raw.decode("utf-8")
+    anchor = '''        }
+      } else {
+        int32_t key_rule_id = CreateRule(spec.property_names, rule_name + "_name");'''
+    replacement = '''        }
+        if (additional_property) {
+          int32_t key_expression = spec.property_names
+              ? RuleRef(CreateRule(spec.property_names, rule_name + "_extra_name"))
+              : KeyPatternExpression();
+          int32_t value_rule_id =
+              CreateRule(additional_property, rule_name + "_" + additional_suffix);
+          property_choices.push_back(Sequence(
+              {beginning_separator,
+               FormatOtherProperty(key_expression, value_rule_id, rule_name,
+                                   additional_suffix, additional_property)}
+          ));
+        }
+      } else {
+        int32_t key_rule_id = CreateRule(spec.property_names, rule_name + "_name");'''
+    if text.count(anchor) != 1:
+        raise RuntimeError("JSON converter source drift: dynamic object additional properties")
+    result = text.replace(anchor, replacement).encode("utf-8")
+    path.write_bytes(result)
+    changed["cpp/json_schema_converter.cc"] = {
+        "original_sha256": hashlib.sha256(raw).hexdigest(),
+        "patched_sha256": hashlib.sha256(result).hexdigest()}
     return changed
 
 

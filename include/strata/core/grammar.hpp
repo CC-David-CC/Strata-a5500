@@ -9,7 +9,7 @@
 
 namespace strata::grammar {
 
-inline constexpr const char* kBackend = "xgrammar-0.2.8-strata-budget1";
+inline constexpr const char* kBackend = "xgrammar-0.2.8-strata-budget1-json1";
 inline constexpr size_t kMaxSourceBytes = 8192;
 inline constexpr size_t kMaxHistoryTokens = 8192;
 inline constexpr size_t kMaxOutputBytes = 65536;

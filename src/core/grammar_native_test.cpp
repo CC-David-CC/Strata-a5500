@@ -262,6 +262,26 @@ static void json_unit() {
     Matcher arbitrary(object);
     for (unsigned char c : std::string(R"({"nested":[true,null,1.5,"ok"]})")) REQUIRE(arbitrary.accept(c));
     REQUIRE(arbitrary.complete());
+    // A pattern does not forbid nonmatching keys when additionalProperties is
+    // allowed. The pinned backend previously blocked "name" after "count".
+    const std::string dynamic_schema = R"({"type":"object","propertyNames":{"pattern":"^[a-z]+$"},"patternProperties":{"^count":{"type":"integer"}},"additionalProperties":{"type":"string"},"minProperties":1,"maxProperties":3})";
+    auto dynamic = compiler.compile(dynamic_schema, 5000000, true);
+    for (const auto& example : std::vector<std::pair<std::string, bool>>{
+            {R"({"count":3,"name":"tests"})", true},
+            {R"({"name":"tests","count":3})", true},
+            {R"({"name":"tests"})", true}, {R"({"count":3})", true},
+            {R"({"name":true})", false}}) {
+        Matcher m(dynamic);
+        bool accepted = true;
+        for (unsigned char c : example.first) if (!m.accept(c)) { accepted = false; break; }
+        REQUIRE((accepted && m.complete()) == example.second);
+    }
+    auto closed_dynamic = compiler.compile(R"({"type":"object","patternProperties":{"^count":{"type":"integer"}},"additionalProperties":false})", 5000000, true);
+    Matcher closed(closed_dynamic);
+    bool extra_allowed = true;
+    for (unsigned char c : std::string(R"({"name":"tests"})"))
+        if (!closed.accept(c)) { extra_allowed = false; break; }
+    REQUIRE(!extra_allowed);
     std::cout << "JSON schema: title bounds/types/keys, JSON object, native thinking budget, tools, speculation, checkpoints passed\n";
 }
 
