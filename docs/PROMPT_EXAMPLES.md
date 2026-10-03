@@ -4,6 +4,10 @@ Run the zero-example prompt first. If it fails, the qualification harness can
 start a fresh attempt with one example, then two, then three. Each attempt keeps
 its own request, response and result. A hinted success does not replace a failed
 baseline. The server does not retry, repair calls, or add hidden demonstrations.
+Here, zero means zero **added task demonstrations**. The model pack's fixed
+tool-format instructions, including its generic XML syntax skeleton, remain in
+every variant. Record the installed template hash when comparing models; replacing
+that native template is a separate variable.
 
 Start with the readable [empty-call example](codex/prompt-examples/windows-tools-get_goal.txt),
 [PowerShell example](codex/prompt-examples/windows-tools-exec_command.txt), and

@@ -13,6 +13,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import socketserver
 import subprocess
@@ -185,6 +186,36 @@ def inspect_stream(raw):
             "output_types": [i["type"] for i in final["output"]], "reassembles_final": True}
 
 
+def command_observations(commands):
+    """A later echo can mask an earlier command's exit status in either shell.
+
+    Keep the actual status and require the unittest summary/missing-file error
+    in the observed output. A successful echo alone is not a passing test run.
+    """
+    failed, passed, missing, masked = [], [], [], []
+    for index, command in enumerate(commands):
+        text, output = command['command'], command.get('aggregated_output', '')
+        zero = command.get('exit_code') == 0
+        if '-m unittest' in text and 'test_settings.py' in text:
+            summary = re.search(r'(?m)^Ran [1-9][0-9]* tests? in [^\r\n]+\r?\n\s*\r?\n(OK|FAILED\b[^\r\n]*)', output)
+            if summary and summary[1].startswith('FAILED'):
+                failed.append(index)
+                if zero:
+                    masked.append(index)
+            elif summary and summary[1] == 'OK' and zero:
+                passed.append(index)
+        if ('does-not-exist.fixture' in text and 'does-not-exist.fixture' in output and
+                any(word in output for word in ('PathNotFound', 'No such file or directory'))):
+            missing.append(index)
+            if zero:
+                masked.append(index)
+    return {'client_observed_failing_tests': bool(failed),
+            'client_verified_after_failure': bool(failed and passed and min(failed) < max(passed)),
+            'expected_missing_file_failure': bool(missing),
+            'errors_with_zero_shell_status': sorted(set(masked)),
+            'command_observation_version': 2}
+
+
 def run_once(args):
     base = args.base_url.rstrip("/")
     url = urlsplit(base)
@@ -335,6 +366,7 @@ Python is installed at {sys.executable}; quote the path when using PowerShell. S
                "argv": argv, "health": health}
     (out / "invocation.json").write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     started = time.monotonic()
+    process = None
     try:
         with (out / "codex-events.jsonl").open("w", encoding="utf-8") as stdout, \
              (out / "codex-stderr.txt").open("w", encoding="utf-8") as stderr:
@@ -353,15 +385,7 @@ Python is installed at {sys.executable}; quote the path when using PowerShell. S
         receipt["client_commands"] = [e["item"] for e in events if e.get("type") == "item.completed"
                                       and e.get("item", {}).get("type") == "command_execution"]
         commands = receipt["client_commands"]
-        test_commands = [(i, c) for i, c in enumerate(commands)
-                         if "-m unittest" in c["command"] and "test_settings.py" in c["command"]]
-        failed_tests = [i for i, c in test_commands if c.get("exit_code") not in (None, 0)]
-        passed_tests = [i for i, c in test_commands if c.get("exit_code") == 0]
-        receipt["client_observed_failing_tests"] = bool(failed_tests)
-        receipt["client_verified_after_failure"] = bool(failed_tests and passed_tests and min(failed_tests) < max(passed_tests))
-        receipt["expected_missing_file_failure"] = any("does-not-exist.fixture" in c["command"]
-            and c.get("exit_code") not in (None, 0) and any(word in c.get("aggregated_output", "") for word in
-                ("PathNotFound", "No such file or directory")) for c in commands)
+        receipt.update(command_observations(commands))
         rows = get("/api/requests")["requests"]
         exchanges = [get("/api/requests?id=" + row["id"]) for row in reversed(rows) if row["id"] not in before]
         (out / "exchanges.json").write_text(json.dumps(exchanges, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -411,7 +435,20 @@ Python is installed at {sys.executable}; quote the path when using PowerShell. S
             and receipt["all_streams_valid"] and receipt["untruncated_monitor"] and verification["passed"]
             and receipt["client_verified_after_failure"] and receipt["expected_missing_file_failure"]
             and run_tests.returncode == 0) else "fail"
+    except KeyboardInterrupt:
+        receipt.update(result='interrupted', elapsed_s=round(time.monotonic() - started, 3))
+        raise
+    except Exception as error:
+        receipt.update(result='harness_error', error=repr(error))
+        raise
     finally:
+        if process is not None and process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=10)
         for server in (proxy, relay):
             server.shutdown()
             server.server_close()
@@ -453,6 +490,12 @@ def main():
                 break
         else:
             report['result'] = 'fail'
+    except KeyboardInterrupt:
+        report['result'] = 'interrupted'
+        raise
+    except Exception as error:
+        report.update(result='harness_error', error=repr(error))
+        raise
     finally:
         (parent / 'result.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     return 0 if report['result'] == 'pass' else 1

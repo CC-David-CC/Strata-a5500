@@ -14,9 +14,26 @@ from responses_prompt_examples import (attempts, tool_examples, example_prefix, 
 from serve.frontend import OutputParser
 from serve.responses import native_tools
 from jsonschema import Draft202012Validator
+from responses_native_coding_probe import command_observations
 
 
 class PromptExamples(unittest.TestCase):
+    def test_real_shell_status_and_observed_subcommand_failure_are_separate(self):
+        command = 'python3 -B -m unittest -v test_settings.py; echo exit=$?'
+        failed = {'command': command, 'exit_code': 0, 'aggregated_output': 'Ran 12 tests in 0.002s\n\nFAILED (failures=4, errors=7)\nexit=1\n'}
+        passed = {'command': command, 'exit_code': 0, 'aggregated_output': 'Ran 12 tests in 0.002s\r\n\r\nOK\r\nexit=0\r\n'}
+        missing = {'command': "cat -- 'input files/does-not-exist.fixture'; echo exit=$?", 'exit_code': 0,
+                   'aggregated_output': "cat: 'input files/does-not-exist.fixture': No such file or directory\nexit=1\n"}
+        report = command_observations([failed, missing, passed])
+        self.assertTrue(report['client_observed_failing_tests'])
+        self.assertTrue(report['client_verified_after_failure'])
+        self.assertTrue(report['expected_missing_file_failure'])
+        self.assertEqual(report['errors_with_zero_shell_status'], [0, 1])
+        empty = {**passed, 'aggregated_output': 'exit=0\n'}
+        self.assertFalse(command_observations([failed, empty])['client_verified_after_failure'])
+        self.assertFalse(command_observations([passed, failed])['client_verified_after_failure'])
+        self.assertFalse(command_observations([{**missing, 'aggregated_output': 'No such file or directory'}])['expected_missing_file_failure'])
+
     def test_all_tools_both_shells_parse_to_declared_arguments(self):
         tools = json.loads((ROOT / 'docs/codex/tool-declarations-0.160.0.json').read_text(encoding='utf-8'))
         originals = copy.deepcopy(tools)
