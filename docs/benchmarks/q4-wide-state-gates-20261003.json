@@ -1,0 +1,735 @@
+{
+  "engine_source": "9f7fdeb",
+  "test_source": "71e3f8a",
+  "engine_sha256": {
+    "control": "618d2f8cc30ada07c6a529067d76e68f4ba2ac054445a7777b1fe54eb406494f",
+    "wide": "2f0929640b772b6736ee1bf663cc22b33973fa481940ffc0a09b238f461d95e2"
+  },
+  "gate": {
+    "micro": [
+      {
+        "name": "mmvq_multi_parity",
+        "parity": true,
+        "memcheck": true
+      },
+      {
+        "name": "wide_bf16_parity",
+        "parity": true,
+        "memcheck": true
+      },
+      {
+        "name": "iq_multi_parity",
+        "parity": true,
+        "memcheck": true
+      },
+      {
+        "name": "s2_expert_grouped_parity",
+        "parity": true,
+        "memcheck": true
+      },
+      {
+        "name": "gr_parity",
+        "parity": true,
+        "memcheck": true
+      }
+    ],
+    "state": [
+      {
+        "label": "real-t8",
+        "width": 8,
+        "depth": null,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 7,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 8,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 9,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 19,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "real-t12",
+        "width": 12,
+        "depth": null,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 11,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 12,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 13,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 27,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "real-t16",
+        "width": 16,
+        "depth": null,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 15,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 16,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 17,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 35,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "real-t18",
+        "width": 18,
+        "depth": null,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 17,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 18,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 19,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 39,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "real-t24",
+        "width": 24,
+        "depth": null,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 23,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 24,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 25,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          },
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject-1",
+        "width": 24,
+        "depth": -1,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject0",
+        "width": 24,
+        "depth": 0,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject1",
+        "width": 24,
+        "depth": 1,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject2",
+        "width": 24,
+        "depth": 2,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject3",
+        "width": 24,
+        "depth": 3,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject4",
+        "width": 24,
+        "depth": 4,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject5",
+        "width": 24,
+        "depth": 5,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject6",
+        "width": 24,
+        "depth": 6,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject7",
+        "width": 24,
+        "depth": 7,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject8",
+        "width": 24,
+        "depth": 8,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject9",
+        "width": 24,
+        "depth": 9,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject10",
+        "width": 24,
+        "depth": 10,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject11",
+        "width": 24,
+        "depth": 11,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject12",
+        "width": 24,
+        "depth": 12,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject13",
+        "width": 24,
+        "depth": 13,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject14",
+        "width": 24,
+        "depth": 14,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject15",
+        "width": 24,
+        "depth": 15,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject16",
+        "width": 24,
+        "depth": 16,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject17",
+        "width": 24,
+        "depth": 17,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject18",
+        "width": 24,
+        "depth": 18,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject19",
+        "width": 24,
+        "depth": 19,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject20",
+        "width": 24,
+        "depth": 20,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject21",
+        "width": 24,
+        "depth": 21,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t24-reject22",
+        "width": 24,
+        "depth": 22,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 51,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t12",
+        "width": 12,
+        "depth": 10,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 27,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t16",
+        "width": 16,
+        "depth": 14,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 35,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      },
+      {
+        "label": "oracle-t18",
+        "width": 18,
+        "depth": 16,
+        "passed": true,
+        "comparison": [
+          {
+            "cap": 39,
+            "tokens_match": true,
+            "different_state_fields": [],
+            "serial_consumed_ok": true,
+            "mtp_consumed_ok": true
+          }
+        ]
+      }
+    ],
+    "complete": true
+  },
+  "fixture_intervention": [
+    {
+      "variant": "historical",
+      "repeat": 0,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 0,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 1,
+      "exit": 0
+    },
+    {
+      "variant": "historical",
+      "repeat": 1,
+      "exit": 1
+    },
+    {
+      "variant": "historical",
+      "repeat": 2,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 2,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 3,
+      "exit": 0
+    },
+    {
+      "variant": "historical",
+      "repeat": 3,
+      "exit": 0
+    },
+    {
+      "variant": "historical",
+      "repeat": 4,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 4,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 5,
+      "exit": 0
+    },
+    {
+      "variant": "historical",
+      "repeat": 5,
+      "exit": 1
+    },
+    {
+      "variant": "historical",
+      "repeat": 6,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 6,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 7,
+      "exit": 0
+    },
+    {
+      "variant": "historical",
+      "repeat": 7,
+      "exit": 0
+    },
+    {
+      "variant": "historical",
+      "repeat": 8,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 8,
+      "exit": 0
+    },
+    {
+      "variant": "copy-dependency",
+      "repeat": 9,
+      "exit": 0
+    },
+    {
+      "variant": "historical",
+      "repeat": 9,
+      "exit": 0
+    }
+  ],
+  "cross_build_gate_passed": true,
+  "input_tokens_for_state_checks": 8192,
+  "state_allocated_context": 16384,
+  "hardware": "llm-60, RTX PRO 6000 Blackwell Workstation Edition 96 GB, 128 GB installed RAM",
+  "evidence_archives": {
+    "wide-state-evidence.tar.gz": "00ea72e0cd796f655035a94a1f63571651d492724e1b7bffa93c8a17e3a18586",
+    "hc-fixture-evidence.tar.gz": "e836b43e43b4f7e991303c5d6acabd20dc7048e8ec2b160c2715809d3758dbb6"
+  }
+}
