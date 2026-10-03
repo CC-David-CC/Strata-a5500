@@ -70,6 +70,9 @@ struct PrefixMasks {
 
 class Matcher {
 public:
+    // JSON bounds/alternatives and discarded speculative masks share this
+    // sequence budget. Raw GBNF retains its smaller existing default.
+    static constexpr uint64_t kJsonWorkLimit = 64000000;
     explicit Matcher(std::shared_ptr<const Compiled> compiled, uint64_t work_limit = 2000000, Scope scope = {});
     ~Matcher();
     Matcher(Matcher&&) noexcept;
@@ -106,6 +109,10 @@ private:
 
 class Compiler {
 public:
+    // Bounded string lengths expand the schema automaton across the vocabulary.
+    // Codex's 36-character title uses >100M work units with Qwen's 248K tokens.
+    // The independent 2.5s deadline and 16 MiB compiled-size limit still apply.
+    static constexpr uint64_t kJsonWorkLimit = 150000000;
     explicit Compiler(std::shared_ptr<const Vocabulary> vocabulary, size_t entries = 8,
                       size_t cache_bytes = 64 * 1024 * 1024);
     ~Compiler();

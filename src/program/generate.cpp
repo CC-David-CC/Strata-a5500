@@ -4149,7 +4149,8 @@ int main(int argc, char** argv) {
                 grammar_protocol = vocab->protocol;
                 grammar_compiler = std::make_unique<strata::grammar::Compiler>(std::move(vocab));
             }
-            return grammar_compiler->compile(source, 5000000, json_schema);
+            return grammar_compiler->compile(source,
+                json_schema ? strata::grammar::Compiler::kJsonWorkLimit : 5000000, json_schema);
         };
 #else
         const bool grammar_capable = false;
@@ -5138,7 +5139,8 @@ int main(int argc, char** argv) {
                 try {
                     // Same compiler and initial matcher as GEN. No prompt, KV,
                     // sampler or generation state is touched by this command.
-                    strata::grammar::Matcher checked(compile_grammar(input.grammar, input.json_schema), 2000000,
+                    strata::grammar::Matcher checked(compile_grammar(input.grammar, input.json_schema),
+                        input.json_schema ? strata::grammar::Matcher::kJsonWorkLimit : 2000000,
                                                      {input.thinking, input.tools});
                     checked.mask();
                     // Python verifies the same special IDs as well as emitted bytes.
@@ -5236,7 +5238,8 @@ int main(int argc, char** argv) {
                 }
 #ifdef STRATA_ENABLE_GBNF
                 try {
-                    matcher = std::make_unique<strata::grammar::Matcher>(compile_grammar(input.grammar, input.json_schema), 2000000,
+                    matcher = std::make_unique<strata::grammar::Matcher>(compile_grammar(input.grammar, input.json_schema),
+                        input.json_schema ? strata::grammar::Matcher::kJsonWorkLimit : 2000000,
                                 strata::grammar::Scope{input.thinking, input.tools, input.reasoning_tokens});
                 } catch (const std::exception& error) {
                     std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());

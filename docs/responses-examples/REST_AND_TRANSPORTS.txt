@@ -9,4 +9,5 @@ POST /v1/responses/compact -- excluded compaction.
 POST /v1/responses/input_tokens -- not implemented in this adapter.
 WebSocket /v1/responses, response.create -- excluded; HTTP profile only.
 
-No background worker, conversation DB, hosted tools or JSON-constraint frontend is implied.
+No background worker, conversation DB or hosted tools are implied.
+Native JSON answer constraints are documented in ../JSON_OUTPUT.md.

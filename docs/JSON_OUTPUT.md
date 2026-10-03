@@ -64,7 +64,13 @@ token is legal. No prompt text is injected to force a wrap-up. Speculative forks
 and checkpoints preserve the same counter. JSON generation has the existing
 8192-token maximum and 8192-byte schema bound; an omitted output limit uses the
 smaller of available context and that token maximum. Total request and native
-work/memory bounds remain active. Unsatisfiable or unrepresentable schemas can
+work/memory bounds remain active. Schema compilation has a 150-million-unit work
+ceiling, a 2.5-second operation deadline and a 16 MiB compiled-size limit. The
+Codex title schema takes about 1.2 seconds and 5.2 MiB with this Qwen 248K-token
+vocabulary on llm-49; the earlier 5-million-unit raw-grammar limit rejected it.
+JSON matching has a 64-million-unit sequence budget, including discarded speculative
+work, with the existing per-operation deadline. Raw GBNF's budgets are unchanged.
+Unsatisfiable or unrepresentable schemas can
 fail preflight, and validation failures are not silently retried.
 
 The legacy Chat Completions `response_format` implementation is unchanged. The

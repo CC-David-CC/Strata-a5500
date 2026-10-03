@@ -265,6 +265,30 @@ static void json_unit() {
     std::cout << "JSON schema: title bounds/types/keys, JSON object, native thinking budget, tools, speculation, checkpoints passed\n";
 }
 
+static void json_pack(const std::shared_ptr<const Vocabulary>& vocab) {
+    Compiler compiler(vocab);
+    const std::string schema = R"({"type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":36}},"required":["title"],"additionalProperties":false})";
+    const auto begin = std::chrono::steady_clock::now();
+    auto compiled = compiler.compile(schema, Compiler::kJsonWorkLimit, true);
+    std::unordered_map<std::string, int32_t> byte_id;
+    for (size_t id = 0; id < vocab->bytes.size(); ++id)
+        if (vocab->bytes[id].size() == 1) byte_id[vocab->bytes[id]] = (int32_t)id;
+    for (const auto& sample : std::vector<std::pair<std::string, bool>>{
+            {R"({"title":"Fix addition"})", true}, {R"({"title":""})", false},
+            {R"({"title":"012345678901234567890123456789012345"})", true},
+            {R"({"title":"0123456789012345678901234567890123456"})", false}}) {
+        Matcher matcher(compiled, Matcher::kJsonWorkLimit);
+        bool accepted = true;
+        for (char c : sample.first)
+            if (!matcher.accept(byte_id.at(std::string(1, c)))) { accepted = false; break; }
+        REQUIRE((accepted && matcher.complete()) == sample.second);
+    }
+    std::cout << "JSON title with actual vocabulary: " << vocab->bytes.size() << " tokens, "
+              << compiler.cache_bytes() << " compiled bytes, "
+              << std::chrono::duration<double>(std::chrono::steady_clock::now() - begin).count()
+              << " seconds; required/nonempty/length constraints passed\n";
+}
+
 int main(int argc, char** argv) {
     try {
         if (argc != 2 && argc != 4) throw std::runtime_error("usage: grammar_native_test CASES [TOKENIZER_DIR VOCAB_AUDIT]");
@@ -279,6 +303,7 @@ int main(int argc, char** argv) {
         if (argc == 4) {
             auto actual = Vocabulary::from_pack(argv[2], {248044, 248046});
             corpus(argv[1], actual);
+            json_pack(actual);
             dump_vocab(*actual, argv[3]);
         }
         std::cout << "grammar native tests passed (" << kBackend << ")\n";

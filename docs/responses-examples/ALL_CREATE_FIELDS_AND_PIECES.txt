@@ -1,6 +1,6 @@
 COMPLETE PINNED CREATE-REQUEST FIELD/PIECE INVENTORY
 Source: openai-python 3.23.0 TypedDict definitions, rendered by Pydantic TypeAdapter.
-This describes WIRE TYPES only. It adds no JSON Schema output support to Strata.
+This describes WIRE TYPES only. See ../JSON_OUTPUT.md for the native JSON support added after this inventory.
 anyOf/oneOf list alternative shapes; they must not all be combined into one request.
 References resolve to the named pieces below. Required lists and enum choices are included.
 The root covers stream:false; stream:true selects SSE without changing these request pieces.

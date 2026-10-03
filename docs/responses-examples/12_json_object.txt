@@ -1,5 +1,5 @@
 SYNTHETIC DOCUMENTATION EXAMPLE
-Status: Excluded
+Status: Supported by the native gbnf-v4 build with requirements-json.txt
 
 POST /v1/responses
 Content-Type: application/json
@@ -7,7 +7,7 @@ Content-Type: application/json
 {
   "model": "qwen3.8-flash-next",
   "store": false,
-  "input": "Hello.",
+  "input": "Return a JSON object with a brief greeting in an answer field.",
   "text": {
     "format": {
       "type": "json_object"

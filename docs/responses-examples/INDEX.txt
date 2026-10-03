@@ -14,8 +14,8 @@ Read support labels: requested/in-progress and excluded cases are not certified 
 08_reasoning_summary.txt: Supported; a bounded second service pass genuinely generates the summary
 09_encrypted_reasoning.txt: Supported authenticated Strata-issued replay tokens; deployment key survives restarts
 10_reasoning_replay.txt: Real encryption of synthetic data under a PUBLIC THROWAWAY EXAMPLE KEY; not accepted by your deployment
-11_json_schema_EXCLUDED.txt: Excluded; documentation example is not an implementation
-12_json_object_EXCLUDED.txt: Excluded
+11_json_schema.txt: Native JSON Schema answer decoding and mandatory final validation; gbnf-v4 required
+12_json_object.txt: Native JSON object answer decoding; gbnf-v4 required
 13_strict_function_EXCLUDED.txt: Excluded; strict:true and omitted strict are rejected
 14_custom_lark_EXCLUDED.txt: Excluded; raw GBNF does not implement Lark custom tools
 15_storage_EXCLUDED.txt: Excluded; no response store
