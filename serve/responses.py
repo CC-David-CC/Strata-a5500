@@ -79,8 +79,6 @@ def validate_request(request, svc):
         req.setdefault(key, default)
         if type(req[key]) is not bool:
             raise RequestError("expected a boolean", key)
-    if req["stream"]:
-        unsupported("streaming is not enabled in this phase", "stream")
     if req["background"]:
         unsupported("background execution is not supported", "background")
     if req.get("previous_response_id") is not None:
@@ -263,7 +261,10 @@ class ResponseAssembler:
                 "total_tokens": self.input_tokens + count,
                 "input_tokens_details": {"cached_tokens": min(done.get("reused") or 0, self.input_tokens)},
                 "output_tokens_details": {"reasoning_tokens": 0}}
-        out.append(self.event("response." + terminal, response=self.snapshot()))
+        # Transport cancellation follows a disconnected connection. There is no
+        # documented response.cancelled SSE event and no cancel endpoint here.
+        if terminal != "cancelled":
+            out.append(self.event("response." + terminal, response=self.snapshot()))
         return out
 
 
@@ -334,9 +335,15 @@ def execute_response(svc, prepared, cancel):
             raise
         yield from owner.finalize_response("fail", error={"code": "server_error", "message": str(exc)})
     finally:
-        if iterator is not None:
-            iterator.close()
-        if owner.response["status"] not in TERMINAL:
-            # Cleanup has now confirmed work stopped; a cancellation request alone
-            # never changes the canonical response to cancelled.
-            owner.finalize_response("stopped")
+        try:
+            if iterator is not None:
+                iterator.close()
+        except Exception as exc:
+            if owner.response["status"] not in TERMINAL:
+                owner.finalize_response("fail", error={"code": "server_error", "message": str(exc)})
+            raise
+        else:
+            if owner.response["status"] not in TERMINAL:
+                # Cleanup has confirmed work stopped; requesting cancellation
+                # alone never changes the canonical response to cancelled.
+                owner.finalize_response("stopped")

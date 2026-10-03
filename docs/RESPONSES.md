@@ -55,7 +55,7 @@ Configured sampling defaults remain in effect when a request omits them.
 | Retrieve/delete/cancel/background | Not implemented. Disconnects use existing cancellation/draining. |
 | `text.format` | Omitted or `{"type":"text"}` only. |
 | JSON Schema / JSON-object generation | Excluded; no strict enforcement claim or object-only fallback. |
-| Streaming | R2 gate; rejected until that phase passes. |
+| Streaming | Typed SSE from the same assembler as final JSON; set `stream:true`. |
 | Function calls | R3 gate; rejected until that phase passes. |
 | Reasoning summaries/encryption, image/audio, hosted tools, compaction, WebSockets | Unsupported; rejected. |
 | Raw GBNF | Rejected until a separate native grammar contribution passes its gates. |
@@ -65,6 +65,15 @@ user message to your supplied history. Resend any instructions you still want.
 Responses and runtime handles are request-local; no parent record exists to mutate.
 The optional existing API monitor can retain its usual bounded diagnostics in
 memory. That is not Responses storage or a conversation continuation mechanism.
+
+For streaming, pass `stream=True` to the same SDK call and iterate the returned
+events. Text arrives as `response.output_text.delta`; terminal events are
+`response.completed`, `response.incomplete` (output budget), or `response.failed`.
+The stream includes lifecycle, output-item and content-part events with stable
+indexes/IDs and increasing sequence numbers. Keep-alives are SSE comments.
+Validation errors are JSON HTTP errors before SSE headers. A disconnected client
+cannot receive a terminal event; existing cancellation drains/stops work before
+the next request owns the engine. There is no custom cancellation SSE event.
 
 ## Ownership and tests
 

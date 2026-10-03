@@ -2440,11 +2440,30 @@ def make_handler(svc: Service):
             try:
                 prepared = create_response(svc, req)
                 events = execute_response(svc, prepared, cancel)
-                for _ in events:
-                    pass
+                if req.get("stream"):
+                    self._sse()
+                for event in events:
+                    if cancel.is_set() and prepared.assembler.response["status"] != "failed":
+                        return
+                    if event is not None and "response" in event:
+                        self._note(response_status=event["response"]["status"])
+                    if req.get("stream"):
+                        frame = b": keep-alive\n\n" if event is None else (
+                            f"event: {event['type']}\n".encode() + b"data: " +
+                            json.dumps(event, ensure_ascii=False).encode("utf-8") + b"\n\n")
+                        self.wfile.write(frame)
+                        self.wfile.flush()
+                if cancel.is_set() and prepared.assembler.response["status"] != "failed":
+                    return
                 result = prepared.assembler.snapshot()
                 self._note(outcome=result["status"])
-                self._json(500 if result["status"] == "failed" else 200, result)
+                if req.get("stream"):
+                    if self.record is not None:
+                        raw = json.dumps(result, ensure_ascii=False)
+                        self._note(response=raw[:262144], response_truncated=len(raw) > 262144,
+                                   usage=result["usage"], error=result["error"])
+                else:
+                    self._json(500 if result["status"] == "failed" else 200, result)
             except RequestError as exc:
                 self._json(exc.status, exc.wire())
             except (EngineDied, EngineStarting, EngineStuck, GpuBusy) as exc:

@@ -9,9 +9,11 @@ import contextlib
 import copy
 import io
 import json
+import socket
 from pathlib import Path
 import tempfile
 import threading
+import time
 import unittest
 import urllib.error
 import urllib.request
@@ -40,7 +42,8 @@ def request(**kwargs):
 
 @contextlib.contextmanager
 def listening(svc):
-    httpd = server.serve(svc, port=0)
+    with mock.patch.object(svc, "start_telemetry"):
+        httpd = server.serve(svc, port=0)
     try:
         yield f"http://127.0.0.1:{httpd.server_address[1]}"
     finally:
@@ -85,7 +88,7 @@ class Normalization(unittest.TestCase):
         self.assertEqual(req, original)
 
     def test_unsupported_capabilities_rejected_before_load(self):
-        cases = [dict(previous_response_id="resp_missing"), dict(background=True), dict(stream=True),
+        cases = [dict(previous_response_id="resp_missing"), dict(background=True),
                  dict(text={"format": {"type": "json_schema", "schema": {}}}),
                  dict(text={"format": {"type": "json_object"}}), dict(text={"verbosity": "high"}),
                  dict(reasoning={"summary": "auto"}), dict(include=["reasoning.encrypted_content"]),
@@ -220,10 +223,225 @@ class Startup(unittest.TestCase):
                 if flag:
                     argv.append("--experimental-responses")
                 with mock.patch("sys.argv", argv), mock.patch.object(server, "serve") as start, \
-                     mock.patch.object(server.time, "sleep", side_effect=KeyboardInterrupt), \
+                     mock.patch.object(server, "time", mock.Mock(wraps=time, sleep=mock.Mock(side_effect=KeyboardInterrupt))), \
                      mock.patch.object(server.signal, "signal"), contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(server.main(), 0)
                 self.assertIs(start.call_args.args[0].experimental_responses, expected)
+
+
+def sse_events(raw):
+    events, comments = [], []
+    for block in raw.decode("utf-8").split("\n\n"):
+        if not block:
+            continue
+        if block.startswith(":"):
+            comments.append(block)
+            continue
+        lines = block.splitlines()
+        name = next(line[7:] for line in lines if line.startswith("event: "))
+        event = json.loads("\n".join(line[6:] for line in lines if line.startswith("data: ")))
+        if name != event["type"]:
+            raise AssertionError("SSE name differs from JSON event type")
+        events.append(event)
+    return events, comments
+
+
+def normalized(obj):
+    if isinstance(obj, list):
+        return [normalized(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: ("<volatile>" if k in ("id", "call_id", "created_at", "completed_at") and v is not None
+                    else normalized(v)) for k, v in obj.items()}
+    return obj
+
+
+class Streaming(unittest.TestCase):
+    def test_unicode_reassembly_matches_final_json(self):
+        text = 'A 猫 🐈 e\u0301\n"quoted" \\ end'
+        svc = service(text)
+        with listening(svc) as base:
+            code, _, body = http(base, request())
+            self.assertEqual(code, 200)
+            final = json.loads(body)
+            code, headers, raw = http(base, request(stream=True))
+        self.assertEqual(code, 200)
+        self.assertEqual(headers["Content-Type"], "text/event-stream")
+        self.assertNotIn(b"[DONE]", raw)
+        events, _ = sse_events(raw)
+        self.assertEqual([e["sequence_number"] for e in events], list(range(len(events))))
+        self.assertEqual([e["type"] for e in events[:4]], ["response.created", "response.in_progress",
+            "response.output_item.added", "response.content_part.added"])
+        self.assertEqual(events[0]["response"]["output"], [])
+        item_id = events[2]["item"]["id"]
+        text_so_far = ""
+        for event in events[3:]:
+            if "item_id" in event:
+                self.assertEqual(event["item_id"], item_id)
+                self.assertEqual(event["output_index"], 0)
+                self.assertEqual(event["content_index"], 0)
+            if event["type"] == "response.output_text.delta":
+                text_so_far += event["delta"]
+            elif event["type"] == "response.output_text.done":
+                self.assertEqual(event["text"], text_so_far)
+            elif event["type"] == "response.content_part.done":
+                self.assertEqual(event["part"]["text"], text_so_far)
+            elif event["type"] == "response.output_item.done":
+                self.assertEqual(event["item"]["content"][0]["text"], text_so_far)
+        self.assertEqual(text_so_far, text)
+        self.assertEqual(events[-1]["type"], "response.completed")
+        self.assertEqual(normalized(events[-1]["response"]), normalized(final))
+
+    def test_empty_response_and_output_limit(self):
+        for text, cap, expected in (("", 10, "completed"), ("abcdef", 2, "incomplete")):
+            with self.subTest(expected=expected), listening(service(text)) as base:
+                code, _, raw = http(base, request(stream=True, max_output_tokens=cap))
+                self.assertEqual(code, 200)
+                events, _ = sse_events(raw)
+                self.assertEqual(events[-1]["type"], "response." + expected)
+                self.assertEqual(sum(e["type"] in ("response.completed", "response.incomplete", "response.failed")
+                                     for e in events), 1)
+                if text:
+                    self.assertEqual(events[-1]["response"]["output"][0]["content"][0]["text"], "ab")
+
+    def test_preflight_error_precedes_stream_headers(self):
+        svc = service()
+        with listening(svc) as base:
+            for body in (request(stream=True, store=True), request(stream=True, max_output_tokens=999999)):
+                code, headers, _ = http(base, body)
+                self.assertEqual(code, 400)
+                self.assertEqual(headers["Content-Type"], "application/json")
+            with mock.patch.object(svc, "load", side_effect=server.EngineStarting("not ready")):
+                code, headers, _ = http(base, request(stream=True))
+                self.assertEqual(code, 503)
+                self.assertEqual(headers["Content-Type"], "application/json")
+
+    def test_error_after_headers_is_failed_and_next_request_works(self):
+        for fail_after in (0, 3):
+            class FaultEngine(server.MockEngine):
+                fail = True
+                closed = False
+
+                def generate(self, *args, **kwargs):
+                    try:
+                        if self.fail:
+                            self.fail = False
+                            yield None
+                            for n, token in enumerate(super().generate(*args, **kwargs)):
+                                if n == fail_after:
+                                    raise server.EngineDied("scripted generation failure")
+                                yield token
+                        else:
+                            yield from super().generate(*args, **kwargs)
+                    finally:
+                        self.closed = True
+
+            svc = service("abcdef", engine_class=FaultEngine)
+            with self.subTest(fail_after=fail_after), listening(svc) as base:
+                code, _, raw = http(base, request(stream=True))
+                self.assertEqual(code, 200)
+                events, comments = sse_events(raw)
+                self.assertIn(": keep-alive", comments)
+                self.assertEqual(events[-1]["type"], "response.failed")
+                self.assertNotIn("response.completed", [e["type"] for e in events])
+                self.assertTrue(svc.engine.closed)
+                self.assertFalse(svc.status["busy"])
+                code, _, body = http(base, request())
+                self.assertEqual(code, 200)
+                self.assertEqual(json.loads(body)["output"][0]["content"][0]["text"], "abcdef")
+
+    def test_missing_done_is_failure_not_completion(self):
+        svc = service()
+        p = create_response(svc, request())
+        def broken(*args, **kwargs):
+            yield "start", None
+            yield "event", Event("content", "partial")
+        with mock.patch.object(svc, "run", broken):
+            events = list(execute_response(svc, p, threading.Event()))
+        self.assertEqual(events[-1]["type"], "response.failed")
+        self.assertIn("without a generation outcome", events[-1]["response"]["error"]["message"])
+
+    def test_nonstream_failure_is_not_http_success(self):
+        svc = service()
+        def broken(*args, **kwargs):
+            yield "start", None
+            raise ValueError("scripted failure")
+        with listening(svc) as base, mock.patch.object(svc, "run", broken):
+            code, _, body = http(base, request())
+            self.assertEqual(code, 500)
+            self.assertEqual(json.loads(body)["status"], "failed")
+
+    def test_iterator_close_confirms_stop_after_drain(self):
+        svc = service()
+        p = create_response(svc, request())
+        cancel = threading.Event()
+        observed = []
+        def running(*args, **kwargs):
+            try:
+                yield "start", None
+                yield "event", Event("content", "x")
+                yield "ping", None
+            finally:
+                observed.append((cancel.is_set(), p.assembler.snapshot()["status"]))
+        with mock.patch.object(svc, "run", running):
+            events = execute_response(svc, p, cancel)
+            while next(events)["type"] != "response.output_text.delta":
+                pass
+            cancel.set()
+            self.assertEqual(p.assembler.snapshot()["status"], "in_progress")
+            events.close()
+        self.assertEqual(observed, [(True, "in_progress")])
+        self.assertEqual(p.assembler.snapshot()["status"], "cancelled")
+
+    def test_disconnect_queued_prefill_decode_and_next_request(self):
+        for phase in ("queued", "prefill", "decode"):
+            class BlockingEngine(server.MockEngine):
+                calls = 0
+                stopped = threading.Event()
+
+                def generate(self, ids, max_new, sampling, cancel):
+                    self.calls += 1
+                    if phase != "queued" and self.calls == 1:
+                        try:
+                            if phase == "decode":
+                                yield from self.tok.encode("partial")
+                            while not cancel.wait(0.02):
+                                yield None
+                        finally:
+                            self.stopped.set()
+                        return
+                    yield from super().generate(ids, max_new, sampling, cancel)
+
+            svc = service("next request", engine_class=BlockingEngine)
+            with self.subTest(phase=phase), listening(svc) as base:
+                if phase == "queued":
+                    svc.fifo.acquire()
+                port = int(base.rsplit(":", 1)[1])
+                sock = socket.create_connection(("127.0.0.1", port), timeout=5)
+                body = json.dumps(request(stream=True)).encode()
+                sock.sendall(b"POST /v1/responses HTTP/1.0\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\n" +
+                             f"Content-Length: {len(body)}\r\n\r\n".encode() + body)
+                target = b"response.created" if phase == "queued" else (
+                    b"response.output_text.delta" if phase == "decode" else b": keep-alive")
+                received = b""
+                while target not in received:
+                    received += sock.recv(65536)
+                sock.shutdown(socket.SHUT_RDWR)
+                sock.close()
+                if phase == "queued":
+                    time.sleep(0.65)  # existing disconnect watcher runs every 0.5 seconds
+                    svc.fifo.release()
+                else:
+                    self.assertTrue(svc.engine.stopped.wait(4), "engine was not stopped/drained")
+                deadline = time.monotonic() + 4
+                while (svc.status["busy"] or svc.status["queued"]) and time.monotonic() < deadline:
+                    time.sleep(0.02)
+                self.assertFalse(svc.status["busy"])
+                self.assertEqual(svc.status["queued"], 0)
+                if phase == "queued":
+                    self.assertEqual(svc.engine.calls, 0)
+                code, _, body = http(base, request())
+                self.assertEqual(code, 200)
+                self.assertEqual(json.loads(body)["output"][0]["content"][0]["text"], "next request")
 
 
 if __name__ == "__main__":
