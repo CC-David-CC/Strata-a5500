@@ -9,7 +9,13 @@ namespace {
 // The shape of a round's cost by window size, relative to one token, used only for sizes not measured yet (the
 // measured round times replace it). Between the RTX 5070's measured curves: +10 ms per token with every missed expert
 // on the CPU (bench/results/2026-09-27-spec/window-cost), flatter with the default CPU/DMA split.
-constexpr double kShape[DraftPolicy::kMaxT + 1] = {0.0, 1.0, 1.35, 1.7, 2.05, 2.45, 2.85, 3.25, 3.6};
+constexpr double kShape[] = {0.0, 1.0, 1.35, 1.7, 2.05, 2.45, 2.85, 3.25, 3.6};
+constexpr double prior_shape(int t) {
+    // Preserve the eight-position prior. Wider builds must not silently
+    // zero-initialize their costs: that produces division by zero/NaN in the
+    // policy. Continue the last slope until actual observations replace it.
+    return t <= 8 ? kShape[t] : kShape[8] + (t - 8) * (kShape[8] - kShape[7]);
+}
 constexpr double kCostAlpha = 0.1;    // EMA weight of a new round time
 constexpr double kTokAlpha = 0.05;    // EMA weight of a new MTP window outcome
 constexpr double kDecay = 0.97;       // lookup counts: older windows fade
@@ -41,10 +47,10 @@ double DraftPolicy::cost_ms(int t) const {
     for (int u = 1; u <= kMaxT; ++u)
         if (cost_n_[u] > 0) {
             const double w = std::min(cost_n_[u], 20.0);
-            num += w * cost_[u] * kShape[t] / kShape[u];
+            num += w * cost_[u] * prior_shape(t) / prior_shape(u);
             den += w;
         }
-    return den > 0 ? num / den : kShape[t];
+    return den > 0 ? num / den : prior_shape(t);
 }
 
 double DraftPolicy::mtp_tokens(int t) const {

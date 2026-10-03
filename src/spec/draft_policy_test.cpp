@@ -9,6 +9,7 @@
 #include "strata/spec/draft_policy.hpp"
 
 #include <cstdio>
+#include <cmath>
 
 using strata::spec::DraftPolicy;
 
@@ -23,6 +24,33 @@ double cost(int t) { return 19.0 + 10.5 * (t - 1); }   // ms per round, measured
 
 int main() {
     std::printf("draft_policy_test\n");
+    {
+        DraftPolicy p(DraftPolicy::kMaxT);
+        bool valid = true;
+        double previous = 0;
+        for (int t = 1; t <= DraftPolicy::kMaxT; ++t) {
+            const double value = p.cost_ms(t);
+            valid &= std::isfinite(value) && value > previous;
+            previous = value;
+        }
+        check(valid, "every compiled width starts with a finite positive increasing cost");
+    }
+    {
+        bool valid = true;
+        // A lone observation of a wide window used to divide by its zero
+        // prior and poison estimates for other widths with Inf or NaN.
+        for (int seen = 1; seen <= DraftPolicy::kMaxT; ++seen) {
+            DraftPolicy p(DraftPolicy::kMaxT);
+            p.observe(true, seen, seen - 1, 40, cost(seen));
+            for (int t = 1; t <= DraftPolicy::kMaxT; ++t) {
+                const double value = p.cost_ms(t);
+                valid &= std::isfinite(value) && value > 0;
+            }
+            const auto pick = p.choose(1, DraftPolicy::kMaxT - 1, 40);
+            valid &= pick.t >= 1 && pick.t <= DraftPolicy::kMaxT;
+        }
+        check(valid, "observing any width keeps every remaining cost finite and positive");
+    }
     {
         DraftPolicy p(6);
         for (int i = 0; i < 50; ++i) p.observe(false, 4, 2, 0, cost(4));   // MTP windows of 4: 3 tokens each
