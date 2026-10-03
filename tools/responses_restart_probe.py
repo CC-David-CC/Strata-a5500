@@ -1,7 +1,7 @@
 """Prove encrypted full-history replay across two actual server processes.
 
 Both processes use MockEngine/ByteTokenizer; model output is explicitly synthetic.
-Only the deployment key persists. No response records or native/GPU state survive.
+Only the environment's deployment key persists. No response records or native/GPU state survive.
 """
 from __future__ import annotations
 import argparse
@@ -20,17 +20,19 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from serve.frontend import ChatTemplate
 from serve.response_replay import ReplayCodec
+from serve.response_replay import KEY_ENV
+from cryptography.fernet import Fernet
 from serve.server import ByteTokenizer, MockEngine, Server, Service, make_handler
 
 MODEL = "qwen3.8-flash-next"
 
 
-def child(key, turn):
+def child(turn):
     tok = ByteTokenizer()
     script = "Unique earlier reasoning marker.</think>Earlier answer." if turn == 1 else "Restarted answer."
     svc = Service(MockEngine(tok, script), tok, ChatTemplate(ROOT / "serve/chat_template.jinja"))
     svc.experimental_responses = True
-    svc.responses_replay = ReplayCodec.load(key)
+    svc.responses_replay = ReplayCodec.load()
     httpd = Server(("127.0.0.1", 0), make_handler(svc))
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
@@ -47,8 +49,9 @@ def child(key, turn):
 
 @contextlib.contextmanager
 def process(key, turn, evidence):
-    command = [sys.executable, str(Path(__file__).resolve()), "--child", str(turn), "--key", str(key)]
-    proc = subprocess.Popen(command, cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+    command = [sys.executable, str(Path(__file__).resolve()), "--child", str(turn)]
+    env = {**os.environ, KEY_ENV: key}
+    proc = subprocess.Popen(command, cwd=ROOT, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             text=True, encoding="utf-8")
     lines, ready = [], queue.Queue()
 
@@ -89,16 +92,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path)
     ap.add_argument("--child", type=int)
-    ap.add_argument("--key", type=Path)
     a = ap.parse_args()
     if a.child:
-        return child(a.key, a.child)
+        return child(a.child)
     if a.out is None:
         ap.error("--out is required")
     a.out.mkdir(parents=True, exist_ok=True)
     logs = []
     with tempfile.TemporaryDirectory(prefix="responses-restart-") as temporary:
-        key = Path(temporary) / "responses.key"
+        key = Fernet.generate_key().decode("ascii")
         with process(key, 1, logs) as first:
             response = post(first["base"], {"model": MODEL, "store": False, "input": "Earlier question", "reasoning": {"effort": "low"}})
         history = [{"role": "user", "content": "Earlier question"}] + response["output"]
@@ -110,10 +112,10 @@ def main():
         assert final["status"] == "completed" and final["output"][0]["content"][0]["text"] == "Restarted answer."
         assert json.loads(logs[-1])["prompt_contains_earlier_reasoning"] is True
         assert json.loads(logs[-1])["response_store_exists"] is False
-        assert [p.name for p in Path(temporary).iterdir()] == ["responses.key"]
+        assert list(Path(temporary).iterdir()) == []
     receipt = {"result": "pass", "server_pids": [first["pid"], second["pid"]],
                "server": "Strata HTTP + Service + MockEngine", "model_output_provenance": "synthetic scripts in this probe",
-               "persisted_files": ["deployment key only"], "encrypted_only_reasoning_replayed": True,
+               "persisted_files": [], "reused_configuration": "deployment key environment variable", "encrypted_only_reasoning_replayed": True,
                "no_response_store": True, "native_inference_test": False}
     (a.out / "restart-probe.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     (a.out / "restart-server-log.txt").write_text("".join(logs), encoding="utf-8")

@@ -9,6 +9,7 @@ import contextlib
 import copy
 import io
 import json
+import os
 import socket
 from pathlib import Path
 import tempfile
@@ -24,7 +25,7 @@ from serve import server
 from serve.frontend import ChatTemplate, Event, ToolCall
 from serve.responses import (RequestError, create_response, execute_response, resolve_input,
                              strict_json, transition, validate_request)
-from serve.response_replay import ReplayCodec
+from serve.response_replay import KEY_ENV, ReplayCodec
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL = "qwen3.8-flash-next"
@@ -682,15 +683,15 @@ class Reasoning(unittest.TestCase):
         self.assertEqual(again.assembler.snapshot()["output"][0]["content"][0]["text"], "Replay worked.")
 
     def test_replay_key_restart_and_tampering(self):
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "responses.key"
+        key = Fernet.generate_key().decode("ascii")
+        with mock.patch.dict(os.environ, {KEY_ENV: key}):
             svc = service("visible thought</think>answer")
-            svc.responses_replay = ReplayCodec.load(path)
+            svc.responses_replay = ReplayCodec.load()
             p = create_response(svc, request(reasoning={"effort": "low"}))
             list(execute_response(svc, p, threading.Event()))
             item = p.assembler.snapshot()["output"][0]
             original = copy.deepcopy(item)
-            restored = ReplayCodec.load(path).restore(MODEL, item)
+            restored = ReplayCodec.load().restore(MODEL, item)
             self.assertEqual(restored["content"], item["content"])
             self.assertEqual(item, original)
             broken = item["encrypted_content"][:-6] + "X" + item["encrypted_content"][-5:]
@@ -703,10 +704,9 @@ class Reasoning(unittest.TestCase):
                     svc.responses_replay.restore(model, wrong)
             with self.assertRaises(ValueError):
                 ReplayCodec(Fernet.generate_key()).restore(MODEL, item)
-            path.write_bytes(b"invalid key")
-            with self.assertRaises(ValueError):
-                ReplayCodec.load(path)
-            self.assertEqual(path.read_bytes(), b"invalid key")
+        for invalid in ("", "invalid key"):
+            with mock.patch.dict(os.environ, {KEY_ENV: invalid}), self.assertRaises(ValueError):
+                ReplayCodec.load()
 
     def test_summary_limit_and_failure_are_terminal_once(self):
         for script, expected in (("long summary " * 20, "incomplete"),

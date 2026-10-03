@@ -1,7 +1,7 @@
 EXECUTED ENCRYPTION ROUND TRIP, SYNTHETIC PUBLIC FIXTURE
 Purpose: opaque reasoning replay state (the model's earlier reasoning, not a hidden instruction).
 Fernet authenticated encryption using serve/response_replay.py; this file shows the actual payload.
-This public key is for this example only. A real server creates its own private deployment key.
+This public key is for this example only. A real deployment supplies its private key in the environment.
 No private payload or another provider's encrypted blob was inspected.
 
 PUBLIC THROWAWAY KEY

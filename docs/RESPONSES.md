@@ -12,6 +12,15 @@ python serve/server.py --engine strata --config strata-model.json --experimental
 ```
 
 Use the path of your actual model config in place of `strata-model.json`.
+Set `STRATA_RESPONSES_REPLAY_KEY` in the server environment first. For a disposable
+PowerShell test, generate a key without printing it:
+
+```powershell
+$env:STRATA_RESPONSES_REPLAY_KEY = python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+For a persistent deployment, supply the same secret from your environment/secret
+manager on each start. Regenerating it invalidates earlier encrypted replay items.
 Alternatively, add `"experimental_responses": true` at the top level of that
 config. The CLI flag enables it even if the config says false; the effective
 value is resolved once at startup. No per-request experimental field is needed.
@@ -124,12 +133,11 @@ produce an error before generation. There is no attempt to decode another
 provider's state. Returned visible content remains usable without encryption;
 a summary alone cannot substitute for the underlying reasoning.
 
-Enabling the route creates/loads one private key under
-`%LOCALAPPDATA%/Strata/responses.key` on Windows, or
-`$XDG_STATE_HOME/strata/responses.key` (default `~/.local/state/strata`) on Unix.
-Processes under the same OS user share that default key. This is deployment
-configuration, not response storage. Keep it private and retain it across
-restarts; replacing it invalidates old tokens. A malformed key fails startup.
+Enabling the route reads `STRATA_RESPONSES_REPLAY_KEY` from the server environment.
+No secret file is created. This follows the handoff's environment-only key rule.
+Keep this deployment secret private and stable across restarts. Servers sharing
+it can restore each other's tokens for the same advertised model. Missing or
+malformed keys fail startup before a model is loaded.
 Disabled servers neither import the optional crypto dependency nor load a key.
 
 The [text example index](responses-examples/INDEX.txt) covers the supported and

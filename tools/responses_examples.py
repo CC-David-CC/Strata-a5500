@@ -158,7 +158,7 @@ def main():
         "EXECUTED ENCRYPTION ROUND TRIP, SYNTHETIC PUBLIC FIXTURE\n"
         "Purpose: opaque reasoning replay state (the model's earlier reasoning, not a hidden instruction).\n"
         "Fernet authenticated encryption using serve/response_replay.py; this file shows the actual payload.\n"
-        "This public key is for this example only. A real server creates its own private deployment key.\n"
+        "This public key is for this example only. A real deployment supplies its private key in the environment.\n"
         "No private payload or another provider's encrypted blob was inspected.\n\n"
         "PUBLIC THROWAWAY KEY\n" + fixture_key.decode() + "\n\nPLAINTEXT ITEM\n" + pretty(visible)
         + "\n\nWIRE ITEM (encrypted-only replay)\n" + pretty(encrypted)
