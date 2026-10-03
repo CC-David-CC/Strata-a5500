@@ -1,3 +1,8 @@
+> **Historical development branch:** this preserves the earlier combined AMD
+> and serving work. Current contributions, their enable switches and public
+> evidence are listed in the [fork branch guide](https://github.com/CC-David-CC/Strata-a5500/blob/contrib/gfx1012-community/docs/FORK_BRANCHES.md).
+> The dated instructions and measurements below apply to this snapshot.
+
 # Strata-a5500: RX 5500 XT 8 GB support
 
 A minor, experimental fork of **[Strata by Niko1221 and the Strata contributors](https://github.com/Niko1221/Strata)**, focused on the **consumer AMD Radeon RX 5500 XT 8 GB (RDNA1 / gfx1012)**. `a5500` is the test machine's nickname.
