@@ -12,6 +12,11 @@ New here? Start with the [README](../README.md); installing step by step is in [
 
 ---
 
+## Local Q8 buffer ownership experiment
+
+See [Q8 exchange rotation](Q8_EXCHANGE_ROTATION.md) for the opt-in storage change,
+correctness contract and test plan. Model speed results are pending.
+
 ## Speed (measured)
 
 RTX 5070 **12 GB**, Ryzen 5 7600 (6 cores), 64 GB DDR5-5200, Windows, engine 0.1.26 with the settings setup writes
