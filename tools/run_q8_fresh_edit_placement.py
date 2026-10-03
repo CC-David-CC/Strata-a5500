@@ -98,6 +98,12 @@ def main():
     r.save();lock=(H/'fleet-downloads/.rtxpro-bandwidth.lock').open('a')
     try:
         while not PRIOR.exists() or not json.loads(PRIOR.read_text()).get('finished'):r.check_time();time.sleep(5)
+        rotation=H/'fleet-downloads/rtxpro-q8-exchange-rotation-20261003-r2/exchange-rotation-attempt-01/matrix.json'
+        gate=json.loads(rotation.read_text())
+        if not (gate.get('completed') and gate.get('source_fixture_and_gpu_memcheck_passed') and
+                gate.get('default_off_exact_tokens')) or any(
+                x.startswith('mtp-ngram') for x in gate.get('semantic_gate_failures',[])):
+            raise RuntimeError('Combined rotation prerequisite not accepted; placement follow-up not started')
         while True:
             try:fcntl.flock(lock.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB);break
             except BlockingIOError:r.check_time();time.sleep(5)
