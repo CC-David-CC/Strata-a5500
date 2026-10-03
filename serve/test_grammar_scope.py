@@ -118,6 +118,11 @@ class ToolLoop(unittest.TestCase):
             self.assertEqual(code, 400)
             self.assertNotIn('text/event-stream', headers['Content-Type'])
             self.assertEqual(svc.engine.index, before)
+            for malformed in (True, 42):
+                code, headers, _ = http(base, {**body, 'tools': malformed, 'stream': True}, '/v1/chat/completions')
+                self.assertEqual(code, 400)
+                self.assertNotIn('text/event-stream', headers['Content-Type'])
+                self.assertEqual(svc.engine.index, before)
 
     def test_parallel_namespaced_calls_mock_results_and_final_json_sse(self):
         tools = [function_tool(), {'type': 'namespace', 'name': 'files', 'description': 'Files', 'tools': [function_tool()]}]

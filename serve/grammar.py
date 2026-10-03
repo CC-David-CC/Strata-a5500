@@ -112,6 +112,8 @@ def validate_grammar_request(req, api):
     if "enable_thinking" in kw and type(kw["enable_thinking"]) is not bool:
         raise ValueError("enable_thinking must be a boolean")
     if api == "chat":
+        if req.get("tools") is not None and not isinstance(req["tools"], list):
+            raise ValueError("tools must be an array")
         for tool in req.get("tools") or []:
             if not isinstance(tool, dict) or tool.get("type") != "function" or not isinstance(tool.get("function"), dict):
                 raise ValueError("Chat grammar supports function tools only")
