@@ -13,7 +13,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from serve.grammar import GrammarConstraint, validate_grammar_request
-from serve.responses_json import prepare_json_output, JsonOutput
+from serve.responses_json import prepare_json_output, prepare_function_schema, JsonOutput
 
 MAX_REQUEST_BYTES = 4 * 1024 * 1024
 TERMINAL = frozenset(("completed", "incomplete", "failed", "cancelled"))
@@ -116,18 +116,18 @@ def validate_tools(tools):
             if (namespace, name) in names:
                 raise RequestError("duplicate function in namespace", loc + ".name")
             names.add((namespace, name))
-            if function.get("strict") is not False:
-                unsupported("explicit strict:false is required; strict or omitted-strict normalization is unsupported",
-                            loc + ".strict")
+            if function.get("strict") is not None and type(function["strict"]) is not bool:
+                raise RequestError("strict must be boolean or null", loc + ".strict")
             if "description" in function:
                 string(function["description"], loc + ".description")
             parameters = function.setdefault("parameters", {"type": "object", "properties": {}})
-            # Description shape only: this is not schema enforcement.
             if not isinstance(parameters, dict) or parameters.get("type", "object") != "object":
                 raise RequestError("function parameters must describe an object", loc + ".parameters")
             props = parameters.get("properties", {})
             if not isinstance(props, dict) or any(not isinstance(v, dict) for v in props.values()):
                 raise RequestError("properties must map names to description objects", loc + ".parameters")
+            if function.get("strict") is not False:
+                prepare_function_schema(function, loc, normalize=function.get("strict") is None)
 
 
 def validate_request(request, svc):
@@ -393,6 +393,13 @@ class ResponseAssembler:
         self.item = None
         self.allowed_tools = {native["name"]: (namespace, name) for native, namespace, name in native_tools(request["tools"])} \
             if request["tool_choice"] == "auto" else {}
+        self.tool_validators = {}
+        for tool in request["tools"]:
+            namespace = tool["name"] if tool["type"] == "namespace" else None
+            for function in tool["tools"] if namespace else [tool]:
+                if function["strict"]:
+                    name = (namespace + "." if namespace else "") + function["name"]
+                    self.tool_validators[name] = prepare_function_schema(function, "tools")
         self.call_ids = set()
         self.replay = replay
         self.reasoning_item = None
@@ -489,10 +496,14 @@ class ResponseAssembler:
                 out.append(self.event("response.function_call_arguments.delta", item_id=self.item["id"],
                                       output_index=len(self.response["output"]) - 1, delta=event.text))
             else:
-                # Syntax only. Never reserialize arguments already sent, validate
-                # a tool schema, or execute a client-owned function here.
-                if not isinstance(strict_json("".join(self.fragments)), dict):
+                # Validate before declaring the call complete; never rewrite
+                # streamed arguments or execute the client-owned function.
+                arguments = "".join(self.fragments)
+                if not isinstance(strict_json(arguments), dict):
                     raise ValueError("model function arguments are not an object")
+                name = (self.item.get("namespace", "") + "." if self.item.get("namespace") else "") + self.item["name"]
+                if name in self.tool_validators:
+                    self.tool_validators[name].validate(arguments)
                 out.extend(self.close_item("completed"))
         else:
             raise ValueError(f"unexpected semantic output: {event.kind}")
@@ -525,8 +536,10 @@ class ResponseAssembler:
             self.reasoning_item = None
         else:
             item["arguments"] = value
-            out = [self.event("response.function_call_arguments.done", item_id=item["id"],
-                              output_index=index, arguments=value)]
+            name = (item.get("namespace", "") + "." if item.get("namespace") else "") + item["name"]
+            out = [] if status != "completed" and name in self.tool_validators else [
+                self.event("response.function_call_arguments.done", item_id=item["id"],
+                           output_index=index, arguments=value)]
         out.append(self.event("response.output_item.done", output_index=index, item=copy.deepcopy(item)))
         return out
 

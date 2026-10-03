@@ -576,12 +576,9 @@ class Functions(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(RequestError):
                 resolve_input(request(input=bad))
 
-    def test_strict_omission_custom_invalid_namespace_and_choice_rejected(self):
+    def test_invalid_strict_schema_custom_namespace_and_choice_rejected(self):
         svc = service()
-        missing_strict = function_tool()
-        del missing_strict["strict"]
-        bodies = [request(tools=[function_tool(strict=True)]), request(tools=[missing_strict]),
-                  request(tools=[function_tool(strict=None)]),
+        bodies = [request(tools=[function_tool(strict=True)]), request(tools=[function_tool(strict="true")]),
                   request(tools=[{"type": "custom", "name": "patch", "format": {"type": "grammar", "syntax": "lark", "definition": 'start: "x"'}}]),
                   request(tools=[{"type": "namespace", "name": "group", "tools": [function_tool()]}]),
                   request(tools=[function_tool()], tool_choice={"type": "function", "name": "echo"}),

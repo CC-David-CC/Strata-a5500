@@ -109,14 +109,16 @@ def main():
         post("remote schema reference rejected before SSE", {"input": "Hello", "stream": True,
              "text": {"format": {**TITLE, "schema": {"$ref": "https://example.invalid/schema"}}}}, expected_status=400)
         tool = {"type": "function", "name": "lookup", "description": "Read the hidden integer. Call before answering.",
-                "parameters": {"type": "object", "properties": {}, "additionalProperties": False}, "strict": False}
+                "parameters": {"type": "object", "properties": {"key": {"type": "string", "enum": ["hidden"]}},
+                               "required": ["key"], "additionalProperties": False}, "strict": True}
         fmt = {"type": "json_schema", "name": "lookup_result", "strict": True, "schema": {
             "type": "object", "properties": {"value": {"type": "integer"}}, "required": ["value"], "additionalProperties": False}}
-        history = [{"role": "user", "content": "Call lookup to read the hidden integer. Do not guess. Then give the value as JSON."}]
+        history = [{"role": "user", "content": "Call lookup with key hidden to read the hidden integer. Do not guess. Then give the value as JSON."}]
         result = post("real model function call before JSON answer", {"input": history, "tools": [tool],
              "text": {"format": fmt}, "reasoning": {"effort": "medium"}, "max_output_tokens": 3072, "stream": True})
         calls = [item for item in result["output"] if item["type"] == "function_call"]
         assert len(calls) == 1 and calls[0]["name"] == "lookup", result
+        assert json.loads(calls[0]['arguments']) == {'key':'hidden'}
         history += result["output"]
         history.append({"type": "function_call_output", "call_id": calls[0]["call_id"],
                         "output": "MOCK EXTERNAL TOOL RESULT (not JSON): the hidden integer is 27. Other arbitrary text: purple."})

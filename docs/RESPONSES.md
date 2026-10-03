@@ -71,7 +71,7 @@ Configured sampling defaults remain in effect when a request omits them.
 | `text.format` | Text, `json_object`, or `json_schema`; JSON requires the gbnf-v4 native build and requirements-json.txt. |
 | JSON Schema / JSON-object generation | Native schema decoding plus mandatory final validation; see [JSON output](JSON_OUTPUT.md). |
 | Streaming | Typed SSE from the same assembler as final JSON; set `stream:true`. |
-| Function calls | Client-owned functions with explicit `strict:false`, flat or inside `type:namespace`. |
+| Function calls | Client-owned functions, flat or inside `type:namespace`; strict argument validation is supported. |
 | Tool choice | `auto` or `none`; forced choices and `parallel_tool_calls:false` with tools are rejected. |
 | Reasoning effort | `none`, `low`, `medium`; `high`, `xhigh`, `max` map to native `xhigh`. `minimal` is rejected. |
 | Reasoning representations | Actual `reasoning_text`, generated summaries, authenticated Strata-issued replay tokens. |
@@ -108,8 +108,15 @@ Strata does not execute these functions through its MCP integration.
 Namespaces keep `namespace` and `name` separate on the wire. At the existing
 template/parser boundary only, `files.read_file` identifies `read_file` inside
 `files`. Dots are excluded from each individual wire name, preventing collisions.
-Nested namespaces, custom tools, strict functions and omitted strict are rejected.
-Parameter descriptions guide the model; no JSON Schema guarantee is implied.
+Nested namespaces and custom tools are rejected. With explicit `strict:false`,
+parameter descriptions guide the model. With `strict:true`, complete generated
+arguments are validated before the call is marked complete. Invalid arguments fail
+the response and never produce a completed call. Tool envelopes/arguments are not
+natively grammar-masked; final answer JSON uses the separate native schema path.
+Strict functions require closed objects with every property required. Omitted/null
+strict normalizes compatible schemas; explicitly open/dynamic objects retain the
+documented best-effort mode and are reported as `strict:false`. See the
+[tool schema guide](CODEX_TOOL_SCHEMAS.md).
 
 Raw thinking is emitted as a reasoning item's `content`, with typed
 `response.reasoning_text.delta/done` events. A requested summary is produced by

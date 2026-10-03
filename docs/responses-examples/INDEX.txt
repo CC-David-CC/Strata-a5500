@@ -16,7 +16,7 @@ Read support labels: requested/in-progress and excluded cases are not certified 
 10_reasoning_replay.txt: Real encryption of synthetic data under a PUBLIC THROWAWAY EXAMPLE KEY; not accepted by your deployment
 11_json_schema.txt: Native JSON Schema answer decoding and mandatory final validation; gbnf-v4 required
 12_json_object.txt: Native JSON object answer decoding; gbnf-v4 required
-13_strict_function_EXCLUDED.txt: Excluded; strict:true and omitted strict are rejected
+13_strict_function.txt: Strict argument validation before call completion; omitted strict normalizes when compatible
 14_custom_lark_EXCLUDED.txt: Excluded; raw GBNF does not implement Lark custom tools
 15_storage_EXCLUDED.txt: Excluded; no response store
 16_previous_response_EXCLUDED.txt: Excluded; supply full input instead

@@ -54,8 +54,9 @@ produces `response.incomplete`; its partial text need not yet be complete JSON.
 Reasoning and client-owned function calls can precede the JSON answer. The schema
 constrains the answer, not tool results, function arguments or reasoning summaries.
 A tool-only response can complete without an answer, allowing the normal client
-loop to continue. Strict function parameter schemas and Lark tools are separate
-capabilities and remain unsupported. Raw `grammar` and `text.format` JSON requirements
+loop to continue. [Strict function parameter validation](CODEX_TOOL_SCHEMAS.md) is supported
+before a completed call is emitted; external tool results stay unconstrained.
+Lark custom tools remain a separate unsupported capability. Raw `grammar` and `text.format` JSON requirements
 cannot be combined on one request.
 
 The server's configured thinking budget is enforced by native token masks for

@@ -4,6 +4,7 @@ No object-only fallback for a missing schema validator; no rewriting streamed te
 The legacy Chat Completions structured-output adapter is independent.
 """
 from dataclasses import dataclass
+import copy
 import json
 
 from serve.grammar import GrammarConstraint
@@ -15,7 +16,7 @@ class JsonOutput:
     validator: object
 
     def constraint(self, thinking, tools, budget):
-        source = json.dumps(self.schema, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
+        source = json.dumps(native_schema(self.schema), ensure_ascii=False, allow_nan=False, separators=(",", ":"))
         return GrammarConstraint(source, bool(thinking), bool(tools), json_schema=True,
                                  reasoning_tokens=min(budget or 0, 8192) if thinking else 0)
 
@@ -33,6 +34,78 @@ class JsonOutput:
         if error is not None:
             path = "/" + "/".join(str(part) for part in error.absolute_path)
             raise ValueError("JSON output failed schema validation at " + path + ": " + error.message)
+
+
+def schema_nodes(schema):
+    """Yield schemas, never property names, annotation values or const data."""
+    pending = [schema]
+    while pending:
+        node = pending.pop()
+        if not isinstance(node, dict):
+            continue
+        yield node
+        for key in ("properties", "patternProperties", "$defs", "definitions", "dependentSchemas"):
+            if isinstance(node.get(key), dict):
+                pending.extend(node[key].values())
+        for key in ("allOf", "anyOf", "oneOf", "prefixItems"):
+            if isinstance(node.get(key), list):
+                pending.extend(node[key])
+        for key in ("additionalProperties", "items", "contains", "propertyNames", "if", "then", "else", "not",
+                    "unevaluatedProperties", "unevaluatedItems", "contentSchema"):
+            if key in node:
+                pending.append(node[key])
+
+
+def native_schema(schema):
+    """Equivalent simplification for a native compiler's optional-false limitation."""
+    result = copy.deepcopy(schema)
+    for node in schema_nodes(result):
+        if node.get("additionalProperties") is False:
+            # A forbidden, non-required property in a closed object is exactly
+            # equivalent to omitting it. Required false schemas stay impossible.
+            props = node.get("properties", {})
+            if isinstance(props, dict):
+                for name in list(props):
+                    if props[name] is False and name not in node.get("required", []):
+                        del props[name]
+    return result
+
+
+def prepare_function_schema(function, param, normalize=False):
+    """Normalize omitted strict when possible; validate explicit strict guarantees."""
+    from serve.responses import RequestError
+    schema = copy.deepcopy(function["parameters"])
+    # Check schema shape before operations such as iterating required/properties.
+    try:
+        prepare_json_output({"type": "json_schema", "name": function["name"], "schema": schema})
+    except RequestError as exc:
+        exc.param = param + ".parameters"
+        raise
+    for node in schema_nodes(schema):
+        if node.get("type") == "object" or "properties" in node:
+            props = node.get("properties", {})
+            if not isinstance(props, dict):
+                raise RequestError("properties must be an object", param + ".parameters")
+            if normalize:
+                # An explicitly open/dynamic object cannot be normalized without
+                # dropping the caller's behavior. Return the documented non-strict
+                # fallback, reflected as strict:false in the response tool.
+                if node.get("additionalProperties", False) is not False or node.get("patternProperties"):
+                    function["strict"] = False
+                    return None
+                node["additionalProperties"] = False
+                node["required"] = list(props)
+            elif node.get("additionalProperties") is not False or set(node.get("required", [])) != set(props):
+                raise RequestError("strict functions require additionalProperties:false and all properties required",
+                                   param + ".parameters")
+    try:
+        prepared = prepare_json_output({"type": "json_schema", "name": function["name"], "strict": True, "schema": schema})
+    except RequestError as exc:
+        exc.param = param + ".parameters"
+        raise
+    function["parameters"] = schema
+    function["strict"] = True
+    return prepared
 
 
 def prepare_json_output(fmt):
@@ -87,29 +160,15 @@ def prepare_json_output(fmt):
 
     # Walk schemas, not arbitrary object values. A property named "$ref" or
     # JSON data inside const/default must not be mistaken for a reference.
-    pending = [schema]
     annotations = set("$schema $id $anchor $dynamicAnchor $defs definitions then else minContains maxContains title description default examples "
                       "deprecated readOnly writeOnly $comment contentEncoding contentMediaType contentSchema".split())
-    while pending:
-        node = pending.pop()
-        if not isinstance(node, dict):
-            continue
+    for node in schema_nodes(schema):
         unknown = set(node) - set(Draft202012Validator.VALIDATORS) - annotations
         if unknown:
             raise RequestError("unknown JSON Schema keyword: " + sorted(unknown)[0], "text.format.schema")
         for key in ("$ref", "$dynamicRef"):
             if key in node and (not isinstance(node[key], str) or not node[key].startswith("#")):
                 raise RequestError("only local schema references are supported", "text.format.schema")
-        for key in ("properties", "patternProperties", "$defs", "definitions", "dependentSchemas"):
-            if isinstance(node.get(key), dict):
-                pending.extend(node[key].values())
-        for key in ("allOf", "anyOf", "oneOf", "prefixItems"):
-            if isinstance(node.get(key), list):
-                pending.extend(node[key])
-        for key in ("additionalProperties", "items", "contains", "propertyNames", "if", "then", "else", "not",
-                    "unevaluatedProperties", "unevaluatedItems", "contentSchema"):
-            if key in node:
-                pending.append(node[key])
 
     def no_remote(uri):
         raise NoSuchResource(ref=uri)

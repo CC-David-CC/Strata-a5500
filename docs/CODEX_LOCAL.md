@@ -57,8 +57,9 @@ A completed reasoning item can survive cancellation without a completed answer i
 Strata preserves it as an assistant thinking turn without inventing answer text.
 
 The remaining protocol limits in [RESPONSES.md](RESPONSES.md) still apply: `store:false`,
-full-history replay, non-strict function tools, no hosted tools, no image input, and no
-strict function parameter schemas/Lark tools or server compaction endpoint. Native JSON
+full-history replay, client-owned function tools, no hosted tools, no image input,
+and no Lark tools or server compaction endpoint. [All 12 captured function schemas](CODEX_TOOL_SCHEMAS.md)
+have transport/replay tests, including strict normalized variants. Native JSON
 answer schemas are supported by the stacked GBNF build. This catalog does not enable
 those capabilities or modify a client's requested schema. Long-session compaction is not
 qualified; start a new conversation when approaching the configured context limit.
