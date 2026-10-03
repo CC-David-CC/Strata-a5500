@@ -971,6 +971,7 @@ class Service:
         # so it is off unless the config's "api_monitor" (or --api-monitor) turns it on
         self.api_monitor = False
         self.experimental_responses = False             # stateless protocol adapter; no store or workers
+        self.responses_replay = None                     # deployment key, never a response store
         self.api_requests = collections.deque(maxlen=100)  # bounded I/O in memory; no headers or API keys
         self.request_trace = threading.local()
         self.history = collections.deque(maxlen=500)    # the last finished requests, newest last (GET /metrics)
@@ -1437,6 +1438,7 @@ class Service:
             sampling = {**defaults, **req_values}
         parser = OutputParser(thinking=thinking, tools=tools, stream_tools=True)
         detok, n, finish = Detokenizer(self.tok), 0, "length"
+        reasoning_tokens = 0  # Responses usage: tokens consumed in the parser's reasoning region.
         timings, before = None, None                    # this request's timings; the engine's `last` before it
         raw_ids = []                                    # every generated id (STRATA_DEBUG: dump raw model text)
         emb = getattr(self.embeddings, "path", None)
@@ -1491,6 +1493,8 @@ class Service:
                                     break
                                 raw_ids.append(t)
                                 seg.append(t)
+                                if lifecycle and parser.state == "reasoning":
+                                    reasoning_tokens += 1
                                 evs = parser.feed(detok.push(t))
                                 self._note(n, evs)
                                 last_print = self._progress(last_print)
@@ -1537,6 +1541,8 @@ class Service:
                         for t in extra:
                             n += 1
                             raw_ids.append(t)
+                            if lifecycle and parser.state == "reasoning":
+                                reasoning_tokens += 1
                             evs = parser.feed(detok.push(t))
                             self._note(n, evs)
                             for ev in evs:
@@ -1613,7 +1619,7 @@ class Service:
         for ev in parser.finish():
             yield "event", ev
         yield "done", {"finish": finish, "completion_tokens": n, "reused": (timings or {}).get("cache_n", 0),
-                       "timings": timings}
+                       "timings": timings, **({"reasoning_tokens": reasoning_tokens} if lifecycle else {})}
 
 
 def prompt_tokens_seen(prompt_tokens: int, last: dict) -> int:
@@ -2937,6 +2943,16 @@ def main() -> int:
     if type(cfg.get("experimental_responses", False)) is not bool:
         ap.error("experimental_responses must be true or false")
     experimental_responses = a.experimental_responses or cfg.get("experimental_responses", False)
+    responses_replay = None
+    if experimental_responses:
+        try:
+            from serve.response_replay import ReplayCodec
+        except ImportError:
+            ap.error("encrypted Responses replay needs: python -m pip install -r requirements-responses.txt")
+        try:
+            responses_replay = ReplayCodec.load()
+        except (OSError, ValueError) as exc:
+            ap.error(f"cannot load the Responses deployment key: {exc}")
     if a.gpu is not None:
         cfg["gpu"] = int(a.gpu) if a.gpu.strip().isdigit() else a.gpu
     a.host = a.host or cfg.get("host") or "127.0.0.1"   # issue #26: the run scripts pass no --host, the config can
@@ -3032,6 +3048,7 @@ def main() -> int:
               else f"[strata] also answers to the host names {', '.join(svc.allowed_hosts)} (allowed_hosts)", flush=True)
     svc.api_monitor = a.api_monitor or cfg.get("api_monitor") is True
     svc.experimental_responses = experimental_responses
+    svc.responses_replay = responses_replay
     if svc.api_monitor:
         print("[strata] API request monitor on (/api-monitor): the last 100 requests' prompts and answers are kept in "
               "memory" + ("" if svc.api_key else "; anyone who can reach this server can read them (no API key)"),
