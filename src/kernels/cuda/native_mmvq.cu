@@ -1018,17 +1018,40 @@ int q8_rows() {
     return g_q8_rows;
 }
 
-template<typename F, int NCOLS, int NW, int ROWS>
+int g_q8_token_tile = -1;
+void validate_q8_token_tile(int tile) {
+    if (tile != 0 && tile != 2 && tile != 4 && tile != 8 && tile != 12)
+        throw std::invalid_argument("STRATA_NATIVE_Q8_TOKEN_TILE must be 0, 2, 4, 8 or 12");
+}
+int q8_token_tile() {
+    if (g_q8_token_tile < 0) {
+        const char* value = std::getenv("STRATA_NATIVE_Q8_TOKEN_TILE");
+        char* end = nullptr;
+        const long n = value ? std::strtol(value, &end, 10) : 0;
+        if (value && (end == value || *end != '\0' ||
+            (n != 0 && n != 2 && n != 4 && n != 8 && n != 12)))
+            throw std::invalid_argument("STRATA_NATIVE_Q8_TOKEN_TILE must be 0, 2, 4, 8 or 12");
+        g_q8_token_tile = (int)n;
+    }
+    return g_q8_token_tile;
+}
+
+template<typename F, int NCOLS, int NW, int ROWS, int TILE = NCOLS>
 __launch_bounds__(NW * WARP, 1)
 __global__ void native_mmvq_multi_kernel(const typename F::Block* __restrict__ w,
                                          const Q81Block* __restrict__ x,
                                          float* __restrict__ y, int n_in, int n_out) {
     constexpr int BPI = F::BPI * NW / WARPS;           // blocks per iteration scale with the warp count
     const int tid = WARP * int(threadIdx.y) + int(threadIdx.x);
-    const int row0 = ROWS * int(blockIdx.x);
+    constexpr int GROUPS = (NCOLS + TILE - 1) / TILE;
+    // Adjacent CTAs visit different token tiles of the same weight row. This
+    // preserves each column's reduction tree while bounding live accumulators.
+    // Weight reuse between CTAs is a cache hypothesis, not a DRAM guarantee.
+    const int row0 = ROWS * int(blockIdx.x / GROUPS);
+    const int col0 = int(blockIdx.x % GROUPS) * TILE;
     const int blocks_per_row = n_in / F::DIV;
     const int x_stride = n_in / Q8K;                   // Q8_1 blocks per activation column
-    float tmp[NCOLS][ROWS] = {};
+    float tmp[TILE][ROWS] = {};
     for (int kbx = tid / F::T; kbx < blocks_per_row; kbx += BPI) {
         const int kby = kbx * F::KBY;
         const int kqs = F::kqs(tid);
@@ -1038,28 +1061,30 @@ __global__ void native_mmvq_multi_kernel(const typename F::Block* __restrict__ w
                 const std::size_t block = std::size_t(row0 + i) * blocks_per_row + kbx;
                 const typename F::W wv = F::load(w + block, kqs);      // once per (row, block)
 #pragma unroll
-                for (int j = 0; j < NCOLS; ++j)                         // then per column
-                    tmp[j][i] += F::apply(wv, x + std::size_t(j) * x_stride + kby, kqs);
+                for (int j = 0; j < TILE; ++j)
+                    if (col0 + j < NCOLS)
+                        tmp[j][i] += F::apply(wv, x + std::size_t(col0 + j) * x_stride + kby, kqs);
             }
         }
     }
-    __shared__ float partial[NW - 1 > 0 ? NW - 1 : 1][NCOLS][ROWS][WARP];
+    __shared__ float partial[NW - 1 > 0 ? NW - 1 : 1][TILE][ROWS][WARP];
     if (threadIdx.y > 0) {
 #pragma unroll
-        for (int j = 0; j < NCOLS; ++j)
+        for (int j = 0; j < TILE; ++j)
 #pragma unroll
             for (int i = 0; i < ROWS; ++i) partial[threadIdx.y - 1][j][i][threadIdx.x] = tmp[j][i];
     }
     __syncthreads();
     if (threadIdx.y > 0) return;
 #pragma unroll
-    for (int j = 0; j < NCOLS; ++j) {
+    for (int j = 0; j < TILE; ++j) {
 #pragma unroll
         for (int i = 0; i < ROWS; ++i) {
 #pragma unroll
             for (int l = 0; l < NW - 1; ++l) tmp[j][i] += partial[l][j][i][threadIdx.x];
             tmp[j][i] = warp_sum(tmp[j][i]);
-            if (threadIdx.x == i && row0 + i < n_out) y[std::size_t(j) * n_out + row0 + i] = tmp[j][i];
+            if (threadIdx.x == i && row0 + i < n_out && col0 + j < NCOLS)
+                y[std::size_t(col0 + j) * n_out + row0 + i] = tmp[j][i];
         }
     }
 }
@@ -1069,6 +1094,21 @@ void launch_multi_n(const void* weights, const void* x_q8_1, float* y, int n_in,
     const auto* w = static_cast<const typename F::Block*>(weights);
     const auto* x = static_cast<const Q81Block*>(x_q8_1);
     if constexpr (std::is_same<typename F::Block, Q80Block>::value) {
+        // Experimental tiling changes only independent token/CTA placement.
+        // Other row policies and the non-exact layout retain their old path.
+        if (g_multi_exact && q8_rows() == 1) switch (q8_token_tile()) {
+#define STRATA_Q8_TILE(T) case T: \
+            if constexpr (NCOLS > T) { \
+                constexpr int groups = (NCOLS + T - 1) / T; \
+                const std::size_t blocks = std::size_t(n_out) * groups; \
+                if (blocks > 2147483647u) throw std::invalid_argument("Q8 token tile grid exceeds CUDA x limit"); \
+                native_mmvq_multi_kernel<F, NCOLS, WARPS, 1, T><<<unsigned(blocks), dim3(WARP, WARPS), 0, s>>>(w, x, y, n_in, n_out); \
+                return; \
+            } break
+            STRATA_Q8_TILE(2); STRATA_Q8_TILE(4); STRATA_Q8_TILE(8); STRATA_Q8_TILE(12);
+#undef STRATA_Q8_TILE
+            default: break;
+        }
         // Change only how independent output rows share a block. Keep NW=4,
         // lane assignment, partial sums and reduction order identical.
         if (g_multi_exact) switch (q8_rows()) {
@@ -1211,6 +1251,7 @@ void small_f32(const void* weights, const float* x, void* scratch_q8_1,
 void native_mmvq_set_multi_exact(bool exact) { g_multi_exact = exact; }
 bool native_mmvq_multi_exact() { return g_multi_exact; }
 void native_q8_0_set_rows_per_block(int rows) { validate_q8_rows(rows); g_q8_rows = rows; }
+void native_q8_0_set_token_tile(int tile) { validate_q8_token_tile(tile); g_q8_token_tile = tile; }
 int native_q8_0_rows_per_block() { return q8_rows(); }
 
 std::size_t native_q8_1_bytes(int n_in, int ncols) {

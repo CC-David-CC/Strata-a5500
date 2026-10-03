@@ -98,6 +98,10 @@ void native_q8_0_f32(const void* weights, const float* x, void* scratch_q8_1,
 // changing each output's reduction order in multi_exact mode. The initial value comes from
 // STRATA_NATIVE_Q8_ROWS, default 0. This also affects Q4 models' Q8_0 projections.
 void native_q8_0_set_rows_per_block(int rows);
+// Experimental CUDA token tiling; 0 keeps the original layout. Values 2/4/8/12
+// bound independent columns per CTA when exact mode and one output row are set.
+// Configure before capture; changing the policy does not rewrite existing graphs.
+void native_q8_0_set_token_tile(int tile);
 int native_q8_0_rows_per_block();
 
 void native_iq4_nl_mmvq(const void* weights, const void* x_q8_1, float* y,
