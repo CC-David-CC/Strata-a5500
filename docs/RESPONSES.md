@@ -7,6 +7,36 @@ The flag enables the ordinary `/v1/responses` interface; requests have no
 Strata-specific fields. Existing Chat Completions and Anthropic routes keep their
 behavior. All Responses routes use the existing API key and CORS settings.
 
+## Enable and verify
+
+Use the `feat/responses-api-451` branch of this fork and its Python server.
+The fork's `main` and the separate hardware/performance branches do not contain
+this adapter. From this checkout, using your installed Strata Python environment
+and working model config:
+
+```sh
+python -m serve.server --engine strata --config strata-model.json --host 127.0.0.1 --port 8095 --experimental-responses
+```
+
+Replace `strata-model.json` with your run config. To make the setting persistent,
+add `"experimental_responses": true` at the top level of that existing JSON
+object, alongside `exe`, `args` and `tokenizer`, then restart your normal server
+launcher. Keep the rest of the config. This key belongs outside `env` and
+`sampling`; the CLI flag belongs to `serve.server`, not the native executable
+or the setup command.
+
+Startup prints `[strata] experimental Responses API on; retained responses: ...`.
+A successful `POST /v1/responses` returns a `response` object, or typed SSE when
+`stream:true`. The Python examples below exercise both views. Use the port your
+server actually listens on: these examples explicitly use 8095, while generated
+setup launchers commonly use 8080.
+
+To disable, remove the CLI flag and set the config key to `false` (or remove it),
+then restart. The CLI flag enables the adapter even if the config says `false`.
+With both off, `/v1/responses` returns 404 and no Responses store is opened.
+Disabling does not delete previously retained data. The API monitor is optional;
+`--api-monitor` is not required to enable Responses.
+
 For a text-only smoke test without a GPU:
 
 ```sh
