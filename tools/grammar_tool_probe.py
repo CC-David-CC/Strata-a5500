@@ -165,6 +165,8 @@ def main():
                         # tokens before and after this point come from Strata/CUDA.
                         history += first['output'] + [
                             {'type': 'function_call_output', 'call_id': c['call_id'], 'output': MOCK_RESULT} for c in calls]
+                        history.append({'role': 'user', 'content': 'The requested lookup is complete. '
+                                        'Use its result to give your final answer now. Do not call any more functions.'})
                         final = send(label + '-answer', {**body, 'input': history})
                         answer = ''.join(part['text'] for item in final['output'] if item['type'] == 'message'
                                          for part in item['content'])
