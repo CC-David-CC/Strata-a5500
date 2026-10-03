@@ -236,6 +236,13 @@ function arguments and client results, token limits, disconnect recovery, and
 the existing chat endpoint and monitor. The test server shut down cleanly.
 [Validation details and tested source hashes](benchmarks/2026-10-02-responses-cuda.json).
 
+PR merge check on 2026-10-03: this branch merged cleanly with upstream 0.1.37
+(`db4f91a`). All seven serving test modules passed: **204 passed, 5 skipped**,
+including all 39 Responses tests and 114 server tests. This checks the combined
+Python service with mock/scripted engines, including upstream's newer engine
+recovery behavior. The native GPU measurements above retain their 0.1.34 source.
+[Merge inputs, source hashes and module outcomes](benchmarks/2026-10-03-responses-merge-check.json).
+
 Contract sources:
 [Responses creation](https://developers.openai.com/api/reference/python/resources/responses/methods/create),
 [streaming events](https://developers.openai.com/api/reference/resources/responses/streaming-events),
