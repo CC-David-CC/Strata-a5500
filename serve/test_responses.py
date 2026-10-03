@@ -130,7 +130,7 @@ class Normalization(unittest.TestCase):
     def test_unsupported_capabilities_rejected_before_load(self):
         cases = [dict(previous_response_id="resp_missing"), dict(background=True),
                  dict(text={"format": {"type": "json_schema", "schema": {}}}),
-                 dict(text={"format": {"type": "json_object"}}), dict(text={"verbosity": "high"}),
+                 dict(text={"verbosity": "high"}),
                  dict(reasoning={"summary": "unknown"}), dict(include=["file_search_call.results"]),
                  dict(input=[{"type": "item_reference", "id": "msg_missing"}]),
                  dict(input=[{"role": "user", "content": [{"type": "input_image", "image_url": "file://private"}]}]),

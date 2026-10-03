@@ -8,6 +8,7 @@ from serve.frontend import Event, OutputParser
 
 
 CAPABILITY = "gbnf-v3"
+JSON_CAPABILITY = "gbnf-v4"
 ANSWER_PREFIX = "<|im_start|>assistant\n<think>\n\n</think>\n\n"
 THINK_PREFIX = "<|im_start|>assistant\n<think>\n"
 
@@ -17,6 +18,8 @@ class GrammarConstraint:
     source: str
     thinking: bool = False
     tools: bool = False
+    json_schema: bool = False
+    reasoning_tokens: int = 0
 
     @property
     def scoped(self):
@@ -26,6 +29,8 @@ class GrammarConstraint:
         return replace(self, thinking=bool(thinking), tools=bool(tools))
 
     def __post_init__(self):
+        if type(self.json_schema) is not bool or type(self.reasoning_tokens) is not int or not 0 <= self.reasoning_tokens <= 8192:
+            raise ValueError("invalid constraint format or reasoning token budget")
         if not isinstance(self.source, str):
             raise ValueError("grammar must be a UTF-8 GBNF source string with a root rule")
         try:
@@ -41,7 +46,10 @@ class GrammarConstraint:
                 command == "CHECKG" or command.startswith("GEN ")):
             raise ValueError("invalid native grammar command")
         raw = self.source.encode("utf-8")
-        head = f"GENG2 {len(raw)} {int(self.thinking)} {int(self.tools)}" if self.scoped else f"GENG1 {len(raw)}"
+        if self.json_schema or self.reasoning_tokens:
+            head = f"GENG3 {len(raw)} {int(self.json_schema)} {int(self.thinking)} {int(self.tools)} {self.reasoning_tokens}"
+        else:
+            head = f"GENG2 {len(raw)} {int(self.thinking)} {int(self.tools)}" if self.scoped else f"GENG1 {len(raw)}"
         return head.encode("ascii") + b"\n" + raw + b"\n" + command.encode("ascii") + b"\n"
 
 

@@ -13,6 +13,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from serve.grammar import GrammarConstraint, validate_grammar_request
+from serve.responses_json import prepare_json_output, JsonOutput
 
 MAX_REQUEST_BYTES = 4 * 1024 * 1024
 TERMINAL = frozenset(("completed", "incomplete", "failed", "cancelled"))
@@ -197,8 +198,7 @@ def validate_request(request, svc):
     text = req.setdefault("text", {"format": {"type": "text"}})
     fields(text, "format", "text")
     fmt = text.setdefault("format", {"type": "text"})
-    if fmt != {"type": "text"}:
-        unsupported("only plain text.format is supported; JSON formats are excluded", "text.format")
+    prepare_json_output(fmt)
     tools = req.setdefault("tools", [])
     validate_tools(tools)
     if tools and not req["parallel_tool_calls"]:
@@ -601,12 +601,16 @@ class PreparedResponse:
     thinking: bool
     summary_reserve: int
     constraint: GrammarConstraint | None = None
+    output_format: JsonOutput | None = None
 
 
 def create_response(svc, request):
     req = validate_request(request, svc)
+    output_format = prepare_json_output(req["text"]["format"])
     constraint = GrammarConstraint(req["grammar"]) if "grammar" in req else None
     messages = resolve_input(req, svc.responses_replay)
+    if output_format is not None:
+        messages.insert(0, {"role": "system", "content": output_format.instruction()})
     svc.load()
     tools = [native for native, _, _ in native_tools(req["tools"])] \
         if req["tool_choice"] == "auto" else None
@@ -616,18 +620,21 @@ def create_response(svc, request):
         kwargs["reasoning_effort"] = "xhigh" if effort in ("high", "xhigh", "max") else effort
     if constraint is not None:
         constraint = constraint.with_scope(effort != "none", tools)
+    if output_format is not None:
+        constraint = output_format.constraint(effort != "none", tools, svc.reasoning_budget(req))
     ids, thinking, max_new = svc.prepare(messages, tools, kwargs, req.get("max_output_tokens"), constraint=constraint)
     if constraint is not None:
         try:
             svc.prepare_constraint(constraint, req)
         except ValueError as exc:
-            raise RequestError(str(exc), "grammar", "invalid_grammar") from exc
+            param = "text.format" if output_format is not None else "grammar"
+            raise RequestError(str(exc), param, "invalid_grammar") from exc
     summary = req["reasoning"]["summary"]
     reserve = min({"concise": 128, "auto": 256, "detailed": 512}[summary], max_new // 4) if summary else 0
     if summary and reserve < 1:
         raise RequestError("summaries need max_output_tokens of at least 4", "max_output_tokens")
     return PreparedResponse(ResponseAssembler(req, len(ids), max_new, svc.responses_replay), ids, max_new,
-                            {"temperature": req["temperature"], "top_p": req["top_p"]}, tools, thinking, reserve, constraint)
+                            {"temperature": req["temperature"], "top_p": req["top_p"]}, tools, thinking, reserve, constraint, output_format)
 
 
 def execute_response(svc, prepared, cancel):
@@ -721,6 +728,13 @@ def execute_response(svc, prepared, cancel):
                 yield from owner.append_output(event)
             if outcome == "complete" and owner.item is not None and owner.item["type"] == "function_call":
                 raise ValueError("model stopped inside a function call")
+        if outcome == "complete" and prepared.output_format is not None:
+            output = owner.snapshot()["output"]
+            answers = ["".join(part["text"] for part in item["content"]) for item in output if item["type"] == "message"]
+            if not answers and not any(item["type"] == "function_call" for item in output):
+                raise ValueError("JSON generation completed without an answer or function call")
+            for answer in answers:
+                prepared.output_format.validate(answer)
         yield from owner.finalize_response(outcome, done)
     except GeneratorExit:
         cancel.set()

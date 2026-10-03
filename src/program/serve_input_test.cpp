@@ -35,6 +35,17 @@ int main() {
                 REQUIRE(scoped[0].thinking == (flags[0] == '1') && scoped[0].tools == (flags[2] == '1'));
                 REQUIRE(!scoped[1].thinking && !scoped[1].tools);
             }
+            for (const std::string flags : {"1 0 0 0", "1 1 1 2048", "0 1 0 2"}) {
+                auto json = parse("GENG3 " + std::to_string(source.size()) + " " + flags +
+                                  "\n" + source + "\nCHECKG\n" + frame, chunk);
+                REQUIRE(json.size() == 2 && !json[0].fatal && json[0].grammar == source);
+                REQUIRE(json[0].json_schema == (flags[0] == '1'));
+                REQUIRE(!json[1].json_schema && json[1].reasoning_tokens == 0);
+            }
+            for (const std::string flags : {"1 0 0 2", "1 1 0 8193", "1 1 0 -1", "2 1 1 0", "1 1 0 0 extra"}) {
+                auto bad = parse("GENG3 1 " + flags + "\nx\nCHECKG\n", chunk);
+                REQUIRE(bad.size() == 1 && bad[0].fatal);
+            }
             for (size_t cut = 1; cut < frame.size(); ++cut) {
                 auto bad = parse(frame.substr(0, cut), chunk);
                 if (cut >= 4) REQUIRE(bad.size() == 1 && bad[0].fatal);

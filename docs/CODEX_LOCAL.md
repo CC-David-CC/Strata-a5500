@@ -6,6 +6,8 @@ Shell commands and file edits run on the computer running Codex; generation runs
 
 1. Start your configured native Strata server with `--experimental-responses`, an API key,
    and `STRATA_RESPONSES_REPLAY_KEY` as described in [RESPONSES.md](RESPONSES.md).
+   Use the gbnf-v4 build and install requirements-json.txt for Codex automatic JSON titles;
+   see [JSON_OUTPUT.md](JSON_OUTPUT.md).
    For coding with thinking enabled, merge [server-coding-settings.json](codex/server-coding-settings.json)
    into the existing server config. It is a settings fragment, not a complete model config.
 2. Copy [strata.config.toml](codex/strata.config.toml) into your chosen Codex home as
@@ -56,7 +58,8 @@ Strata preserves it as an assistant thinking turn without inventing answer text.
 
 The remaining protocol limits in [RESPONSES.md](RESPONSES.md) still apply: `store:false`,
 full-history replay, non-strict function tools, no hosted tools, no image input, and no
-strict JSON Schema/Lark tools or server compaction endpoint. This catalog does not enable
+strict function parameter schemas/Lark tools or server compaction endpoint. Native JSON
+answer schemas are supported by the stacked GBNF build. This catalog does not enable
 those capabilities or modify a client's requested schema. Long-session compaction is not
 qualified; start a new conversation when approaching the configured context limit.
 Keep the same replay key if you need to replay an earlier encrypted reasoning item. Fresh

@@ -56,7 +56,7 @@ see [Local Codex CLI with Strata](CODEX_LOCAL.md).
 ## Capability profile
 
 The adapter supports text messages, per-request instructions, explicit `store:false`,
-plain text output, bounded metadata, temperature/top-p, and output limits.
+plain text and [native JSON output](JSON_OUTPUT.md), bounded metadata, temperature/top-p, and output limits.
 Reasoning defaults to off unless a summary is requested, which defaults effort
 to medium. Unknown behavior-changing parameters are errors.
 Request bodies are bounded to 4 MiB; input context must fit the existing service.
@@ -68,8 +68,8 @@ Configured sampling defaults remain in effect when a request omits them.
 | Server storage | Explicit `store:false` required; omitted or true is rejected. |
 | `previous_response_id`, conversation storage, ID-only references | Unsupported; no history is inferred from GPU cache. |
 | Retrieve/delete/cancel/background | Not implemented. Disconnects use existing cancellation/draining. |
-| `text.format` | Omitted or `{"type":"text"}` only. |
-| JSON Schema / JSON-object generation | Excluded; no strict enforcement claim or object-only fallback. |
+| `text.format` | Text, `json_object`, or `json_schema`; JSON requires the gbnf-v4 native build and requirements-json.txt. |
+| JSON Schema / JSON-object generation | Native schema decoding plus mandatory final validation; see [JSON output](JSON_OUTPUT.md). |
 | Streaming | Typed SSE from the same assembler as final JSON; set `stream:true`. |
 | Function calls | Client-owned functions with explicit `strict:false`, flat or inside `type:namespace`. |
 | Tool choice | `auto` or `none`; forced choices and `parallel_tool_calls:false` with tools are rejected. |

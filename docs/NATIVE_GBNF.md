@@ -87,7 +87,7 @@ the replay key and enable `--experimental-responses` as described in the
 Both use the same native constraint argument and decoder. A build without GBNF
 rejects grammar requests; it does not download or enable a backend at runtime.
 
-The engine's existing `INFO` diagnostics advertise `grammar=gbnf-v3`.
+The engine's existing `INFO` diagnostics advertise `grammar=gbnf-v4` (v3 for earlier builds).
 The HTTP service checks that version (also accepting `gbnf-v2` for plain answers), verifies the tokenizer byte table against
 the native vocabulary, and compiles the request before sending success headers.
 An older engine or an unsupported configuration is rejected explicitly. The server
@@ -126,7 +126,8 @@ Custom stop strings, images and simultaneous JSON requirements are rejected.
 Grammar source is bounded to 8192 UTF-8 bytes,
 output to 8192 tokens and 65536 native bytes; compilation/matcher work has the
 [G1 limits](gbnf-evidence/G1/grammar-backend-decision.md). No arbitrary grammar
-file path, registry, Lark or JSON converter is exposed.
+file path, registry or Lark input is exposed through the raw grammar field.
+Responses JSON formats use the separate [native schema boundary](JSON_OUTPUT.md).
 
 Chat sampling uses the existing bounded native sampler: `top_k` accepts 1..64;
 zero means its existing 64-candidate cap. Seeds use unsigned 64-bit values.
@@ -184,8 +185,9 @@ Responses reasoning summaries remain a separate, bounded service pass and are
 outside the answer grammar. Injected `reasoning_budget_tokens` wrap-up is not
 supported with grammar: disable that server setting for constrained reasoning.
 Output-token limits still apply to the entire generated turn; incomplete tool
-envelopes are never exposed as unconstrained answer text. JSON Schema enforcement,
-strict tool schemas, hosted tools, Lark custom tools and forced tool choice are
+envelopes are never exposed as unconstrained answer text. Native JSON answer schemas
+and their thinking budgets are now supported through [text.format](JSON_OUTPUT.md).
+Strict tool schemas, hosted tools, Lark custom tools and forced tool choice are
 not added by this feature. This is not a claim of universal Codex compatibility.
 
 Run the synthetic HTTP contract checks with
@@ -264,6 +266,7 @@ G6 recovery is deferred. The user
 selected Mermaid/plain text for G4, so actual Code Visualizer ProgramModel
 integration is not performed or claimed.
 
-JSON Schema, JSON-object
-enforcement and standard custom-tool Lark syntax are outside this contribution.
+JSON Schema and JSON-object answer generation were added after the original gates
+at the user's explicit request; see [JSON_OUTPUT.md](JSON_OUTPUT.md).
+Standard custom-tool Lark syntax remains outside this contribution.
 Existing unconstrained structured-output behavior is separate from native GBNF.

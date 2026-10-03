@@ -1,0 +1,76 @@
+# Native JSON output for Responses
+
+The GBNF branch supports Responses `text.format` with `json_object` and
+`json_schema`, including `strict:true`. This extends the earlier handoff scope
+at the user's explicit request on 2026-10-03. It uses the existing native
+XGrammar compiler, matcher, token masks, single-engine queue and cancellation.
+There is no HTTP translation, second inference implementation, or object-only
+fallback for schemas.
+
+Build the branch with `STRATA_ENABLE_GBNF=ON` using [NATIVE_GBNF.md](NATIVE_GBNF.md),
+install `python -m pip install -r requirements-json.txt`, and start Strata with
+`--experimental-responses` plus your existing model config and authentication.
+The native engine must advertise `grammar=gbnf-v4`. Older grammar builds are
+rejected before generation for JSON requests. Plain GBNF retains v2/v3 compatibility.
+
+For an arbitrary JSON object:
+
+```json
+{"model":"qwen3.8-flash-next","store":false,"input":"Return an object with a greeting.","max_output_tokens":256,"text":{"format":{"type":"json_object"}}}
+```
+
+For the exact schema used by Codex's automatic chat-title task:
+
+```json
+{
+  "model": "qwen3.8-flash-next",
+  "store": false,
+  "input": "Create a short title for fixing an addition function.",
+  "text": {"format": {
+    "type": "json_schema",
+    "name": "codex_output_schema",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {"title": {"type": "string", "minLength": 1, "maxLength": 36}},
+      "required": ["title"],
+      "additionalProperties": false
+    }
+  }}
+}
+```
+
+Set `stream:true` for typed SSE. The concatenated text deltas are exactly the
+JSON text in the final response; validation does not reserialize it or repair it.
+A completed assistant answer is parsed with duplicate-key, finite-number and
+Unicode checks, then validated against JSON Schema draft 2020-12. Schema validity,
+size, references and required validator availability are checked before generation.
+External schema references are not fetched. The native compiler enforces its schema
+constraints during decoding; final schema validation also checks constraints that
+cannot be represented by that grammar. Invalid output produces `response.failed`,
+never a successful response with weakened guarantees. Output-budget exhaustion
+produces `response.incomplete`; its partial text need not yet be complete JSON.
+
+Reasoning and client-owned function calls can precede the JSON answer. The schema
+constrains the answer, not tool results, function arguments or reasoning summaries.
+A tool-only response can complete without an answer, allowing the normal client
+loop to continue. Strict function parameter schemas and Lark tools are separate
+capabilities and remain unsupported. Raw `grammar` and `text.format` JSON requirements
+cannot be combined on one request.
+
+The server's configured thinking budget is enforced by native token masks for
+JSON requests: after that many reasoning tokens only the native end-of-thinking
+token is legal. No prompt text is injected to force a wrap-up. Speculative forks
+and checkpoints preserve the same counter. JSON generation has the existing
+8192-token maximum and 8192-byte schema bound; an omitted output limit uses the
+smaller of available context and that token maximum. Total request and native
+work/memory bounds remain active. Unsatisfiable or unrepresentable schemas can
+fail preflight, and validation failures are not silently retried.
+
+The legacy Chat Completions `response_format` implementation is unchanged. The
+Responses-only branch still has no native JSON decoder; use the stacked GBNF branch
+for this feature. The [local Codex profile](CODEX_LOCAL.md) uses it automatically
+when Codex sends a JSON title request.
+
+References: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs),
+[XGrammar compiler](https://xgrammar.mlc.ai/docs/latest/api/python/grammar_compiler.html).

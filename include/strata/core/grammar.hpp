@@ -19,6 +19,7 @@ struct ProtocolTokens {
 };
 struct Scope {
     bool thinking = false, tools = false;
+    uint32_t reasoning_tokens = 0; // zero: no separate thinking limit
     bool enabled() const { return thinking || tools; }
 };
 
@@ -111,7 +112,7 @@ public:
     Compiler(const Compiler&) = delete;
     Compiler& operator=(const Compiler&) = delete;
     std::shared_ptr<const Compiled> compile(const std::string& source,
-                                          uint64_t work_limit = 5000000);
+                                          uint64_t work_limit = 5000000, bool json_schema = false);
     size_t cache_entries() const;
     size_t cache_bytes() const;
 private:

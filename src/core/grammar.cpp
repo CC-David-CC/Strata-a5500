@@ -85,10 +85,11 @@ struct Compiled {
     std::string identity;
     xgrammar::CompiledGrammar grammar;
     size_t bytes;
-    Compiled(std::shared_ptr<const Vocabulary> v, std::string s, xgrammar::CompiledGrammar g)
+    bool json_schema;
+    Compiled(std::shared_ptr<const Vocabulary> v, std::string s, xgrammar::CompiledGrammar g, bool json)
         : vocabulary(std::move(v)), source(std::move(s)),
-          identity(std::string(kBackend) + ":" + vocabulary->identity + ":" + source_identity(source)),
-          grammar(std::move(g)), bytes(grammar.MemorySizeBytes() + source.size()) {}
+          identity(std::string(kBackend) + ":" + vocabulary->identity + (json ? ":json-schema:" : ":") + source_identity(source)),
+          grammar(std::move(g)), bytes(grammar.MemorySizeBytes() + source.size()), json_schema(json) {}
 };
 
 struct Matcher::Impl {
@@ -104,12 +105,15 @@ struct Matcher::Impl {
     const char* channel = "answer";
     bool stopped = false;
     size_t separator_bytes = 0;
+    uint32_t reasoning_tokens = 0;
     std::vector<int32_t> answer_mask;
     explicit Impl(std::shared_ptr<const Compiled> c, uint64_t limit, Scope s)
         : compiled(std::move(c)), matcher(compiled->grammar, std::nullopt, false), budget{limit},
           bitmask((compiled->vocabulary->bytes.size() + 31) / 32), scope(s),
           phase(s.thinking ? Phase::reasoning : s.tools ? Phase::choice : Phase::answer) {
         const auto& t = compiled->vocabulary->protocol;
+        if (s.reasoning_tokens > kMaxHistoryTokens || (!s.thinking && s.reasoning_tokens))
+            throw std::runtime_error("invalid native thinking budget");
         if ((s.thinking && t.think_end < 0) || (s.tools && (t.call_start < 0 || t.call_end < 0)))
             throw std::runtime_error("grammar scope requires the Qwen reasoning/tool special tokens");
     }
@@ -117,7 +121,7 @@ struct Matcher::Impl {
         : compiled(from.compiled), matcher(from.matcher.Fork()), budget(from.budget), history(from.history),
           bitmask(from.bitmask), output_bytes(from.output_bytes), dirty(from.dirty), failed(from.failed),
           scope(from.scope), phase(from.phase), channel(from.channel), stopped(from.stopped),
-          separator_bytes(from.separator_bytes), answer_mask(from.answer_mask) {}
+          separator_bytes(from.separator_bytes), reasoning_tokens(from.reasoning_tokens), answer_mask(from.answer_mask) {}
     void usable() const {
         if (failed) throw std::runtime_error("grammar matcher failed; discard this generation");
     }
@@ -147,6 +151,9 @@ const std::vector<int32_t>& Matcher::mask() {
         auto allow = [&](int32_t id) { p.bitmask[id / 32] |= (int32_t) (1u << (id % 32)); };
         if (p.phase == Impl::Phase::reasoning || p.phase == Impl::Phase::tool) {
             p.bitmask = v.text_mask;
+            if (p.phase == Impl::Phase::reasoning && p.scope.reasoning_tokens &&
+                p.reasoning_tokens >= p.scope.reasoning_tokens)
+                std::fill(p.bitmask.begin(), p.bitmask.end(), 0);
             allow(p.phase == Impl::Phase::reasoning ? v.protocol.think_end : v.protocol.call_end);
         } else {
             int64_t shape[2] = {1, (int64_t) p.bitmask.size()};
@@ -223,6 +230,7 @@ bool Matcher::accept(int32_t token) {
         const auto& v = *p.compiled->vocabulary;
         const bool stop = std::find(v.stop_ids.begin(), v.stop_ids.end(), token) != v.stop_ids.end();
         if (p.phase == Impl::Phase::reasoning) {
+            if (token != v.protocol.think_end) ++p.reasoning_tokens;
             p.channel = token == v.protocol.think_end ? "control" : "reasoning";
             if (token == v.protocol.think_end) p.phase = Impl::Phase::choice;
         } else if (p.phase == Impl::Phase::tool) {
@@ -247,7 +255,9 @@ bool Matcher::accept(int32_t token) {
         p.history.push_back(token); p.output_bytes += bytes;
         if (before != p.phase) p.separator_bytes = 0;
         p.dirty = before != p.phase || p.phase == Impl::Phase::answer ||
-                  p.phase == Impl::Phase::choice || p.phase == Impl::Phase::after_tool;
+                  p.phase == Impl::Phase::choice || p.phase == Impl::Phase::after_tool ||
+                  (p.phase == Impl::Phase::reasoning && p.scope.reasoning_tokens &&
+                   p.reasoning_tokens >= p.scope.reasoning_tokens);
         return true;
     } catch (...) { p.failed = true; throw; }
 }
@@ -326,7 +336,8 @@ Checkpoint Matcher::checkpoint() const {
 void Matcher::restore(const Checkpoint& checkpoint) {
     impl_->usable();
     if (checkpoint.compiled != impl_->compiled || checkpoint.scope.thinking != impl_->scope.thinking ||
-        checkpoint.scope.tools != impl_->scope.tools)
+        checkpoint.scope.tools != impl_->scope.tools ||
+        checkpoint.scope.reasoning_tokens != impl_->scope.reasoning_tokens)
         throw std::runtime_error("grammar/tokenizer/backend identity mismatch in checkpoint");
     if (checkpoint.tokens.size() > kMaxHistoryTokens) throw std::runtime_error("grammar checkpoint is too large");
     Matcher fresh(impl_->compiled, impl_->budget.remaining, impl_->scope);
@@ -358,18 +369,26 @@ Compiler::~Compiler() = default;
 size_t Compiler::cache_entries() const { return impl_->cache.size(); }
 size_t Compiler::cache_bytes() const { return impl_->bytes; }
 
-std::shared_ptr<const Compiled> Compiler::compile(const std::string& source, uint64_t limit) {
-    validate_source(source);
+std::shared_ptr<const Compiled> Compiler::compile(const std::string& source, uint64_t limit, bool json_schema) {
+    if (json_schema) {
+        if (source.empty() || source.size() > kMaxSourceBytes || source.find('\0') != std::string::npos || !valid_utf8(source))
+            throw std::runtime_error("JSON schema must be 1..8192 UTF-8 bytes without a raw NUL");
+    } else validate_source(source);
     auto& p = *impl_;
     for (auto i = p.cache.begin(); i != p.cache.end(); ++i)
-        if ((*i)->source == source) {
+        if ((*i)->source == source && (*i)->json_schema == json_schema) {
             const auto compiled = *i;
             p.cache.splice(p.cache.begin(), p.cache, i);
             return compiled;
         }
     detail::WorkBudget budget{limit};
     detail::WorkScope scope(budget, 2500ms);
-    auto result = std::make_shared<Compiled>(p.vocabulary, source, p.compiler.CompileGrammar(source, "root"));
+    // Schema conversion feeds the same compiler/matcher and native token masks.
+    // strict_mode=false preserves the schema's own additionalProperties/items
+    // semantics; it is unrelated to the HTTP strict flag. Keep property order.
+    auto grammar = json_schema ? p.compiler.CompileJSONSchema(source, true, std::nullopt, std::nullopt, false, 2, false)
+                               : p.compiler.CompileGrammar(source, "root");
+    auto result = std::make_shared<Compiled>(p.vocabulary, source, std::move(grammar), json_schema);
     if (result->bytes > 16 * 1024 * 1024)
         throw std::runtime_error("grammar resource limit: compiled grammar exceeds 16 MiB");
     scope.finish();

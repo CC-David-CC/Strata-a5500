@@ -2,7 +2,9 @@
 #pragma once
 #include <charconv>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
+#include <sstream>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -12,10 +14,13 @@ struct ServeRequest {
     std::string line, grammar, error;
     bool fatal = false;
     bool thinking = false, tools = false;
+    bool json_schema = false;
+    uint32_t reasoning_tokens = 0;
 };
 
 // GENG1 <UTF-8 byte count>\n<exact grammar bytes>\nGEN <arguments>\n
 // GENG2 <byte count> <thinking:0|1> <tools:0|1> adds final-answer scope.
+// GENG3 <byte count> <json_schema:0|1> <thinking:0|1> <tools:0|1> <reasoning tokens>
 // Both versions permit CHECKG as the final command (compile only).
 // A malformed/truncated frame terminates this pipe; its body is never reparsed
 // as commands. The caller owns the existing queue and STOP/cancellation flag.
@@ -30,12 +35,24 @@ public:
             if (!line(request.line, terminated)) { finished_ = true; return std::nullopt; }
             if (request.line.rfind("GENG", 0) != 0) return request;
             const bool scoped = request.line.rfind("GENG2 ", 0) == 0;
-            if (!terminated || (!scoped && request.line.rfind("GENG1 ", 0) != 0))
+            const bool json_frame = request.line.rfind("GENG3 ", 0) == 0;
+            if (!terminated || (!scoped && !json_frame && request.line.rfind("GENG1 ", 0) != 0))
                 throw std::runtime_error("unsupported or truncated grammar frame header");
             size_t count = 0;
             const char* start = request.line.data() + 6;
             const char* end = request.line.data() + request.line.size();
-            if (scoped) {
+            if (json_frame) {
+                std::istringstream header(request.line.substr(6));
+                int json = -1, thinking = -1, tools = -1;
+                int64_t budget = -1;
+                std::string extra;
+                if (!(header >> count >> json >> thinking >> tools >> budget) || header >> extra ||
+                    json < 0 || json > 1 || thinking < 0 || thinking > 1 || tools < 0 || tools > 1 ||
+                    budget < 0 || budget > 8192 || (!thinking && budget))
+                    throw std::runtime_error("invalid GENG3 flags or reasoning budget");
+                request.json_schema = json; request.thinking = thinking; request.tools = tools;
+                request.reasoning_tokens = (uint32_t) budget;
+            } else if (scoped) {
                 if (end - start < 5 || end[-4] != ' ' || end[-2] != ' ' ||
                     (end[-3] != '0' && end[-3] != '1') || (end[-1] != '0' && end[-1] != '1'))
                     throw std::runtime_error("grammar scope requires thinking/tools boolean flags");
@@ -43,7 +60,7 @@ public:
                 if (!request.thinking && !request.tools) throw std::runtime_error("empty grammar scope");
                 end -= 4;
             }
-            const auto number = std::from_chars(start, end, count);
+            const auto number = json_frame ? std::from_chars_result{end, std::errc{}} : std::from_chars(start, end, count);
             if (number.ec != std::errc{} || number.ptr != end || count < 1 || count > 8192)
                 throw std::runtime_error("grammar frame length must be 1..8192 bytes");
             request.grammar = bytes(count);

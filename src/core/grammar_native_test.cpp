@@ -220,6 +220,51 @@ static void scoped_unit() {
                  "checkpoints, budgets and isolation passed\n";
 }
 
+static void json_unit() {
+    std::vector<std::string> bytes;
+    for (int i = 0; i < 256; ++i) bytes.push_back(std::string(1, (char)i));
+    bytes.insert(bytes.end(), {"", "", "", ""});
+    auto vocab = Vocabulary::from_bytes(std::move(bytes), {256}, {257, 258, 259});
+    Compiler compiler(vocab);
+    const std::string schema = R"({"type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":36}},"required":["title"],"additionalProperties":false})";
+    auto compiled = compiler.compile(schema, 5000000, true);
+    REQUIRE(compiler.compile(schema, 5000000, true) == compiled);
+    fails([&] { compiler.compile(schema); }); // distinct source formats/cache admission
+    for (const auto& example : std::vector<std::pair<std::string, bool>>{
+            {R"({"title":"Fix addition"})", true}, {R"({"title":""})", false},
+            {R"({"title":123})", false}, {R"({"wrong":"x"})", false},
+            {R"({"title":"0123456789012345678901234567890123456"})", false},
+            {R"({"title":"x","extra":0})", false}}) {
+        Matcher m(compiled);
+        bool accepted = true;
+        for (unsigned char c : example.first) if (!m.accept(c)) { accepted = false; break; }
+        REQUIRE((accepted && m.complete()) == example.second);
+    }
+    Matcher budget(compiled, 2000000, {true, true, 2});
+    REQUIRE(budget.accept('a'));
+    const auto saved = budget.checkpoint();
+    const int32_t drafts[] = {'b', 'c'};
+    PrefixMasks masks;
+    budget.prefix_masks(drafts, 2, masks);
+    REQUIRE(masks.blocked_draft == 1 && budget.tokens() == saved.tokens);
+    REQUIRE(budget.accept('b') && !budget.allows('c') && budget.allows(257));
+    auto forked = budget.fork();
+    REQUIRE(!forked.allows('c') && forked.accept(257));
+    REQUIRE(budget.accept(257) && budget.accept(258));
+    REQUIRE(budget.accept('x') && budget.accept(259)); // tool text stays unconstrained
+    for (unsigned char c : std::string(R"({"title":"After tool"})")) REQUIRE(budget.accept(c));
+    REQUIRE(budget.complete() && budget.accept(256));
+    budget.restore(saved);
+    REQUIRE(budget.accept('b') && !budget.allows('c'));
+    Matcher different(compiled, 2000000, {true, true, 3});
+    fails([&] { different.restore(saved); }, "identity mismatch");
+    auto object = compiler.compile(R"({"type":"object"})", 5000000, true);
+    Matcher arbitrary(object);
+    for (unsigned char c : std::string(R"({"nested":[true,null,1.5,"ok"]})")) REQUIRE(arbitrary.accept(c));
+    REQUIRE(arbitrary.complete());
+    std::cout << "JSON schema: title bounds/types/keys, JSON object, native thinking budget, tools, speculation, checkpoints passed\n";
+}
+
 int main(int argc, char** argv) {
     try {
         if (argc != 2 && argc != 4) throw std::runtime_error("usage: grammar_native_test CASES [TOKENIZER_DIR VOCAB_AUDIT]");
@@ -230,6 +275,7 @@ int main(int argc, char** argv) {
         corpus(argv[1], vocab);
         unit(vocab);
         scoped_unit();
+        json_unit();
         if (argc == 4) {
             auto actual = Vocabulary::from_pack(argv[2], {248044, 248046});
             corpus(argv[1], actual);

@@ -505,7 +505,9 @@ class StrataEngine:
         return f" cvec={int(on)}" if isinstance(on, bool) else ""
 
     def require_grammar(self, constraint):
-        supported = (CAPABILITY,) if constraint.scoped else (CAPABILITY, "gbnf-v2")
+        if (constraint.json_schema or constraint.reasoning_tokens) and self.info.get("grammar") != "gbnf-v4":
+            raise ValueError("JSON output and native thinking budgets require a gbnf-v4 native build")
+        supported = ("gbnf-v4", CAPABILITY) if constraint.scoped else ("gbnf-v4", CAPABILITY, "gbnf-v2")
         if self.info.get("grammar") not in supported:
             raise ValueError("grammar requires a gbnf-v3 native build for reasoning/tools (gbnf-v2 for plain text) "
                              "in a supported single-GPU text mode; "
@@ -1447,7 +1449,7 @@ class Service:
             if room < 1:
                 raise ValueError(f"prompt ({len(ids)} tokens) leaves no room to answer in the context "
                                  f"({self.engine.max_context}); requests are never truncated")
-            max_new = room
+            max_new = min(room, 8192) if constraint is not None and constraint.json_schema else room
         elif max_new > room:
             if not self.fit_max_tokens:
                 raise ValueError(f"prompt ({len(ids)} tokens) + max tokens ({max_new}) exceeds the context "
@@ -1462,7 +1464,7 @@ class Service:
     def prepare_constraint(self, constraint, sampling):
         """Same native compiler, before headers, using existing serialized admission."""
         validate_sampling({**self.sampling_defaults, **self.shared, **sampling})
-        if constraint.thinking and self.reasoning_budget(sampling):
+        if constraint.thinking and self.reasoning_budget(sampling) and constraint.reasoning_tokens != min(self.reasoning_budget(sampling), 8192):
             raise ValueError("grammar does not support injected reasoning-budget wrap-up; disable reasoning_budget_tokens")
         with self.fifo:
             self.ensure_loaded()
