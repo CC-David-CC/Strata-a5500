@@ -53,6 +53,10 @@
 #include "strata/core/native_dense.hpp"
 #include "strata/program/logits_selection.hpp"
 #include "strata/program/conv_cache.hpp"
+#include "strata/program/serve_input.hpp"
+#ifdef STRATA_ENABLE_GBNF
+#include "strata/core/grammar.hpp"
+#endif
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/suffix_drafter.hpp"
 #include "strata/kernels/cvec.hpp"
@@ -67,6 +71,7 @@
 #include <windows.h>
 #include <psapi.h>
 #include <io.h>
+#include <fcntl.h>
 #else
 #include <unistd.h>
 #include <cerrno>
@@ -4120,6 +4125,18 @@ int main(int argc, char** argv) {
     }
     if (o.serve) {
         const bool use_mtp = !target_only;
+#ifdef STRATA_ENABLE_GBNF
+        // This profile shares the existing frontend's two end controls. A
+        // custom normal-text EOS would consume bytes as a control in the
+        // matcher while the frontend might render them, violating the language.
+        const bool grammar_end_ids = o.eos_ids.size() == 2 &&
+            std::find(o.eos_ids.begin(), o.eos_ids.end(), 248044) != o.eos_ids.end() &&
+            std::find(o.eos_ids.begin(), o.eos_ids.end(), 248046) != o.eos_ids.end();
+        const bool grammar_capable = !use_mtp && !multi_gpu && !o.vision && grammar_end_ids;
+        std::unique_ptr<strata::grammar::Compiler> grammar_compiler;
+#else
+        const bool grammar_capable = false;
+#endif
         if (o.prefill_chunk <= 0 ||
             (graph_hits && (thits.d_res == nullptr || host_res.empty()))) {
             std::fprintf(stderr, "strata serve: needs --prefill CHUNK (and a fillable "
@@ -4921,49 +4938,44 @@ int main(int argc, char** argv) {
         std::atomic<bool> stop_req{false};
         std::mutex in_mu;
         std::condition_variable in_cv;
-        std::deque<std::string> in_lines;
+        std::deque<strata::program::ServeRequest> in_lines;
         bool in_eof = false;
         std::thread([&] {
             // read(2) on the descriptor, not std::cin: glibc's exit() flushes every stdio stream and waits for
             // stdin's lock, which getline holds while it waits for input - an engine ending on an error (every
             // std::exit) would hang in exit() on Linux, and the server would wait for it forever
-            std::string l, buf;
-            char chunk[4096];
-            auto getline_fd = [&](std::string& out) -> bool {
-                for (;;) {
-                    const size_t nlpos = buf.find('\n');
-                    if (nlpos != std::string::npos) {
-                        out.assign(buf, 0, nlpos);
-                        buf.erase(0, nlpos + 1);
-                        return true;
-                    }
 #if defined(_WIN32)
-                    const int n = _read(0, chunk, (unsigned) sizeof chunk);
-#else
-                    const ssize_t n = ::read(0, chunk, sizeof chunk);
-                    if (n < 0 && errno == EINTR) continue;
+            _setmode(0, _O_BINARY); // framed sizes count bytes, including literal newlines
 #endif
-                    if (n <= 0) {
-                        if (buf.empty()) return false;
-                        out.swap(buf);
-                        buf.clear();
-                        return true;
-                    }
-                    buf.append(chunk, (size_t) n);
+            strata::program::ServeInput reader([](char* chunk, size_t size) -> std::ptrdiff_t {
+#if defined(_WIN32)
+                return _read(0, chunk, (unsigned) size);
+#else
+                ssize_t n;
+                do { n = ::read(0, chunk, size); } while (n < 0 && errno == EINTR);
+                return n;
+#endif
+            });
+            while (auto request = reader.next()) {
+                if (request->line == "STOP" && request->grammar.empty() && !request->fatal) {
+                    stop_req.store(true); continue;
                 }
-            };
-            while (getline_fd(l)) {
-                if (!l.empty() && l.back() == '\r') l.pop_back();
-                if (l == "STOP") { stop_req.store(true); continue; }
                 std::lock_guard<std::mutex> lk(in_mu);
-                in_lines.push_back(l);
+                if (in_lines.size() >= 8) {
+                    request->fatal = true;
+                    request->error = "native input queue exceeds eight pending commands";
+                    stop_req.store(true);
+                }
+                const bool fatal = request->fatal;
+                in_lines.push_back(std::move(*request));
                 in_cv.notify_one();
+                if (fatal) break;
             }
             std::lock_guard<std::mutex> lk(in_mu);
             in_eof = true;
             in_cv.notify_one();
         }).detach();
-        auto next_line = [&](std::string& out) -> bool {
+        auto next_line = [&](strata::program::ServeRequest& out) -> bool {
             std::unique_lock<std::mutex> lk(in_mu);
             in_cv.wait(lk, [&] { return !in_lines.empty() || in_eof; });
             if (in_lines.empty()) return false;
@@ -5026,7 +5038,7 @@ int main(int argc, char** argv) {
                         "mtp_max=%d lookup=%d vram_free_mib=%lld cvec=%s arena_mib=%lld pool_workers=%d pcie_frac=%.2f "
                         "spec_min_p=%.2f conversation_cache_mib=%lld conversation_cache_slots=%d "
                         "conversation_cache_min_free_mib=%lld decode_mode=%s requested_spec=%d requested_lookup=%d "
-                        "mtp_loaded=%d mtp_vram_mib=%.1f engine=" STRATA_VERSION "\n",
+                        "mtp_loaded=%d mtp_vram_mib=%.1f grammar=%s engine=" STRATA_VERSION "\n",
                         (long long) o.max_context, o.kv.c_str(),
                         (long long) (g.n_qsa_layers() > 0 && ss.qsa_states[ss.qsa_primary()].kv_mode == 1
                                          ? ss.qsa_states[ss.qsa_primary()].n_slots * 4 : 0),
@@ -5038,7 +5050,8 @@ int main(int argc, char** argv) {
                         pool.workers(), o.pcie_frac,
                         o.spec_min_p, (long long) o.conversation_cache_mib, o.conversation_cache_slots,
                         (long long) o.conversation_cache_min_free_mib, use_mtp ? "mtp" : "target",
-                        requested_spec, requested_lookup, use_mtp ? 1 : 0, (double) mtp.vram_bytes() / 1048576.0);
+                        requested_spec, requested_lookup, use_mtp ? 1 : 0, (double) mtp.vram_bytes() / 1048576.0,
+                        grammar_capable ? "gbnf-v1" : "none");
         }
         // issue #29: a request whose heartbeat (tokens, prompt chunks, verify windows) stops for this long is stuck on
         // a flag nobody will raise - end the engine with where it was, so the server starts it again instead of the
@@ -5087,7 +5100,13 @@ int main(int argc, char** argv) {
         bool mrope_identity = true;
         std::vector<float> img_rows;
         std::vector<const float*> row_ptr;
-        while (next_line(line)) {
+        strata::program::ServeRequest input;
+        while (next_line(input)) {
+            if (input.fatal) {
+                std::printf("ERR %s\n", strata::program::protocol_error(input.error).c_str());
+                return 1;
+            }
+            line = std::move(input.line);
             // #477: every --expert-profile-save-every minutes, before the next request (at QUIT: after the loop)
             if (!heat.empty() && line != "QUIT" && o.expert_profile_save_min > 0 &&
                 Clock::now() - profile_saved_at >= std::chrono::duration<double>(o.expert_profile_save_min * 60.0))
@@ -5100,6 +5119,16 @@ int main(int argc, char** argv) {
             } busy_scope;
             stop_req.store(false);   // a STOP that arrived between requests is stale
             err.clear();
+            // Every request begins and ends with no installed mask. Prompt/KV
+            // reuse never carries a previous request's matcher state.
+            struct ClearMasks {
+                strata::core::Verifier& ver;
+                explicit ClearMasks(strata::core::Verifier& v) : ver(v) { std::string e; ver.set_token_masks(nullptr, 0, e); }
+                ~ClearMasks() { std::string e; ver.set_token_masks(nullptr, 0, e); }
+            } clear_masks(ver);
+#ifdef STRATA_ENABLE_GBNF
+            std::unique_ptr<strata::grammar::Matcher> matcher;
+#endif
             const bool geni = line.rfind("GENI ", 0) == 0;
             if (!geni && line.rfind("GEN ", 0) != 0) {
                 std::printf("ERR expected: GEN <max_new> <id,id,...> or GENI <max_new> <file> <id,id,...>\n");
@@ -5159,6 +5188,28 @@ int main(int argc, char** argv) {
                 continue;
             }
             const int64_t n = (int64_t) ids.size();
+            if (!input.grammar.empty()) {
+                if (!grammar_capable || geni || max_new > 8192) {
+                    std::printf("ERR GBNF requires a grammar-enabled single-GPU target-only text engine, standard end IDs and at most 8192 output tokens\n");
+                    continue;
+                }
+#ifdef STRATA_ENABLE_GBNF
+                try {
+                    if (!grammar_compiler) {
+                        auto vocab = strata::grammar::Vocabulary::from_pack(
+                            std::filesystem::path(o.pack) / "tokenizer",
+                            std::vector<int32_t>(o.eos_ids.begin(), o.eos_ids.end()));
+                        if ((int64_t) vocab->bytes.size() != n_vocab)
+                            throw std::runtime_error("grammar tokenizer vocabulary differs from model head");
+                        grammar_compiler = std::make_unique<strata::grammar::Compiler>(std::move(vocab));
+                    }
+                    matcher = std::make_unique<strata::grammar::Matcher>(grammar_compiler->compile(input.grammar));
+                } catch (const std::exception& error) {
+                    std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
+                    continue;
+                }
+#endif
+            }
             req_imgs.clear();
             if (geni && !o.vision) { std::printf("ERR this engine was started without --vision\n"); continue; }
             if (geni || !mrope_identity) {
@@ -5790,12 +5841,33 @@ int main(int argc, char** argv) {
                     cudaMemcpy(d_hist, hist_stage.data(), (size_t) T * (size_t) hist_n * sizeof(int32_t),
                                cudaMemcpyHostToDevice);
                 }
+#ifdef STRATA_ENABLE_GBNF
+                if (matcher) {
+                    try {
+                        if (T != 1) throw std::runtime_error("constrained speculation is not qualified");
+                        if (!ver.set_token_masks(matcher->mask().data(), T, err)) throw std::runtime_error(err);
+                    } catch (const std::exception& error) {
+                        std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
+                        return 1;
+                    }
+                }
+#endif
                 tr("window", p, T);
                 const Clock::time_point tw0 = Clock::now();
                 if (!ver.run(T, window.data(), p, win_pool_fn, win_pool_user, outv.data(), err) || drive.d.failed) {
                     std::printf("ERR %s\n", drive.d.failed && drive.d.fail ? drive.d.fail : err.c_str());
                     return 1;
                 }
+#ifdef STRATA_ENABLE_GBNF
+                if (matcher) {
+                    try {
+                        if (!matcher->accept(outv[0])) throw std::runtime_error("constrained selector returned an illegal token");
+                    } catch (const std::exception& error) {
+                        std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
+                        return 1;
+                    }
+                }
+#endif
                 int a = 0;
                 while (a < T - 1 && window[(size_t) a + 1] == outv[(size_t) a]) ++a;
                 if (from_sfx) { ++sfx_windows; sfx_drafts += T - 1; sfx_ok += a; }
@@ -5850,6 +5922,12 @@ int main(int argc, char** argv) {
                     std::fprintf(stderr, "strata trace: CURSOR prompt=%lld consumed=%zu produced=%lld pending=%d "
                                          "window=%d selection_position=%lld\n", (long long) n, consumed.size(),
                                  (long long) produced_n, outv[(size_t) a], T, (long long) (p + a));
+#ifdef STRATA_ENABLE_GBNF
+                if (matcher && trace)
+                    std::fprintf(stderr, "strata trace: GRAMMAR tokens=%zu accepting=%d terminal=%d work=%llu identity=%s\n",
+                                 matcher->tokens().size(), matcher->complete(), matcher->terminated(),
+                                 (unsigned long long) matcher->work_used(), matcher->identity().c_str());
+#endif
                 if (use_mtp && timed_round && !eos)
                     policy.observe(from_sfx, T, a, sfx_match,
                                    std::chrono::duration<double, std::milli>(Clock::now() - round0).count());

@@ -102,6 +102,11 @@ public:
     /// or sync and never read a history staged for another position.
     void set_head_sampling(bool on) { head_sampling_ = on; if (next_) next_->set_head_sampling(on); }
 
+    /// Copy host masks for the next window. nullptr/0 clears the request-local
+    /// constraint. Masked requests always select again after graph replay, even
+    /// when greedy; a captured unconstrained pick is never authoritative.
+    bool set_token_masks(const int32_t* masks, int rows, std::string& err);
+
     /// LAYER SPLIT (multi-GPU): this verifier runs layers [layer_begin, layer_end) of every window.  A stage that
     /// does not start at layer 0 takes its residual from `handoff_in` instead of embedding the tokens; a stage that
     /// does not end at the last layer writes its residual to `handoff_out` and has no head.  The hand-off holds,
@@ -172,6 +177,8 @@ private:
     const int32_t* hist_d_ = nullptr;   ///< penalty-history row (set_history); null = no penalties apply
     int hist_len_ = 0;
     bool head_sampling_ = true;          ///< set_head_sampling
+    strata::kernels::TokenMask token_mask_;
+    int token_mask_rows_ = 0;
     int device_ = -1;                    ///< the device `init` ran on: run/commit switch to it (layer split)
     std::atomic<bool> released_{false};  ///< #267: release_gpu_waits ran (maybe on the watchdog thread): no more windows
     bool device_plan_ = false;            ///< E-6: resident-only layers planned on the device (STRATA_VERIFY_DEVICE_PLAN)

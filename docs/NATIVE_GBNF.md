@@ -56,12 +56,15 @@ CMake/server startup does not download dependencies. See the
 syntax, licenses and resource limits, and the [native test report](gbnf-evidence/G1/REPORT.md)
 for the parser, recursive grammar, tokenizer-byte and sanitizer results.
 
-G1 provides compilation and private matcher state. It does not yet enable the
-`grammar` HTTP request field or constrain model selection.
+G1 provides compilation and private matcher state. G2 enforces native masks
+through the same persistent target-only decoder; see its
+[real model and sampler report](gbnf-evidence/G2/REPORT.md). The private native
+frame is documented for the probe. The `grammar` HTTP request field is not
+enabled until G3 connects and qualifies both adapters.
 
 ## Remaining grammar gates
 
-G2 enforces legality before native selection. G3 connects the raw `grammar` extension to both HTTP
+G3 connects the raw `grammar` extension to both HTTP
 adapters. G4 adds inspection and state-derived application contracts. G5
 qualifies constrained MTP/suffix execution; G6 recovery is deferred.
 
