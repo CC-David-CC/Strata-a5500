@@ -32,6 +32,62 @@ the RX 5500 XT, combine it with `contrib/gfx1012-community`. Non-MTP serving is
 the independent `contrib/non-mtp-serving` contribution. Combined test commits
 are identified explicitly in the results.
 
+## Enable an option for serving
+
+Build this branch for your GPU. For example, with a CUDA toolchain installed
+on Linux and an RTX 4090 (`89`; choose your GPU's architecture):
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=ON \
+  -DSTRATA_ENABLE_HIP=OFF -DCMAKE_CUDA_ARCHITECTURES=89
+cmake --build build --target strata --parallel 4
+```
+
+For AMD, use the [HIP source-build instructions](AMD_HIP.md#build). Set the run
+config's `exe` to the absolute path of that build's `strata` executable. The
+alternatives are compiled into this branch; both runtime switches default to
+zero (off).
+
+In your existing run config, merge these keys into its `env` object to test GR
+max4 alone. Keep all other config and environment entries:
+
+```json
+{
+  "env": {
+    "STRATA_GR_DOWN_MAX4": "1",
+    "STRATA_MMVQ_WARP1": "0"
+  }
+}
+```
+
+For one-warp MMVQ alone, use `"STRATA_GR_DOWN_MAX4": "0"` and
+`"STRATA_MMVQ_WARP1": "1"` instead. Start or restart with Strata's Python
+environment and your edited config:
+
+```sh
+python -m serve.server --engine strata --config config.json --host 127.0.0.1 --port 8080
+```
+
+The server passes `env` to the native engine on both Windows and Linux. Config
+values override inherited shell variables. For a Linux shell-only trial, when
+the config does not already set these keys:
+
+```sh
+STRATA_GR_DOWN_MAX4=1 STRATA_MMVQ_WARP1=0 \
+  python -m serve.server --engine strata --config config.json --host 127.0.0.1 --port 8080
+```
+
+Set both config values to `"0"` and restart to disable the alternatives. Restart
+after every change because engine initialization and captured GPU graphs retain
+the selected paths. For GR max4, the measured setting is `--spec 4`; windows
+larger than four continue to use the existing implementation.
+
+Check that `exe` names this branch's build and inspect the `args` and `env`
+recorded by `tools/bench_mtp_modes.py` when verifying a trial. An upstream binary
+does not implement these switches. Use the [reproduction checks](#reproduction)
+for numerical validation; `STRATA_BENCH_ALLOW_ROUNDING` is only a test tolerance
+switch and is not needed to serve requests.
+
 ## RTX PRO result at 64K input
 
 [Full matrix, settings and build identities](benchmarks/2026-10-01-experimental-kernels.md).
