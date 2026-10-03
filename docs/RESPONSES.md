@@ -77,7 +77,7 @@ Configured sampling defaults remain in effect when a request omits them.
 | `client_metadata` | Diagnostic strings in the existing optional monitor; never instructions or inference settings. |
 | `prompt_cache_key` | Routing hint to the sole engine, echoed in the response. No separate cache partitions, billing, or retention guarantee. |
 | Image/audio, hosted tools, compaction, WebSockets | Unsupported; rejected. |
-| Raw GBNF | This stacked branch adds the [native GBNF extension](NATIVE_GBNF.md), requiring a qualified target-only build and explicit reasoning off. The frozen R4 Responses-only checkpoint rejects it. |
+| Raw GBNF | This stacked branch adds the [native GBNF extension](NATIVE_GBNF.md), requiring a qualified native build and explicit reasoning off. The guide covers target-only and G5 speculative modes. The frozen R4 Responses-only checkpoint rejects it. |
 
 To continue, append the previous response's complete `output` items and the new
 user message to your supplied history. Resend any instructions you still want.

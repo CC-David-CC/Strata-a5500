@@ -1,4 +1,4 @@
-"""G3 real-model HTTP/official-SDK qualification; owns one native process at a time.
+"""G3/G5 real-model HTTP/official-SDK qualification; one native process at a time.
 
 Use an idle authorized GPU, private config and a fresh evidence directory. No
 model output is scripted. This does not establish native-model Codex tool skill.
@@ -39,12 +39,14 @@ def main():
     ap.add_argument('--config', type=Path, required=True)
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--unsupported-config', type=Path, action='append', default=[])
+    ap.add_argument('--mode', choices=('target','mtp','coupled','suffix','suffix-coupled'), default='target')
+    ap.add_argument('--speculation-benchmark', action='store_true')
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=False)
     cfg = json.loads(a.config.read_text(encoding='utf-8'))
     report = {'result': 'running', 'scripted_model_output': False, 'sdk_version': openai.__version__,
               'executable_sha256': hashlib.sha256(Path(cfg['exe']).read_bytes()).hexdigest(),
-              'args': cfg['args'], 'cases': []}
+              'args': cfg['args'], 'mode': a.mode, 'cases': []}
     benchmarks = []
     engine = httpd = client = svc = None
 
@@ -68,6 +70,7 @@ def main():
         env.pop('STRATA_SPEC_COUPLED', None)
         # Controlled timings: trace is off. Native G2 retained the cursor audit.
         env.pop('STRATA_TRACE', None)
+        env.pop('STRATA_GRAMMAR_LOGITS', None)
         engine = StrataEngine(config['exe'], config['args'], cwd=config['cwd'],
                               log=str(a.out / (label + '-engine.txt')), env=env)
         tok = tokenizer(config['tokenizer'])
@@ -92,6 +95,7 @@ def main():
 
     def run(api, grammar=None, stream=False, **kw):
         started = time.perf_counter()
+        first_delta = None
         call = client.responses.create if api == 'responses' else client.chat.completions.create
         result = call(**args(api, grammar, stream=stream, **kw))
         if not stream:
@@ -106,15 +110,18 @@ def main():
                     if api == 'responses':
                         if event.type == 'response.output_text.delta':
                             text += event.delta
+                            if event.delta and first_delta is None: first_delta = time.perf_counter() - started
                         if event.type in ('response.completed', 'response.incomplete', 'response.failed'):
                             status = event.response.status
                             assert text == event.response.output_text
                     elif event.choices:
                         text += event.choices[0].delta.content or ''
+                        if event.choices[0].delta.content and first_delta is None: first_delta = time.perf_counter() - started
                         status = event.choices[0].finish_reason or status
             if api == 'responses':
                 assert [e['sequence_number'] for e in wire] == list(range(len(wire)))
-        return dict(text=text, status=status, wire=wire, wall_s=time.perf_counter() - started, native=dict(engine.last))
+        return dict(text=text, status=status, wire=wire, wall_s=time.perf_counter() - started,
+                    first_text_delta_s=first_delta, native=dict(engine.last))
 
     def bad(api, extra):
         payload = args(api, 'root ::= "true"', stream=True)
@@ -133,9 +140,12 @@ def main():
         raise AssertionError('unsupported grammar request returned success')
 
     try:
-        start(cfg, 'target')
-        assert engine.info['grammar'] == CAPABILITY and engine.info['decode_mode'] == 'target'
-        assert engine.info['mtp_loaded'] == 0 and engine.info['lookup'] == 0
+        start(cfg, a.mode)
+        assert engine.info['grammar'] == CAPABILITY
+        assert engine.info['decode_mode'] == ('target' if a.mode == 'target' else 'mtp')
+        assert engine.info['mtp_loaded'] == int(a.mode != 'target')
+        assert bool(engine.info['lookup']) == a.mode.startswith('suffix')
+        assert ('--coupled-draft' in cfg['args']) == a.mode.endswith('coupled')
         literal = '<think>literal</think>\n猫 café'
         grammar = 'root ::= ' + json.dumps(literal, ensure_ascii=False)
         # Multiline/quotes and command-looking comments are inert grammar data.
@@ -218,6 +228,39 @@ def main():
         with (a.out / 'target-only-benchmarks.csv').open('w', newline='') as f:
             w = csv.DictWriter(f, fieldnames=list(benchmarks[0])); w.writeheader(); w.writerows(benchmarks)
         save('alternating benchmark passed', rows=len(benchmarks), output=plain['text'])
+        if a.speculation_benchmark:
+            rows = []
+            for label, api, sampled, value, text_prompt in (
+                ('digits', 'responses', False, '0 1 2 3 4 5 6 7 8 9',
+                 'Write the digits 0 through 9 separated by spaces. No explanation.'),
+                ('repeats', 'responses', False, 'alpha beta gamma delta ' * 8,
+                 'Repeat this line exactly, eight times, without extra text:\nalpha beta gamma delta'),
+                ('sampled-repeats', 'chat', True, 'alpha beta gamma delta ' * 8,
+                 'Repeat this line exactly, eight times, without extra text:\nalpha beta gamma delta')):
+                rule = 'root ::= ' + json.dumps(value)
+                options = dict(prompt=text_prompt, cap=96)
+                if sampled:
+                    options.update(temperature=0.8, top_p=0.85, presence_penalty=0.05, frequency_penalty=0.1,
+                        extra_body=dict(grammar=rule, seed=434, top_k=20, min_p=0.04,
+                                        penalty_last_n=64, repetition_penalty=1.1))
+                warm = run(api, rule, **options)
+                assert warm['text'] == value and warm['status'] in ('completed', 'stop')
+                for repeat in range(6):
+                    for streamed in ((False,True) if repeat % 2 == 0 else (True,False)):
+                        r = run(api, rule, stream=streamed, **options)
+                        assert r['text'] == value and r['status'] in ('completed', 'stop')
+                        rows.append(dict(mode=a.mode, workload=label, api=api, sampled=sampled, repeat=repeat, stream=streamed,
+                            wall_s=r['wall_s'], first_text_delta_s=r['first_text_delta_s'],
+                            **{k:r['native'][k] for k in ('generated','prompt_ms','decode_ms','reused','drafts_offered','drafts_accepted')}))
+                with concurrent.futures.ThreadPoolExecutor(2) as pool:
+                    pending = [pool.submit(run, api, rule, stream=streamed, **options)
+                               for streamed in (False,True)]
+                    concurrent_results = [f.result() for f in pending]
+                assert all(r['text'] == value and r['status'] in ('completed', 'stop') for r in concurrent_results)
+                save('concurrent benchmark ' + label, results=[{k:r[k] for k in ('wall_s','first_text_delta_s')} for r in concurrent_results])
+            with (a.out/'speculation-benchmarks.csv').open('w',newline='') as f:
+                writer=csv.DictWriter(f,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
+            save('constrained speculation benchmark', rows=len(rows))
         close()
         for i, path in enumerate(a.unsupported_config):
             rejected_cfg = json.loads(path.read_text(encoding='utf-8'))

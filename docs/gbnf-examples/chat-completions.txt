@@ -24,5 +24,5 @@ Pieces:
   be combined with grammar. Nonempty logit_bias and logprobs are unsupported.
 
 This is a request example, not captured model evidence. Enable the native build
-and target-only profile in ../NATIVE_GBNF.md. Chat does not require the separate
+and supported native profile in ../NATIVE_GBNF.md. Chat does not require the separate
 experimental Responses switch.

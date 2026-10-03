@@ -120,13 +120,9 @@ def main():
         ids = prompt("List the integers from 1 through 20, separated by commas. No explanation.")
         first, _ = generate("greedy first request", ids)
         follow, last = generate("live prefix continuation", ids + first, 8)
-        if args.mode == "target":
-            assert last["reused"] == len(ids) + len(first) - 1, last
-        else:
-            # The legacy speculative loop can retain an evaluated tail at an
-            # output cap; a matching checkpoint may be used instead of live KV.
-            # Its exact budget/commit relation is a separate G5 qualification.
-            assert 0 < last["reused"] <= len(ids) + len(first) - 1, last
+        # G5 applies the same retained boundary to ordinary speculation: no
+        # invisible tail can replace the live prefix at an output cap.
+        assert last["reused"] == len(ids) + len(first) - 1, last
         replay, _ = generate("prompt checkpoint rewind", ids)
         assert replay == first, {"first": first, "replay": replay}
         one, last = generate("one token budget", ids, 1)
@@ -203,11 +199,12 @@ def main():
         cursors = [dict((k, int(v)) for k, v in re.findall(r"(\w+)=(-?\d+)", line))
                    for line in text.splitlines() if "strata trace: CURSOR " in line]
         assert cursors, "native cursor evidence missing"
-        if args.mode == "target":
-            for c in cursors:
+        for c in cursors:
+            if args.mode == "target":
                 assert c["window"] == 1
-                assert c["consumed"] == c["prompt"] + c["produced"] - 1, c
-                assert c["selection_position"] == c["consumed"] - 1, c
+            assert c["consumed"] == c["prompt"] + c["produced"] - 1, c
+            assert c["selection_position"] == c["consumed"] - 1, c
+        if args.mode == "target":
             assert "DRAFT_PREFILL" not in text and "strata mtp:" not in text
             assert "window up to 1 tokens" in text
         report["cursor_windows_checked"] = len(cursors)

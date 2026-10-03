@@ -151,6 +151,34 @@ bool Matcher::allows(int32_t token) {
     return ((uint32_t) m[(size_t) token / 32] & (1u << (token % 32))) != 0;
 }
 
+void Matcher::prefix_masks(const int32_t* drafts, int count, PrefixMasks& out) {
+    impl_->usable();
+    if (count < 0 || count > 7 || (count && !drafts))
+        throw std::runtime_error("grammar speculative prefix requires 0..7 drafts");
+    out.rows = 1; out.blocked_draft = -1; out.end_draft = false;
+    out.bits = mask();
+    if (!count) return;
+    try {
+        auto tentative = fork();
+        try {
+            detail::WorkScope scope(tentative.impl_->budget, 1000ms);
+            for (int i = 0; i < count; ++i) {
+                detail::work(); // include cheap/cached proposal steps in the request budget
+                if (!tentative.accept(drafts[i])) { out.blocked_draft = i; break; }
+                if (tentative.terminated()) { out.end_draft = true; break; }
+                const auto& next = tentative.mask();
+                out.bits.insert(out.bits.end(), next.begin(), next.end());
+                ++out.rows;
+            }
+            scope.finish();
+        } catch (...) {
+            impl_->budget = tentative.impl_->budget;
+            throw;
+        }
+        impl_->budget = tentative.impl_->budget;
+    } catch (...) { impl_->failed = true; throw; }
+}
+
 bool Matcher::accept(int32_t token) {
     auto& p = *impl_;
     p.usable();

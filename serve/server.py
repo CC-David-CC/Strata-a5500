@@ -506,8 +506,8 @@ class StrataEngine:
 
     def require_grammar(self):
         if self.info.get("grammar") != CAPABILITY:
-            raise ValueError("grammar requires a gbnf-v2 native build in single-GPU target-only text mode "
-                             "(--spec 1, no MTP/suffix); this engine does not advertise that capability")
+            raise ValueError("grammar requires a gbnf-v2 native build in a supported single-GPU text mode; "
+                             "this engine does not advertise that capability")
 
     def validate_constraint(self, constraint):
         """Compile before HTTP headers. Caller owns the ordinary service FIFO."""

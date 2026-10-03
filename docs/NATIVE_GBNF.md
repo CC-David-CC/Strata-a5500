@@ -62,7 +62,8 @@ through the same persistent target-only decoder; see its
 
 ## G3: raw grammar through both HTTP APIs
 
-Build with GBNF enabled as above, use the target-only configuration, and start
+Build with GBNF enabled as above, use the target-only configuration (or the G5
+speculative configuration below), and start
 the existing server. For Responses, also install its Python requirements, set
 the replay key and enable `--experimental-responses` as described in the
 [Responses guide](RESPONSES.md). Chat Completions needs no Responses flag.
@@ -72,7 +73,7 @@ rejects grammar requests; it does not download or enable a backend at runtime.
 The engine's existing `INFO` diagnostics must advertise `grammar=gbnf-v2`.
 The HTTP service checks that version, verifies the tokenizer byte table against
 the native vocabulary, and compiles the request before sending success headers.
-An older engine or an MTP/suffix configuration is rejected explicitly. The server
+An older engine or an unsupported configuration is rejected explicitly. The server
 does not change its configured inference mode to accommodate a request.
 
 Send one additional field, `grammar`, containing UTF-8 GBNF source with a `root`
@@ -101,7 +102,7 @@ pieces are in [Responses](gbnf-examples/responses.txt),
 [Chat Completions](gbnf-examples/chat-completions.txt) and
 [recursive Unicode](gbnf-examples/recursive-unicode.txt) examples.
 
-The qualified profile is single-GPU target-only text generation with the
+The initial G3 profile is single-GPU target-only text generation with the
 gpt2/qwen35 tokenizer and standard end controls. The rendered prompt must end at
 the Qwen answer-only boundary with thinking explicitly disabled. Requests with
 tools, generated reasoning, summaries, custom stop strings, images or simultaneous
@@ -145,9 +146,60 @@ model evidence, including an incomplete but readable command that the client
 refuses to apply. Inspection is an explicit local debug operation, with no new
 HTTP or native-pipe endpoint.
 
-## Remaining grammar gates
+## G5: constrained MTP and suffix execution
 
-G5 qualifies constrained MTP/suffix execution; G6 recovery is deferred. The user
+Keep the same Python server, API flag, request body and grammar-enabled build.
+To enable MTP, use the existing native configuration's `args` entries:
+
+```text
+"--spec", "4", "--mtp", "<your-existing-MTP-directory>", "--suffix-draft", "0"
+```
+
+Use `"--suffix-draft", "3"` to enable the existing suffix policy. Add
+`"--coupled-draft"` for coupled proposals on sampled requests; use
+`"--no-coupled-draft"` for argmax proposals. The server never disables these
+settings to accommodate a grammar request. `--spec 1` remains the reference
+mode of the same decoder and requires no draft weights. Native GBNF is still
+off by default at build time; Responses is still off by default at server startup.
+The existing suffix policy can enlarge the maximum window (`--spec 4` plus
+suffix lookup uses a maximum of 6 here); `INFO` records requested and effective
+settings. This is independent of the number of reachable rows in a particular
+grammar-constrained window.
+
+The matcher builds each row's legal-token mask from a tentative proposal prefix.
+An illegal draft keeps the row that can replace it and removes its descendants.
+An end-token proposal has no following row. Existing target selection determines
+which proposals survive by exact token equality. A single retained count governs
+model commit, emitted output, grammar progress and draft catch-up; it is bounded
+before commitment by remaining output and EOS. The final emitted token remains
+pending model feedback and is not consumed twice by the matcher.
+
+`STRATA_TRACE=1` adds native `SPEC` observations: selected proposal source,
+coupled mode, proposed/reachable rows, retained count, illegal/end proposal and
+window duration. Ordinary draft-offered statistics count the valid verifier
+input drafts; the trace separately exposes proposals removed before verification.
+Grammar work spent on discarded proposals still counts against its request budget.
+There is no automatic acceleration recovery or unmasked retry.
+
+The [G5 report](gbnf-evidence/G5/REPORT.md) pins the exact model, build, correctness
+matrix and latency results. Fixed-logit tests require exact selected tokens.
+Actual model logits can differ with GPU graph shape, even when seed, masks,
+history and expert placement match. Native numerical diagnostics are reported
+separately; a seed alone is not a promise of bitwise model parity.
+
+For explicit local numerical investigation, `STRATA_GRAMMAR_LOGITS=<local-file>`
+buffers raw head rows, legal masks, histories and counters, then writes once
+after generation. It is an environment-only diagnostic, not an API parameter.
+The bound is 32 rows per request and 128 per process, with at most 262144 logits
+per row; truncation is explicit in the file and rejected by the audit tool.
+Keep it off for performance measurements. The
+[audit tool](../tools/grammar_numerical_audit.py) retains legal scores and hashes,
+full-vocabulary deviations, greedy margins and explicitly approximate float64
+CDF boundaries. It does not infer grammar branch probabilities.
+
+## Remaining scope
+
+G6 recovery is deferred. The user
 selected Mermaid/plain text for G4, so actual Code Visualizer ProgramModel
 integration is not performed or claimed.
 

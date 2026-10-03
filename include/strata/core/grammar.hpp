@@ -49,6 +49,13 @@ struct Inspection {
     std::vector<TokenPreview> preview;
 };
 
+struct PrefixMasks {
+    std::vector<int32_t> bits; // row-major, ceil(vocabulary/32) words per row
+    int rows = 0;
+    int blocked_draft = -1; // zero-based proposal that has no continuation
+    bool end_draft = false; // the last proposal examined is a legal end control
+};
+
 class Matcher {
 public:
     explicit Matcher(std::shared_ptr<const Compiled> compiled, uint64_t work_limit = 2000000);
@@ -58,6 +65,11 @@ public:
     Matcher(const Matcher&) = delete;
     Matcher& operator=(const Matcher&) = delete;
     const std::vector<int32_t>& mask();
+    // Masks before each reachable proposal, then its replacement/bonus row.
+    // No row follows an illegal/end proposal. x (the pending feedback token)
+    // is already committed and must NOT be passed again. At most seven drafts.
+    // Tentative work is charged here, but tentative progress is discarded.
+    void prefix_masks(const int32_t* drafts, int count, PrefixMasks& out);
     bool allows(int32_t token);
     bool accept(int32_t token); // illegal token: false with no state change
     bool complete() const;     // accepting prefix, possibly with legal continuations

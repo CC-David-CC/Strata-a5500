@@ -138,6 +138,9 @@ More: [where your chats are stored](docs/INSTALL.md#where-things-are-stored), [t
 
 This contribution also offers an [experimental stateless Responses adapter](docs/RESPONSES.md).
 It is off by default; the guide shows how to enable it and lists its supported client profile and limitations.
+The stacked [native GBNF contribution](docs/NATIVE_GBNF.md) adds an optional grammar-enabled build for both APIs,
+with target-only and speculative configurations. Its [inspection guide](docs/GBNF_INSPECTION.md) includes Mermaid
+and plain-text views. GBNF is also off by default; the guide includes the build and enablement commands.
 
 ## Something went wrong?
 

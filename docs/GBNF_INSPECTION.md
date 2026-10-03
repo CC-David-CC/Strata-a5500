@@ -159,3 +159,31 @@ labels raw-model, grammar-conditioned and final-sampler probabilities as
 `not_collected`, and branch mass as `not_inferred`. It does not substitute legal
 token counts, truncated previews or equal branch weights for those measurements.
 Detailed numeric qualification belongs to G5's explicit native diagnostics.
+
+## Speculative window view
+
+This Mermaid view maps the source algorithms; it is not a second executable
+state machine. The request's matcher is the only committed grammar owner.
+
+```mermaid
+flowchart TD
+    proposals["Existing MTP / coupled / suffix proposal"] --> cap["Bound rows by output budget and context"]
+    cap --> masks["Matcher.prefix_masks: tentative native progress"]
+    masks --> valid{"Next draft legal and nonterminal?"}
+    valid -->|yes| masks
+    valid -->|no or end of proposals| select["Verify reachable rows with existing target selector"]
+    select --> retain["retained_window: equality, budget and EOS"]
+    retain --> grammar["Advance committed matcher through retained output"]
+    grammar --> model["Commit corresponding model input prefix"]
+    model --> emit["Emit retained output; keep final token pending"]
+    emit --> more{"Generation continues?"}
+    more -->|yes| proposals
+    more -->|no| finish["Wait for commit, release request resources"]
+```
+
+Source: [prefix masks](../src/core/grammar.cpp),
+[retained boundary](../include/strata/program/speculative_window.hpp),
+[native composition](../src/program/generate.cpp). A grammar checkpoint does not
+replace `Verifier::commit`, which restores/replays the retained recurrent and
+attention state. An illegal proposal is an expected draft rejection; it is not
+a generation failure or an acceleration-mode transition.

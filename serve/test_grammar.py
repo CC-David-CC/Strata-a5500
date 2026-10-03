@@ -166,7 +166,7 @@ class NativePipe(unittest.TestCase):
         engine.can_stop = True
         return engine, raw
 
-    def test_missing_old_or_speculative_capability_writes_nothing(self):
+    def test_missing_or_old_capability_writes_nothing(self):
         for cap in (None, 'none', 'gbnf-v1'):
             engine, raw = self.pipe(cap)
             with self.assertRaisesRegex(ValueError, 'gbnf-v2'):
