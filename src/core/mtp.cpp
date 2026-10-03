@@ -30,6 +30,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <exception>
 #include <fstream>
@@ -594,8 +595,12 @@ bool finish_capture(cudaStream_t cs, bool ok, cudaGraphExec_t& exec, const char*
     }
     cudaGraphDestroy(graph);
     // an explicit upload: the first launch's implicit one blocked behind a device-side spin (verify.cpp)
-    cudaGraphUpload(exec, cs);
-    cudaStreamSynchronize(cs);
+    const cudaError_t ue = cudaGraphUpload(exec, cs);
+    const cudaError_t se = cudaStreamSynchronize(cs);
+    if (ue != cudaSuccess || se != cudaSuccess) {
+        err = std::string("mtp: ") + what + " upload: " + cudaGetErrorString(ue != cudaSuccess ? ue : se);
+        return false;
+    }
     return true;
 }
 }  // namespace
@@ -647,7 +652,10 @@ bool MtpDrafter::capture_round(int T, bool coupled, std::string& err) {
         coupled_rec_ = false;
     }
     if (ok) mtp_select(R_, HCN, out_ids_, row_ + 1, Rin_, tok_, m_out_, 0, cs_, probs_, m_prob_);
-    return finish_capture(cs_, ok, exec, coupled ? "round (coupled)" : "round", err);
+    const bool captured = finish_capture(cs_, ok, exec, coupled ? "round (coupled)" : "round", err);
+    if (captured && std::getenv("STRATA_GRAPH_CAPTURE_LOG"))
+        std::fprintf(stderr, "strata mtp: captured round T=%d coupled=%d\n", T, (int) coupled);
+    return captured;
 }
 
 // Chain step j (1..max_t-2): one row at the cell staged in step row `max_t + j - 1`, from the previous step's
@@ -666,7 +674,24 @@ bool MtpDrafter::capture_step(int j, bool coupled, std::string& err) {
     bool ok = record_forward(1, row, cs_, err);
     coupled_rec_ = false;
     if (ok) mtp_select(R_, HCN, out_ids_, row_ + 1, Rin_, tok_, m_out_, j, cs_, probs_, m_prob_);
-    return finish_capture(cs_, ok, exec, coupled ? "step (coupled)" : "step", err);
+    const bool captured = finish_capture(cs_, ok, exec, coupled ? "step (coupled)" : "step", err);
+    if (captured && std::getenv("STRATA_GRAPH_CAPTURE_LOG"))
+        std::fprintf(stderr, "strata mtp: captured step j=%d coupled=%d\n", j, (int) coupled);
+    return captured;
+}
+
+bool MtpDrafter::prepare_graphs(int upto, std::string& err) {
+    if (!g_ || !ss_ || !wt_ || !window_R_ || device_ < 0 || upto < 1 || upto > max_t_) {
+        err = "mtp: graph preparation requires a bound drafter and a valid window limit";
+        return false;
+    }
+    const OnDevice on_device(device_);
+    if (!idle(err)) return false;
+    for (int T = 1; T <= upto; ++T)
+        if (!capture_round(T, coupled_active_, err)) return false;
+    for (int j = 1; j < std::min(max_t_ - 1, max_drafts_); ++j)
+        if (!capture_step(j, coupled_active_, err)) return false;
+    return true;
 }
 
 void MtpDrafter::kv_restore(int64_t upto) {

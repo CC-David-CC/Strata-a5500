@@ -4681,6 +4681,16 @@ int main(int argc, char** argv) {
         std::string line;
         int64_t rounds = 0;
         const int S = o.spec;
+        int diagnostic_window_limit = S;
+        if (const char* limit_text = std::getenv("STRATA_DIAG_WINDOW_LIMIT")) {
+            char* end = nullptr;
+            const long v = std::strtol(limit_text, &end, 10);
+            if (end == limit_text || *end != '\0' || v < 1 || v > S) {
+                std::fprintf(stderr, "strata serve: diagnostic window limit must be within 1..spec\n");
+                return 2;
+            }
+            diagnostic_window_limit = (int) v;
+        }
         const int S_mtp = use_mtp ? (o.mtp_max_t > 0 ? std::min(o.mtp_max_t, S) : S) : 1;
         if (use_mtp && S_mtp < S) mtp.set_max_drafts(S_mtp - 1);
         strata::spec::SuffixDrafter sfx(std::max(1, o.suffix_draft), 64, (size_t) o.max_context + 4096);
@@ -4689,6 +4699,9 @@ int main(int argc, char** argv) {
         // An oracle replaces only proposals, never logits or accepted outputs.
         std::vector<int64_t> serve_oracle;
         int reject_depth = -1;
+        int oracle_window = S;
+        const bool oracle_log = std::getenv("STRATA_VERIFY_ORACLE_LOG") == nullptr ||
+                                std::strcmp(std::getenv("STRATA_VERIFY_ORACLE_LOG"), "0") != 0;
         if (!o.spec_oracle.empty()) {
             std::ifstream in(o.spec_oracle);
             const std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
@@ -4707,7 +4720,17 @@ int main(int argc, char** argv) {
                 }
                 reject_depth = (int) v;
             }
-            std::fprintf(stderr, "strata serve: diagnostic oracle proposals active, reject_depth=%d\n", reject_depth);
+            if (const char* text_width = std::getenv("STRATA_VERIFY_ORACLE_WINDOW")) {
+                char* end = nullptr;
+                const long v = std::strtol(text_width, &end, 10);
+                if (end == text_width || *end != '\0' || v < 1 || v > S) {
+                    std::fprintf(stderr, "strata serve: oracle window must be within 1..spec\n");
+                    return 2;
+                }
+                oracle_window = (int) v;
+            }
+            std::fprintf(stderr, "strata serve: diagnostic oracle proposals active, reject_depth=%d window=%d\n",
+                         reject_depth, oracle_window);
         }
         // The vision path (--vision): GENI <max_new> <embeddings file> <id,id,...> carries images.  The file is one
         // or more strata-vision records (int32 'SVE1', n, nx, ny, n_embd, then n x n_embd floats) in prompt order;
@@ -5336,6 +5359,24 @@ int main(int argc, char** argv) {
                 if (!pr.empty())
                     std::fprintf(stderr, "strata prompt verification GPU stages (stage %d):%s\n", st, pr.c_str());
             }
+            // Opt-in measurement intervention. Capture/upload only; no target or draft graph is executed here.
+            // Charge the setup to prompt/request time so moving it outside decode cannot hide its cost.
+            const char* prepare_v = std::getenv("STRATA_PREPARE_VERIFY_GRAPHS");
+            const char* prepare_m = std::getenv("STRATA_PREPARE_MTP_GRAPHS");
+            const bool pv = prepare_v && std::strcmp(prepare_v, "1") == 0;
+            const bool pm = use_mtp && prepare_m && std::strcmp(prepare_m, "1") == 0;
+            if (!cancelled && (pv || pm)) {
+                const auto setup0 = Clock::now();
+                const int limit = std::min(diagnostic_window_limit,
+                    !serve_oracle.empty() ? oracle_window : o.suffix_draft > 0 ? S : S_mtp);
+                if ((pv && !ver.prepare_graphs(limit, err)) || (pm && !mtp.prepare_graphs(limit, err))) {
+                    std::printf("ERR preparing decode graphs: %s\n", err.c_str());
+                    return 1;
+                }
+                std::fprintf(stderr, "strata serve: GRAPH_SETUP verify=%d mtp=%d limit=%d ms=%.3f\n",
+                             (int) pv, (int) pm, limit,
+                             std::chrono::duration<double, std::milli>(Clock::now() - setup0).count());
+            }
             const double prompt_ms = std::chrono::duration<double, std::milli>(Clock::now() - r0).count();
             std::printf("REUSED %lld\n", (long long) resume);   // the prompt is read; the first window comes next
             std::fflush(stdout);
@@ -5374,6 +5415,8 @@ int main(int argc, char** argv) {
             const int64_t ple_major0 = ver.ple_major_faults, ple_minor0 = ver.ple_minor_faults;
             double dt_run = 0, dt_commit = 0, dt_draft = 0;
             int64_t dec_windows = 0, dec_T = 0;
+            const bool report_widths = std::getenv("STRATA_WINDOW_HISTOGRAM") != nullptr;
+            std::array<int64_t, strata::kernels::kVerifyMaxT + 1> width_hist{}, committed_hist{};
             const int64_t decode_hits0 = drive.d.cache_hits;
             // CS-T: the RAM and file tiers of this request (the mmap source; 0 with the arena)
             const int64_t ram0 = src.ram_reads(), files0 = src.file_reads();
@@ -5394,7 +5437,7 @@ int main(int argc, char** argv) {
                 bool from_sfx = false;
                 int sfx_match = 0;
                 if (o.suffix_draft > 0 && !first_window) {
-                    const int k = sfx.propose(S - 1, sbuf.data());
+                    const int k = diagnostic_window_limit > 1 ? sfx.propose(diagnostic_window_limit - 1, sbuf.data()) : 0;
                     sfx_match = sfx.last_match();
                     if (k > 0 && (!use_mtp || sbuf[0] == drafts[0])) {
                         const strata::spec::DraftPolicy::Pick pk = policy.choose(T, k, sfx_match);
@@ -5402,7 +5445,8 @@ int main(int argc, char** argv) {
                     }
                 }
                 const bool timed_round = !first_window;
-                if (!serve_oracle.empty() && !first_window) { T = S; from_sfx = false; }
+                if (!serve_oracle.empty() && !first_window) { T = oracle_window; from_sfx = false; }
+                T = std::min(T, diagnostic_window_limit);
                 // The output limit also bounds the state we may commit. A full
                 // speculative window can otherwise consume unreported tokens.
                 T = (int) std::min<int64_t>(T, max_new - produced_n);
@@ -5448,10 +5492,11 @@ int main(int argc, char** argv) {
                         a = i; break;   // no state from beyond the emitted EOS
                     }
                 if (from_sfx) { ++sfx_windows; sfx_drafts += T - 1; sfx_ok += a; }
-                if (!serve_oracle.empty())
+                if (!serve_oracle.empty() && oracle_log)
                     std::fprintf(stderr, "strata serve: ORACLE_WINDOW produced=%lld T=%d accepted=%d injected=%d\n",
                                  (long long) produced_n, T, a, (int) injected_reject);
                 const Clock::time_point tw1 = Clock::now();
+                if (report_widths) { ++width_hist[(size_t) T]; ++committed_hist[(size_t) a + 1]; }
                 std::thread adapt_thr;   // the adaptive tier beside the commit and the draft (as in generate)
                 bool adapt_ok = true;
                 if (!drive.d.usage.empty() && ((rounds + 1) % o.adapt_every) == 0)
@@ -5508,6 +5553,13 @@ int main(int argc, char** argv) {
             }
             decode_capture.finish();
             const double decode_ms = std::chrono::duration<double, std::milli>(Clock::now() - d0).count();
+            if (report_widths) {
+                std::fprintf(stderr, "strata serve: WINDOW_HIST widths=");
+                for (int t = 1; t <= S; ++t) std::fprintf(stderr, "%s%d:%lld", t == 1 ? "" : ",", t, (long long) width_hist[(size_t) t]);
+                std::fprintf(stderr, " committed=");
+                for (int t = 1; t <= S; ++t) std::fprintf(stderr, "%s%d:%lld", t == 1 ? "" : ",", t, (long long) committed_hist[(size_t) t]);
+                std::fprintf(stderr, "\n");
+            }
             // the last commit (set_commit_async): the session is complete before anything reads or copies it
             if (!ver.wait_commit(err)) {
                 std::printf("ERR %s\n", err.c_str());

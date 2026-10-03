@@ -954,6 +954,10 @@ bool Verifier::capture(int T, std::string& err) {
     const cudaError_t us = cudaStreamSynchronize(cs_);
     std::fprintf(stderr, "strata verify: captured the %d-token window (upload %s, sync %s)\n", T,
                  cudaGetErrorString(ue), cudaGetErrorString(us));
+    if (ue != cudaSuccess || us != cudaSuccess) {
+        err = std::string("verify: graph upload: ") + cudaGetErrorString(ue != cudaSuccess ? ue : us);
+        return false;
+    }
     return true;
 }
 
@@ -1021,6 +1025,29 @@ bool Verifier::capture_commit(std::string& err) {
     }
     cudaGraphDestroy(graph);
     return true;
+}
+
+bool Verifier::prepare_graphs(int upto, std::string& err) {
+    if (!ss_ || !g_ || !wt_ || device_ < 0 || upto < 1 || upto > max_t_) {
+        err = "verify: graph preparation requires initialized buffers and a valid window limit";
+        return false;
+    }
+    if (released_.load()) { err = "verify: cannot prepare a released verifier"; return false; }
+    const OnDevice on_device(device_);
+    if (!wait_commit(err)) return false;
+    for (int T = 1; T <= upto; ++T)
+        if (!capture(T, err)) return false;
+    const bool new_commit = commit_exec_ == nullptr;
+    if (!capture_commit(err)) return false;
+    if (new_commit) {
+        const cudaError_t ue = cudaGraphUpload(commit_exec_, cs_);
+        const cudaError_t se = cudaStreamSynchronize(cs_);
+        if (ue != cudaSuccess || se != cudaSuccess) {
+            err = std::string("verify: preparing commit graph: ") + cudaGetErrorString(ue != cudaSuccess ? ue : se);
+            return false;
+        }
+    }
+    return next_ == nullptr || next_->prepare_graphs(upto, err);
 }
 
 bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool, void* user, int32_t* out,
