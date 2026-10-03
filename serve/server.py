@@ -1514,7 +1514,7 @@ class Service:
         return now
 
     def run(self, ids, thinking, tools, max_new, sampling, cancel, *, lifecycle=False,
-            constraint=None) -> Iterator[tuple[str, object]]:
+            constraint=None, parse_tools=True) -> Iterator[tuple[str, object]]:
         """Yields ("event", Event) as text arrives, then ("done", {"finish": .., "completion_tokens": ..})."""
         budget = self.reasoning_budget(sampling) if thinking else None   # #123: opt-in, off by default
         defaults = {**self.sampling_defaults, **self.shared}   # the config's, then the Chat settings shared with apps
@@ -1522,7 +1522,8 @@ class Service:
             req_values = {k: v for k, v in (sampling or {}).items() if v is not None}
             sampling = {**defaults, **req_values}
         scoped_output = GrammarOutput(tools) if constraint is not None and constraint.scoped else None
-        parser = None if constraint is not None else OutputParser(thinking=thinking, tools=tools, stream_tools=True)
+        parser = None if constraint is not None else OutputParser(thinking=thinking, tools=tools, stream_tools=True,
+                                                                  parse_tools=parse_tools)
         detok, n, finish = Detokenizer(self.tok, strict=constraint is not None), 0, "length"
         reasoning_tokens = 0  # Responses usage: tokens consumed in the parser's reasoning region.
         timings, before = None, None                    # this request's timings; the engine's `last` before it

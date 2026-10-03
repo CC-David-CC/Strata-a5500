@@ -454,8 +454,10 @@ class ResponseAssembler:
                                   output_index=len(self.response["output"]) - 1,
                                   content_index=0, delta=event.text, logprobs=[]))
         elif event.kind == "tool_start":
-            if event.call.name not in self.allowed_tools or event.call.id in self.call_ids:
-                raise ValueError("model emitted an undeclared, disabled or duplicate function call")
+            if event.call.name not in self.allowed_tools:
+                raise ValueError(f"model emitted an undeclared or disabled function: {event.call.name!r}")
+            if event.call.id in self.call_ids:
+                raise ValueError("model emitted a duplicate function call_id")
             if self.item is not None:
                 if self.item["type"] != "message":
                     raise ValueError("another function started before the current call finished")
@@ -676,7 +678,7 @@ def execute_response(svc, prepared, cancel):
             remaining = prepared.max_new - done["completion_tokens"]
             ids, _, limit = svc.prepare(messages, None, {"enable_thinking": False}, remaining)
             owner.input_tokens += len(ids)
-            iterator = svc.run(ids, False, None, limit, prepared.sampling, cancel, lifecycle=True)
+            iterator = svc.run(ids, False, None, limit, prepared.sampling, cancel, lifecycle=True, parse_tools=False)
             summary_done = None
             for kind, value in iterator:
                 if kind == "start":
