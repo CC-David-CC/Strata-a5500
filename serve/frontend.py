@@ -331,6 +331,22 @@ def call_end(text: str) -> int:
             return text.find(CALL_END, pos)
 
 
+def parameter_value(value, declared=None):
+    """Interpret a Qwen XML value before producing any canonical argument JSON."""
+    if declared == "string":
+        return value
+    # Qwen sometimes uses Python's spelling inside its XML parameter envelope.
+    # This is not JSON repair: no JSON has been emitted yet, and only an explicit
+    # boolean parameter permits these two unambiguous spellings. String and
+    # undeclared parameters retain their existing interpretation. Never eval.
+    if declared == "boolean" and value.strip() in ("True", "False"):
+        return value.strip() == "True"
+    try:
+        return json.loads(value)
+    except ValueError:
+        return value
+
+
 def parse_tool_call(body: str, schema: dict | None = None) -> ToolCall:
     """`<function=NAME>\\n<parameter=P>\\nVALUE\\n</parameter>...</function>` -> ToolCall. Values are JSON-decoded
     when the tool's schema says the parameter is not a string (or, without a schema, when they parse as JSON
@@ -354,13 +370,7 @@ def parse_tool_call(body: str, schema: dict | None = None) -> ToolCall:
         if value.endswith("\n"):
             value = value[:-1]
         declared = (props.get(pname) or {}).get("type")
-        if declared == "string":
-            args[pname] = value
-        else:
-            try:
-                args[pname] = json.loads(value)
-            except ValueError:
-                args[pname] = value
+        args[pname] = parameter_value(value, declared)
     return ToolCall(name=name, arguments=args)
 
 
@@ -389,6 +399,7 @@ class OutputParser:
         self.sfirst = True
         self.sval_started = False
         self.sdeclared = {}
+        self.svalue_type = None
 
     def _scan(self) -> list[Event]:
         """Advance the streaming view of the call body in self.buf (see stream_tools)."""
@@ -420,6 +431,7 @@ class OutputParser:
                     if b < 0:
                         return out
                     pname = stripped[11:b]
+                    self.svalue_type = self.sdeclared.get(pname)
                     args(("" if self.sfirst else ",") + json.dumps(pname) + ":")
                     self.sfirst = False
                     self.sp += b + 1
@@ -468,10 +480,7 @@ class OutputParser:
                     value = value[1:]
                 if value.endswith("\n"):
                     value = value[:-1]
-                try:
-                    v = json.loads(value)
-                except ValueError:
-                    v = value
+                v = parameter_value(value, self.svalue_type)
                 args(json.dumps(v, ensure_ascii=False))
                 self.sp += end + len(PARAM_END)
                 self.ss = "between"

@@ -95,12 +95,13 @@ def main():
             {"type": "message", "id": "msg_example", "role": "assistant", "status": "completed",
              "content": [{"type": "output_text", "text": "Earlier answer.", "annotations": []}]},
             {"role": "user", "content": "Continue."}]}),
-        ("json_schema_EXCLUDED", "Excluded; documentation example is not an implementation", {**base,
+        ("json_schema", "Supported on the GBNF branch; native JSON plus mandatory full schema validation", {**base,
             "text": {"format": {"type": "json_schema", "name": "answer", "strict": True,
                 "schema": {"type": "object", "properties": {"answer": {"type": "string"}},
                            "required": ["answer"], "additionalProperties": False}}}}),
-        ("json_object_EXCLUDED", "Excluded", {**base, "text": {"format": {"type": "json_object"}}}),
-        ("strict_function_EXCLUDED", "Excluded; strict:true and omitted strict are rejected", {**base, "tools": [{**tool, "strict": True}]}),
+        ("json_object", "Supported on the GBNF branch", {**base, "text": {"format": {"type": "json_object"}}}),
+        ("strict_function", "Supported; arguments are validated before call completion, tool results stay arbitrary text", {**base, "tools": [
+            {**tool, "strict": True, "parameters": {**tool["parameters"], "required": ["path"], "additionalProperties": False}}]}),
         ("custom_lark_EXCLUDED", "Excluded; raw GBNF does not implement Lark custom tools", {**base, "tools": [{
             "type": "custom", "name": "operation", "format": {"type": "grammar", "syntax": "lark", "definition": 'start: "wait"'}}]}),
         ("storage_EXCLUDED", "Excluded; no response store", {**base, "store": True}),

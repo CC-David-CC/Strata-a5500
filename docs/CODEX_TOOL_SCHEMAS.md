@@ -23,6 +23,12 @@ the response; they are not rewritten, silently repaired or executed by Strata.
 Partial deltas remain partial. Tool results are arbitrary client-supplied text,
 not inputs to the argument validator.
 
+At the native XML parsing boundary, explicitly boolean parameters accept Qwen's
+`True`/`False` spellings as well as JSON `true`/`false`. This produces one canonical
+JSON value before argument deltas are emitted. String and undeclared parameters
+retain their existing interpretation; no Python evaluation or post-stream repair
+is involved. All byte-split positions and strict JSON/SSE equality are tested.
+
 This is validation at the function-call completion boundary. Native token masks
 constrain the final answer when `text.format` requests JSON; they do not constrain
 the Qwen XML tool envelope or its arguments. Invalid generated arguments therefore

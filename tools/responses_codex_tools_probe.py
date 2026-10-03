@@ -21,17 +21,19 @@ def main():
     parser.add_argument('--model', required=True)
     parser.add_argument('--catalog-dir', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--reasoning', choices=('none', 'medium'), default='medium')
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=False)
     tools = json.loads((args.catalog_dir / 'tool-declarations-0.160.0.json').read_text(encoding='utf-8'))
     samples = json.loads((args.catalog_dir / 'tool-argument-examples-0.160.0.json').read_text(encoding='utf-8'))
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     report = {'scripted_model_output': False, 'mocked_tool_results': True,
-              'tools_executed': False, 'prompt_supplies_sample_arguments': True, 'cases': [], 'result': 'running'}
+              'tools_executed': False, 'prompt_supplies_sample_arguments': True,
+              'reasoning': args.reasoning, 'cases': [], 'result': 'running'}
 
     def post(name, body):
-        body = {'model': args.model, 'store': False, 'reasoning': {'effort': 'none'},
-                'max_output_tokens': 1024, 'temperature': 0, 'stream': True, **body}
+        body = {'model': args.model, 'store': False, 'reasoning': {'effort': args.reasoning},
+                'max_output_tokens': 3072, 'temperature': 0, 'stream': True, **body}
         (args.out / (name + '.request.json')).write_text(json.dumps(body, indent=2), encoding='utf-8')
         request = urllib.request.Request(args.base_url.rstrip('/') + '/responses',
             data=json.dumps(body).encode(), headers={'Content-Type': 'application/json',
@@ -70,7 +72,9 @@ def main():
                 declarations = [{**copy.deepcopy(group), 'tools': [copy.deepcopy(function)]}] if namespace else [function]
                 history = [{'role': 'user', 'content': 'Protocol fixture: call ' + name +
                             ' exactly once using these argument values: ' + json.dumps(sample) +
-                            '. Emit the tool call and stop. The test client will supply a mocked result.'}]
+                            '. These are direct parameter names: do not wrap them in an arguments parameter. '
+                            'An empty object means the function has no parameters. '
+                            'Emit the tool call and stop. The test client will supply a mocked result.'}]
                 started = time.monotonic()
                 row = {'name': name}
                 report['cases'].append(row)

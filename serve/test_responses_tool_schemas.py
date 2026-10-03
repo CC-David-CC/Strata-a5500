@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator
 from serve.responses import create_response, execute_response, native_tools, validate_request, RequestError
 from serve.test_responses import ROOT, service, request, listening, http, normalized, sse_events, function_tool, function_script
 from serve.responses_json import native_schema, prepare_json_output
+from serve.frontend import OutputParser, parse_tool_call
 
 TOOLS = json.loads((ROOT/'docs/codex/tool-declarations-0.160.0.json').read_text(encoding='utf-8'))
 SAMPLES = json.loads((ROOT/'docs/codex/tool-argument-examples-0.160.0.json').read_text(encoding='utf-8'))
@@ -25,6 +26,43 @@ def script(name, arguments):
 
 
 class CapturedToolSchemas(unittest.TestCase):
+    def test_xml_boolean_reaches_strict_response_without_rewriting_stream(self):
+        tool = function_tool(name='fixture', strict=True, parameters={'type': 'object',
+            'properties': {'value': {'type': 'boolean'}}, 'required': ['value'], 'additionalProperties': False})
+        output = '<tool_call>\n<function=fixture>\n<parameter=value>\nFalse\n</parameter>\n</function>\n</tool_call>'
+        svc = service([output, output])
+        with listening(svc) as base:
+            code, _, raw = http(base, request(tools=[tool]))
+            self.assertEqual(code, 200, raw)
+            final = json.loads(raw)
+            self.assertEqual(final['status'], 'completed')
+            self.assertEqual(json.loads(final['output'][0]['arguments']), {'value': False})
+            code, _, raw = http(base, request(tools=[tool], stream=True))
+            self.assertEqual(code, 200, raw)
+            events, _ = sse_events(raw)
+            self.assertEqual(normalized(events[-1]['response']), normalized(final))
+            self.assertEqual(''.join(e['delta'] for e in events if e['type'] == 'response.function_call_arguments.delta'),
+                             final['output'][0]['arguments'])
+
+    def test_native_boolean_spellings_have_one_canonical_argument_value(self):
+        for declared, raw, expected in (('boolean', 'False', False), ('boolean', 'True', True),
+                ('boolean', ' false ', False), ('string', 'False', 'False'), (None, 'False', 'False'),
+                ('boolean', 'not_a_boolean', 'not_a_boolean')):
+            with self.subTest(declared=declared, raw=raw):
+                properties = {'value': {'type': declared}} if declared else {}
+                tool = {'name': 'fixture', 'parameters': {'type': 'object', 'properties': properties}}
+                xml = '<function=fixture>\n<parameter=value>\n'+raw+'\n</parameter>\n</function>'
+                self.assertEqual(parse_tool_call(xml, tool).arguments, {'value': expected})
+                wrapped = '<tool_call>\n'+xml+'\n</tool_call>'
+                # Every byte split, including inside the spelling and closing tag.
+                for split in range(len(wrapped)+1):
+                    parser = OutputParser(thinking=False, tools=[tool], stream_tools=True)
+                    events = parser.feed(wrapped[:split]) + parser.feed(wrapped[split:]) + parser.finish()
+                    arguments = ''.join(e.text for e in events if e.kind == 'tool_args')
+                    call = next(e.call for e in events if e.kind == 'tool_call')
+                    self.assertEqual(json.loads(arguments), {'value': expected})
+                    self.assertEqual(call.arguments, {'value': expected})
+
     def test_all_twelve_strict_normalized_variants(self):
         tools=copy.deepcopy(TOOLS)
         for group in tools:
