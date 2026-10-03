@@ -205,8 +205,8 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
     max_t_ = max_t;
     sampling_.greedy = true;      // a fresh verifier samples greedily until set_sampling says otherwise
     sampling_.temperature = 0.0f;
-    if (max_t < 2 || max_t > strata::kernels::kVerifyMaxT || max_t > strata::kernels::cpu::MAXT) {
-        err = "verify: the window must hold 2.." + std::to_string(strata::kernels::kVerifyMaxT) + " tokens";
+    if (max_t < 1 || max_t > strata::kernels::kVerifyMaxT || max_t > strata::kernels::cpu::MAXT) {
+        err = "verify: the window must hold 1.." + std::to_string(strata::kernels::kVerifyMaxT) + " tokens";
         return false;
     }
     if (hits.d_res == nullptr || hits.cache_base == nullptr || hits.blob <= 0) {

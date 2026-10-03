@@ -6,6 +6,7 @@
 // kernel applied per token, or a multi-token kernel whose per-token arithmetic is the single-token kernel's
 // (multi-column MMVQ in exact mode, the T-token GDN kernels, the per-token hit activation, the multi-token CPU
 // expert rows).  So a draft is accepted exactly when greedy decode would have produced it.
+// T=1 with max_t=1 is persistent target-only execution of this same verifier, with no drafts.
 //
 // What the window costs is the dense weights read ONCE for T tokens and the union of the T tokens' missed
 // experts on the CPU (measured on decode traces: 1.75x one token's misses for T=2, 2.4x for 3, 3.05x for 4).
