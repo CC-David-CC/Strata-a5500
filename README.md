@@ -1,3 +1,9 @@
+> **Historical P4 development branch:** this snapshot is retained as both
+> `strata-p4` and `contrib/pascal-sm61`. Current contributions and their enable
+> switches are listed in the [fork branch guide](https://github.com/CC-David-CC/Strata-a5500/blob/contrib/gfx1012-community/docs/FORK_BRANCHES.md).
+> This snapshot's manual build requires CUDA 12.x and
+> `-DSTRATA_EXPERIMENTAL_SM61=ON -DCMAKE_CUDA_ARCHITECTURES=61` (off by default).
+
 # Strata: experimental Tesla P4 support
 
 This is David's **`strata-p4` branch** of a small hardware-support fork of
