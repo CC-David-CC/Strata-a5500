@@ -26,6 +26,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstdint>
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -349,19 +350,41 @@ int fused_multi_lds_parity(const float* d_norm, const uint16_t* d_down, const ui
         std::printf("    tolerance: worst %.3e of max |ref| %.3e (rel %.3e), n %zu\n", worst, mag, worst / mag, x.size());
         return worst <= 2e-6 * mag;
     };
+    auto exact = [](const char* field, const std::vector<float>& x, const std::vector<float>& y) {
+        size_t first = x.size(), count = 0;
+        double worst = 0.0;
+        for (size_t i = 0; i < x.size(); ++i) {
+            if (std::memcmp(&x[i], &y[i], sizeof(float)) != 0) {
+                if (first == x.size()) first = i;
+                ++count;
+                if (std::isfinite(x[i]) && std::isfinite(y[i]))
+                    worst = std::max(worst, std::fabs((double) x[i] - y[i]));
+            }
+        }
+        if (count) {
+            uint32_t xb = 0, yb = 0;
+            std::memcpy(&xb, &x[first], sizeof(xb));
+            std::memcpy(&yb, &y[first], sizeof(yb));
+            std::printf("    %s: %zu/%zu differ; first[%zu] %.9g (0x%08x) vs %.9g (0x%08x); max abs %.3e\n",
+                        field, count, x.size(), first, x[first], (unsigned) xb, y[first], (unsigned) yb, worst);
+        }
+        return count == 0;
+    };
     auto same = [&](const Snapshot& a, const Snapshot& b) {
         if (v3)   // `lo` is the default kernels' workspace between down and up; the split read keeps it in shared memory
             return close(a.r_out, b.r_out) && close(a.rs, b.rs) && close(a.inject, b.inject) && close(a.mixed, b.mixed);
-        return std::memcmp(a.r_out.data(), b.r_out.data(), a.r_out.size() * sizeof(float)) == 0 &&
-               std::memcmp(a.lo.data(), b.lo.data(), a.lo.size() * sizeof(float)) == 0 &&
-               std::memcmp(a.rs.data(), b.rs.data(), a.rs.size() * sizeof(float)) == 0 &&
-               std::memcmp(a.inject.data(), b.inject.data(), a.inject.size() * sizeof(float)) == 0 &&
-               std::memcmp(a.mixed.data(), b.mixed.data(), a.mixed.size() * sizeof(float)) == 0;
+        bool ok = true;
+        ok &= exact("R_out", a.r_out, b.r_out);
+        ok &= exact("lo", a.lo, b.lo);
+        ok &= exact("rs", a.rs, b.rs);
+        ok &= exact("inject", a.inject, b.inject);
+        ok &= exact("mixed", a.mixed, b.mixed);
+        return ok;
     };
 
     cudaStream_t stream = nullptr;
     check(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking), "multi stream");
-    // Max T forces the HIP kernel's full dynamic-LDS request: 8 * 1280 * sizeof(float) = 40 KiB.
+    // Exercise the real dynamic shared-memory limit and any resulting token slices.
     fused_gr_read_multi(args.data(), T, d_xn, stream);
     check(cudaStreamSynchronize(stream), "multi max-T sync");
     const Snapshot multi = snapshot();
@@ -409,8 +432,8 @@ int fused_multi_lds_parity(const float* d_norm, const uint16_t* d_down, const ui
         ++bad;
     }
 
-    std::printf("  fused GR multi max-T=8 LDS launch and changing graph replay %s\n",
-                bad == 0 ? "pass" : "FAIL");
+    std::printf("  fused GR multi T=%d shared-memory launch and changing graph replay %s\n",
+                T, bad == 0 ? "pass" : "FAIL");
     check(cudaGraphExecDestroy(graph_exec), "multi graph exec destroy");
     check(cudaGraphDestroy(graph), "multi graph destroy");
     check(cudaStreamDestroy(stream), "multi stream destroy");
@@ -760,7 +783,7 @@ int main(int argc, char** argv) {
                         activation_mode_name(mode), ok ? "pass" : "*** FAIL ***", rm, ri);
             if (!ok) ++bad;
         }
-        for (int t : {1, 2, 3, 4, strata::kernels::kFusedGrMaxT})
+        for (int t = 1; t <= strata::kernels::kFusedGrMaxT; ++t)
             bad += fused_multi_lds_parity(dN, dD, dU, dJ, eps, t);
         select_activation_mode(0);
         cudaFree(rws_raw);
