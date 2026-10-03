@@ -179,6 +179,9 @@ static void scoped_unit() {
     REQUIRE(m.accept(think_end) && std::string(m.channel()) == "control");
     REQUIRE(!m.allows('x') && !m.allows(stop) && m.allows(call_start));
     REQUIRE(m.accept('\n') && std::string(m.channel()) == "control");
+    REQUIRE(m.accept('\n') && !m.allows('\n')); // formatting cannot consume the entire output budget
+    auto after_separator = m.fork();
+    REQUIRE(!after_separator.allows('\n') && after_separator.allows('O'));
     REQUIRE(m.accept(call_start) && std::string(m.channel()) == "tool");
     for (char c : std::string("arbitrary parameters: purple 999, not OK")) REQUIRE(m.accept(c));
     REQUIRE(!m.allows(stop) && !m.allows(think_end));
@@ -203,6 +206,11 @@ static void scoped_unit() {
         REQUIRE(std::string(reasoning.channel()) == "answer");
     }
     REQUIRE(reasoning.complete() && reasoning.accept(stop));
+    Matcher leading(compiler.compile("root ::= \"\\n\\n\\nOK\""), 2000000, {true, false});
+    REQUIRE(leading.accept(think_end));
+    for (char c : std::string("\n\n\nOK"))
+        REQUIRE(leading.accept(c) && std::string(leading.channel()) == "answer");
+    REQUIRE(leading.complete()); // answer newlines are not envelope separators
     Matcher empty(compiler.compile("root ::= \"\""), 2000000, {false, true});
     REQUIRE(empty.complete() && empty.accept(stop));
     Matcher limited(compiled, 64, {true, true});

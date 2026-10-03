@@ -163,9 +163,10 @@ drafts cannot advance the live grammar or change the emitted channel.
 
 The native pipe labels committed tokens as reasoning, tool, control or answer.
 The server uses its existing tool parser only on tool tokens and emits answer
-bytes directly. Newline-only tokens after reasoning/calls are framing only when
+bytes directly. Up to two newline bytes after reasoning/calls are framing only when
 the grammar does not accept them as the start of the answer. Grammar-permitted
 leading newlines and literal `<think>` text in an answer are preserved exactly.
+The separator is bounded so it cannot consume the entire output budget.
 No token is silently rewritten after SSE delivery.
 
 Responses reasoning summaries remain a separate, bounded service pass and are

@@ -103,6 +103,7 @@ struct Matcher::Impl {
     Phase phase;
     const char* channel = "answer";
     bool stopped = false;
+    size_t separator_bytes = 0;
     std::vector<int32_t> answer_mask;
     explicit Impl(std::shared_ptr<const Compiled> c, uint64_t limit, Scope s)
         : compiled(std::move(c)), matcher(compiled->grammar, std::nullopt, false), budget{limit},
@@ -115,7 +116,8 @@ struct Matcher::Impl {
     Impl(const Impl& from)
         : compiled(from.compiled), matcher(from.matcher.Fork()), budget(from.budget), history(from.history),
           bitmask(from.bitmask), output_bytes(from.output_bytes), dirty(from.dirty), failed(from.failed),
-          scope(from.scope), phase(from.phase), channel(from.channel), stopped(from.stopped), answer_mask(from.answer_mask) {}
+          scope(from.scope), phase(from.phase), channel(from.channel), stopped(from.stopped),
+          separator_bytes(from.separator_bytes), answer_mask(from.answer_mask) {}
     void usable() const {
         if (failed) throw std::runtime_error("grammar matcher failed; discard this generation");
     }
@@ -154,7 +156,11 @@ const std::vector<int32_t>& Matcher::mask() {
             p.matcher.FillNextTokenBitmask(&tensor);
             if (p.phase != Impl::Phase::answer) {
                 p.answer_mask = p.bitmask;
-                for (auto id : v.newline_ids) allow(id);
+                // Qwen's envelope separator is at most two LF bytes. An
+                // unbounded formatting alternative can starve the answer when
+                // its first legal token has a lower score than a newline.
+                for (auto id : v.newline_ids)
+                    if (v.bytes[id].size() <= 2 - p.separator_bytes) allow(id);
                 if (p.scope.tools) allow(v.protocol.call_start);
                 if (p.phase == Impl::Phase::after_tool) for (auto id : v.stop_ids) allow(id);
             }
@@ -231,6 +237,7 @@ bool Matcher::accept(int32_t token) {
             // A newline that the grammar permits belongs to the answer. Only
             // other newline-only tokens are protocol framing, never output.
             p.channel = "control";
+            p.separator_bytes += bytes;
         } else {
             if (!p.matcher.AcceptToken(token)) throw std::runtime_error("native grammar rejected an allowed token");
             p.channel = stop ? "control" : "answer"; p.phase = Impl::Phase::answer;
@@ -238,7 +245,9 @@ bool Matcher::accept(int32_t token) {
         detail::work();
         scope.finish();
         p.history.push_back(token); p.output_bytes += bytes;
-        p.dirty = before != p.phase || p.phase == Impl::Phase::answer;
+        if (before != p.phase) p.separator_bytes = 0;
+        p.dirty = before != p.phase || p.phase == Impl::Phase::answer ||
+                  p.phase == Impl::Phase::choice || p.phase == Impl::Phase::after_tool;
         return true;
     } catch (...) { p.failed = true; throw; }
 }

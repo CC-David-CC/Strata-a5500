@@ -147,13 +147,20 @@ class ToolLoop(unittest.TestCase):
             self.assertEqual(code, 200, raw)
             end = json.loads(raw)
             self.assertEqual(normalized(stream_final(self, base, follow)), normalized(end))
+            # The native qualification uses this documented client decision
+            # after its tool budget. It must disable new calls, not erase input.
+            code, _, raw = http(base, {**follow, 'tool_choice': 'none'})
+            self.assertEqual(code, 200, raw)
+            self.assertEqual(json.loads(raw)['output'][-1]['content'][0]['text'], 'OK')
         self.assertEqual(end['status'], 'completed')
         self.assertEqual(end['output'][-1]['content'][0]['text'], 'OK')
         self.assertGreater(end['usage']['output_tokens_details']['reasoning_tokens'], 0)
         self.assertIn(result_text, svc.engine.inputs[-1])
         self.assertEqual(first, original)
-        self.assertTrue(all(c.scoped and c.thinking and c.tools for c in svc.engine.constraints))
-        self.assertEqual(svc.engine.closed, 4)
+        self.assertTrue(all(c.scoped and c.thinking and c.tools for c in svc.engine.constraints[:4]))
+        self.assertTrue(svc.engine.constraints[-1].thinking)
+        self.assertFalse(svc.engine.constraints[-1].tools)
+        self.assertEqual(svc.engine.closed, 5)
         self.assertFalse(svc.status['busy'])
 
     def test_tools_without_thinking_and_literal_answer_bytes(self):
