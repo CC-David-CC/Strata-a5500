@@ -103,7 +103,7 @@ Throughput and functional checks do not establish model intelligence.
 
 ```sh
 cmake -S . -B build-gfx1012 -G Ninja -DCMAKE_BUILD_TYPE=Release \
-  -DSTRATA_ENABLE_HIP=ON -DSTRATA_BUILD_TESTS=ON \
+  -DSTRATA_ENABLE_HIP=ON -DSTRATA_ENABLE_CUDA=OFF -DSTRATA_BUILD_TESTS=ON \
   -DCMAKE_HIP_COMPILER=/usr/bin/clang++-17 -DCMAKE_HIP_ARCHITECTURES=gfx1012
 cmake --build build-gfx1012 \
   --target strata hip_intrinsics hip_prefill_gemm hip_q2_zero native_expert_parity -j 6
@@ -115,6 +115,21 @@ ctest --test-dir build-gfx1012 \
 Adjust the compiler path to the installed toolchain. CMake fetches pinned GGML
 when `STRATA_GGML_DIR` is omitted. The modern HIP build used
 `-DCMAKE_PREFIX_PATH=/opt/rocm/core-10.0` for that host's package layout.
+
+To use this build for HTTP serving, set the existing run config's `exe` to the
+absolute path of `build-gfx1012/strata`, then restart with that config:
+
+```sh
+python -m serve.server --engine strata --config config.json --host 127.0.0.1 --port 8080
+```
+
+Use the Python environment installed for Strata. Keep the matching model pack,
+GGUF, tokenizer and MTP paths in the config; see the
+[model and serving configuration](AMD_HIP.md#model-and-serving-configuration).
+Selecting `gfx1012` at build time enables this hardware path; there is no
+additional runtime feature switch. This independent branch still requires an
+MTP drafter for serving. The [separate serving contribution](https://github.com/CC-David-CC/Strata-a5500/blob/contrib/non-mtp-serving/docs/NON_MTP_SERVING_REVIEW.md#start-the-server-without-mtp)
+adds the option to run without one.
 
 The model-throughput harness belongs to the separate serving contribution:
 [tested harness source](https://github.com/CC-David-CC/Strata-a5500/blob/dea58f12e0536eb03a4bd8c2266a38ffbd9d0e28/tools/bench_mtp_modes.py).

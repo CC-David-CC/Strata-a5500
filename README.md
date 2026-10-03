@@ -1,6 +1,7 @@
 > **Community hardware contribution:** this fork branch adds support for the
 > consumer AMD Radeon RX 5500 XT **8GB**, with version-gated HIP compatibility.
 > See the [hardware, scope and validation status](docs/COMMUNITY_GFX1012_REVIEW.md).
+> [Fork branches, feature switches and public evidence](docs/FORK_BRANCHES.md).
 > Credit for Strata belongs to [Niko1221/Strata](https://github.com/Niko1221/Strata).
 > Rebased on upstream **0.1.34**; [fresh checks](docs/benchmarks/2026-10-02-upstream-sync-hardware.md).
 > Earlier performance tables retain their original 0.1.33 source identities.
