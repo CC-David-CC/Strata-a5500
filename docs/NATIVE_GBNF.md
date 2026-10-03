@@ -6,6 +6,12 @@ This branch starts at the passing stateless Responses checkpoint
 replay key and tested local Codex profile. Responses remains disabled by default;
 enable it with `--experimental-responses` or `"experimental_responses": true`.
 
+For a small real-model demonstration, see the [14-case live test](gbnf-evidence/live-demo/REPORT.md)
+and its [plain-text request/result receipt](gbnf-evidence/live-demo/GBNF_DEMO.txt).
+The same prompt produced ordinary prose without a grammar and `color=blue;count=1`
+with a grammar, in both target-only and MTP modes. The recorded checks also cover
+Responses JSON/SSE, Chat JSON, Unicode, token limits and invalid grammar rejection.
+
 ## G0: persistent target-only generation
 
 In the existing server configuration's `args` array, use `"--spec", "1"` and
