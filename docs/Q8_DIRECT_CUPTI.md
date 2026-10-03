@@ -56,4 +56,102 @@ The measured library SHA-256 is
 `tools/profile_q8_cupti_model.py` verifies that library and the frozen ownership
 binary, then compares an 8K/128-output capture against the just-completed 8K
 control. Only after equality does it attempt the native 64K/512-output matrix.
-Model counter results are pending; no new model speed claim follows yet.
+
+## Real Q8 results, 2026-10-03
+
+The short 8K/128-output probe passed: every output token and recorded work
+counter matched its unprofiled control. The four native 64K cases then finished
+successfully. The original frozen engine and its static graphs were retained.
+Each capture used one pass, one range, no replay and zero dropped ranges.
+
+Hardware: RTX PRO 6000 Blackwell Workstation Edition **96 GB**, Ryzen 9 7950X,
+128 GB system RAM, NVIDIA driver 595.91.07, CUDA 13.2.86. Model: full Unsloth
+Qwen3.8-Flash-Next **Q8_0**, FP16 KV, native RoPE. Each fresh engine received
+65,536 input tokens and produced the requested 512 output tokens, with 73,728
+positions allocated. These are additional traffic measurements, not the 1M
+ownership off/on comparison.
+
+Ownership rotation and completion waits were enabled in every arm. Expert
+placement was automatic CPU/PCIe, with 96 adaptive swaps and a 56 GiB RAM
+expert budget; the PLE table was in RAM. No case read experts from files.
+There were 16,400 GPU expert slots without MTP and 16,192 with MTP. Verification
+capacity was eight, MTP maximum T was four, and the suffix draft setting was
+three where enabled. ESP was off. The differing cache capacities and adaptive
+speculation make these configuration comparisons, not a single-variable MTP
+experiment.
+
+| Configuration / task | Unprofiled output tok/s | Effective output tok/s | Sampled DRAM GB / committed token | GPU-only conditional ceiling, tok/s |
+| --- | ---: | ---: | ---: | ---: |
+| Plain / coding | 72.68 | 23.80 | 8.2869 | 198.7 |
+| MTP / coding | 117.58 | 26.77 | 4.3074 | 382.4 |
+| N-gram / editing* | 72.97 | 23.82 | 3.8526 | 427.5 |
+| MTP + n-gram / editing | 68.63 | 23.03 | 3.4640 | 475.5 |
+
+GB is decimal. Effective throughput includes prefill and request wall time,
+excluding engine startup. Speed comes only from the unprofiled controls.
+The ceiling is **1,647 GB/s divided by sampled DRAM GB per committed token**,
+using the earlier measured streaming bandwidth on this GPU. It omits CPU
+expert execution, PCIe, synchronization and other limits; it is not an
+achievable whole-engine speed prediction.
+
+All four profiles reproduced their own control's complete 512-token output.
+Plain, MTP and combined also reproduced all recorded work counters. *N-gram
+had 447 versus 445 drafts offered, 233,302 versus 232,640 cache hits, 255,560
+versus 254,637 lookups, and 38,426 versus 38,227 RAM blob reads under capture.
+Its output equality passed, but its work equality did not. Its traffic is
+valid for that captured execution; no matched speed/traffic fraction is
+reported. These counters alone do not identify the cause of the schedule
+change.
+
+There is one control/profile pair per configuration, with no reverse-order
+repeat or confidence interval. Coding and editing are different prompts.
+Plain and MTP coding first differed from each other at output token index 288
+(zero based); equality above is profile versus its own control, not across
+decoding modes. The editing outputs matched across the two suffix modes.
+Token and aggregate work equality do not establish per-step state or logit
+equivalence.
+
+### Capture boundaries and interpretation
+
+Every 64K capture covered decode windows 32 through 47. Speculation committed
+different numbers of tokens in those windows:
+
+| Configuration | Committed count at start / end | Tokens in range | DRAM read bytes | DRAM write bytes |
+| --- | ---: | ---: | ---: | ---: |
+| Plain | 32 / 48 | 16 | 129,269,047,552 | 3,321,371,648 |
+| MTP | 78 / 129 | 51 | 211,511,863,808 | 8,167,668,736 |
+| N-gram | 110 / 163 | 53 | 186,064,848,640 | 18,122,789,888 |
+| MTP + n-gram | 155 / 224 | 69 | 216,075,765,760 | 22,941,421,312 |
+
+These are different output-position ranges. Multiplying the sampled traffic
+by full-request control throughput gives a **proxy**, not measured continuous
+bandwidth utilization: 36.6% of the conditional ceiling for plain, 30.8% for
+MTP, and 14.4% for combined. N-gram's work mismatch excludes that proxy.
+The two-window 8K probe is only a compatibility gate and is excluded from this
+table and the 64K ceiling claims.
+
+The data supports lower GPU traffic per committed token with speculation in
+these samples. It also shows that lower traffic alone does not guarantee a
+faster request: combined editing had less traffic per committed token but a
+slower unprofiled control than n-gram editing. CPU work, transfers and waits
+need their own critical-path measurements before attributing the remaining
+gap to GPU kernel bandwidth. Counter collection itself changed no engine
+kernel and supplies no new optimization speedup claim.
+
+### Reproduction and evidence
+
+- Engine source: `1a50d913bf910a1f63fbc1a0788a7083e3ca5f8c`.
+- Engine SHA-256: `d14ed6b69a1814ce4b5c08932a47d6921a55fa0aa8dea50427ccf0782d1ad997`.
+- Library/fixture source: `06d5f4fce19cf53767f74c2cc7dc10512fff9d62`.
+- Model runner source: `75c24a4af2f95e7fe389af23ab33be11398e4b8f`.
+- [Compact measurements and checks](../bench/results/2026-10-03-q8-direct-cupti/summary.json).
+- Raw archive: `q8-direct-profiling-evidence-20261003.tar.gz`, 189 files,
+  230,856 compressed bytes. SHA-256:
+  `792ec5e55aa891e60d275ea3588e96a07d2f36eeebdbb305618f7b26d71ffc89`.
+
+The raw archive is retained on llm-60 under `~/fleet-downloads/` and in the
+local fleet evidence folder, with matching SHA-256. It includes successful
+CUPTI counters, config images, commands, outputs and logs, plus the failed
+Nsight model probe and skipped dependent run. No weights are archived. The
+GPU was idle after completion; no reboot, public service or other host was
+changed.

@@ -1,0 +1,353 @@
+{
+  "date_utc": "2026-10-03",
+  "hardware": {
+    "host": "llm-60",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "vram_GB": 96,
+    "cpu": "AMD Ryzen 9 7950X",
+    "system_RAM_GB": 128,
+    "driver": "595.91.07",
+    "cuda": "13.2.86"
+  },
+  "engine_source": "1a50d913bf910a1f63fbc1a0788a7083e3ca5f8c",
+  "engine_sha256": "d14ed6b69a1814ce4b5c08932a47d6921a55fa0aa8dea50427ccf0782d1ad997",
+  "library_source": "06d5f4fce19cf53767f74c2cc7dc10512fff9d62",
+  "library_sha256": "47d059ca1cc9040caf2247ff5fd6620eb460c0fe5125cf3397f5b19e41012450",
+  "runner_source": "75c24a4af2f95e7fe389af23ab33be11398e4b8f",
+  "model": "Unsloth Qwen3.8-Flash-Next Q8_0, all experts retained",
+  "kv": "fp16",
+  "rope": "native",
+  "allocated_context": 73728,
+  "input_tokens": 65536,
+  "output_tokens": 512,
+  "ownership_rotation": true,
+  "completion_waits": true,
+  "ple_placement": "RAM",
+  "RAM_expert_budget_GiB": 56,
+  "expert_miss_placement": "auto CPU/PCIe",
+  "adaptive_swaps": 96,
+  "verification_capacity": 8,
+  "mtp_max_T": 4,
+  "esp": false,
+  "throughput_source": "unprofiled control",
+  "capture": {
+    "passes": 1,
+    "ranges": 1,
+    "dropped": 0,
+    "replay": false,
+    "windows": [
+      32,
+      48
+    ],
+    "windows_end_exclusive": true,
+    "streaming_bandwidth_GB_s": 1647
+  },
+  "records": [
+    {
+      "mode": "serial",
+      "task": "coding",
+      "gpu_expert_slots": 16400,
+      "suffix_draft": 0,
+      "prompt_sha256": {
+        "coding": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896"
+      },
+      "output_token_ids_sha256": "61c9f9c9c183a07c780a82b3517fb1047067a325d0c3997c6c4b5d04525ae551",
+      "output_token_hash_encoding": "UTF-8 compact JSON list of integers, no trailing newline",
+      "unprofiled": {
+        "output_tokens": 512,
+        "decode_tps": 72.6818465731645,
+        "prefill_seconds": 14.4636,
+        "decode_seconds": 7.0443999999999996,
+        "request_wall_seconds": 21.515300335988286,
+        "effective_output_tps": 23.79701849402428,
+        "finish": "length",
+        "work": {
+          "generated": 512,
+          "prompt_tokens": 65536,
+          "prompt_ms": 14463.6,
+          "decode_ms": 7044.4,
+          "finish": "length",
+          "drafts_accepted": 0,
+          "drafts_offered": 0,
+          "reused": 0,
+          "hits": 233605,
+          "lookups": 242670,
+          "ram_blobs": 13736,
+          "file_blobs": 0,
+          "file_mb": 0.0,
+          "prompt_read": 65536
+        }
+      },
+      "capture_start_window_committed": [
+        32,
+        32
+      ],
+      "capture_stop_window_committed": [
+        48,
+        48
+      ],
+      "committed_tokens_in_capture": 16,
+      "range_bytes": {
+        "dram__bytes_op_read.sum": 129269047552,
+        "dram__bytes_op_write.sum": 3321371648,
+        "lts__t_bytes.sum": 154577834112
+      },
+      "bytes_per_committed_token": {
+        "dram__bytes_op_read.sum": 8079315472.0,
+        "dram__bytes_op_write.sum": 207585728.0,
+        "lts__t_bytes.sum": 9661114632.0
+      },
+      "DRAM_GB_per_committed_token": 8.2869012,
+      "conditional_ceiling_tps_at_1647_GBs": 198.74739184775123,
+      "conditional_ceiling_tps_at_1792_GBs": 216.24488536197342,
+      "profile_matches_reference_tokens": true,
+      "profile_matches_reference_work": true,
+      "work_counter_differences_reference_profile": {},
+      "window_traffic_full_request_throughput_proxy": 0.36569962452056637
+    },
+    {
+      "mode": "mtp",
+      "task": "coding",
+      "gpu_expert_slots": 16192,
+      "suffix_draft": 0,
+      "prompt_sha256": {
+        "coding": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896"
+      },
+      "output_token_ids_sha256": "58587785311961d08ff01429536871896d6ef02dbbd45036106b3eea575c635d",
+      "output_token_hash_encoding": "UTF-8 compact JSON list of integers, no trailing newline",
+      "unprofiled": {
+        "output_tokens": 512,
+        "decode_tps": 117.57681532172873,
+        "prefill_seconds": 14.7655,
+        "decode_seconds": 4.3546000000000005,
+        "request_wall_seconds": 19.12762797200412,
+        "effective_output_tps": 26.767563691085037,
+        "finish": "length",
+        "work": {
+          "generated": 512,
+          "prompt_tokens": 65536,
+          "prompt_ms": 14765.5,
+          "decode_ms": 4354.6,
+          "finish": "length",
+          "drafts_accepted": 343,
+          "drafts_offered": 423,
+          "reused": 0,
+          "hits": 271786,
+          "lookups": 280093,
+          "ram_blobs": 12589,
+          "file_blobs": 0,
+          "file_mb": 0.0,
+          "prompt_read": 65536
+        }
+      },
+      "capture_start_window_committed": [
+        32,
+        78
+      ],
+      "capture_stop_window_committed": [
+        48,
+        129
+      ],
+      "committed_tokens_in_capture": 51,
+      "range_bytes": {
+        "dram__bytes_op_read.sum": 211511863808,
+        "dram__bytes_op_write.sum": 8167668736,
+        "lts__t_bytes.sum": 315367524032
+      },
+      "bytes_per_committed_token": {
+        "dram__bytes_op_read.sum": 4147291447.2156863,
+        "dram__bytes_op_write.sum": 160150367.37254903,
+        "lts__t_bytes.sum": 6183676941.803922
+      },
+      "DRAM_GB_per_committed_token": 4.307441814588235,
+      "conditional_ceiling_tps_at_1647_GBs": 382.3615201073687,
+      "conditional_ceiling_tps_at_1792_GBs": 416.0241918836701,
+      "profile_matches_reference_tokens": true,
+      "profile_matches_reference_work": true,
+      "work_counter_differences_reference_profile": {},
+      "window_traffic_full_request_throughput_proxy": 0.30750169444015363
+    },
+    {
+      "mode": "ngram",
+      "task": "editing",
+      "gpu_expert_slots": 16400,
+      "suffix_draft": 3,
+      "prompt_sha256": {
+        "editing": "06080d4c63a012112b7fbd334e4b4c32da7b85006b8018208f80b79b3ae3c829"
+      },
+      "output_token_ids_sha256": "5df963a98103788ed7ac4cb9cf991678e34c0ee6dbff419c951c00c4d1516496",
+      "output_token_hash_encoding": "UTF-8 compact JSON list of integers, no trailing newline",
+      "unprofiled": {
+        "output_tokens": 512,
+        "decode_tps": 72.97189441879027,
+        "prefill_seconds": 14.473600000000001,
+        "decode_seconds": 7.0164,
+        "request_wall_seconds": 21.49853893199179,
+        "effective_output_tps": 23.81557191489405,
+        "finish": "length",
+        "work": {
+          "generated": 512,
+          "prompt_tokens": 65536,
+          "prompt_ms": 14473.6,
+          "decode_ms": 7016.4,
+          "finish": "length",
+          "drafts_accepted": 389,
+          "drafts_offered": 445,
+          "reused": 0,
+          "hits": 232640,
+          "lookups": 254637,
+          "ram_blobs": 38227,
+          "file_blobs": 0,
+          "file_mb": 0.0,
+          "prompt_read": 65536
+        }
+      },
+      "capture_start_window_committed": [
+        32,
+        110
+      ],
+      "capture_stop_window_committed": [
+        48,
+        163
+      ],
+      "committed_tokens_in_capture": 53,
+      "range_bytes": {
+        "dram__bytes_op_read.sum": 186064848640,
+        "dram__bytes_op_write.sum": 18122789888,
+        "lts__t_bytes.sum": 301906591808
+      },
+      "bytes_per_committed_token": {
+        "dram__bytes_op_read.sum": 3510657521.5094337,
+        "dram__bytes_op_write.sum": 341939431.8490566,
+        "lts__t_bytes.sum": 5696350788.830189
+      },
+      "DRAM_GB_per_committed_token": 3.8525969533584905,
+      "conditional_ceiling_tps_at_1647_GBs": 427.5038421977239,
+      "conditional_ceiling_tps_at_1792_GBs": 465.1407924822837,
+      "profile_matches_reference_tokens": true,
+      "profile_matches_reference_work": false,
+      "work_counter_differences_reference_profile": {
+        "drafts_offered": [
+          445,
+          447
+        ],
+        "hits": [
+          232640,
+          233302
+        ],
+        "lookups": [
+          254637,
+          255560
+        ],
+        "ram_blobs": [
+          38227,
+          38426
+        ]
+      },
+      "window_traffic_full_request_throughput_proxy": null
+    },
+    {
+      "mode": "mtp-ngram",
+      "task": "editing",
+      "gpu_expert_slots": 16192,
+      "suffix_draft": 3,
+      "prompt_sha256": {
+        "editing": "06080d4c63a012112b7fbd334e4b4c32da7b85006b8018208f80b79b3ae3c829"
+      },
+      "output_token_ids_sha256": "5df963a98103788ed7ac4cb9cf991678e34c0ee6dbff419c951c00c4d1516496",
+      "output_token_hash_encoding": "UTF-8 compact JSON list of integers, no trailing newline",
+      "unprofiled": {
+        "output_tokens": 512,
+        "decode_tps": 68.62994785732477,
+        "prefill_seconds": 14.768,
+        "decode_seconds": 7.4603,
+        "request_wall_seconds": 22.235914207994938,
+        "effective_output_tps": 23.02581289038748,
+        "finish": "length",
+        "work": {
+          "generated": 512,
+          "prompt_tokens": 65536,
+          "prompt_ms": 14768.0,
+          "decode_ms": 7460.3,
+          "finish": "length",
+          "drafts_accepted": 392,
+          "drafts_offered": 417,
+          "reused": 0,
+          "hits": 211706,
+          "lookups": 237043,
+          "ram_blobs": 42009,
+          "file_blobs": 0,
+          "file_mb": 0.0,
+          "prompt_read": 65536
+        }
+      },
+      "capture_start_window_committed": [
+        32,
+        155
+      ],
+      "capture_stop_window_committed": [
+        48,
+        224
+      ],
+      "committed_tokens_in_capture": 69,
+      "range_bytes": {
+        "dram__bytes_op_read.sum": 216075765760,
+        "dram__bytes_op_write.sum": 22941421312,
+        "lts__t_bytes.sum": 357363466016
+      },
+      "bytes_per_committed_token": {
+        "dram__bytes_op_read.sum": 3131532837.1014495,
+        "dram__bytes_op_write.sum": 332484366.8405797,
+        "lts__t_bytes.sum": 5179180666.898551
+      },
+      "DRAM_GB_per_committed_token": 3.464017203942029,
+      "conditional_ceiling_tps_at_1647_GBs": 475.45953239658417,
+      "conditional_ceiling_tps_at_1792_GBs": 517.3184469063017,
+      "profile_matches_reference_tokens": true,
+      "profile_matches_reference_work": true,
+      "work_counter_differences_reference_profile": {},
+      "window_traffic_full_request_throughput_proxy": 0.14434445663838336
+    }
+  ],
+  "probe": {
+    "mode": "probe-mtp",
+    "task": "coding",
+    "input_tokens": 8192,
+    "output_budget": 128,
+    "profile_matches_reference_tokens": true,
+    "profile_matches_reference_work": true,
+    "capture_start": [
+      8,
+      17
+    ],
+    "capture_stop": [
+      10,
+      19
+    ],
+    "committed_tokens": 2,
+    "use": "Compatibility only; omitted from 64K roofline comparison"
+  },
+  "between_mode_outputs": {
+    "serial_mtp_first_difference_zero_based": 288,
+    "ngram_combined_first_difference_zero_based": null
+  },
+  "limits": [
+    "One control/profile pair per mode; no reversed performance repeat or confidence interval.",
+    "Counters cover 16 decode windows, different committed output positions for each mode.",
+    "The throughput/traffic proxy is not direct GPU utilization.",
+    "N-gram output matches, but aggregate work differs; its proxy is intentionally omitted.",
+    "GPU-only ceilings omit CPU, PCIe, wait and compute limits.",
+    "Coding and editing prompts differ. GPU cache capacity differs with MTP enabled.",
+    "Profiled elapsed times are excluded from throughput claims.",
+    "Output and aggregate work equality do not establish full state or logit equivalence.",
+    "All cases have ownership enabled; these are not the 1M off/on gain measurement."
+  ],
+  "archive": {
+    "sha256": "792ec5e55aa891e60d275ea3588e96a07d2f36eeebdbb305618f7b26d71ffc89",
+    "bytes": 230856,
+    "files": 189,
+    "source_bytes": 7521220,
+    "verified_local_remote_sha256": true,
+    "filename": "q8-direct-profiling-evidence-20261003.tar.gz"
+  }
+}
