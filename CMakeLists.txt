@@ -421,6 +421,10 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
   endif()
 
   add_executable(strata src/program/generate.cpp)
+  option(STRATA_FLEET_CUDA_TRACE "Build opt-in CUDA capture ranges for fleet experiments" OFF)
+  if(STRATA_ENABLE_CUDA AND STRATA_FLEET_CUDA_TRACE)
+    target_compile_definitions(strata PRIVATE STRATA_FLEET_CUDA_TRACE=1)
+  endif()
   target_include_directories(strata PRIVATE ${_strata_gpu_include_directories})
   target_link_libraries(strata PRIVATE strata_engine strata_prefill strata_spec ${_strata_gpu_runtime_target})
 

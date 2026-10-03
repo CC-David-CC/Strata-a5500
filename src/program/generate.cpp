@@ -53,6 +53,7 @@
 #include "strata/core/native_dense.hpp"
 #include "strata/program/logits_selection.hpp"
 #include "strata/program/conv_cache.hpp"
+#include "strata/program/fleet_decode_capture.hpp"
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/suffix_drafter.hpp"
 #include "strata/kernels/cvec.hpp"
@@ -5726,7 +5727,9 @@ int main(int argc, char** argv) {
             const uint64_t file_bytes0 = src.file_read_bytes();
             const int64_t decode_look0 = drive.d.cache_hits + drive.d.cache_admitted + drive.d.cache_refused;
             if (cancelled) finish = "cancel";
+            strata::program::FleetDecodeCapture fleet_capture;
             while (!cancelled && produced_n < max_new) {
+                strata::program::FleetDecodeCapture::Window fleet_window(fleet_capture, dec_windows, produced_n);
                 int T = S_mtp;
                 if (req_spec_min_p > 0.0) {
                     T = 1;
@@ -5759,7 +5762,7 @@ int main(int argc, char** argv) {
                 // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
                 // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
                 // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-                apply_pending(!adapt_nowait());
+                fleet_capture.phase("adaptive admission and wait", [&] { apply_pending(!adapt_nowait()); });
                 if (hist_n > 0) {
                     // the tails the penalties count over, ONE PER ROW: the tokens the state has consumed, the
                     // fed-back head `x` (it joins `consumed` only after this window commits), then the drafts
@@ -5773,7 +5776,7 @@ int main(int argc, char** argv) {
                 }
                 tr("window", p, T);
                 const Clock::time_point tw0 = Clock::now();
-                if (!ver.run(T, window.data(), p, win_pool_fn, win_pool_user, outv.data(), err) || drive.d.failed) {
+                if (!fleet_capture.phase("verification", [&] { return ver.run(T, window.data(), p, win_pool_fn, win_pool_user, outv.data(), err); }) || drive.d.failed) {
                     std::printf("ERR %s\n", drive.d.failed && drive.d.fail ? drive.d.fail : err.c_str());
                     return 1;
                 }
@@ -5788,8 +5791,8 @@ int main(int argc, char** argv) {
                 std::thread adapt_thr;   // the adaptive tier beside the commit and the draft (as in generate)
                 bool adapt_ok = true;
                 if (!drive.d.usage.empty() && ((rounds + 1) % o.adapt_every) == 0)
-                    adapt_thr = std::thread([&] { adapt_ok = adapt(); });
-                if (!ver.commit(a + 1, err)) {
+                    adapt_thr = std::thread([&] { adapt_ok = fleet_capture.phase("adaptive ranking and copies", [&] { return adapt(); }); });
+                if (!fleet_capture.phase("commit", [&] { return ver.commit(a + 1, err); })) {
                     if (adapt_thr.joinable()) adapt_thr.join();
                     std::printf("ERR %s\n", err.c_str());
                     return 1;
@@ -5815,14 +5818,14 @@ int main(int argc, char** argv) {
                 if (use_mtp && hist_n > 0 && mtp.coupled() && !eos && produced_n < max_new)
                     mtp.set_draft_history(consumed.data(), (int64_t) consumed.size(), outv[(size_t) a]);
                 const bool drafted = !use_mtp || eos || produced_n >= max_new ||
-                                     mtp.draft(T, outv.data(), p, a, drafts.data(), err, dprob.data(), (float) req_spec_min_p);
+                                     fleet_capture.phase("MTP draft", [&] { return mtp.draft(T, outv.data(), p, a, drafts.data(), err, dprob.data(), (float) req_spec_min_p); });
                 {
                     const Clock::time_point tw3 = Clock::now();
                     auto msd = [](Clock::time_point a0, Clock::time_point b0) { return std::chrono::duration<double, std::milli>(b0 - a0).count(); };
                     dt_run += msd(tw0, tw1); dt_commit += msd(tw1, tw2); dt_draft += msd(tw2, tw3);
                     ++dec_windows; dec_T += T;
                 }
-                if (adapt_thr.joinable()) adapt_thr.join();
+                if (adapt_thr.joinable()) fleet_capture.phase("adaptive host join", [&] { adapt_thr.join(); });
                 if (!adapt_ok) {
                     std::printf("ERR an adaptive refill failed\n");
                     return 1;
