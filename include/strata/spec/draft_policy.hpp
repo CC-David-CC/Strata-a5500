@@ -16,12 +16,13 @@
 #pragma once
 
 #include <array>
+#include "strata/spec/limits.hpp"
 
 namespace strata::spec {
 
 class DraftPolicy {
 public:
-    static constexpr int kMaxT = 8;
+    static constexpr int kMaxT = strata::kSpecMaxT;
     static constexpr int kBuckets = 4;
 
     explicit DraftPolicy(int max_t, double margin = 0.03);

@@ -15,10 +15,11 @@
 #pragma once
 
 #include <cstdint>
+#include "strata/spec/limits.hpp"
 
 namespace strata::kernels {
 
-inline constexpr int kVerifyMaxT = 8;
+inline constexpr int kVerifyMaxT = strata::kSpecMaxT;
 
 /// For token t of T: conv over [history(3) | qkv_0 .. qkv_t] -> SiLU -> L2 norm of the q/k heads -> h[t].
 /// `history` is NOT written.  Bitwise `fused_gdn_conv_l2` per token.

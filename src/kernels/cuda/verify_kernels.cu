@@ -226,8 +226,8 @@ __global__ void fetch_blobs_kernel(const unsigned long long* __restrict__ src, c
 }
 
 __global__ void rebase_ptrs_kernel(unsigned long long* ptr, const int32_t* n, unsigned long long base, long long bytes) {
-    const int k = threadIdx.x;
-    if (k < *n) ptr[k] = base + (unsigned long long) k * (unsigned long long) bytes;
+    for (int k = threadIdx.x; k < *n; k += blockDim.x)
+        ptr[k] = base + (unsigned long long) k * (unsigned long long) bytes;
 }
 
 __global__ void add_streams_broadcast_kernel(const float* __restrict__ h, const float* __restrict__ e,

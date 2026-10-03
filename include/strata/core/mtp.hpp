@@ -18,6 +18,7 @@
 //     are simply overwritten when their positions are processed again;
 //   * all 512 routed experts live in VRAM (708 MB) and run through the grouped hit kernels.
 #pragma once
+#include "strata/spec/limits.hpp"
 
 #include "strata/core/layer.hpp"
 #include "strata/core/session.hpp"
@@ -109,12 +110,12 @@ private:
     bool capture_prefill_dev(int T, std::string& err);   ///< E-4: without the mapped staging (inputs copied on device)
     bool capture_round(int T, bool coupled, std::string& err);
     bool capture_step(int j, bool coupled, std::string& err);
-    cudaGraphExec_t step_exec_[9] = {};
+    cudaGraphExec_t step_exec_[strata::kSpecMaxT + 1] = {};
     // coupled draft sampling: its own round/step graphs (the argmax ones stay as they were), the request's
     // parameters and the penalty ring (mapped staging + device copies), the split scratch, token id -> subset index
     bool setup_coupled(std::string& err);
-    cudaGraphExec_t round_exec_c_[9] = {};
-    cudaGraphExec_t step_exec_c_[9] = {};
+    cudaGraphExec_t round_exec_c_[strata::kSpecMaxT + 1] = {};
+    cudaGraphExec_t step_exec_c_[strata::kSpecMaxT + 1] = {};
     bool coupled_ok_ = false, coupled_active_ = false;
     bool coupled_rec_ = false;   ///< record_forward: the full layer ends in the coupled sampler (draft coupled_j_)
     int coupled_j_ = 0;
@@ -136,11 +137,11 @@ private:
     int64_t n_vocab_ = 0;
     uint64_t vram_ = 0;
     cudaStream_t cs_ = nullptr;
-    cudaGraphExec_t prefill_exec_[9] = {};
-    cudaGraphExec_t prefill_dev_exec_[9] = {};
+    cudaGraphExec_t prefill_exec_[strata::kSpecMaxT + 1] = {};
+    cudaGraphExec_t prefill_dev_exec_[strata::kSpecMaxT + 1] = {};
     int32_t* pf_dev_ = nullptr;   ///< E-4: a prompt's rows' token / step / position records, uploaded at once
     int64_t pf_cap_ = 0;          ///< its capacity in ints
-    cudaGraphExec_t round_exec_[9] = {};
+    cudaGraphExec_t round_exec_[strata::kSpecMaxT + 1] = {};
 
     struct Tensor { std::string name, kind; int64_t rows = 0, cols = 0; uint64_t off = 0, bytes = 0; };
     std::vector<Tensor> tensors_;

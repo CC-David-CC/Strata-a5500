@@ -25,7 +25,7 @@
 namespace strata::kernels::cpu {
 namespace {
 
-constexpr int MAXT = 8;   // the verify window's tokens per group (kVerifyMaxT)
+constexpr int MAXT = 8;   // register tile; outer loops cover longer verifier windows
 
 inline float h2f(ggml_half h) {
     uint16_t u;

@@ -1303,7 +1303,15 @@ void launch_mmvq(const uint8_t* W, size_t rb, const block_q8_1* X, float* y, int
     else if (ncols <= 1) mmvq_multi_kernel<TY, 1><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
     else if (ncols == 2) mmvq_multi_kernel<TY, 2><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
     else if (ncols <= 4) mmvq_multi_kernel<TY, 4><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
-    else mmvq_multi_kernel<TY, 8><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);   // 8 at a time past 8
+#if STRATA_VERIFY_MAX_T > 8
+    else if (ncols <= 8) mmvq_multi_kernel<TY, 8><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
+    else if (ncols <= 12) mmvq_multi_kernel<TY, 12><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
+    else if (ncols <= 16) mmvq_multi_kernel<TY, 16><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
+    else if (ncols <= 18) mmvq_multi_kernel<TY, 18><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
+    else mmvq_multi_kernel<TY, 24><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
+#else
+    else mmvq_multi_kernel<TY, 8><<<grid, block, 0, s>>>(W, rb, X, y, n_in, n_out, ncols);
+#endif
 }
 
 template<int TG>

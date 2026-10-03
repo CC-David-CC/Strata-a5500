@@ -16,6 +16,7 @@
 // are set, small enough that the grouped path's SwiGLU output keeps a finite fp16 q8_1 scale.
 #include "strata/kernels/f16_bits.hpp"
 #include "strata/kernels/iq_kernels.hpp"
+#include "strata/spec/limits.hpp"
 
 #include <cuda_runtime.h>
 
@@ -115,7 +116,7 @@ void check_mmvq(int t, int n_in, int n_out, cudaStream_t s, std::mt19937& rng) {
     k::iq_dequant_f32(t, dw, (int64_t) n_out * n_in, dwf, s);
     std::vector<float> wf((size_t) n_out * n_in);
     ck(cudaMemcpy(wf.data(), dwf, wf.size() * 4, cudaMemcpyDeviceToHost), "wf");
-    const int max_cols = 11;
+    const int max_cols = std::max(11, strata::kSpecMaxT);
     const auto x = random_x((size_t) max_cols * n_in, rng);
     float* dx = dalloc<float>(x.size());
     ck(cudaMemcpy(dx, x.data(), x.size() * 4, cudaMemcpyHostToDevice), "x");
@@ -128,7 +129,11 @@ void check_mmvq(int t, int n_in, int n_out, cudaStream_t s, std::mt19937& rng) {
     float* dy_old = dalloc<float>((size_t) max_cols * n_out);
     float* dy_new = dalloc<float>((size_t) max_cols * n_out);
     std::vector<float> y_old((size_t) max_cols * n_out), y_new(y_old.size());
-    const int cols[] = {1, 2, 3, 4, 5, 6, 7, 8, 11};
+    const int cols[] = {1, 2, 3, 4, 5, 6, 7, 8, 11
+#if STRATA_VERIFY_MAX_T > 8
+        ,9,10,12,13,14,15,16,17,18,19,20,21,22,23,24
+#endif
+    };
     int bad = 0;
     double worst = 0.0;
     for (int nc : cols) {
@@ -250,7 +255,7 @@ struct Grouped {
 
 void check_grouped(int gu, int dt, int64_t H, int64_t FF, cudaStream_t s, std::mt19937& rng) {
     // 0..11 entries per group: one pass, a partial pass, two passes and three passes of GRP_NC = 4
-    Grouped G(gu, dt, H, FF, {1, 3, 4, 5, 0, 8, 2, 11, 1}, 8, rng);
+    Grouped G(gu, dt, H, FF, {1, 3, 4, 5, 0, 8, 2, 11, strata::kSpecMaxT}, strata::kSpecMaxT, rng);
     const auto a = G.result(true, s), b = G.result(false, s);
     size_t diff = 0, written = 0;
     bool finite = true;

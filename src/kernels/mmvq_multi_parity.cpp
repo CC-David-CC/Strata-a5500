@@ -30,6 +30,7 @@
 // blocks of 256) each thread holds at most one block in both layouts and they coincide; its case uses n_in = 4096.
 #include "strata/kernels/iq_kernels.hpp"
 #include "strata/kernels/native_mmvq.hpp"
+#include "strata/spec/limits.hpp"
 
 #include <cuda_runtime.h>
 
@@ -70,7 +71,11 @@ uint16_t sane_half(std::mt19937& rng) {
 }
 
 // T = 4 is the last width where the two layouts coincide, T = 5 the first where they differ
-const int WIDTHS[] = {1, 2, 3, 4, 5, 6, 8};
+const int WIDTHS[] = {1, 2, 3, 4, 5, 6, 7, 8
+#if STRATA_VERIFY_MAX_T > 8
+    ,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+#endif
+};
 constexpr int COINCIDE_MAX_T = 4;
 
 bool ck(cudaError_t e, const char* what) {

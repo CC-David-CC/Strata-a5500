@@ -25,6 +25,7 @@
 // kernels agreeing on garbage would otherwise pass.
 #include "strata/kernels/f16_bits.hpp"
 #include "strata/kernels/s2_expert_grouped.hpp"
+#include "strata/spec/limits.hpp"
 
 #include <cuda_runtime.h>
 
@@ -268,7 +269,7 @@ void check_all() {
     // Activations for up to 8 tokens, device copies with and without the fp32 scales.
     std::vector<uint8_t> x;
     std::vector<float> xs;
-    fill_x(x, xs, 8, rng);
+    fill_x(x, xs, strata::kSpecMaxT, rng);
     uint8_t* d_x = dalloc<uint8_t>(x.size());
     float* d_xs = dalloc<float>(xs.size());
     up(d_x, x);
@@ -338,7 +339,7 @@ void check_all() {
 
     // ---- 3. moe_hit_grouped_s2_multi: 4 tokens x 10 routed entries, 29 hits
     {
-        const int T = 4, n = T * K, count = 29;
+        const int T = strata::kSpecMaxT, n = T * K, count = n - 11;
         std::vector<int32_t> ent_ids(n);
         std::iota(ent_ids.begin(), ent_ids.end(), 0);
         std::shuffle(ent_ids.begin(), ent_ids.end(), rng);
@@ -368,14 +369,14 @@ void check_all() {
 
     // ---- 4. moe_grouped_s2: 8 tokens x 10 entries in groups of 1..8, one group on a mapped host blob
     {
-        const int T = 8, n = T * K;
+        const int T = strata::kSpecMaxT, n = T * K;
         uint8_t* h_host = nullptr;
         uint8_t* d_host = nullptr;
         ck(cudaHostAlloc((void**) &h_host, BLOB, cudaHostAllocMapped), "host blob");
         std::memcpy(h_host, fx.hb(fx.nb - 1), BLOB);
         ck(cudaHostGetDevicePointer((void**) &d_host, h_host, 0), "host blob ptr");
         // group sizes: 8, 1, 5, 2, 7, 3, 1, 6, 4, ... up to n entries
-        const int sizes[] = {8, 1, 5, 2, 7, 3, 1, 6, 4, 8, 1, 2, 3, 4, 5, 6, 7, 1, 1, 5};
+        const int sizes[] = {T, 1, 5, 2, T-1, 3, 1, 6, 4, T, 1, 2, 3, 4, 5, 6, 7, 1, 1, 5};
         std::vector<int32_t> order(n);   // the output rows, in group order
         std::iota(order.begin(), order.end(), 0);
         std::shuffle(order.begin(), order.end(), rng);
@@ -426,7 +427,7 @@ void check_all() {
 
     // ---- 5. moe_group_resident + moe_grouped_s2: the MTP layer (experts resident at base + id * BLOB)
     {
-        const int T = 5, n = T * K;
+        const int T = strata::kSpecMaxT, n = T * K;
         std::vector<int32_t> ids(n);
         for (int t = 0; t < T; ++t) {   // distinct within a token, shared across tokens
             std::vector<int32_t> pick(fx.nb);

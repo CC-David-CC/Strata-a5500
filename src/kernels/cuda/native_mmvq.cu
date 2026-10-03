@@ -24,6 +24,7 @@
 // SOFTWARE.
 
 #include "strata/kernels/native_mmvq.hpp"
+#include "strata/spec/limits.hpp"
 #include "strata/kernels/dp4a.hpp"
 #include "strata/kernels/iq_kernels.hpp"
 
@@ -782,7 +783,7 @@ __global__ void native_small_mmvq_kernel(const Weight* __restrict__ w,
 // row) value is accumulated over kbx in the same order, summed across warps in the same order and reduced with
 // the same warp tree as the ncols = 1 kernel, so every column is BITWISE equal to a single-column call on that
 // column (checked by bench/micro/native_mmvq_multi.cpp). The ncols = 1 kernels are untouched.
-constexpr int MAX_NCOLS = 8;
+constexpr int MAX_NCOLS = strata::kSpecMaxT;
 
 // Each format splits its dot product into `load` (everything that depends only on the weight block: codes,
 // unpacked scales, block scale) and `apply` (the activation loads and the original *_impl expression). `load` runs
@@ -1073,7 +1074,15 @@ void launch_multi_n(const void* weights, const void* x_q8_1, float* y, int n_in,
         if (g_multi_exact) switch (q8_rows()) {
 #define STRATA_Q8_ROWS(R) case R: \
             native_mmvq_multi_kernel<F, NCOLS, WARPS, R><<<unsigned((std::size_t(n_out)+R-1)/R), dim3(WARP, WARPS), 0, s>>>(w, x, y, n_in, n_out); return
-            STRATA_Q8_ROWS(1); STRATA_Q8_ROWS(2); STRATA_Q8_ROWS(4); STRATA_Q8_ROWS(8);
+            STRATA_Q8_ROWS(1); STRATA_Q8_ROWS(2); STRATA_Q8_ROWS(4);
+            case 8:
+                // 24 columns x eight rows would exceed the 48 KiB static
+                // shared-memory limit. Keep every column, tile output rows.
+                if constexpr (NCOLS <= 16)
+                    native_mmvq_multi_kernel<F, NCOLS, WARPS, 8><<<unsigned((std::size_t(n_out)+7)/8), dim3(WARP, WARPS), 0, s>>>(w, x, y, n_in, n_out);
+                else
+                    native_mmvq_multi_kernel<F, NCOLS, WARPS, 4><<<unsigned((std::size_t(n_out)+3)/4), dim3(WARP, WARPS), 0, s>>>(w, x, y, n_in, n_out);
+                return;
 #undef STRATA_Q8_ROWS
             default: break;
         }
@@ -1105,7 +1114,25 @@ void launch_multi(const void* weights, const void* x_q8_1, float* y, int n_in, i
         case 6: launch_multi_n<F, 6>(weights, x_q8_1, y, n_in, n_out, s); break;
         case 7: launch_multi_n<F, 7>(weights, x_q8_1, y, n_in, n_out, s); break;
         case 8: launch_multi_n<F, 8>(weights, x_q8_1, y, n_in, n_out, s); break;
-        default: throw std::invalid_argument("native MMVQ multi-column launch requires 2 <= ncols <= 8");
+#if STRATA_VERIFY_MAX_T > 8
+        case 9: launch_multi_n<F, 9>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 10: launch_multi_n<F, 10>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 11: launch_multi_n<F, 11>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 12: launch_multi_n<F, 12>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 13: launch_multi_n<F, 13>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 14: launch_multi_n<F, 14>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 15: launch_multi_n<F, 15>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 16: launch_multi_n<F, 16>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 17: launch_multi_n<F, 17>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 18: launch_multi_n<F, 18>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 19: launch_multi_n<F, 19>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 20: launch_multi_n<F, 20>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 21: launch_multi_n<F, 21>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 22: launch_multi_n<F, 22>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 23: launch_multi_n<F, 23>(weights, x_q8_1, y, n_in, n_out, s); break;
+        case 24: launch_multi_n<F, 24>(weights, x_q8_1, y, n_in, n_out, s); break;
+#endif
+        default: throw std::invalid_argument("native MMVQ multi-column launch exceeds compiled verifier capacity");
     }
 }
 
@@ -1113,7 +1140,7 @@ void validate_shape(int n_in, int ncols, int block_elems = Q8K) {
     if (n_in <= 0 || n_in % block_elems != 0) {
         throw std::invalid_argument("native MMVQ requires n_in > 0 and divisible by its block element count");
     }
-    if (ncols < 1 || ncols > MAX_NCOLS) throw std::invalid_argument("native MMVQ requires 1 <= ncols <= 8");
+    if (ncols < 1 || ncols > MAX_NCOLS) throw std::invalid_argument("native MMVQ ncols exceeds compiled verifier capacity");
 }
 void validate_pointer(const void* p) {
     if (!p || reinterpret_cast<std::uintptr_t>(p) % 4 != 0) {

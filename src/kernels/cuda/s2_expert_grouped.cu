@@ -27,6 +27,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <mutex>
 
 namespace strata::kernels {
 namespace {
@@ -643,7 +644,7 @@ __global__ void hit_select_kernel(const int32_t* __restrict__ ids, const int32_t
 __global__ void hit_select_multi_kernel(const int32_t* __restrict__ ids, const int32_t* __restrict__ res_row, int n,
                                         int n_expert, int32_t* __restrict__ slot, int32_t* __restrict__ dst,
                                         int32_t* __restrict__ count) {
-    __shared__ int warp_count[4];
+    __shared__ int warp_count[strata::kSpecMaxEntries / 32];
     const int i = threadIdx.x, lane = i & 31, warp = i >> 5;
     int s = -1;
     if (i < n) {
@@ -660,7 +661,11 @@ __global__ void hit_select_multi_kernel(const int32_t* __restrict__ ids, const i
         slot[at] = s;
         dst[at] = i;
     }
-    if (i == 0) *count = warp_count[0] + warp_count[1] + warp_count[2] + warp_count[3];
+    if (i == 0) {
+        int total = 0;
+        for (int w = 0; w < strata::kSpecMaxEntries / 32; ++w) total += warp_count[w];
+        *count = total;
+    }
 }
 
 __global__ void add_hits_kernel(float* __restrict__ parts, const float* __restrict__ hit_out,
@@ -712,8 +717,8 @@ void moe_hit_grouped_s2_dev(const uint8_t* blob_base, const int32_t* slot_index,
 
 void moe_hit_select_multi(const int32_t* ids, const int32_t* res_row, int n, int n_expert, int32_t* slot, int32_t* dst,
                           int32_t* count, void* stream) {
-    if (n < 1 || n > 128) { std::fprintf(stderr, "moe_hit_select_multi: n must be 1..128\n"); std::exit(1); }
-    hit_select_multi_kernel<<<1, 128, 0, (cudaStream_t) stream>>>(ids, res_row, n, n_expert, slot, dst, count);
+    if (n < 1 || n > strata::kSpecMaxEntries) { std::fprintf(stderr, "moe_hit_select_multi: compiled entry capacity exceeded\n"); std::exit(1); }
+    hit_select_multi_kernel<<<1, strata::kSpecMaxEntries, 0, (cudaStream_t) stream>>>(ids, res_row, n, n_expert, slot, dst, count);
     check("moe_hit_select_multi", stream);
 }
 
@@ -753,7 +758,10 @@ namespace {
 // arithmetic is `row_dot_s2_q8`'s, chunk by chunk in the same lane order, so every entry is bitwise the per-entry
 // hit kernel's.
 constexpr int GU_CHUNKS = (H / 32 + 31) / 32;   // 3: chunks of a gate/up row per lane (80 chunks / 32 lanes)
-constexpr int GMAX = 8;                          // entries per group (tokens routed to one expert in a window)
+constexpr int GMAX = kVerifyMaxT;                // entries routed to one expert in a window
+constexpr int GROUP_CAP = strata::kSpecMaxEntries;
+constexpr size_t GU_SMEM = GMAX * (H / 4 * sizeof(int) + H / 32 * sizeof(float));
+constexpr size_t GU_T_SMEM = GMAX * (H / 32) * (8 * sizeof(int) + sizeof(int2));
 // a group holds one entry per token of the window routed to its expert, and the kernels below keep at
 // most GMAX of them (`min(..., GMAX)`): a longer window would drop entries without a word.
 static_assert(GMAX >= kVerifyMaxT, "a verify window's group can exceed GMAX entries");
@@ -787,8 +795,14 @@ __global__ void __launch_bounds__(256) gu_grouped_kernel(const unsigned long lon
                                                          const uint8_t* __restrict__ x_q8_0,
                                                          const float* __restrict__ x_scales,
                                                          float* __restrict__ gate_up, int cap_entries) {
-    __shared__ int xs_q[GMAX][H / 4];          // the entries' int8 activations as words (2560 B each)
+#if STRATA_VERIFY_MAX_T > 8
+    extern __shared__ __align__(16) unsigned char raw[];
+    auto xs_q = reinterpret_cast<int (*)[H / 4]>(raw);
+    auto xs_d = reinterpret_cast<float (*)[H / 32]>(raw + GMAX * H / 4 * sizeof(int));
+#else
+    __shared__ int xs_q[GMAX][H / 4];
     __shared__ float xs_d[GMAX][H / 32];
+#endif
     const int g = blockIdx.y;
     if (g >= *n_groups) return;
     const int e0 = grp_start[g], ne = min(grp_start[g + 1] - e0, GMAX);
@@ -923,8 +937,14 @@ __global__ void __launch_bounds__(256) gu_grouped_t_kernel(const unsigned long l
                                                            const float* __restrict__ x_scales,
                                                            float* __restrict__ gate_up, int cap_entries) {
     constexpr int NC = H / 32;
-    __shared__ int xs_w[8 * GMAX * NC];          // 20 KB: word j of entry k's chunk c at [j][k * NC + c]
-    __shared__ int2 xs_dh[GMAX * NC];            // 5 KB: (dx as bits, hx)
+#if STRATA_VERIFY_MAX_T > 8
+    extern __shared__ __align__(16) unsigned char raw[];
+    auto xs_w = reinterpret_cast<int*>(raw);
+    auto xs_dh = reinterpret_cast<int2*>(raw + 8 * GMAX * NC * sizeof(int));
+#else
+    __shared__ int xs_w[8 * GMAX * NC];
+    __shared__ int2 xs_dh[GMAX * NC];
+#endif
     const int g = blockIdx.y;
     if (g >= *n_groups) return;
     const int e0 = grp_start[g], ne = min(grp_start[g + 1] - e0, GMAX);
@@ -1048,7 +1068,7 @@ __global__ void group_resident_kernel(const int32_t* __restrict__ ids, int n, in
                                       long long blob, unsigned long long* __restrict__ grp_ptr,
                                       int32_t* __restrict__ grp_start, int32_t* __restrict__ counts,
                                       int32_t* __restrict__ ent_dst, int32_t* __restrict__ ent_tok) {
-    __shared__ int e_s[128], first_s[128], size_s[128], gidx_s[128], gstart_s[129];
+    __shared__ int e_s[GROUP_CAP], first_s[GROUP_CAP], size_s[GROUP_CAP], gidx_s[GROUP_CAP], gstart_s[GROUP_CAP + 1];
     const int i = threadIdx.x;
     const int e = i < n ? ids[i] : -1;
     e_s[i] = e;
@@ -1090,16 +1110,49 @@ __global__ void group_resident_kernel(const int32_t* __restrict__ ids, int n, in
 void moe_group_resident(const int32_t* ids, int n, int k_per_tok, const uint8_t* base, int64_t blob,
                         unsigned long long* grp_ptr, int32_t* grp_start, int32_t* counts, int32_t* ent_dst,
                         int32_t* ent_tok, void* stream) {
-    if (n < 1 || n > 128) { std::fprintf(stderr, "moe_group_resident: n must be 1..128\n"); std::exit(1); }
-    group_resident_kernel<<<1, 128, 0, (cudaStream_t) stream>>>(ids, n, k_per_tok, base, (long long) blob, grp_ptr,
+    if (n < 1 || n > GROUP_CAP) { std::fprintf(stderr, "moe_group_resident: entry count exceeds compiled capacity\n"); std::exit(1); }
+    group_resident_kernel<<<1, GROUP_CAP, 0, (cudaStream_t) stream>>>(ids, n, k_per_tok, base, (long long) blob, grp_ptr,
                                                                grp_start, counts, ent_dst, ent_tok);
     check("moe_group_resident", stream);
+}
+
+void moe_grouped_s2_prepare() {
+#if STRATA_VERIFY_MAX_T > 8
+    static std::mutex lock;
+    static bool ready[64] = {};
+    std::lock_guard<std::mutex> guard(lock);
+    int dev = -1, limit = 0;
+    cudaError_t e = cudaGetDevice(&dev);
+    if (e == cudaSuccess && dev >= 0 && dev < 64 && ready[dev]) return;
+    if (e == cudaSuccess) e = cudaDeviceGetAttribute(&limit, cudaDevAttrMaxSharedMemoryPerBlockOptin, dev);
+    if (e != cudaSuccess || dev < 0 || dev >= 64 || limit < (int) GU_T_SMEM) {
+        std::fprintf(stderr, "wide grouped experts: need %zu bytes shared memory; device=%d limit=%d error=%s\n",
+                     GU_T_SMEM, dev, limit, cudaGetErrorString(e));
+        std::exit(1);
+    }
+    e = cudaFuncSetAttribute(gu_grouped_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) GU_SMEM);
+    if (e == cudaSuccess)
+        e = cudaFuncSetAttribute(gu_grouped_t_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) GU_T_SMEM);
+    if (e != cudaSuccess) {
+        std::fprintf(stderr, "wide grouped expert shared-memory setup: %s\n", cudaGetErrorString(e));
+        std::exit(1);
+    }
+    ready[dev] = true;
+#endif
 }
 
 void moe_grouped_s2(const unsigned long long* grp_ptr, const int32_t* grp_start, const int32_t* n_groups,
                     const int32_t* ent_dst, const int32_t* ent_tok, int64_t cap_groups, int64_t cap_entries,
                     const uint8_t* x_q8_0, const float* x_scales, void* scratch, float* out, void* stream) {
     if (cap_groups <= 0 || cap_entries <= 0) return;
+    // Initialized during verifier/drafter loading, before graph capture; also
+    // supports standalone parity calls that do not construct either engine.
+    moe_grouped_s2_prepare();
+#if STRATA_VERIFY_MAX_T > 8
+    const size_t gu_smem = GU_SMEM, gu_t_smem = GU_T_SMEM;
+#else
+    const size_t gu_smem = 0, gu_t_smem = 0;
+#endif
     cudaStream_t cs = (cudaStream_t) stream;
     const uint64_t gu_bytes = ((uint64_t) cap_entries * (uint64_t) (2 * FF) * 4 + 15) & ~15ull;
     const uint64_t q8_bytes = ((uint64_t) cap_entries * (uint64_t) (FF / 32) * 34 + 15) & ~15ull;
@@ -1110,10 +1163,10 @@ void moe_grouped_s2(const unsigned long long* grp_ptr, const int32_t* grp_start,
     {
         const dim3 grid((unsigned) (2 * FF / GU_ROWS), (unsigned) cap_groups);
         if (fast)
-            gu_grouped_t_kernel<<<grid, 256, 0, cs>>>(grp_ptr, grp_start, n_groups, ent_tok, x_q8_0, x_scales,
+            gu_grouped_t_kernel<<<grid, 256, gu_t_smem, cs>>>(grp_ptr, grp_start, n_groups, ent_tok, x_q8_0, x_scales,
                                                       gate_up, (int) cap_entries);
         else
-            gu_grouped_kernel<<<grid, 256, 0, cs>>>(grp_ptr, grp_start, n_groups, ent_tok, x_q8_0, x_scales, gate_up,
+            gu_grouped_kernel<<<grid, 256, gu_smem, cs>>>(grp_ptr, grp_start, n_groups, ent_tok, x_q8_0, x_scales, gate_up,
                                                     (int) cap_entries);
         check("moe_grouped_s2/gu", stream);
     }

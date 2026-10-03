@@ -22,7 +22,8 @@ def main():
     ap.add_argument("--caps", type=int, nargs="+", default=[1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 17])
     ap.add_argument("--eos-id", type=int,
                     help="Use a known early reference token as EOS to test stopping inside a verified prefix")
-    ap.add_argument("--verify-window", type=int, default=4, choices=range(2, 9))
+    ap.add_argument("--verify-window", type=int, default=4, choices=range(2, 25))
+    ap.add_argument("--mtp-window", type=int, default=4, choices=range(1, 25))
     ap.add_argument("--oracle-sweep", action="store_true")
     ap.add_argument("--reject-depth", type=int, default=-1)
     opt = ap.parse_args()
@@ -51,7 +52,7 @@ def main():
     save()
     for mode in ("off", "on"):
         args = list(cfg["args"])
-        for name, value in [("--spec", opt.verify_window), ("--mtp-max-t", 4), ("--suffix-draft", 0),
+        for name, value in [("--spec", opt.verify_window), ("--mtp-max-t", opt.mtp_window), ("--suffix-draft", 0),
                             ("--spec-min-p", 0), ("--max-context", 16384),
                             ("--prompt-cache", 1), ("--prompt-cache-every", 0),
                             ("--prompt-cache-root", 0), ("--turn-token", -1),
