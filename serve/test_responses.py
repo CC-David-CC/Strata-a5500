@@ -91,6 +91,42 @@ class Normalization(unittest.TestCase):
         self.assertEqual([m["content"] for m in normalized], ["top", "developer", "system", "first", "answer", "second"])
         self.assertEqual(req, original)
 
+    def test_steering_instructions_remain_in_the_system_prefix(self):
+        body = request(instructions="TOP_LEVEL", input=[
+            {"role": "developer", "content": "INITIAL_PERMISSIONS"},
+            {"role": "user", "content": "ORIGINAL_TASK"},
+            {"role": "assistant", "content": "PARTIAL_ANSWER"},
+            {"role": "user", "content": "<turn_aborted>Interrupted.</turn_aborted>"},
+            {"role": "developer", "content": "UPDATED_PERMISSIONS"},
+            {"role": "system", "content": "LATEST_INSTRUCTIONS"},
+            {"role": "user", "content": "STEERED_TASK"}])
+        original = copy.deepcopy(body)
+        messages = resolve_input(validate_request(body, self.svc))
+        self.assertEqual([m["role"] for m in messages],
+                         ["system", "developer", "developer", "system", "user", "assistant", "user", "user"])
+        prepared = create_response(self.svc, body)
+        prompt = self.svc.tok.decode(prepared.ids)
+        prefix, history = prompt.split("<|im_end|>", 1)
+        for text in ("TOP_LEVEL", "INITIAL_PERMISSIONS", "UPDATED_PERMISSIONS", "LATEST_INSTRUCTIONS"):
+            self.assertIn(text, prefix)
+            self.assertNotIn(text, history)
+        self.assertLess(prefix.index("INITIAL_PERMISSIONS"), prefix.index("UPDATED_PERMISSIONS"))
+        self.assertLess(history.index("ORIGINAL_TASK"), history.index("PARTIAL_ANSWER"))
+        self.assertLess(history.index("PARTIAL_ANSWER"), history.index("STEERED_TASK"))
+        self.assertEqual(body, original)
+
+    def test_instruction_update_does_not_break_tool_result_binding(self):
+        body = request(input=[
+            {"role": "user", "content": "Read the file."},
+            {"type": "function_call", "call_id": "call_read", "name": "read", "arguments": "{}"},
+            {"role": "developer", "content": "PERMISSION_UPDATE"},
+            {"type": "function_call_output", "call_id": "call_read", "output": "FILE_DATA"},
+            {"role": "user", "content": "Now explain it."}])
+        messages = resolve_input(validate_request(body, self.svc))
+        self.assertEqual([m["role"] for m in messages], ["developer", "user", "assistant", "tool", "user"])
+        self.assertEqual(messages[3]["content"], "FILE_DATA")
+        self.assertIn("PERMISSION_UPDATE", self.svc.tok.decode(create_response(self.svc, body).ids))
+
     def test_unsupported_capabilities_rejected_before_load(self):
         cases = [dict(previous_response_id="resp_missing"), dict(background=True),
                  dict(text={"format": {"type": "json_schema", "schema": {}}}),
@@ -163,6 +199,23 @@ class Lifecycle(unittest.TestCase):
 
 
 class HttpBoundary(unittest.TestCase):
+    def test_steering_history_works_for_json_and_sse(self):
+        body = request(input=[{"role": "user", "content": "Old task"},
+                              {"role": "assistant", "content": "Partial result"},
+                              {"role": "developer", "content": "Updated permissions"},
+                              {"role": "user", "content": "New task"}])
+        svc = service("Recovered")
+        with listening(svc) as base:
+            code, _, raw = http(base, body)
+            self.assertEqual(code, 200, raw)
+            final = json.loads(raw)
+            code, headers, raw = http(base, dict(body, stream=True))
+            self.assertEqual(code, 200, raw)
+            self.assertIn("text/event-stream", headers["Content-Type"])
+            events, _ = sse_events(raw)
+            self.assertEqual(events[-1]["type"], "response.completed")
+            self.assertEqual(normalized(events[-1]["response"]), normalized(final))
+
     def test_flag_off_and_old_endpoints(self):
         svc = service("</think>old")
         svc.experimental_responses = False

@@ -50,6 +50,9 @@ response = client.responses.create(
 print(response.output_text)
 ```
 
+For a pinned interactive Codex profile, model metadata and coding sampling defaults,
+see [Local Codex CLI with Strata](CODEX_LOCAL.md).
+
 ## Capability profile
 
 The adapter supports text messages, per-request instructions, explicit `store:false`,

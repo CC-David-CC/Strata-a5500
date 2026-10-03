@@ -216,9 +216,9 @@ def resolve_input(req, replay=None):
         items = [{"role": "user", "content": items}]
     if not isinstance(items, list) or not items:
         raise RequestError("input must be text or a nonempty array of items", "input")
-    messages = []
+    messages, instructions = [], []
     if req.get("instructions") is not None:
-        messages.append({"role": "system", "content": req["instructions"]})
+        instructions.append({"role": "system", "content": req["instructions"]})
     pending, results, seen = {}, {}, set()
     reasoning = []
 
@@ -310,10 +310,6 @@ def resolve_input(req, replay=None):
         role = item.get("role")
         if role not in ("system", "developer", "user", "assistant"):
             raise RequestError("unsupported message role", param + ".role")
-        if reasoning and role != "assistant":
-            raise RequestError("visible reasoning must precede an assistant message or function call", param)
-        if role != "assistant" or results:
-            flush_results()
         content = item.get("content")
         if isinstance(content, list):
             if not content:
@@ -330,6 +326,17 @@ def resolve_input(req, replay=None):
                 parts.append(string(part.get("text"), loc + ".text"))
             content = "".join(parts)
         content = string(content, param + ".content")
+        if role in ("system", "developer"):
+            # The native template requires one leading instruction block. Codex
+            # can update permissions/instructions after an interrupted turn.
+            # Preserve their roles and arrival order in that block; never turn
+            # permission updates into user text or discard conversation history.
+            instructions.append({"role": role, "content": content})
+            continue
+        if reasoning and role != "assistant":
+            raise RequestError("visible reasoning must precede an assistant message or function call", param)
+        if role != "assistant" or results:
+            flush_results()
         if reasoning:
             assistant()["content"] = content
         else:
@@ -337,7 +344,7 @@ def resolve_input(req, replay=None):
     if reasoning:
         raise RequestError("visible reasoning needs a following assistant message or function call", "input")
     flush_results()
-    return messages
+    return instructions + messages
 
 
 def transition(current, event):
