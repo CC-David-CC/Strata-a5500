@@ -1,3 +1,10 @@
+> **Historical AMD review branch:** this earlier combined contribution is
+> superseded by the separate hardware and serving branches in the
+> [fork branch guide](https://github.com/CC-David-CC/Strata-a5500/blob/contrib/gfx1012-community/docs/FORK_BRANCHES.md).
+> For this snapshot, see the [manual RX 5500 XT build](docs/AMD_HIP.md#rdna1-rx-5500-xt-8-gb-gfx1012)
+> and [published measurements](docs/benchmarks/2026-09-30-gfx1012.json).
+> The upstream introduction follows below.
+
 <h1 align="center">Strata</h1>
 
 <p align="center"><b>Run a 125-billion-parameter AI model on a normal gaming PC</b><br>
