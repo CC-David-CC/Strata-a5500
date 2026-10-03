@@ -132,7 +132,7 @@ def main():
         one, last = generate("one token budget", ids, 1)
         assert len(one) == 1 and last["finish"] == "length"
         sampling = {"temperature": 0.7, "top_p": 0.9, "top_k": 40, "min_p": 0.05,
-                    "penalty_repeat": 1.05, "penalty_last_n": 64, "seed": 123}
+                    "repetition_penalty": 1.05, "penalty_last_n": 64, "seed": 123}
         sample, _ = generate("sampled penalized request", ids, 20, sampling)
         repeated, _ = generate("sampled same seed replay", ids, 20, sampling)
         assert sample == repeated, {"sample": sample, "repeated": repeated}

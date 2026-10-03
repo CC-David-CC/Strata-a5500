@@ -25,6 +25,9 @@ int main() {
             auto valid = parse(frame + "STOP\nGEN 2 4,5\nQUIT\n", chunk);
             REQUIRE(valid.size() == 4 && valid[0].grammar == source && valid[0].line == "GEN 8 1,2,3");
             REQUIRE(!valid[0].fatal && valid[1].line == "STOP" && valid[2].grammar.empty());
+            auto check = parse("GENG1 " + std::to_string(source.size()) + "\n" + source + "\nCHECKG\n" + frame, chunk);
+            REQUIRE(check.size() == 2 && check[0].line == "CHECKG" && check[0].grammar == source);
+            REQUIRE(!check[0].fatal && check[1].line == "GEN 8 1,2,3");
             for (size_t cut = 1; cut < frame.size(); ++cut) {
                 auto bad = parse(frame.substr(0, cut), chunk);
                 if (cut >= 4) REQUIRE(bad.size() == 1 && bad[0].fatal);
@@ -43,6 +46,13 @@ int main() {
             ++cases;
         }
         REQUIRE(strata::program::protocol_error("bad\nT 42\rDONE") == "bad T 42 DONE");
+        for (const std::string text : {"\xe7\x8c\xab", "\xf0\x9f\x90\x88"}) {
+            for (size_t padding = 512 - text.size(); padding < 512; ++padding) {
+                const std::string prefix(padding, 'x');
+                REQUIRE(strata::program::protocol_error(prefix + text + "tail") ==
+                        prefix + (padding + text.size() <= 512 ? text : ""));
+            }
+        }
         std::cout << "serve input: " << cases << " chunk sizes, all frame truncations and inert payload cases passed\n";
         return 0;
     } catch (const std::exception& error) { std::cerr << error.what() << '\n'; return 1; }

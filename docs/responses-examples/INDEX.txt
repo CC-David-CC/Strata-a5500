@@ -33,3 +33,8 @@ ALL_CREATE_PIECE_EXAMPLES.txt: a synthetic JSON illustration for every nested ty
 ENCRYPTION_ROUNDTRIP.txt: public example key, plaintext, real ciphertext and restored data
 REST_AND_TRANSPORTS.txt: method/transport inventory
 REASONING_PIECES.txt: distinctions between raw text, summary and encrypted replay
+
+Stacked native-GBNF branch additions (Strata extension, qualified build required):
+../gbnf-examples/responses.txt: raw grammar, stateless Responses and explicit reasoning off
+../gbnf-examples/chat-completions.txt: same constraint through Chat Completions
+../gbnf-examples/recursive-unicode.txt: source rules, references, recursion and UTF-8 pieces

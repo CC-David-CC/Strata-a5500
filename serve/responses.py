@@ -12,6 +12,7 @@ import re
 import time
 import uuid
 from dataclasses import dataclass
+from serve.grammar import GrammarConstraint, validate_grammar_request
 
 MAX_REQUEST_BYTES = 4 * 1024 * 1024
 TERMINAL = frozenset(("completed", "incomplete", "failed", "cancelled"))
@@ -132,7 +133,11 @@ def validate_request(request, svc):
     """Single capability gate, before loading a model or writing success headers."""
     fields(request, "model input instructions stream store background metadata max_output_tokens temperature top_p "
            "text tools tool_choice parallel_tool_calls truncation include reasoning previous_response_id "
-           "prompt_cache_key client_metadata", "")
+           "prompt_cache_key client_metadata grammar", "")
+    try:
+        validate_grammar_request(request, "responses")
+    except ValueError as exc:
+        raise RequestError(str(exc), "grammar", "unsupported_parameter") from exc
     req = copy.deepcopy(request)
     if req.get("model") not in svc.model_names():
         raise RequestError("model not found", "model", "model_not_found", 404)
@@ -583,10 +588,12 @@ class PreparedResponse:
     tools: list | None
     thinking: bool
     summary_reserve: int
+    constraint: GrammarConstraint | None = None
 
 
 def create_response(svc, request):
     req = validate_request(request, svc)
+    constraint = GrammarConstraint(req["grammar"]) if "grammar" in req else None
     messages = resolve_input(req, svc.responses_replay)
     svc.load()
     tools = [native for native, _, _ in native_tools(req["tools"])] \
@@ -595,13 +602,18 @@ def create_response(svc, request):
     kwargs = {"enable_thinking": effort != "none", "preserve_thinking": True}
     if effort != "none":
         kwargs["reasoning_effort"] = "xhigh" if effort in ("high", "xhigh", "max") else effort
-    ids, thinking, max_new = svc.prepare(messages, tools, kwargs, req.get("max_output_tokens"))
+    ids, thinking, max_new = svc.prepare(messages, tools, kwargs, req.get("max_output_tokens"), constraint=constraint)
+    if constraint is not None:
+        try:
+            svc.prepare_constraint(constraint, req)
+        except ValueError as exc:
+            raise RequestError(str(exc), "grammar", "invalid_grammar") from exc
     summary = req["reasoning"]["summary"]
     reserve = min({"concise": 128, "auto": 256, "detailed": 512}[summary], max_new // 4) if summary else 0
     if summary and reserve < 1:
         raise RequestError("summaries need max_output_tokens of at least 4", "max_output_tokens")
     return PreparedResponse(ResponseAssembler(req, len(ids), max_new, svc.responses_replay), ids, max_new,
-                            {"temperature": req["temperature"], "top_p": req["top_p"]}, tools, thinking, reserve)
+                            {"temperature": req["temperature"], "top_p": req["top_p"]}, tools, thinking, reserve, constraint)
 
 
 def execute_response(svc, prepared, cancel):
@@ -611,8 +623,9 @@ def execute_response(svc, prepared, cancel):
     deferred = []
     try:
         yield owner.event("response.created", response=owner.snapshot())
+        options = {"constraint": prepared.constraint} if prepared.constraint is not None else {}
         iterator = svc.run(prepared.ids, prepared.thinking, prepared.tools, prepared.max_new - prepared.summary_reserve,
-                           prepared.sampling, cancel, lifecycle=True)
+                           prepared.sampling, cancel, lifecycle=True, **options)
         done = None
         for kind, value in iterator:
             if kind == "start":

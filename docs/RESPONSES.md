@@ -1,8 +1,10 @@
 # Experimental stateless Responses adapter
 
 This branch adds a bounded `POST /v1/responses` profile over Strata's existing
-service. It is disabled by default. It does not change native inference, MTP,
-model loading, or the legacy Chat Completions structured-output path.
+service. It is disabled by default. The Responses adapter itself does not change
+native inference, MTP, model loading, or the legacy Chat Completions structured-output
+path. This stacked branch's separate [native grammar contribution](NATIVE_GBNF.md)
+starts from the frozen R4 Responses checkpoint.
 
 Enable it when starting an existing configured server:
 
@@ -75,7 +77,7 @@ Configured sampling defaults remain in effect when a request omits them.
 | `client_metadata` | Diagnostic strings in the existing optional monitor; never instructions or inference settings. |
 | `prompt_cache_key` | Routing hint to the sole engine, echoed in the response. No separate cache partitions, billing, or retention guarantee. |
 | Image/audio, hosted tools, compaction, WebSockets | Unsupported; rejected. |
-| Raw GBNF | Rejected until a separate native grammar contribution passes its gates. |
+| Raw GBNF | This stacked branch adds the [native GBNF extension](NATIVE_GBNF.md), requiring a qualified target-only build and explicit reasoning off. The frozen R4 Responses-only checkpoint rejects it. |
 
 To continue, append the previous response's complete `output` items and the new
 user message to your supplied history. Resend any instructions you still want.
@@ -171,7 +173,8 @@ did. The profile uses the documented Windows sandbox and a normal disposable
 workspace; private Python temporary directories failed under the restricted token.
 
 To use that profile locally, save its contents as `strata.config.toml` in your
-Codex home, set `base_url` to your Strata server, and run:
+[Codex configuration directory](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence),
+set `base_url` to your Strata server, and run:
 
 ```sh
 codex --profile strata
@@ -186,8 +189,9 @@ These tests establish this bounded protocol profile, not universal Codex support
 or native-model quality. Larger sessions can ask for excluded compaction or
 other capabilities and will get explicit errors. The
 [R0 report](responses-evidence/R0/REPORT.md) describes the original capture-time
-blockers; R3 implements the namespaces, summaries and replay it observed. GBNF
-work still requires a separately recorded passing R4 checkpoint.
+blockers; R3 implements the namespaces, summaries and replay it observed. The
+[R4 receipt](responses-evidence/R4/R4-receipt.json) pins that checkpoint; the
+[native grammar guide](NATIVE_GBNF.md) records the subsequent G phases.
 
 Protocol references: [Responses](https://developers.openai.com/api/reference/resources/responses),
 [typed streaming](https://developers.openai.com/api/docs/guides/streaming-responses),

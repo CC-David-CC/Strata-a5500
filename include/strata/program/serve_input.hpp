@@ -14,6 +14,7 @@ struct ServeRequest {
 };
 
 // GENG1 <UTF-8 byte count>\n<exact grammar bytes>\nGEN <arguments>\n
+// The gbnf-v2 capability also permits CHECKG as the final command (compile only).
 // A malformed/truncated frame terminates this pipe; its body is never reparsed
 // as commands. The caller owns the existing queue and STOP/cancellation flag.
 class ServeInput {
@@ -36,9 +37,10 @@ public:
                 throw std::runtime_error("grammar frame length must be 1..8192 bytes");
             request.grammar = bytes(count);
             if (bytes(1) != "\n") throw std::runtime_error("grammar frame delimiter is missing");
-            if (!line(request.line, terminated) || !terminated || request.line.rfind("GEN ", 0) != 0 ||
+            if (!line(request.line, terminated) || !terminated ||
+                (request.line != "CHECKG" && request.line.rfind("GEN ", 0) != 0) ||
                 request.line.find('\0') != std::string::npos)
-                throw std::runtime_error("grammar frame needs one complete GEN command");
+                throw std::runtime_error("grammar frame needs one complete GEN or CHECKG command");
             return request;
         } catch (const std::exception& error) {
             finished_ = request.fatal = true;
@@ -83,6 +85,15 @@ private:
 
 inline std::string protocol_error(const std::string& message) {
     std::string out = message.substr(0, 512);
+    // Source-bearing diagnostics are UTF-8 too. A byte limit must not leave a
+    // partial character that kills the Python stdout decoder instead of ERR.
+    if (message.size() > out.size() && !out.empty()) {
+        size_t start = out.size() - 1;
+        while (start && ((unsigned char) out[start] & 0xc0) == 0x80) --start;
+        const auto lead = (unsigned char) out[start];
+        const size_t size = lead < 0x80 ? 1 : lead < 0xe0 ? 2 : lead < 0xf0 ? 3 : 4;
+        if (start + size > out.size()) out.resize(start);
+    }
     for (char& ch : out) if ((unsigned char) ch < 32 || ch == 127) ch = ' ';
     return out;
 }

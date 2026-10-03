@@ -1,8 +1,8 @@
 """G2 real native selector probe using the existing engine process and STOP/drain.
 
 Only use an idle authorized GPU and a private config. This is a native protocol
-probe, not HTTP/SDK evidence. Model output is never scripted. Grammar frames are
-sent directly until the shared API argument is added in G3.
+probe, not HTTP/SDK evidence. Model output is never scripted. It deliberately
+exercises raw frames; grammar_api_probe.py qualifies the G3 shared API argument.
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def main():
             engine.proc.stdin.buffer.write(f"GENG1 {len(raw)}\n".encode("ascii") + raw + b"\n")
             engine.proc.stdin.buffer.flush()
         # This probe owns one process and issues requests sequentially. Production
-        # G3 must write frame + GEN atomically under the existing admission owner.
+        # uses frame + GEN atomically under the existing admission owner.
         return engine.generate(ids, cap, sampling or {}, threading.Event())
 
     def text(ids):
@@ -70,7 +70,8 @@ def main():
 
     try:
         engine = StrataEngine(cfg["exe"], cfg["args"], cwd=cfg["cwd"], log=str(a.out / "engine.txt"), env=env)
-        assert engine.info["grammar"] == "gbnf-v1" and engine.info["decode_mode"] == "target"
+        native_capability = engine.info["grammar"]
+        assert native_capability in ("gbnf-v1", "gbnf-v2") and engine.info["decode_mode"] == "target"
         assert engine.info["mtp_loaded"] == 0 and engine.info["lookup"] == 0
         record("native capability", info=engine.info, pid=engine.proc.pid)
         ids = prompt("Output the answer to 2+2 as one digit. No explanation.")
@@ -80,8 +81,8 @@ def main():
         forced, last = generate("greedy Unicode literal", source, ids)
         assert text(forced) == literal and last["finish"] == "stop"
         sampling = {"temperature": 0.8, "top_k": 3, "top_p": 0.85, "min_p": 0.05,
-                    "penalty_last_n": 64, "penalty_repeat": 1.2, "penalty_freq": 0.2,
-                    "penalty_present": 0.1, "seed": 434}
+                    "penalty_last_n": 64, "repetition_penalty": 1.2, "frequency_penalty": 0.2,
+                    "presence_penalty": 0.1, "seed": 434}
         sampled, last = generate("sampled penalized literal", source, ids, sampling=sampling)
         assert text(sampled) == literal and last["finish"] == "stop"
         for cap in range(1, len(forced)):
@@ -136,7 +137,7 @@ def main():
         assert text(clean) == "true" and last["finish"] == "stop"
         old_pid = engine.proc.pid
         engine.restart()
-        assert engine.proc.pid != old_pid and engine.info["grammar"] == "gbnf-v1"
+        assert engine.proc.pid != old_pid and engine.info["grammar"] == native_capability
         restarted, last = generate("fresh matcher after native restart", source, ids)
         assert text(restarted) == literal and last["finish"] == "stop" and last["reused"] == 0
         record("native restart", old_pid=old_pid, new_pid=engine.proc.pid)

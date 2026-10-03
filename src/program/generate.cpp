@@ -4134,6 +4134,19 @@ int main(int argc, char** argv) {
             std::find(o.eos_ids.begin(), o.eos_ids.end(), 248046) != o.eos_ids.end();
         const bool grammar_capable = !use_mtp && !multi_gpu && !o.vision && grammar_end_ids;
         std::unique_ptr<strata::grammar::Compiler> grammar_compiler;
+        std::string grammar_vocabulary;
+        auto compile_grammar = [&](const std::string& source) {
+            if (!grammar_compiler) {
+                auto vocab = strata::grammar::Vocabulary::from_pack(
+                    std::filesystem::path(o.pack) / "tokenizer",
+                    std::vector<int32_t>(o.eos_ids.begin(), o.eos_ids.end()));
+                if ((int64_t) vocab->bytes.size() != n_vocab)
+                    throw std::runtime_error("grammar tokenizer vocabulary differs from model head");
+                grammar_vocabulary = vocab->identity;
+                grammar_compiler = std::make_unique<strata::grammar::Compiler>(std::move(vocab));
+            }
+            return grammar_compiler->compile(source);
+        };
 #else
         const bool grammar_capable = false;
 #endif
@@ -5051,7 +5064,7 @@ int main(int argc, char** argv) {
                         o.spec_min_p, (long long) o.conversation_cache_mib, o.conversation_cache_slots,
                         (long long) o.conversation_cache_min_free_mib, use_mtp ? "mtp" : "target",
                         requested_spec, requested_lookup, use_mtp ? 1 : 0, (double) mtp.vram_bytes() / 1048576.0,
-                        grammar_capable ? "gbnf-v1" : "none");
+                        grammar_capable ? "gbnf-v2" : "none");
         }
         // issue #29: a request whose heartbeat (tokens, prompt chunks, verify windows) stops for this long is stuck on
         // a flag nobody will raise - end the engine with where it was, so the server starts it again instead of the
@@ -5112,6 +5125,24 @@ int main(int argc, char** argv) {
                 Clock::now() - profile_saved_at >= std::chrono::duration<double>(o.expert_profile_save_min * 60.0))
                 save_profile("periodic");
             if (line == "QUIT") break;
+            if (line == "CHECKG") {
+                if (!grammar_capable || input.grammar.empty()) {
+                    std::printf("ERR GBNF preflight requires the gbnf-v2 target-only text capability and a grammar frame\n");
+                    continue;
+                }
+#ifdef STRATA_ENABLE_GBNF
+                try {
+                    // Same compiler and initial matcher as GEN. No prompt, KV,
+                    // sampler or generation state is touched by this command.
+                    strata::grammar::Matcher checked(compile_grammar(input.grammar));
+                    checked.mask();
+                    std::printf("GRAMMAR_OK %s\n", grammar_vocabulary.c_str());
+                } catch (const std::exception& error) {
+                    std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
+                }
+#endif
+                continue;
+            }
             // the watchdog watches a request from here until this iteration ends, whichever way it ends
             struct BusyScope {
                 BusyScope() { strata::core::progress().busy.store(true); strata::core::progress_at("request"); }
@@ -5195,15 +5226,7 @@ int main(int argc, char** argv) {
                 }
 #ifdef STRATA_ENABLE_GBNF
                 try {
-                    if (!grammar_compiler) {
-                        auto vocab = strata::grammar::Vocabulary::from_pack(
-                            std::filesystem::path(o.pack) / "tokenizer",
-                            std::vector<int32_t>(o.eos_ids.begin(), o.eos_ids.end()));
-                        if ((int64_t) vocab->bytes.size() != n_vocab)
-                            throw std::runtime_error("grammar tokenizer vocabulary differs from model head");
-                        grammar_compiler = std::make_unique<strata::grammar::Compiler>(std::move(vocab));
-                    }
-                    matcher = std::make_unique<strata::grammar::Matcher>(grammar_compiler->compile(input.grammar));
+                    matcher = std::make_unique<strata::grammar::Matcher>(compile_grammar(input.grammar));
                 } catch (const std::exception& error) {
                     std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
                     continue;
