@@ -193,6 +193,14 @@ blockers; R3 implements the namespaces, summaries and replay it observed. The
 [R4 receipt](responses-evidence/R4/R4-receipt.json) pins that checkpoint; the
 [native grammar guide](NATIVE_GBNF.md) records the subsequent G phases.
 
+A subsequent [native hello-world checkpoint](responses-evidence/native-codex/REPORT.md)
+ran the real pinned Codex client against Strata's Coder IQ1_M model on llm-49 over
+an authenticated LAN tunnel. It returned `Hello world` and completed its turn
+with external HTTP requests blocked locally. The report includes the exact
+profile, native logs, captured request/response, enablement commands and a
+reusable probe. This establishes the greeting session; native tool use and
+broader client compatibility remain unqualified.
+
 Protocol references: [Responses](https://developers.openai.com/api/reference/resources/responses),
 [typed streaming](https://developers.openai.com/api/docs/guides/streaming-responses),
 [function calling](https://developers.openai.com/api/docs/guides/function-calling).

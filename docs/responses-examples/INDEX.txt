@@ -33,6 +33,7 @@ ALL_CREATE_PIECE_EXAMPLES.txt: a synthetic JSON illustration for every nested ty
 ENCRYPTION_ROUNDTRIP.txt: public example key, plaintext, real ciphertext and restored data
 REST_AND_TRANSPORTS.txt: method/transport inventory
 REASONING_PIECES.txt: distinctions between raw text, summary and encrypted replay
+NATIVE_HELLO_WORLD.txt: real Codex/native-model greeting, visible reasoning/summary, encrypted replay and usage
 
 Stacked native-GBNF branch additions (Strata extension, qualified build required):
 ../gbnf-examples/responses.txt: raw grammar, stateless Responses and explicit reasoning off
