@@ -32,6 +32,23 @@ struct Checkpoint {
     std::vector<int32_t> tokens;
 };
 
+// Explicit local debugging only; no HTTP/native-pipe inspector endpoint. The
+// mask is the union of viable continuations, not an enumerated parse tree or a
+// probability distribution. Caller-owned occurrence IDs are separate from the
+// exact-source/backend/vocabulary definition fingerprint.
+struct TokenPreview {
+    int32_t id;
+    std::string bytes; // at most 32 raw bytes; render escaped/hex, not as UTF-8
+    bool stop, bytes_truncated;
+};
+struct Inspection {
+    std::string definition, mask_fingerprint;
+    size_t committed_tokens, committed_bytes, legal_tokens;
+    bool accepting, terminated, preview_complete;
+    uint64_t work_used;
+    std::vector<TokenPreview> preview;
+};
+
 class Matcher {
 public:
     explicit Matcher(std::shared_ptr<const Compiled> compiled, uint64_t work_limit = 2000000);
@@ -52,6 +69,7 @@ public:
     const std::vector<int32_t>& tokens() const;
     const std::string& identity() const;
     uint64_t work_used() const;
+    Inspection inspect(size_t preview_limit = 16) const; // bounded 0..64; no parent progress/budget change
 private:
     struct Impl;
     explicit Matcher(std::unique_ptr<Impl> impl);

@@ -44,3 +44,6 @@ target_include_directories(grammar_native_test SYSTEM PRIVATE "${STRATA_XGRAMMAR
 enable_testing()
 add_test(NAME grammar_native_test COMMAND grammar_native_test
   "${CMAKE_CURRENT_SOURCE_DIR}/data/grammars/cases.json")
+add_executable(grammar_inspection_test src/core/grammar_inspection_test.cpp)
+target_link_libraries(grammar_inspection_test PRIVATE strata_grammar)
+add_test(NAME grammar_inspection_test COMMAND grammar_inspection_test)

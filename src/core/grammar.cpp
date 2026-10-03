@@ -174,6 +174,42 @@ const std::vector<int32_t>& Matcher::tokens() const { return impl_->history; }
 const std::string& Matcher::identity() const { return impl_->compiled->identity; }
 uint64_t Matcher::work_used() const { return impl_->budget.used; }
 
+Inspection Matcher::inspect(size_t preview_limit) const {
+    impl_->usable();
+    if (preview_limit > 64) throw std::runtime_error("grammar inspection preview is limited to 64 tokens");
+    const auto& p = *impl_;
+    Inspection out{identity(), "none:terminal", p.history.size(), p.output_bytes, 0,
+                   complete(), terminated(), true, p.budget.used, {}};
+    if (out.terminated) return out;
+    // Read-only observation: work to derive an uncached mask is charged to a
+    // private copy. Even an inspection failure cannot poison/advance the parent.
+    auto budget = p.budget;
+    detail::WorkScope scope(budget, 1000ms);
+    Matcher view(std::make_unique<Impl>(p));
+    const auto& bits = view.mask();
+    uint64_t hash = 14695981039346656037ull;
+    for (int32_t word : bits)
+        for (int byte = 0; byte < 4; ++byte)
+            hash = (hash ^ (uint8_t) ((uint32_t) word >> (8 * byte))) * 1099511628211ull;
+    std::ostringstream fingerprint;
+    fingerprint << "mask-v1-fnv1a64:" << std::hex << std::setfill('0') << std::setw(16) << hash;
+    out.mask_fingerprint = fingerprint.str();
+    const auto& vocab = *p.compiled->vocabulary;
+    for (size_t id = 0; id < vocab.bytes.size(); ++id) {
+        if (!((uint32_t) bits[id / 32] & (1u << (id % 32)))) continue;
+        ++out.legal_tokens;
+        if (out.preview.size() < preview_limit) {
+            const auto& bytes = vocab.bytes[id];
+            out.preview.push_back({(int32_t) id, bytes.substr(0, 32),
+                std::find(vocab.stop_ids.begin(), vocab.stop_ids.end(), (int32_t) id) != vocab.stop_ids.end(),
+                bytes.size() > 32});
+        }
+    }
+    out.preview_complete = out.preview.size() == out.legal_tokens;
+    scope.finish();
+    return out;
+}
+
 Matcher Matcher::fork() const {
     impl_->usable();
     detail::WorkScope scope(impl_->budget, 1000ms);

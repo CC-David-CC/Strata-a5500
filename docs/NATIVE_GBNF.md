@@ -134,10 +134,22 @@ See the [G3 qualification and measured overhead](gbnf-evidence/G3/REPORT.md).
 Raw grammar qualification does not extend the separately tested Codex tool
 profile: grammar cannot be combined with tools or thinking at this checkpoint.
 
+## G4: local inspection and application contracts
+
+The [inspection guide](GBNF_INSPECTION.md) provides Mermaid diagrams, plain-text
+native observations and a bounded application-side example. It uses frozen
+revisions and current permissions to reject stale candidates before effects.
+Grammar syntax alone does not authorize an action. The
+[G4 report](gbnf-evidence/G4/REPORT.md) records native matcher, sanitizer and real
+model evidence, including an incomplete but readable command that the client
+refuses to apply. Inspection is an explicit local debug operation, with no new
+HTTP or native-pipe endpoint.
+
 ## Remaining grammar gates
 
-G4 adds inspection and state-derived application contracts. G5
-qualifies constrained MTP/suffix execution; G6 recovery is deferred.
+G5 qualifies constrained MTP/suffix execution; G6 recovery is deferred. The user
+selected Mermaid/plain text for G4, so actual Code Visualizer ProgramModel
+integration is not performed or claimed.
 
 JSON Schema, JSON-object
 enforcement and standard custom-tool Lark syntax are outside this contribution.
