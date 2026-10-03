@@ -51,7 +51,7 @@ def main():
     ap.add_argument("--suffix-draft", type=int, default=0, help="minimum prompt-lookup match; 0 disables")
     ap.add_argument("--verify-window", type=int, default=None, help="explicit equal allocation across draft arms (2..8)")
     ap.add_argument("--mtp-window", type=int, default=4, help="MTP window cap when verify-window is explicit")
-    ap.add_argument("--cases", nargs="+", choices=["counting", "coding", "writing"],
+    ap.add_argument("--cases", nargs="+", choices=["counting", "coding", "writing", "editing"],
                     default=["counting", "coding", "writing"])
     opt = ap.parse_args()
     if opt.repetitions < 1:
@@ -80,6 +80,16 @@ def main():
                    "systemctl status ssh, and journalctl -u ssh do. Distinguish reading status from "
                    "changing installed software. Do not suggest disabling security protections.",
     }
+    edit_source = "\n\n".join(
+        f"def transform_{i:02d}(value):\n"
+        f"    \"\"\"Transform item {i:02d} without modifying caller state.\"\"\"\n"
+        "    if not isinstance(value, int):\n"
+        "        raise TypeError('value must be an integer')\n"
+        f"    return value * 2 + {i}\n" for i in range(24))
+    tasks['editing'] = (
+        "Return the complete Python module below, code only and no markdown. Preserve every function, "
+        "docstring, error message and formatting. Make exactly one change: in transform_13, replace "
+        "the multiplier 2 with 3. Every other function must remain unchanged.\n\n" + edit_source)
     if opt.workload == "long":
         tasks["coding"] = (
             "Write a complete Python 3 module, code only, no markdown. Implement a TTLCache class "
