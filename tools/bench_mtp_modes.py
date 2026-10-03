@@ -50,17 +50,18 @@ def main():
                     help="fail if counting stops naturally before the output budget")
     ap.add_argument("--source-commit", default=None, help="verified archive commit when .git is absent")
     ap.add_argument("--suffix-draft", type=int, default=0, help="minimum prompt-lookup match; 0 disables")
-    ap.add_argument("--verify-window", type=int, default=None, help="explicit equal allocation across draft arms (2..8)")
+    ap.add_argument("--verify-window", type=int, default=None,
+                    help="explicit equal allocation across draft arms (2..24; engine build must support it)")
     ap.add_argument("--mtp-window", type=int, default=4, help="MTP window cap when verify-window is explicit")
     ap.add_argument("--cases", nargs="+", choices=["counting", "coding", "writing", "editing"],
                     default=["counting", "coding", "writing"])
     opt = ap.parse_args()
     if opt.repetitions < 1:
         ap.error("--repetitions must be positive")
-    if opt.suffix_draft < 0 or (opt.verify_window is not None and not 2 <= opt.verify_window <= 8):
-        ap.error("suffix match must be nonnegative and verify window must be 2..8")
-    if not 2 <= opt.mtp_window <= 8 or (opt.verify_window is not None and opt.mtp_window > opt.verify_window):
-        ap.error("MTP window must be 2..8 and no larger than verify window")
+    if opt.suffix_draft < 0 or (opt.verify_window is not None and not 2 <= opt.verify_window <= 24):
+        ap.error("suffix match must be nonnegative and verify window must be 2..24")
+    if not 2 <= opt.mtp_window <= 24 or (opt.verify_window is not None and opt.mtp_window > opt.verify_window):
+        ap.error("MTP window must be 2..24 and no larger than verify window")
     cfg = json.loads(opt.config.read_text(encoding="utf-8-sig"))
     base_args = list(cfg["args"])
     context = int(option(base_args, "--max-context", 0))
