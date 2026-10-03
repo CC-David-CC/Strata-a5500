@@ -138,6 +138,6 @@ deferred. Cold and warm request times have different cache states and are not a
 performance comparison.
 
 This update adds the probe and evidence to the branch without changing generation.
-The companion publication receipt pins the evidence commit. The remaining review
+The [publication receipt](publication-receipt.json) pins the evidence commit. The remaining review
 gates are the final feature-off native build/run and the previously identified
 Responses accounting/replay follow-ups before a merge-ready claim.
