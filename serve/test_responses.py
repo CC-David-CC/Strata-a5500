@@ -866,11 +866,35 @@ class Reasoning(unittest.TestCase):
             list(execute_response(fresh, p, threading.Event()))
             self.assertIn("<think>\nEarlier visible reasoning.\n</think>", fresh.tok.decode(fresh.engine.last_prompt))
             self.assertEqual(history, original)
-        for bad in ([item], [item, {"role": "user", "content": "Continue"}],
-                    [{**item, "encrypted_content": "opaque reasoning replay state"}, {"role": "assistant", "content": "answer"}],
+        for bad in ([{**item, "encrypted_content": "opaque reasoning replay state"}, {"role": "assistant", "content": "answer"}],
                     [{**item, "summary": [{"type": "summary_text", "text": "A summary"}]}, {"role": "assistant", "content": "answer"}]):
             with self.subTest(history=bad), self.assertRaises(RequestError):
                 resolve_input(request(input=bad))
+
+    def test_interrupted_answer_keeps_its_completed_reasoning_item(self):
+        item = {"type": "reasoning", "id": "rs_interrupted", "summary": [], "status": "completed",
+                "content": [{"type": "reasoning_text", "text": "Earlier completed thinking."}]}
+        for encrypted in (False, True):
+            for suffix in ([], [{"role": "user", "content": "<turn_aborted>Stopped.</turn_aborted>"},
+                               {"role": "developer", "content": "Updated permissions"},
+                               {"role": "user", "content": "Continue with the new task"}]):
+                with self.subTest(encrypted=encrypted, continued=bool(suffix)):
+                    svc = service("Recovered")
+                    replay = copy.deepcopy(item)
+                    if encrypted:
+                        replay["encrypted_content"] = svc.responses_replay.seal(MODEL, item)
+                        del replay["content"]
+                    body = request(input=[{"role": "user", "content": "Original task"}, replay, *suffix])
+                    original = copy.deepcopy(body)
+                    messages = resolve_input(validate_request(body, svc), svc.responses_replay)
+                    thinking = next(m for m in messages if "reasoning_content" in m)
+                    self.assertEqual(thinking, {"role": "assistant", "content": "",
+                                               "reasoning_content": "Earlier completed thinking."})
+                    prepared = create_response(svc, body)
+                    events = list(execute_response(svc, prepared, threading.Event()))
+                    self.assertEqual(events[-1]["type"], "response.completed")
+                    self.assertIn("<think>\nEarlier completed thinking.\n</think>", svc.tok.decode(prepared.ids))
+                    self.assertEqual(body, original)
 
     def test_effort_mapping_and_budget(self):
         for effort, native in (("none", None), ("low", "low"), ("medium", "medium"), ("high", "xhigh"),

@@ -51,6 +51,8 @@ adapter gathers these into the native template's leading instruction block in th
 order, retaining their roles. It does not downgrade permission updates into user messages.
 The relative order of conversation messages and matched tool results is preserved, and the
 supplied request is not mutated. Changing that prefix can reduce prompt-cache reuse.
+A completed reasoning item can survive cancellation without a completed answer item;
+Strata preserves it as an assistant thinking turn without inventing answer text.
 
 The remaining protocol limits in [RESPONSES.md](RESPONSES.md) still apply: `store:false`,
 full-history replay, non-strict function tools, no hosted tools, no image input, and no

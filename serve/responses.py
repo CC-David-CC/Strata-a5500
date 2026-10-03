@@ -334,7 +334,10 @@ def resolve_input(req, replay=None):
             instructions.append({"role": role, "content": content})
             continue
         if reasoning and role != "assistant":
-            raise RequestError("visible reasoning must precede an assistant message or function call", param)
+            # On interruption Codex retains a completed reasoning item but may
+            # omit the unfinished message. Keep that independent item as an
+            # assistant thinking turn with no invented answer text.
+            assistant()
         if role != "assistant" or results:
             flush_results()
         if reasoning:
@@ -342,7 +345,7 @@ def resolve_input(req, replay=None):
         else:
             messages.append({"role": role, "content": content})
     if reasoning:
-        raise RequestError("visible reasoning needs a following assistant message or function call", "input")
+        assistant()
     flush_results()
     return instructions + messages
 
