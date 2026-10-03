@@ -2,8 +2,9 @@
 """Sequential text-only throughput evidence, with and without MTP.
 
 Use a server JSON containing exe, args, cwd and --mtp DIR. The off run removes
-the drafter. Frozen token IDs are shared by both modes; prompt reuse and suffix
-drafting are disabled. This is a throughput/smoke test, not a quality evaluation.
+the MTP drafter. Frozen token IDs are shared by both modes; prompt reuse stays
+disabled. Suffix drafting is opt-in and works with or without MTP. This is a
+throughput/smoke test, not a quality evaluation.
 """
 import argparse
 import hashlib
@@ -218,7 +219,7 @@ def main():
                 run["cases"].append(case)
                 save()
                 assert timing.get("reused", 0) == 0, timing
-                if mode == "off":
+                if mode == "off" and opt.suffix_draft == 0:
                     assert timing.get("drafts_offered", 0) == 0, timing
                 if name == "counting" and opt.require_counting_budget:
                     assert len(emitted) == opt.output_tokens, case
