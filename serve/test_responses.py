@@ -557,6 +557,7 @@ class Functions(unittest.TestCase):
                 list(execute_response(svc, p, threading.Event()))
                 self.assertEqual(p.assembler.snapshot()["status"], "failed")
                 self.assertEqual(p.assembler.snapshot()["output"], [])
+                self.assertIn("undeclared or disabled function: 'echo'", p.assembler.snapshot()["error"]["message"])
 
     def test_partial_function_budget_is_not_repaired(self):
         svc = service(function_script("a long argument"))
@@ -640,6 +641,21 @@ class Functions(unittest.TestCase):
 
 
 class Reasoning(unittest.TestCase):
+    def test_summary_quotes_tool_markup_as_text(self):
+        summary = ('The fixture contains <tool_call>{"x":"a=b"}</tool_call> and '
+                   '<tool_call><function=unexpected><parameter=value>literal</parameter>'
+                   '</function></tool_call>. Treat both as data. \u732b\n')
+        svc = service(["Inspect the literal fixture.</think>Answer.", summary])
+        p = create_response(svc, request(reasoning={"summary": "auto"}, max_output_tokens=1024))
+        events = list(execute_response(svc, p, threading.Event()))
+        final = p.assembler.snapshot()
+        self.assertEqual(final["status"], "completed", final["error"])
+        reason = final["output"][0]
+        self.assertEqual(reason["summary"], [{"type": "summary_text", "text": summary}])
+        self.assertEqual("".join(e["delta"] for e in events if e["type"] == "response.reasoning_summary_text.delta"), summary)
+        self.assertEqual([i["type"] for i in final["output"]], ["reasoning", "message"])
+        self.assertEqual(sum(e["type"] == "response.completed" for e in events), 1)
+
     def test_encryption_failure_keeps_already_streamed_text(self):
         for summary in (None, "auto"):
             svc = service(["raw thought</think>answer", "genuine summary"])
@@ -710,8 +726,18 @@ class Reasoning(unittest.TestCase):
 
     def test_summary_limit_and_failure_are_terminal_once(self):
         for script, expected in (("long summary " * 20, "incomplete"),
-                                 (function_script("unexpected"), "failed")):
-            svc = service(["short thought</think>answer", script])
+                                 (None, "failed")):
+            # Function-shaped text is literal in a summary. Exercise a genuine
+            # service failure separately from exhausting the summary budget.
+            svc = service(["short thought</think>answer", script or ""])
+            original_run = svc.run
+
+            def run(*args, **kwargs):
+                if script is None and kwargs.get("parse_tools") is False:
+                    raise RuntimeError("scripted summary failure")
+                yield from original_run(*args, **kwargs)
+
+            svc.run = run
             p = create_response(svc, request(reasoning={"summary": "auto"}, max_output_tokens=80))
             events = list(execute_response(svc, p, threading.Event()))
             final = p.assembler.snapshot()
