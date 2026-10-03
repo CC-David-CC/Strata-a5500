@@ -30,7 +30,7 @@ and missing capture are rejected. A fresh process is required per capture.
 under the private fleet queue. Each shape runs with and without the library:
 
 - A small static graph with a mapped CPU/GPU handshake.
-- A 4,096-node static graph with the same handshake.
+- A static graph with 4,096 marker nodes plus handshake and payload nodes.
 - A 512 MiB read/modify/write payload. Two captured launches nominally move
   2 GiB; a declared 0.5–1.5 ratio allows L2 residency/deferred writeback while
   detecting missing or incorrectly scaled counters.
@@ -41,5 +41,19 @@ unprofiled control before attempting native 64K measurements.
 
 Counters may be device scoped, so the runner yields to foreign GPU processes.
 Profiled timings are not throughput evidence. CPU/PCIe constraints remain
-separate from a GPU-only conditional bandwidth ceiling. This branch is pending
-validation; it makes no new model speed or traffic claim.
+separate from a GPU-only conditional bandwidth ceiling.
+
+## Fixture result, 2026-10-03
+
+All six control/profile cases passed on source `06d5f4fc`: every output word and
+marker count matched, with zero watchdog interventions. Each direct capture
+used one pass and one range with zero dropped ranges. The large-payload test
+measured 1,073,826,048 DRAM read bytes and 1,058,195,712 write bytes: **99.28%**
+of the nominal 2 GiB. Small payloads mostly stayed in L2, as expected.
+
+The measured library SHA-256 is
+`47d059ca1cc9040caf2247ff5fd6620eb460c0fe5125cf3397f5b19e41012450`.
+`tools/profile_q8_cupti_model.py` verifies that library and the frozen ownership
+binary, then compares an 8K/128-output capture against the just-completed 8K
+control. Only after equality does it attempt the native 64K/512-output matrix.
+Model counter results are pending; no new model speed claim follows yet.
