@@ -48,11 +48,18 @@ def main():
     ap.add_argument("--require-counting-budget", action="store_true",
                     help="fail if counting stops naturally before the output budget")
     ap.add_argument("--source-commit", default=None, help="verified archive commit when .git is absent")
+    ap.add_argument("--suffix-draft", type=int, default=0, help="minimum prompt-lookup match; 0 disables")
+    ap.add_argument("--verify-window", type=int, default=None, help="explicit equal allocation across draft arms (2..8)")
+    ap.add_argument("--mtp-window", type=int, default=4, help="MTP window cap when verify-window is explicit")
     ap.add_argument("--cases", nargs="+", choices=["counting", "coding", "writing"],
                     default=["counting", "coding", "writing"])
     opt = ap.parse_args()
     if opt.repetitions < 1:
         ap.error("--repetitions must be positive")
+    if opt.suffix_draft < 0 or (opt.verify_window is not None and not 2 <= opt.verify_window <= 8):
+        ap.error("suffix match must be nonnegative and verify window must be 2..8")
+    if not 2 <= opt.mtp_window <= 8 or (opt.verify_window is not None and opt.mtp_window > opt.verify_window):
+        ap.error("MTP window must be 2..8 and no larger than verify window")
     cfg = json.loads(opt.config.read_text(encoding="utf-8-sig"))
     base_args = list(cfg["args"])
     context = int(option(base_args, "--max-context", 0))
@@ -131,6 +138,7 @@ def main():
         "input_tokens": opt.input_tokens, "maximum_output_tokens": opt.output_tokens,
         "context_allocation": context, "thinking": False, "cold_cache_control": False,
         "workload": opt.workload, "order": opt.order, "repetitions": opt.repetitions,
+        "suffix_draft": opt.suffix_draft, "verify_window": opt.verify_window, "mtp_window": opt.mtp_window,
         "require_counting_budget": opt.require_counting_budget,
         "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "environment": {k: v for k, v in os.environ.items() if k.startswith("STRATA_")},
@@ -145,9 +153,12 @@ def main():
     save()
     for mode in (opt.order.split("-") if opt.mode == "both" else [opt.mode]):
         args = list(base_args)
-        for name, value in [("--spec", 4 if mode == "on" else 2), ("--suffix-draft", 0),
+        for name, value in [("--spec", opt.verify_window or (4 if mode == "on" else 2)), ("--suffix-draft", opt.suffix_draft),
                             ("--prompt-cache", 0), ("--conversation-cache-mib", 0)]:
             set_option(args, name, value)
+        if opt.verify_window is not None:
+            # Prevent automatic suffix +2 expansion, keeping allocated buffers matched.
+            set_option(args, "--mtp-max-t", opt.mtp_window)
         if mode == "off":
             set_option(args, "--mtp", None)
         else:
