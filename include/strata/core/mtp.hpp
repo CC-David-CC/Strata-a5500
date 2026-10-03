@@ -62,7 +62,7 @@ public:
     bool bind(const WeightTable& wt, const NativeHead* head, const float* window_R, std::string& err);
     /// Diagnostic: capture/upload catch-up rounds 1..upto and the allowed draft steps without launching them.
     /// Requires bind(), set_draft_sampling() and set_max_drafts() for the intended request first.
-    bool prepare_graphs(int upto, std::string& err);
+    bool prepare_graphs(int upto, std::string& err, bool reupload = false);
 
     /// Prompt cells [cell0, cell0 + n): residual rows `R_rows` (device, hc*n_embd each) and `next_tokens` (host,
     /// the token at position cell+1).  Runs in batches of up to max_t rows.

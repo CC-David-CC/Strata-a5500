@@ -1028,7 +1028,7 @@ bool Verifier::capture_commit(std::string& err) {
     return true;
 }
 
-bool Verifier::prepare_graphs(int upto, std::string& err) {
+bool Verifier::prepare_graphs(int upto, std::string& err, bool reupload) {
     if (!ss_ || !g_ || !wt_ || device_ < 0 || upto < 1 || upto > max_t_) {
         err = "verify: graph preparation requires initialized buffers and a valid window limit";
         return false;
@@ -1040,7 +1040,13 @@ bool Verifier::prepare_graphs(int upto, std::string& err) {
         if (!capture(T, err)) return false;
     const bool new_commit = commit_exec_ == nullptr;
     if (!capture_commit(err)) return false;
-    if (new_commit) {
+    if (reupload) {
+        for (int T = 1; T <= upto; ++T) {
+            const cudaError_t e = cudaGraphUpload(exec_[T], cs_);
+            if (e != cudaSuccess) { err = std::string("verify: reupload graph: ") + cudaGetErrorString(e); return false; }
+        }
+    }
+    if (new_commit || reupload) {
         const cudaError_t ue = cudaGraphUpload(commit_exec_, cs_);
         const cudaError_t se = cudaStreamSynchronize(cs_);
         if (ue != cudaSuccess || se != cudaSuccess) {
@@ -1048,7 +1054,7 @@ bool Verifier::prepare_graphs(int upto, std::string& err) {
             return false;
         }
     }
-    return next_ == nullptr || next_->prepare_graphs(upto, err);
+    return next_ == nullptr || next_->prepare_graphs(upto, err, reupload);
 }
 
 bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool, void* user, int32_t* out,

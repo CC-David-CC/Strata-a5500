@@ -77,7 +77,7 @@ public:
     bool run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool, void* user, int32_t* out, std::string& err);
     /// Diagnostic: capture/upload windows 1..upto and the commit graph without launching them.
     /// Call between requests/windows, after settings and stage links are fixed. No model state is advanced.
-    bool prepare_graphs(int upto, std::string& err);
+    bool prepare_graphs(int upto, std::string& err, bool reupload = false);
     /// Diagnostics: row `t` of the last window's head logits (n_vocab floats) to the host. Valid after run().
     bool copy_logits(int t, float* host) const;
     int64_t vocab() const { return next_ ? next_->vocab() : n_vocab_; }

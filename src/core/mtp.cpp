@@ -682,7 +682,7 @@ bool MtpDrafter::capture_step(int j, bool coupled, std::string& err) {
     return captured;
 }
 
-bool MtpDrafter::prepare_graphs(int upto, std::string& err) {
+bool MtpDrafter::prepare_graphs(int upto, std::string& err, bool reupload) {
     if (!g_ || !ss_ || !wt_ || !window_R_ || device_ < 0 || upto < 1 || upto > max_t_) {
         err = "mtp: graph preparation requires a bound drafter and a valid window limit";
         return false;
@@ -693,6 +693,18 @@ bool MtpDrafter::prepare_graphs(int upto, std::string& err) {
         if (!capture_round(T, coupled_active_, err)) return false;
     for (int j = 1; j < std::min(max_t_ - 1, max_drafts_); ++j)
         if (!capture_step(j, coupled_active_, err)) return false;
+    if (reupload) {
+        auto upload = [&](cudaGraphExec_t exec) {
+            const cudaError_t e = cudaGraphUpload(exec, cs_);
+            if (e != cudaSuccess) err = std::string("mtp: reupload graph: ") + cudaGetErrorString(e);
+            return e == cudaSuccess;
+        };
+        for (int T = 1; T <= upto; ++T)
+            if (!upload(coupled_active_ ? round_exec_c_[T] : round_exec_[T])) return false;
+        for (int j = 1; j < std::min(max_t_ - 1, max_drafts_); ++j)
+            if (!upload(coupled_active_ ? step_exec_c_[j] : step_exec_[j])) return false;
+        if (!idle(err)) return false;
+    }
     return true;
 }
 

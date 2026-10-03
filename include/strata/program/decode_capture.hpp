@@ -29,17 +29,28 @@ public:
     DecodeCapture(const DecodeCapture&) = delete;
     DecodeCapture& operator=(const DecodeCapture&) = delete;
 
+    // Nsight Compute app-range replay requires graph uploads inside its range.
+    // Both measured prefixes include these same uploads; their common bytes
+    // are removed by prefix subtraction. This is not a throughput timing mode.
+    bool start_with_uploads() {
+#ifdef STRATA_CUDA_DECODE_CAPTURE
+        if (count_ == 0 || setting("STRATA_PROFILE_GRAPH_UPLOADS", 0) == 0) return false;
+        if (skip_ != 0) {
+            std::fprintf(stderr, "STRATA_PROFILE_GRAPH_UPLOADS requires STRATA_PROFILE_DECODE_SKIP=0\n");
+            std::exit(2);
+        }
+        start();
+        return active_;
+#else
+        return false;
+#endif
+    }
+
     void next_window() {
 #ifdef STRATA_CUDA_DECODE_CAPTURE
         if (count_ == 0) return;
         if (window_ == skip_ + count_) finish();
-        if (window_ == skip_) {
-            const cudaError_t sync = cudaDeviceSynchronize();
-            const cudaError_t start = sync == cudaSuccess ? cudaProfilerStart() : sync;
-            active_ = start == cudaSuccess;
-            std::fprintf(stderr, "strata decode capture: start window %lld, count %lld: %s\n",
-                         (long long) window_, (long long) count_, cudaGetErrorString(start));
-        }
+        if (window_ == skip_ && !active_) start();
         ++window_;
 #endif
     }
@@ -56,6 +67,15 @@ public:
     }
 
 private:
+    void start() {
+#ifdef STRATA_CUDA_DECODE_CAPTURE
+        const cudaError_t sync = cudaDeviceSynchronize();
+        const cudaError_t status = sync == cudaSuccess ? cudaProfilerStart() : sync;
+        active_ = status == cudaSuccess;
+        std::fprintf(stderr, "strata decode capture: start window %lld, count %lld: %s\n",
+                     (long long) window_, (long long) count_, cudaGetErrorString(status));
+#endif
+    }
     static int64_t setting(const char* key, int64_t fallback) {
         const char* text = std::getenv(key);
         if (!text) return fallback;

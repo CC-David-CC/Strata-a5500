@@ -5359,6 +5359,7 @@ int main(int argc, char** argv) {
                 if (!pr.empty())
                     std::fprintf(stderr, "strata prompt verification GPU stages (stage %d):%s\n", st, pr.c_str());
             }
+            strata::program::DecodeCapture decode_capture;
             // Opt-in measurement intervention. Capture/upload only; no target or draft graph is executed here.
             // Charge the setup to prompt/request time so moving it outside decode cannot hide its cost.
             const char* prepare_v = std::getenv("STRATA_PREPARE_VERIFY_GRAPHS");
@@ -5376,6 +5377,16 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "strata serve: GRAPH_SETUP verify=%d mtp=%d limit=%d ms=%.3f\n",
                              (int) pv, (int) pm, limit,
                              std::chrono::duration<double, std::milli>(Clock::now() - setup0).count());
+            }
+            if (!cancelled && decode_capture.start_with_uploads()) {
+                const int limit = std::min(diagnostic_window_limit,
+                    !serve_oracle.empty() ? oracle_window : o.suffix_draft > 0 ? S : S_mtp);
+                if (!pv || (use_mtp && !pm) || !ver.prepare_graphs(limit, err, true) ||
+                    (use_mtp && !mtp.prepare_graphs(limit, err, true))) {
+                    std::printf("ERR profiler graph uploads require prepared target/draft graphs: %s\n", err.c_str());
+                    return 1;
+                }
+                std::fprintf(stderr, "strata decode capture: graph uploads complete; common prefix setup\n");
             }
             const double prompt_ms = std::chrono::duration<double, std::milli>(Clock::now() - r0).count();
             std::printf("REUSED %lld\n", (long long) resume);   // the prompt is read; the first window comes next
@@ -5423,7 +5434,6 @@ int main(int argc, char** argv) {
             const uint64_t file_bytes0 = src.file_read_bytes();
             const int64_t decode_look0 = drive.d.cache_hits + drive.d.cache_admitted + drive.d.cache_refused;
             if (cancelled) finish = "cancel";
-            strata::program::DecodeCapture decode_capture;
             while (!cancelled && produced_n < max_new) {
                 decode_capture.next_window();
                 int T = S_mtp;
