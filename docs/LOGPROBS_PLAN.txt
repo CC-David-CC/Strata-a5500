@@ -1,0 +1,295 @@
+PLAN: Chat Completions logprobs / top_logprobs, issue #675
+
+Status: planning only; no feature implementation or native qualification yet.
+Issue: https://github.com/Niko1221/Strata/issues/675
+Branch: work/logprobs-675
+Worktree: C:\Users\dflanag3\Documents\fleet\strata-logprobs
+Base: Niko1221/Strata main, verified with git ls-remote on 2026-10-03:
+99f3dbd0b21d1401b3769e0c0d963913607f380b
+The base object was already available locally. No fetch was needed.
+Remotes: origin = CC-David-CC/Strata-a5500; upstream = Niko1221/Strata.
+Responses and GBNF retain their own branches/worktrees. This is an independent
+contribution based on main, with selective reuse authorized by the user.
+
+Goal
+====
+Expose the target model's existing next-token distribution through standard
+/v1/chat/completions logprobs and top_logprobs. Start with max_tokens:1 and
+reasoning_effort:none. Continue toward per-token output, including tokens
+accepted from MTP or suffix/ngram proposals, and native grammar/JSON compatibility.
+No second inference service, separate model, per-candidate forward pass, or
+HTTP-to-HTTP adapter is needed.
+
+One generated token still requires reading the prompt or reusing its cache.
+"One forward pass" means no additional model evaluation for scoring each option;
+it does not mean a cold long prompt costs one ordinary decode step.
+
+What already exists
+===================
+Verified in the base checkout:
+- src/core/verify.cpp: Verifier::copy_logits and window_logprobs expose target
+  head rows. The latter copies rows to the CPU and computes a stable full-vocabulary
+  normalizer for diagnostic files; it is useful as a numerical oracle.
+- include/strata/core/verify.hpp: the head belongs to the final stage in a
+  layer split. Row t predicts the token AFTER input position pos0+t.
+- src/program/generate.cpp: persistent serving begins with a one-row verification
+  window containing the last prompt token. MTP drafting is skipped when that
+  first output consumes max_new. Later windows emit accepted target decisions.
+- serve/server.py: StrataEngine.generate currently yields token IDs/heartbeats;
+  Service.run turns them into parser events. openai_chunks/openai_collect have
+  no token-probability data to serialize.
+- tools/strata_tokenizer.py: token_bytes supplies real token bytes, including
+  tokens that contain only part of a UTF-8 character.
+
+Reuse source, pinned for the plan:
+work/gbnf at 0c087036f59bedee17a2de6bef46b238236bc37e.
+Its include/strata/program/grammar_diagnostics.hpp already records raw logits,
+grammar masks, selected IDs, positions, history, and retained-window counts.
+Its speculative_window.hpp helper coordinates the retained prefix with output
+budgets and EOS. Native masks and JSON validation are implemented there.
+serve/grammar.py currently explicitly rejects grammar plus logprobs; that must
+be changed and tested when bringing the two features together.
+The JSON support is presently Responses-specific. Copying it does not by itself
+add correct Chat response_format behavior.
+
+Reuse candidates, not a blind cherry-pick list:
+- b7e2336b9373ea7e241f6e00f2c9ddee576f2310: persistent target-only serving.
+- 83c93e4ea026351460ee36badddc1776ad2ff0f0: pinned native grammar compiler.
+- 7cec5ca526268acdfeab471f2deb2adf59787c4f: native legality before selection.
+- 69f46806bae9af41b6c807f5c2df4aed1affa27e: raw grammar HTTP integration.
+- 2daa12ea803bff43706cb872527e4df5268f940f: constrained MTP/suffix and retained rows.
+- 224180696aebb3ad45bf4030bca7fb15443dbb42: answer-only grammar scope with tools/reasoning.
+- 0fc79c445d6a48d41004dbf85ac9490a63337be7: native JSON and bounded thinking.
+- 9576ab924b91123caa96d14c441010dcd3d5f38f: real-vocabulary JSON budgets.
+Inspect their dependencies and later fixes at the pinned source head before
+porting. Prefer focused copies/ports when a commit also contains unrelated API,
+hardware, inspection or evidence changes. Record the source of every reused piece.
+Do not import all of the Responses adapter merely to reuse a JSON validator.
+
+Probability contract (proposed Strata semantics)
+================================================
+1. Standard logprobs report natural-log probabilities from the target model's
+   full-vocabulary head distribution, before temperature, top-k/top-p/min-p,
+   repetition penalties or grammar masking. State this explicitly in the docs;
+   the OpenAI reference establishes the wire shape but does not fully specify
+   every sampler-stage interaction.
+2. Compute logp(token) = logit(token) - logsumexp(all vocabulary logits).
+   top_logprobs chooses entries to REPORT, not the denominator. Include the
+   selected token's score even when it is outside the reported top-N list.
+3. Temperature zero still returns useful model probabilities. Never report 1.0
+   confidence merely because greedy decoding selected a token.
+4. A grammar changes what may be generated. The standard raw-model scores keep
+   the meaning above. Do not silently renormalize them over legal grammar tokens.
+   If constrained-distribution diagnostics are exposed later, label them
+   separately with their source and normalization; keep them out of standard
+   top_logprobs unless the documented contract is deliberately revised.
+5. MTP draft probabilities and target probabilities are distinct. Standard
+   output scores always come from the target row for the actual retained prefix.
+   Rejected draft continuations are never presented as generated-token scores.
+6. Suffix/ngram lookup itself supplies no model distribution, but the target model
+   can score the proposed sequence by teacher forcing:
+     log P(q1..qm | context) = sum_i log P(qi | context, q1..q(i-1)).
+   A causal batched evaluation can produce these conditional rows together.
+   When verification already evaluated that candidate prefix, reuse those rows;
+   no extra forward pass is needed for the evaluated portion.
+7. Candidate scoring gathers each PROPOSED token's logit, even when it differs
+   from the selected target token or falls outside reported top-N. A rejected
+   candidate still has a valid sequence likelihood under its own forced prefix.
+   Rows beyond the first mismatch are not scores for the actual emitted history.
+   Label proposal sequence scores separately from emitted-token logprobs.
+8. Keep sequence scores in log space and record token count. A multi-token batch
+   costs more work than a single next-token head row; longer proposals can require
+   multiple bounded windows. If only a proposal prefix was verified, label the
+   score as partial. Specify whether EOS is included: a prefix probability and
+   a probability of a complete terminated answer are different quantities.
+
+API contract
+============
+Validate logprobs as a boolean, and top_logprobs as an integer from 0 through 20
+(reject Python-style bool-as-int acceptance). top_logprobs requires logprobs:true;
+null/omission follow the documented optional-field behavior. With logprobs:true
+and no top_logprobs, return selected-token scores and an empty alternatives list.
+
+Each visible content token has token, bytes, logprob and top_logprobs entries at
+choices[i].logprobs.content. Set refusal consistently with the supported Chat
+representation. Alternatives include token, bytes and logprob. Use the tokenizer's
+raw bytes; do not re-tokenize generated text or assume one token equals one
+Unicode character. Control-token alternatives may need bytes:null.
+
+For streaming, attach score entries to the appropriate Chat choice chunks.
+The service's token metadata is the source of truth; chunks only serialize it.
+Collecting a stream must reproduce final JSON token bytes and scores exactly
+after normalizing IDs/timestamps. Preserve existing finish reasons and usage.
+
+Requests without logprobs retain their existing behavior and hot path. Unsupported
+combinations or an older native engine fail before successful streaming headers;
+the endpoint must never accept a requested score and silently omit it.
+
+Pipeline
+========
+validate request and native capability
+  -> existing service queue and model execution
+  -> existing target head row
+  -> stable normalizer + selected token + bounded top-N
+  -> retained-token record (index, token ID, scores)
+  -> detokenizer/parser alignment
+  -> Chat JSON or SSE
+
+Keep native transport records bounded and versioned. Advertise score capability
+in INFO. A requested score record must match the token ID and output position;
+missing, duplicate, non-finite or mismatched records fail the request. Cancellation
+continues to STOP and drain the engine before the next queued request starts.
+No diagnostic-file polling, full-history copying, or per-token file rewriting.
+
+L0 - Freeze the contract and record the baseline
+==============================================
+Reproduce the issue with the exact request, plus a stream variant and a request
+without logprobs. Record current settings, IDs, cache state, native binary/source,
+tokenizer and model hashes. Verify A/B tokenization and leading-space alternatives.
+Use a synthetic logits fixture for independently calculated expected scores.
+Gate: the failure is reproduced, semantics are documented, and the selective
+reuse dependency list is concrete. No performance or compatibility claim yet.
+
+L1 - First generated token, end to end (first useful release checkpoint)
+=====================================================================
+Add request validation/capability preflight and a small typed token-score record.
+Read the first target head row already produced by persistent serving. Return its
+selected score and 0..20 alternatives through both non-streaming JSON and SSE.
+Use the existing queue, authentication, parser and cancellation/draining.
+
+Initially qualify text-only, n:1, max_tokens:1 (or the supported equivalent output
+limit), reasoning disabled, no tool execution. This is a scoped checkpoint;
+it must not claim general per-token support before L3.
+
+A bounded one-row CPU copy through copy_logits is an acceptable correctness
+prototype and measurement baseline: no extra forward pass is involved. Compare
+its latency with a GPU reduction that copies only selected/top-N results. Keep
+the full-vocabulary normalizer in both. Do not adopt repeated full-row CPU copies
+for long generation without measuring the cost. Allocate nothing when disabled.
+
+Gate: the issue's request returns the documented shape; fixed logits agree with
+an independent FP64 log-softmax reference; JSON/SSE agree; scores do not change
+selection; no extra target forward pass; zero draft windows for the single-token
+case; no score work when the option is off. Record cold and warm latency separately.
+
+L2 - Reuse native GBNF/JSON and expose scores together
+===================================================
+Port the required native constraint/compiler/protocol pieces and relevant fixes
+from the pinned GBNF branch, preserving their feature-off behavior. Reuse the
+retained-prefix helper where needed. Keep the JSON validator strict and mandatory.
+
+Allow Chat grammar plus logprobs after capability checks and alignment tests.
+For Chat JSON requests, map response_format to the shared native JSON constraint
+and validate the original schema; do not advertise Responses text.format as a
+Chat request field. Extract small shared validation helpers if current code
+imports Responses solely for strict JSON parsing. No object-only fallback.
+
+Capture raw scores before any in-place masks or penalties can overwrite the row.
+Expose the chosen allowed token's raw probability even if its raw rank exceeds N.
+Return original token bytes; never repair or reserialize text after scores were
+sent. Grammar errors and JSON validation failures retain truthful error behavior.
+
+Gate: A/B grammar works with first-token scores; a legal selected token outside
+raw top-N still has a score; JSON and Unicode cases preserve bytes; enabled and
+disabled builds pass their separate tests. First-token JSON scores describe the
+first token (often '{'), not a later decision field. Do not imply otherwise.
+
+L3 - Every emitted token, including MTP and suffix/ngram proposals
+===============================================================
+Use target-only serving as the correctness reference, reusing the existing branch's
+implementation if main lacks that mode. Extend the same score-record path to
+arbitrary supported output lengths without a second generation implementation.
+
+For each verification window, retain only rows corresponding to emitted tokens:
+accepted proposals and the target correction/bonus token. Clip by EOS, cancellation
+and the remaining output budget before exposing score records. Reuse the GBNF
+retained-window fixes with their boundary tests; don't duplicate count decisions.
+Complete the reduction before the next verifier run reuses its logits buffer.
+
+Test ordinary MTP, coupled MTP and suffix proposals, with partial acceptance,
+rejection at every position and output limits inside a window. Grammar/JSON and
+thinking/tool parser transitions must preserve alignment. Content logprobs do not
+silently include hidden reasoning, tool syntax, stop tokens, or incoming tool data.
+Record explicitly any unsupported parser boundary rather than inventing scores
+for rewritten/partial tokens. Define that boundary before claiming the combination.
+
+Also retain optional candidate-sequence scores from the already computed verify
+rows: proposal tokens, per-token target logprobs, their sum, scored length,
+complete/partial status and acceptance outcome. The proposal source is MTP or
+suffix lookup; the probability source is the target model. Read both the selected
+and proposed token's score when they differ. Keep these as explicitly labeled
+diagnostics until a candidate-score API is deliberately specified; the standard
+Chat content field contains only scores for output actually delivered.
+Validate a rejected candidate against an independent teacher-forced evaluation
+of THAT candidate prefix, not the replacement continuation. Do not run additional
+candidate evaluation by default or commit its discarded state into the session.
+
+Use GPU-side compact summaries for multi-token serving if profiling establishes
+that full-row transfer is a material cost. Keep the API independent of that choice.
+Gate: each scored emitted token maps to its exact target row; rejected rows never
+leak; streamed/non-streamed records agree; enabling scores preserves token choices,
+cache behavior, termination, usage and cancellation. Separate numerical tolerances
+for different graph/window shapes from comparisons on exactly the same logits.
+
+L4 - Native qualification, public examples and contribution review
+================================================================
+Run on an available llm-49 GPU with the existing local Qwen setup. Do not use
+llm-60 or r730. A Windows API client can test JSON/SSE against Ubuntu inference;
+that does not qualify Windows native inference. Use the same distinction for HIP
+and multi-GPU: compile/test or state the remaining backend limit explicitly.
+
+Validation matrix:
+- Request types, null/default values, N=0/1/20, invalid booleans/integers/ranges,
+  older native engines, HTTP/auth errors and preflight before SSE headers.
+- Numerical extremes, ties, selected token outside top-N, tiny probability mass,
+  normalization over the full vocabulary, finite JSON, and an independent oracle.
+- Split UTF-8, leading spaces, special/control tokens, EOS, empty visible content,
+  stop handling, reasoning/tool boundaries, and stable output indexes.
+- Cold/warm cache, consecutive unrelated requests, concurrent queued requests,
+  disconnect/cancel during prefill or output, and clean draining with no leakage.
+- Baseline feature-off, score-enabled first token, longer output, target-only,
+  MTP/coupled/suffix, and grammar/JSON combinations.
+- Latency, host/device transfer volume, allocations and forward-pass counts.
+  An independent backend on the same tokens can be a sanity check, not a demand
+  for exact equality across different quantization/kernels.
+
+Provide a Windows PowerShell request, Ubuntu curl request, and a small Python
+consumer that displays exp(logprob). Explain that a missing top-N candidate is
+unknown, not probability zero. Conditional A/B normalization is a client choice
+and differs from full-vocabulary probability. These are model scores, not measured
+calibration or a guarantee that prompt-injection classification is reliable.
+
+Keep concise public receipts with commands, commits, settings, binaries, results
+and limitations. Link only committed/public artifacts. Prepare one focused PR for
+#675; the initial single-token checkpoint is reviewable before larger extensions.
+No automatic push or PR submission is part of this planning task.
+
+Optional follow-ups, not prerequisites
+=====================================
+- Draft diagnostics: expose MTP draft-head top-N with an explicit draft/source and
+  vocabulary/normalization label. dprob today is not already a complete top-N API.
+  Keep it separate from target-model Chat logprobs and label rejected proposals.
+- Candidate scoring: if top-20 misses required labels, a separately designed
+  endpoint can return arbitrary requested token IDs from the same target row.
+  Multi-token candidates can be scored through a causal teacher-forced batch
+  (or bounded windows for long candidates), reusing evaluated prefixes where
+  possible. This is a joint sequence likelihood, not a probability found in one
+  next-token distribution. Preserve the active conversation/cache state and
+  document costs. Avoid a new endpoint for the initial Chat fix.
+- Responses output logprobs can reuse token records later if the Responses adapter
+  is brought into scope; it is not required for this Chat feature.
+
+Per-checkpoint receipt
+======================
+Exact branch/worktree/commit; reused source commits and changed responsibilities;
+commands and results; public evidence paths; supported combinations and limitations;
+next gate. Until a checkpoint runs, all described tests are planned, not passed.
+
+Sources
+-------
+https://github.com/Niko1221/Strata/issues/675
+https://github.com/Niko1221/Strata/blob/99f3dbd0b21d1401b3769e0c0d963913607f380b/src/core/verify.cpp
+https://github.com/Niko1221/Strata/blob/99f3dbd0b21d1401b3769e0c0d963913607f380b/src/program/generate.cpp
+https://github.com/CC-David-CC/Strata-a5500/blob/0c087036f59bedee17a2de6bef46b238236bc37e/include/strata/program/grammar_diagnostics.hpp
+https://github.com/CC-David-CC/Strata-a5500/blob/0c087036f59bedee17a2de6bef46b238236bc37e/include/strata/program/speculative_window.hpp
+https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create
