@@ -3,6 +3,7 @@
 #include "strata/kernels/bf16_bits.hpp"
 
 #include <cuda_runtime.h>
+#include <cstdlib>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -141,9 +142,16 @@ void bf16_gemv_fp32_mmvf_multi(const float* x, int64_t ldx, const uint16_t* w, f
         w == nullptr || y == nullptr || (reinterpret_cast<uintptr_t>(x) & 7u) != 0)
         throw std::invalid_argument("bf16_gemv_fp32_mmvf_multi: compiled row limit, even n_in/ldx, aligned pointers");
     const cudaStream_t st = (cudaStream_t) stream;
+    static const bool compact = [] {
+        const char* text = std::getenv("STRATA_BF16_ACTIVE_T");
+        return text && std::atoi(text) != 0;
+    }();
 #define STRATA_MMVF_M(N) case N: \
     if (n_tok <= 4) bf16_f32_mmvf_multi_kernel<N, 4><<<(unsigned) n_out, N, 0, st>>>(x, ldx, w, y, ldy, (int) n_in, n_tok); \
     else if (n_tok <= 8) bf16_f32_mmvf_multi_kernel<N, 8><<<(unsigned) n_out, N, 0, st>>>(x, ldx, w, y, ldy, (int) n_in, n_tok); \
+    else if (compact && n_tok <= 12) bf16_f32_mmvf_multi_kernel<N, 12><<<(unsigned) n_out, N, 0, st>>>(x, ldx, w, y, ldy, (int) n_in, n_tok); \
+    else if (compact && n_tok <= 16) bf16_f32_mmvf_multi_kernel<N, 16><<<(unsigned) n_out, N, 0, st>>>(x, ldx, w, y, ldy, (int) n_in, n_tok); \
+    else if (compact && n_tok <= 18) bf16_f32_mmvf_multi_kernel<N, 18><<<(unsigned) n_out, N, 0, st>>>(x, ldx, w, y, ldy, (int) n_in, n_tok); \
     else bf16_f32_mmvf_multi_kernel<N, strata::kSpecMaxT><<<(unsigned) n_out, N, 0, st>>>(x, ldx, w, y, ldy, (int) n_in, n_tok); break
     switch (mmvf_block_size(n_in)) {
         STRATA_MMVF_M(32); STRATA_MMVF_M(64); STRATA_MMVF_M(96); STRATA_MMVF_M(128);

@@ -255,10 +255,11 @@ constexpr int UPM_BLOCKS = N / UPM_COLS;          // 160
 
 // `gr_up_kernel` for T tokens: each row of w_up read once; the T dots reduced by xor so every lane holds every
 // sum, and lane k runs token k's epilogue - the T epilogues in parallel instead of one after another.
-template <int COLS, int TOKENS = 0>
+template <int COLS, int TOKENS = 0, bool Tight = false>
 __global__ void __launch_bounds__(THREADS) gr_up_multi_kernel(GrMulti m) {
-    __shared__ __align__(16) float lo[kFusedGrMaxT][LR];
-    __shared__ float g[kFusedGrMaxT][HC][COLS];
+    constexpr int Capacity = Tight && TOKENS > 0 ? TOKENS : kFusedGrMaxT;
+    __shared__ __align__(16) float lo[Capacity][LR];
+    __shared__ float g[Capacity][HC][COLS];
     const int t = threadIdx.x, lane = t & 31, warp = t >> 5;
     const int T = TOKENS ? TOKENS : m.T;
     const int d0 = blockIdx.x * COLS;
@@ -812,8 +813,24 @@ bool static_tokens() {
     return enabled;
 }
 
+bool active_tokens() {
+    static const bool enabled = [] {
+        const char* text = std::getenv("STRATA_HC_ACTIVE_T");
+        return text != nullptr && std::atoi(text) != 0;
+    }();
+    return enabled;
+}
+
 template<int W>
 void launch_staged(const GrMulti& m, size_t smem, cudaStream_t st) {
+    if (active_tokens()) switch (m.T) {
+#define STRATA_HC_T(T) case T: gr_down_staged_kernel<W, T><<<(LR+HC+W-1)/W, W*32, smem, st>>>(m); return
+        STRATA_HC_T(5); STRATA_HC_T(6); STRATA_HC_T(7); STRATA_HC_T(8);
+#if STRATA_VERIFY_MAX_T > 8
+        STRATA_HC_T(9);
+#endif
+#undef STRATA_HC_T
+    }
     if (static_tokens()) switch (m.T) {
 #define STRATA_HC_T(T) case T: gr_down_staged_kernel<W, T><<<(LR+HC+W-1)/W, W*32, smem, st>>>(m); return
         STRATA_HC_T(1); STRATA_HC_T(2); STRATA_HC_T(3); STRATA_HC_T(4);
@@ -824,6 +841,18 @@ void launch_staged(const GrMulti& m, size_t smem, cudaStream_t st) {
 
 template<int C>
 void launch_up(const GrMulti& m, cudaStream_t st) {
+    if (active_tokens()) switch (m.T) {
+#define STRATA_HC_T(T) case T: gr_up_multi_kernel<C, T, true><<<N/C, THREADS, 0, st>>>(m); return
+        STRATA_HC_T(1); STRATA_HC_T(2); STRATA_HC_T(3); STRATA_HC_T(4);
+        STRATA_HC_T(5); STRATA_HC_T(6); STRATA_HC_T(7); STRATA_HC_T(8);
+#if STRATA_VERIFY_MAX_T > 8
+        STRATA_HC_T(9); STRATA_HC_T(10); STRATA_HC_T(11); STRATA_HC_T(12);
+        STRATA_HC_T(13); STRATA_HC_T(14); STRATA_HC_T(15); STRATA_HC_T(16);
+        STRATA_HC_T(17); STRATA_HC_T(18); STRATA_HC_T(19); STRATA_HC_T(20);
+        STRATA_HC_T(21); STRATA_HC_T(22); STRATA_HC_T(23); STRATA_HC_T(24);
+#endif
+#undef STRATA_HC_T
+    }
     if (static_tokens()) switch (m.T) {
 #define STRATA_HC_T(T) case T: gr_up_multi_kernel<C, T><<<N/C, THREADS, 0, st>>>(m); return
         STRATA_HC_T(1); STRATA_HC_T(2); STRATA_HC_T(3); STRATA_HC_T(4);
