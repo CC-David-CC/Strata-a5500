@@ -167,7 +167,11 @@ def main():
                             {'type': 'function_call_output', 'call_id': c['call_id'], 'output': MOCK_RESULT} for c in calls]
                         history.append({'role': 'user', 'content': 'The requested lookup is complete. '
                                         'Use its result to give your final answer now. Do not call any more functions.'})
-                        final = send(label + '-answer', {**body, 'input': history})
+                        # The client has finished its one-call tool budget. Use
+                        # the documented choice to request an answer explicitly;
+                        # auto is allowed to produce further calls, not obliged
+                        # to answer on the next turn. Retain all tool history.
+                        final = send(label + '-answer', {**body, 'input': history, 'tool_choice': 'none'})
                         answer = ''.join(part['text'] for item in final['output'] if item['type'] == 'message'
                                          for part in item['content'])
                         assert answer == ANSWER and not any(x['type'] == 'function_call' for x in final['output'])

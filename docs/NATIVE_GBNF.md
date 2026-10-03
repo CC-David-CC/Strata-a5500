@@ -149,6 +149,9 @@ protocol. Responses supports flat and namespaced functions with explicit
 The client executes the function and sends its result on the next request.
 Tool results and prior input are prompt data and are never fed to the matcher.
 No tool-argument grammar or server-side tool execution is added.
+`tool_choice: "auto"` may produce additional calls. When the client has finished
+its tool loop and requires an answer, send `tool_choice: "none"` with the retained
+call/result history. This is an ordinary client choice, not a server fallback.
 
 The native matcher starts in reasoning when enabled. After the Qwen `</think>`
 special token it permits a tool call or the first legal answer token. A completed
