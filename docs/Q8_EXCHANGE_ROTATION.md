@@ -4,9 +4,10 @@ Branch: `perf/q8-exchange-buffer-rotation`.
 Target: llm-60, NVIDIA RTX PRO 6000 Blackwell Workstation Edition **96 GB**,
 Ryzen 9 7950X, 128 GB installed RAM. Full Unsloth Q8_0, FP16 KV.
 
-**Status: CPU fixtures, CUDA source-API checks, GPU memcheck, and old/new
-default-off token parity passed. The 64K model comparison is running.**
-No model speedup is established yet.
+**Status: model comparisons completed. Plain decoding and MTP improved in two
+paired runs with exact outputs and matching work counters.** N-gram and combined
+coding outputs diverged; those paths need first-divergence diagnosis before
+accepting an exact-output claim. All fixture and memory checks passed.
 
 ## The change
 
@@ -103,3 +104,56 @@ produced identical 256-token outputs at 8K input. The remaining comparison
 enables rotation at 64K input using the model's native RoPE settings, without
 YaRN extension. Evidence:
 `~/fleet-downloads/rtxpro-q8-exchange-rotation-20261003-r2`.
+
+## Model results, 2026-10-03
+
+Same hardware, full Unsloth Q8_0 and FP16 KV, native RoPE, **65,536 input +
+1,024 output tokens**, 73,728 allocated context. Each pair differs only by the
+rotation setting. Controls and candidates run in opposite orders in the repeat.
+All requests reached the output budget; startup is excluded from request time.
+
+| Mode/task | Copy, first tok/s | Rotation, first | Copy, repeat | Rotation, repeat | Paired decode gains |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Plain coding | 70.07 | 75.39 | 70.00 | 75.64 | +7.6%, +8.1% |
+| Plain editing | 57.51 | 61.93 | 57.43 | 62.06 | +7.7%, +8.1% |
+| MTP coding | 112.62 | 131.87 | 107.49 | 132.53 | +17.1%, +23.3% |
+| MTP editing | 88.81 | 107.64 | 86.73 | 107.56 | +21.2%, +24.0% |
+
+These eight task pairs matched every output token. Cache hit counts, lookups,
+RAM blob reads, proposed drafts and accepted drafts also match within each pair.
+Two pairs are evidence for these workloads, not a confidence interval or a
+universal speed claim. The MTP copy control varied between runs; both results
+are reported.
+
+The plain request pair avoids 5,354 copies / **27.96 GB** of memcpy payload;
+MTP avoids 7,247 copies / **37.85 GB**. These are cumulative across coding and
+editing, not per token. Rotation keeps the GPU eviction and promotion transfers.
+It removes the subsequent RAM-to-RAM copy. It does not duplicate all experts in
+RAM, change weight values, or skip synchronization.
+
+### Suffix paths: results with unresolved coding divergence
+
+| Mode/task | Copy tok/s | Rotation tok/s | First differing output index |
+| --- | ---: | ---: | ---: |
+| N-gram coding | 70.64 | 76.31 | 415 |
+| N-gram editing | 88.42 | 108.14 | None |
+| MTP + n-gram coding | 107.91 | 131.06 | 95 |
+| MTP + n-gram editing | 88.30 | 106.45 | None |
+
+These paths did **not** pass the full exact-token gate and were not promoted
+for the reverse-order performance repeat. N-gram coding first changes the
+docstring word `expiry` to `deadline`; later differences are not counted as
+independent events. Window counts and draft choices differ. Timing-driven draft
+policy decisions are a hypothesis for the divergence, not a proven explanation.
+The preceding coding requests also leave different adaptive cache histories
+for editing, so the editing gains need independent confirmation.
+
+`tools/trace_q8_exchange_policy.py` records window position/width and ordered
+expert IDs with the frozen engine, including a copy-versus-copy repeat. Its
+instrumented rates will not be used as throughput claims. The existing serving
+routing dump stores placeholder weights; it cannot establish route-weight,
+logit-margin or committed-state equality.
+
+Machine-readable [result summary](../bench/results/2026-10-03-q8-buffer-rotation/summary.json)
+includes exact source/binary hashes, per-request prefill and decode timings,
+effective throughput, token-stream digests, counters and comparison results.
