@@ -1,0 +1,709 @@
+{
+  "completed": true,
+  "records": [
+    {
+      "path": "ngram",
+      "variant": "tiled",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "000-ngram-tiled-screen",
+      "started": 1791023504.7344341,
+      "finished": 1791023574.7367306,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 114.09470752089136,
+          "effective_output_tps": 53.038255182944944,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10323.7,
+            "decode_ms": 8975.0,
+            "finish": "length",
+            "drafts_accepted": 157,
+            "drafts_offered": 360,
+            "reused": 0,
+            "hits": 588960,
+            "lookups": 588960,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 102.53431995914649,
+          "effective_output_tps": 51.07672850948844,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10052.7,
+            "decode_ms": 9986.9,
+            "finish": "length",
+            "drafts_accepted": 5,
+            "drafts_offered": 50,
+            "reused": 0,
+            "hits": 513120,
+            "lookups": 513120,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 284.1050966900646,
+          "effective_output_tps": 74.44085081797822,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10143.9,
+            "decode_ms": 3604.3,
+            "finish": "length",
+            "drafts_accepted": 847,
+            "drafts_offered": 1065,
+            "reused": 0,
+            "hits": 596160,
+            "lookups": 596160,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    },
+    {
+      "path": "mtp-ngram",
+      "variant": "control",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "001-mtp-ngram-control-screen",
+      "started": 1791023574.737159,
+      "finished": 1791023637.4278107,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 208.130081300813,
+          "effective_output_tps": 66.51519191891178,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10466.3,
+            "decode_ms": 4920.0,
+            "finish": "length",
+            "drafts_accepted": 696,
+            "drafts_offered": 859,
+            "reused": 0,
+            "hits": 569760,
+            "lookups": 569760,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 156.6156340333114,
+          "effective_output_tps": 61.2285232175413,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10177.8,
+            "decode_ms": 6538.3,
+            "finish": "length",
+            "drafts_accepted": 553,
+            "drafts_offered": 916,
+            "reused": 0,
+            "hits": 665760,
+            "lookups": 665760,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 308.8709920670829,
+          "effective_output_tps": 75.39667276129985,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10258.3,
+            "decode_ms": 3315.3,
+            "finish": "length",
+            "drafts_accepted": 893,
+            "drafts_offered": 1029,
+            "reused": 0,
+            "hits": 556800,
+            "lookups": 556800,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    },
+    {
+      "path": "mtp",
+      "variant": "tiled",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "002-mtp-tiled-screen",
+      "started": 1791023637.428397,
+      "finished": 1791023700.8283143,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 208.24436174323307,
+          "effective_output_tps": 66.96335682602582,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10367.3,
+            "decode_ms": 4917.3,
+            "finish": "length",
+            "drafts_accepted": 696,
+            "drafts_offered": 844,
+            "reused": 0,
+            "hits": 562560,
+            "lookups": 562560,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 156.77148718576808,
+          "effective_output_tps": 61.16943651428652,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10201.0,
+            "decode_ms": 6531.8,
+            "finish": "length",
+            "drafts_accepted": 554,
+            "drafts_offered": 915,
+            "reused": 0,
+            "hits": 664800,
+            "lookups": 664800,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 248.58592479304735,
+          "effective_output_tps": 71.1029235304961,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10275.5,
+            "decode_ms": 4119.3,
+            "finish": "length",
+            "drafts_accepted": 762,
+            "drafts_offered": 778,
+            "reused": 0,
+            "hits": 499200,
+            "lookups": 499200,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    },
+    {
+      "path": "serial",
+      "variant": "tiled",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "003-serial-tiled-screen",
+      "started": 1791023700.8290136,
+      "finished": 1791023778.3547738,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 102.50968536333878,
+          "effective_output_tps": 50.32286481717506,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10351.4,
+            "decode_ms": 9989.3,
+            "finish": "length",
+            "drafts_accepted": 0,
+            "drafts_offered": 0,
+            "reused": 0,
+            "hits": 491520,
+            "lookups": 491520,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 102.45737613063316,
+          "effective_output_tps": 50.744756204860394,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10177.5,
+            "decode_ms": 9994.4,
+            "finish": "length",
+            "drafts_accepted": 0,
+            "drafts_offered": 0,
+            "reused": 0,
+            "hits": 491520,
+            "lookups": 491520,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 102.76172125883109,
+          "effective_output_tps": 50.63874875764084,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10250.0,
+            "decode_ms": 9964.8,
+            "finish": "length",
+            "drafts_accepted": 0,
+            "drafts_offered": 0,
+            "reused": 0,
+            "hits": 491520,
+            "lookups": 491520,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    },
+    {
+      "path": "mtp",
+      "variant": "control",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "004-mtp-control-screen",
+      "started": 1791023778.3555574,
+      "finished": 1791023841.8671417,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 208.60070484222535,
+          "effective_output_tps": 66.88670150146116,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10393.1,
+            "decode_ms": 4908.9,
+            "finish": "length",
+            "drafts_accepted": 696,
+            "drafts_offered": 844,
+            "reused": 0,
+            "hits": 562560,
+            "lookups": 562560,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 156.52227079575678,
+          "effective_output_tps": 61.03900876346725,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10226.7,
+            "decode_ms": 6542.2,
+            "finish": "length",
+            "drafts_accepted": 554,
+            "drafts_offered": 915,
+            "reused": 0,
+            "hits": 664800,
+            "lookups": 664800,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 248.36886657449855,
+          "effective_output_tps": 70.98056596599771,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10296.6,
+            "decode_ms": 4122.9,
+            "finish": "length",
+            "drafts_accepted": 762,
+            "drafts_offered": 778,
+            "reused": 0,
+            "hits": 499200,
+            "lookups": 499200,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    },
+    {
+      "path": "mtp-ngram",
+      "variant": "tiled",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "005-mtp-ngram-tiled-screen",
+      "started": 1791023841.8680894,
+      "finished": 1791023904.8860464,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 207.52269779507134,
+          "effective_output_tps": 66.0914675558059,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10551.3,
+            "decode_ms": 4934.4,
+            "finish": "length",
+            "drafts_accepted": 696,
+            "drafts_offered": 859,
+            "reused": 0,
+            "hits": 569760,
+            "lookups": 569760,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 156.46009045348978,
+          "effective_output_tps": 61.036791190564216,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10223.8,
+            "decode_ms": 6544.8,
+            "finish": "length",
+            "drafts_accepted": 553,
+            "drafts_offered": 916,
+            "reused": 0,
+            "hits": 665760,
+            "lookups": 665760,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 300.66357390334133,
+          "effective_output_tps": 74.68949185474551,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10296.4,
+            "decode_ms": 3405.8,
+            "finish": "length",
+            "drafts_accepted": 893,
+            "drafts_offered": 1029,
+            "reused": 0,
+            "hits": 556800,
+            "lookups": 556800,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    },
+    {
+      "path": "ngram",
+      "variant": "control",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "006-ngram-control-screen",
+      "started": 1791023904.8870492,
+      "finished": 1791023975.3600466,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 113.69061497296518,
+          "effective_output_tps": 52.43689506188062,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10513.6,
+            "decode_ms": 9006.9,
+            "finish": "length",
+            "drafts_accepted": 157,
+            "drafts_offered": 360,
+            "reused": 0,
+            "hits": 588960,
+            "lookups": 588960,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 102.2823752684413,
+          "effective_output_tps": 50.66640783546674,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10191.0,
+            "decode_ms": 10011.5,
+            "finish": "length",
+            "drafts_accepted": 5,
+            "drafts_offered": 50,
+            "reused": 0,
+            "hits": 513120,
+            "lookups": 513120,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 282.00820687945804,
+          "effective_output_tps": 73.64333010240394,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10265.9,
+            "decode_ms": 3631.1,
+            "finish": "length",
+            "drafts_accepted": 847,
+            "drafts_offered": 1065,
+            "reused": 0,
+            "hits": 596160,
+            "lookups": 596160,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    },
+    {
+      "path": "serial",
+      "variant": "control",
+      "repeat": "screen",
+      "output_tokens": 1024,
+      "cases": [
+        "coding",
+        "writing",
+        "editing"
+      ],
+      "label": "007-serial-control-screen",
+      "started": 1791023975.3610592,
+      "finished": 1791024052.8835998,
+      "results": [
+        {
+          "task": "coding",
+          "output_tokens": 1024,
+          "decode_tps": 102.53021337098116,
+          "effective_output_tps": 50.36558284000347,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10336.5,
+            "decode_ms": 9987.3,
+            "finish": "length",
+            "drafts_accepted": 0,
+            "drafts_offered": 0,
+            "reused": 0,
+            "hits": 491520,
+            "lookups": 491520,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+        },
+        {
+          "task": "writing",
+          "output_tokens": 1024,
+          "decode_tps": 102.50352856384949,
+          "effective_output_tps": 50.74944929458501,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10180.2,
+            "decode_ms": 9989.9,
+            "finish": "length",
+            "drafts_accepted": 0,
+            "drafts_offered": 0,
+            "reused": 0,
+            "hits": 491520,
+            "lookups": 491520,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+        },
+        {
+          "task": "editing",
+          "output_tokens": 1024,
+          "decode_tps": 102.79266799172841,
+          "effective_output_tps": 50.63306087811781,
+          "natural_stop": false,
+          "output_budget_reached": true,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 65536,
+            "prompt_ms": 10255.2,
+            "decode_ms": 9961.8,
+            "finish": "length",
+            "drafts_accepted": 0,
+            "drafts_offered": 0,
+            "reused": 0,
+            "hits": 491520,
+            "lookups": 491520,
+            "ram_blobs": 0,
+            "file_blobs": 0,
+            "file_mb": 0.0
+          },
+          "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+        }
+      ]
+    }
+  ]
+}

@@ -127,3 +127,40 @@ arguments, environment, request hashes and histograms are retained in the
 [structured observations](benchmarks/q4-shape-combinations-20261003.json).
 All experts remain resident on the GPU. This is the full Unsloth UD-Q4_K_XL,
 not a full Q8-model measurement or a pruned GSQ IQ3 benchmark.
+
+## Broad four-path screen
+
+The Python harness initially rejected widths above eight before loading a
+model. Commit `5502c14` fixes that harness bound. The engine stayed at `f5f183c`;
+its hash was checked against the previously gated binary.
+
+With runtime verification allocation 16 and MTP cap 4, the repaired 64K-input,
+1,024-output screen completed all paths. Values are output tok/s in
+**code / prose / editing** order. These are one observation per cell; the
+three tasks run sequentially in one fresh engine for each path/variant.
+
+| Path | Control | Tile 12 |
+| --- | ---: | ---: |
+| serial | 102.53 / 102.50 / 102.79 | 102.51 / 102.46 / 102.76 |
+| mtp | 208.60 / 156.52 / 248.37 | 208.24 / 156.77 / 248.59 |
+| ngram | 113.69 / 102.28 / 282.01 | 114.09 / 102.53 / 284.11 |
+| mtp-ngram | 208.13 / 156.62 / 308.87 | 207.52 / 156.46 / 300.66 |
+
+All matched output hashes passed. No task/path gained the predeclared 1.5%
+needed for long repeats. Combined editing regressed by about 2.7%; the other
+changes were below 1%. This does not support enabling the tiling policy
+broadly. The separate width-24 oracle gain remains a diagnostic observation.
+
+A two-second standalone CUDA probe compile overlapped the serial control's
+engine startup, not its requests: compilation ended 2.35 seconds after that
+job started, while engine startup alone took 14.57 seconds. Startup is
+excluded from these throughput metrics. The scheduling helper was corrected
+to reject a parent already stopped by another controller.
+
+Full-model DRAM measurements are still unavailable. User-level NCU lacked
+counter permission; the sudo retry exposed a first-graph-upload range issue.
+The separate graph-range diagnostic reproduced and isolated that issue. Its
+full-model retry hit the original GPU reservation cutoff before validation
+completed. Do not compute a new roofline from these runs.
+
+See [four-path observations](benchmarks/q4-tile-four-path-screen-20261003.json).
