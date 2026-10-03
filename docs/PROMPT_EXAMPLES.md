@@ -1,5 +1,8 @@
 # Test models before adding examples
 
+The [measured Windows/Ubuntu checkpoint](gbnf-evidence/prompt-examples/REPORT.md)
+records real Codex tasks, the failed empty-call baseline and its one-example retry.
+
 Run the zero-example prompt first. If it fails, the qualification harness can
 start a fresh attempt with one example, then two, then three. Each attempt keeps
 its own request, response and result. A hinted success does not replace a failed

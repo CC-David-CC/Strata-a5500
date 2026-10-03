@@ -14,3 +14,4 @@ docs/gbnf-evidence/schema-inventory/*-tests.txt -text -whitespace
 docs/gbnf-evidence/schema-inventory/native-build.txt -text -whitespace
 docs/gbnf-evidence/prompt-examples/**/*.response.txt -text -whitespace
 docs/gbnf-evidence/prompt-examples/*-tests.txt -text -whitespace
+docs/gbnf-evidence/prompt-examples/**/*-tests.txt -text -whitespace
