@@ -25,8 +25,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <numeric>
+#include <memory>
 #include <random>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace k = strata::kernels;
@@ -61,10 +63,11 @@ const char* name_of(int t) {
         case 23: return "IQ4_XS";
         case 29: return "IQ1_M";
         case 42: return "Q2_0";
+        case 8: return "Q8_0";
         default: return "?";
     }
 }
-int block_values(int t) { return t == 20 ? 32 : t == 42 ? 64 : 256; }
+int block_values(int t) { return t == 20 || t == 8 ? 32 : t == 42 ? 64 : 256; }
 
 // `rows` rows of `n` values of format t: random bytes, then a finite fp16 scale in every block
 std::vector<uint8_t> random_rows(int t, int64_t rows, int64_t n, std::mt19937& rng) {
@@ -325,13 +328,87 @@ void bench(cudaStream_t s, std::mt19937& rng) {
     }
 }
 
+// Full Q8 experts, not the dense Q8 tensors inside a Q4 checkpoint. Rotate
+// eight independent 16-expert weight sets (> 600 MiB) to avoid an L2-only test.
+void bench_q8_experts(cudaStream_t s, std::mt19937& rng) {
+    for (int m : {1, 2, 3, 4, 8, 12, 24}) {
+        if (m > strata::kSpecMaxT) continue;
+        std::vector<std::unique_ptr<Grouped>> ring;
+        for (int i = 0; i < 8; ++i)
+            ring.emplace_back(std::make_unique<Grouped>(8, 8, 2560, 640, std::vector<int>(16, m),
+                                                        strata::kSpecMaxT, rng));
+        for (int rep = 0; rep < 4; ++rep) {
+            for (int arm = 0; arm < 2; ++arm) {
+                const bool old = (arm == (rep % 2));
+                int at = 0;
+                const float us = 1000.f * time_ms(s, 96, [&] {
+                    ring[(at++) % ring.size()]->run(old, s);
+                });
+                std::printf("Q8_EXPERT_REUSE_BENCH m=%d rep=%d old=%d us=%.6f weight_sets=8\n",
+                            m, rep, (int) old, us);
+            }
+        }
+    }
+}
+
+void check_q8_graph_replay(cudaStream_t s, std::mt19937& rng) {
+    Grouped G(8, 8, 2560, 640, {1, 4, 0, 5, strata::kSpecMaxT}, strata::kSpecMaxT, rng);
+    cudaGraph_t graph;
+    cudaGraphExec_t executable;
+    ck(cudaStreamBeginCapture(s, cudaStreamCaptureModeGlobal), "capture begin");
+    G.run(false, s);
+    ck(cudaStreamEndCapture(s, &graph), "capture end");
+    ck(cudaGraphInstantiate(&executable, graph, nullptr, nullptr, 0), "instantiate");
+    for (int changed = 0; changed < 2; ++changed) {
+        if (changed) {
+            auto b = random_rows(8, 2 * G.L.n_ff, G.L.n_embd, rng);
+            const auto down = random_rows(8, G.L.n_embd, G.L.n_ff, rng);
+            b.insert(b.end(), down.begin(), down.end());
+            ck(cudaMemcpy(G.blobs[0], b.data(), b.size(), cudaMemcpyHostToDevice), "changed weights");
+            const auto x = random_x((size_t) G.n_tok * G.L.n_embd, rng);
+            ck(cudaMemcpy(G.dx, x.data(), x.size() * 4, cudaMemcpyHostToDevice), "changed activations");
+        }
+        const auto expected = G.result(true, s);
+        ck(cudaMemset(G.dout, 0xFF, G.out_floats * 4), "reset graph output");
+        ck(cudaGraphLaunch(executable, s), "replay");
+        ck(cudaStreamSynchronize(s), "replay sync");
+        std::vector<float> actual(G.out_floats);
+        ck(cudaMemcpy(actual.data(), G.dout, actual.size() * 4, cudaMemcpyDeviceToHost), "replay output");
+        const bool ok = std::memcmp(actual.data(), expected.data(), actual.size() * 4) == 0;
+        std::printf("Q8_EXPERT_REUSE_GRAPH changed=%d %s\n", changed, ok ? "PASS" : "FAIL");
+        if (!ok) ++g_fail;
+    }
+    cudaGraphExecDestroy(executable);
+    cudaGraphDestroy(graph);
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
-    const bool do_bench = argc > 1 && std::string(argv[1]) == "--bench";
+    bool do_bench = false, q8_only = false;
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--bench") do_bench = true;
+        else if (std::string(argv[i]) == "--q8-experts") q8_only = true;
+        else { std::fprintf(stderr, "unknown option: %s\n", argv[i]); return 2; }
+    }
+    if (q8_only) {
+        const char* flag = std::getenv("STRATA_Q8_EXPERT_REUSE");
+        if (!flag || std::string(flag) != "1") {
+            std::fprintf(stderr, "Q8 differential requires STRATA_Q8_EXPERT_REUSE=1\n"); return 2;
+        }
+    }
     cudaStream_t s;
     ck(cudaStreamCreate(&s), "stream");
     std::mt19937 rng(18);
+    if (q8_only) {
+        for (const auto shape : {std::pair<int, int>{2560, 640}, {1024, 512}, {96, 64}, {32, 32}})
+            check_grouped(8, 8, shape.first, shape.second, s, rng);
+        check_q8_graph_replay(s, rng);
+        if (do_bench && g_fail == 0) bench_q8_experts(s, rng);
+        std::printf("q8_expert_reuse: %d failures\n", g_fail);
+        cudaStreamDestroy(s);
+        return g_fail ? 1 : 0;
+    }
     for (int t : {16, 17, 18, 20, 21, 22, 23, 29, 42}) {
         check_mmvq(t, 2560, 67, s, rng);   // the model's n_embd; 67 rows: a partial block of 4 rows
         check_mmvq(t, 1024, 5, s, rng);

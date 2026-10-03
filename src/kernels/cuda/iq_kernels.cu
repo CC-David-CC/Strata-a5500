@@ -553,6 +553,27 @@ __global__ void __launch_bounds__(128) mmvq_kernel(const uint8_t* __restrict__ w
 // order on the same values, so a column of the kernels below is BITWISE equal to the same column of mmvq_kernel /
 // native_gu_kernel / native_down_kernel (iq_multi_parity checks it; STRATA_OLD_IQ_MMVQ=1 keeps the old kernels).
 template<int TY> struct Split;
+// Q8_0 expert-only experiment. Keep kSplit<8> false: enabling this must not
+// silently change dense Q8 dispatch or any existing default. Weight bytes,
+// dp4a accumulation and scale multiplication match vec_dot_q8_0_q8_1 exactly.
+template<> struct Split<8> {
+    struct W { int q[VDR_Q8_0]; float d; };
+    __device__ static W load(const void* __restrict__ vbq, int kbx, int iqs) {
+        const auto* b = (const block_q8_0*) vbq + kbx;
+        W w;
+#pragma unroll
+        for (int i = 0; i < VDR_Q8_0; ++i) w.q[i] = get_int_b2(b->qs, iqs + i);
+        w.d = __half2float(b->d);
+        return w;
+    }
+    __device__ static float apply(const W& w, const block_q8_1* __restrict__ x, int iqs) {
+        int sumi = 0;
+#pragma unroll
+        for (int i = 0; i < VDR_Q8_0; ++i)
+            sumi = ggml_cuda_dp4a(w.q[i], get_int_b4(x->qs, iqs + i), sumi);
+        return w.d * __low2float(x->ds) * ((float) sumi);
+    }
+};
 // Formats with a Split below take the decode-once kernels; the others (Q4_K, Q5_K, Q5_1, Q8_0: UD-Q4_K_XL) the
 // per-entry ones, which call Fmt<TY>::dot per column exactly as before #242 (the launchers test kSplit at compile
 // time, so the multi kernels are never instantiated for a type without a Split).
@@ -1385,6 +1406,9 @@ bool env_on(const char* name) {
 }
 // STRATA_OLD_IQ_MMVQ=1 keeps the per-column kernels (bitwise equal to the new ones; kept for A/B timing)
 bool g_old_kernels = env_on("STRATA_OLD_IQ_MMVQ");
+// Opt-in, independently measurable full-Q8 expert reuse. The old-kernel
+// control also disables it, allowing exact differential checks in one process.
+bool g_q8_expert_reuse = env_on("STRATA_Q8_EXPERT_REUSE");
 
 template<int TY>
 void launch_mmvq(const uint8_t* W, size_t rb, const block_q8_1* X, float* y, int n_in, int n_out, int ncols,
@@ -1402,7 +1426,12 @@ template<int TG>
 void launch_gu(dim3 grid, cudaStream_t s, const unsigned long long* grp_ptr, const int32_t* grp_start,
                const int32_t* n_groups, const int32_t* ent_tok, const block_q8_1* X, const NativeExpertLayout& L,
                float* gate, float* up) {
-    if constexpr (!kSplit<TG>) native_gu_kernel<TG><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_tok, X, L, gate, up);
+    if constexpr (TG == 8) {
+        if (g_q8_expert_reuse && !g_old_kernels)
+            native_gu_multi_kernel<TG><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_tok, X, L, gate, up);
+        else native_gu_kernel<TG><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_tok, X, L, gate, up);
+    }
+    else if constexpr (!kSplit<TG>) native_gu_kernel<TG><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_tok, X, L, gate, up);
     else if (g_old_kernels) native_gu_kernel<TG><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_tok, X, L, gate, up);
     else native_gu_multi_kernel<TG><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_tok, X, L, gate, up);
 }
@@ -1411,7 +1440,12 @@ template<int TD>
 void launch_down(dim3 grid, cudaStream_t s, const unsigned long long* grp_ptr, const int32_t* grp_start,
                  const int32_t* n_groups, const int32_t* ent_dst, const block_q8_1* hq, const NativeExpertLayout& L,
                  float* out) {
-    if constexpr (!kSplit<TD>) native_down_kernel<TD><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_dst, hq, L, out);
+    if constexpr (TD == 8) {
+        if (g_q8_expert_reuse && !g_old_kernels)
+            native_down_multi_kernel<TD><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_dst, hq, L, out);
+        else native_down_kernel<TD><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_dst, hq, L, out);
+    }
+    else if constexpr (!kSplit<TD>) native_down_kernel<TD><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_dst, hq, L, out);
     else if (g_old_kernels) native_down_kernel<TD><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_dst, hq, L, out);
     else native_down_multi_kernel<TD><<<grid, 256, 0, s>>>(grp_ptr, grp_start, n_groups, ent_dst, hq, L, out);
 }
