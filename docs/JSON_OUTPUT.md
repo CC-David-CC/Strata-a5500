@@ -78,5 +78,9 @@ Responses-only branch still has no native JSON decoder; use the stacked GBNF bra
 for this feature. The [local Codex profile](CODEX_LOCAL.md) uses it automatically
 when Codex sends a JSON title request.
 
+The [native JSON checkpoint](gbnf-evidence/JSON/REPORT.md) records the real Codex
+task and title, seven GPU-backed HTTP cases, schema/tool/reasoning streaming,
+231 Python tests, ten native tests and the independent BF16 4B comparison.
+
 References: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs),
 [XGrammar compiler](https://xgrammar.mlc.ai/docs/latest/api/python/grammar_compiler.html).

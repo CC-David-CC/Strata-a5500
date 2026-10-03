@@ -65,3 +65,6 @@ qualified; start a new conversation when approaching the configured context limi
 Keep the same replay key if you need to replay an earlier encrypted reasoning item. Fresh
 keys invalidate older replay items. A LAN deployment must retain authentication; SSH forwarding
 lets the model server remain bound to loopback.
+
+The [real steering checkpoint](responses-evidence/steering/REPORT.md) records the
+read/edit/test task, interrupted output, permission update and successful next turn.
