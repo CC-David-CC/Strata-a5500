@@ -1,4 +1,4 @@
-# Dense token tiles: an unmeasured candidate
+# Dense token tiles: component results, model validation pending
 
 Target: **RTX PRO 6000 Blackwell Workstation Edition, 96 GB**, using the full
 Unsloth UD-Q4_K_XL model. This changes the Q8_0 **dense projections inside Q4**;
@@ -35,4 +35,30 @@ outweigh reduced registers. No improvement in isolated kernels rejects this
 tiling choice; a kernel gain without an end-to-end gain limits its practical
 value. Actual DRAM counters are needed before claiming reduced GPU traffic.
 
-No test or speedup is claimed yet.
+## Component results (2026-10-03)
+
+Source `f5f183c` passed the scalar-format/exact comparison fixture, changed-weight
+graph replay, Compute Sanitizer memcheck and synccheck on the RTX PRO 6000.
+The independent wide-policy CPU regression also passed.
+
+A 12-column tile was the best overall component candidate. Ratios below are
+control time / tiled time, averaging the two arm-order medians. Above 1 is
+faster. This does not establish an end-to-end improvement.
+
+| Projection (input x output) | T16, tile 12 | T24, tile 12 |
+| --- | ---: | ---: |
+
+| 2560 x 10240 | 0.997x | 1.391x |
+| 6144 x 2560 | 0.934x | 1.167x |
+| 2560 x 248320 | 0.798x | 1.278x |
+
+The same policy improves T24 but can regress T16. This argues for a dispatch
+choice based on the active shape if model tests confirm the result. No tiling
+occurs when T is at most the selected tile. The first T8 logits control was
+faster than subsequent identical-kernel controls (493.68 versus about 735
+microseconds); the raw record preserves this timing drift. Do not interpret
+that unchanged-kernel difference as an optimization effect.
+
+Real model state gates, oracle and all four real generation paths are running.
+Actual DRAM measurements remain pending. No new model TPS claim is made here.
+See [component observations](benchmarks/q4-dense-token-tiles-components-20261003.json).
