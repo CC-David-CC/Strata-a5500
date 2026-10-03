@@ -6,14 +6,18 @@
 #include "strata/artifact/dequant.hpp"
 #include "strata/kernels/f16_bits.hpp"
 #include "strata/ngram/ple_reader.hpp"
+#include "strata/ngram/prefault.hpp"
 
 #include <cerrno>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
+#include <chrono>
 #include <limits>
 #if !defined(_WIN32)
 #include <sys/mman.h>
+#include <unistd.h>
 #endif
 #include <vector>
 #include <stdexcept>
@@ -269,19 +273,40 @@ bool PleTable::open(const std::string& gguf_path, std::string& err, const PleIoO
     }
     if (io.mode == PleIo::Mmap && io.lock && impl_->data != nullptr) {
 #if !defined(_WIN32)
-        const uint64_t page = 4096;
+        const long os_page = sysconf(_SC_PAGESIZE);
+        const uint64_t page = os_page > 0 ? (uint64_t) os_page : 4096;
         const uintptr_t a0 = (uintptr_t) impl_->data & ~(uintptr_t) (page - 1);
         const uintptr_t a1 = (uintptr_t) impl_->data + (uintptr_t) need;
         madvise((void*) a0, a1 - a0, MADV_WILLNEED);
+        // Zero/unset retains the original mlock-first control. This changes
+        // startup only; it does not change table interpretation or inference.
+        unsigned workers = 0;
+        if (const char* v = std::getenv("STRATA_PLE_PREFAULT_THREADS")) {
+            char* end = nullptr;
+            errno = 0;
+            const long parsed = std::strtol(v, &end, 10);
+            if (!errno && end != v && *end == '\0' && parsed >= 0)
+                workers = (unsigned) std::min<long>(parsed, 64);
+            else std::fprintf(stderr, "strata: invalid STRATA_PLE_PREFAULT_THREADS; using original loader\n");
+        }
+        const auto started = std::chrono::steady_clock::now();
+        strata::ngram::PrefaultStats prefault;
+        if (workers) prefault = strata::ngram::prefault_pages((const void*) a0, a1 - a0, page, workers);
+        const auto touched = std::chrono::steady_clock::now();
         if (mlock((const void*) a0, a1 - a0) == 0) {
             impl_->locked = true;
         } else {
-            std::fprintf(stderr, "strata: PLE table mlock failed (%s; raise `ulimit -l`): touching its pages instead\n",
+            std::fprintf(stderr, "strata: PLE table mlock failed (%s; raise `ulimit -l`): pages may be reclaimed\n",
                          std::strerror(errno));
-            volatile uint8_t sink = 0;
-            for (uintptr_t p = a0; p < a1; p += page) sink = sink + *(const volatile uint8_t*) p;
-            (void) sink;
+            // The candidate already touched the pages. Do not read twice on a
+            // failed lock. The unchanged control still needs its fallback.
+            if (!workers) strata::ngram::prefault_pages((const void*) a0, a1 - a0, page, 1);
         }
+        const auto done = std::chrono::steady_clock::now();
+        std::fprintf(stderr, "strata: PLE startup threads=%u actual=%u pages=%llu prefault_ms=%.3f lock_ms=%.3f locked=%d\n",
+                     workers, prefault.threads, (unsigned long long) prefault.pages,
+                     std::chrono::duration<double, std::milli>(touched - started).count(),
+                     std::chrono::duration<double, std::milli>(done - touched).count(), (int) impl_->locked);
 #endif
     }
     impl_->mode = io.mode;
