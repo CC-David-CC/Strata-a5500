@@ -86,6 +86,15 @@ def native_tools(tools):
             native["name"] = f"{namespace}.{name}" if namespace else name
             if namespace:
                 native["description"] = tool["description"] + "\n" + native.get("description", "")
+            parameters = native.get("parameters", {})
+            if (parameters.get("properties") == {} and parameters.get("additionalProperties") is False
+                    and not parameters.get("patternProperties")):
+                # The installed pack may supply its own template. Put the empty
+                # call example in this native view, not the repository fallback
+                # template or the protocol's original tool declaration.
+                native["description"] = native.get("description", "") + (
+                    "\nThis function takes no parameters. Emit no parameter blocks. Its complete native call form is:\n"
+                    "<tool_call>\n<function=" + native["name"] + ">\n</function>\n</tool_call>")
             yield native, namespace, name
 
 

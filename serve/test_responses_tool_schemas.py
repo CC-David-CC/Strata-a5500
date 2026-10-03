@@ -27,17 +27,22 @@ def script(name, arguments):
 
 class CapturedToolSchemas(unittest.TestCase):
     def test_zero_parameter_prompt_example_round_trips_without_invented_arguments(self):
+        original = copy.deepcopy(TOOLS)
         tool = next(native for native, _, _ in native_tools(TOOLS) if native['name'] == 'get_goal')
+        self.assertEqual(TOOLS, original)
         template = ChatTemplate(ROOT / 'serve/chat_template.jinja')
         prompt = template.render([{'role': 'user', 'content': 'Read the goal.'}], [tool], enable_thinking=False)
         call = '<tool_call>\n<function=get_goal>\n</function>\n</tool_call>'
-        self.assertIn(call, prompt)
+        self.assertIn(call, tool['description'])
+        self.assertIn(json.dumps(tool['description'])[1:-1], prompt)
         parser = OutputParser(thinking=False, tools=[tool], stream_tools=True)
         events = parser.feed(call) + parser.finish()
         self.assertEqual(''.join(e.text for e in events if e.kind == 'tool_args'), '{}')
         self.assertEqual(next(e.call.arguments for e in events if e.kind == 'tool_call'), {})
-        open_tool = {**tool, 'parameters': {**tool['parameters'], 'additionalProperties': True}}
-        self.assertNotIn(call, template.render([{'role': 'user', 'content': 'Read the goal.'}], [open_tool]))
+        original_tool = next(t for t in TOOLS if t.get('name') == 'get_goal')
+        open_tool = {**original_tool, 'parameters': {**original_tool['parameters'], 'additionalProperties': True}}
+        native = next(native_tools([open_tool]))[0]
+        self.assertNotIn(call, native.get('description', ''))
 
     def test_xml_boolean_reaches_strict_response_without_rewriting_stream(self):
         tool = function_tool(name='fixture', strict=True, parameters={'type': 'object',
