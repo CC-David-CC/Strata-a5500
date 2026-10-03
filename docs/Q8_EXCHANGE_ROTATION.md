@@ -4,8 +4,9 @@ Branch: `perf/q8-exchange-buffer-rotation`.
 Target: llm-60, NVIDIA RTX PRO 6000 Blackwell Workstation Edition **96 GB**,
 Ryzen 9 7950X, 128 GB installed RAM. Full Unsloth Q8_0, FP16 KV.
 
-**Status: CPU fixtures and the CUDA engine build passed; GPU source-API and
-model throughput tests are queued.** No model speedup is measured yet.
+**Status: CPU fixtures, CUDA source-API checks, GPU memcheck, and old/new
+default-off token parity passed. The 64K model comparison is running.**
+No model speedup is established yet.
 
 ## The change
 
@@ -82,10 +83,23 @@ llm-60 (CUDA SM120 Release). Binary SHA-256:
 The standalone ownership fixture passed all **12,304 exchanges** under
 AddressSanitizer and UndefinedBehaviorSanitizer, including concurrent metadata
 readers, exact resident bytes, alias pairs, buffer reuse and malformed commits.
-This does not yet validate CUDA transfers or model generation; those tests remain
-required. The CPU fixture and compiler overlapped the separate retrieval quality
+The CPU fixture and compiler overlapped the separate retrieval quality
 check, with bounded memory/CPU use; that check's timing is not a controlled speed
 comparison. No GPU benchmark overlapped the compilation.
 
 Evidence: `~/fleet-downloads/rtxpro-exchange-cpu-check-20261003` and
 `~/fleet-downloads/rtxpro-exchange-build-ahead-20261003`.
+
+The real CUDA source-API fixture subsequently passed all 64 exchanges in each
+of three configurations: pinned copy, pinned rotation, and requested rotation
+with pageable fallback. Exact bytes, CUDA alias reads, staged transfers, disk
+fallback and close/reopen checks passed. Compute Sanitizer memcheck reported
+**0 errors**. These source-API fixtures use 1,382,400-byte blocks, so their commit
+timing is not a full-model Q8 speed measurement. The CPU fixture separately
+includes Q8's 5,222,400-byte expert blocks.
+
+The old `080891d` binary and the new `1a50d91` binary with rotation disabled
+produced identical 256-token outputs at 8K input. The remaining comparison
+enables rotation at 64K input using the model's native RoPE settings, without
+YaRN extension. Evidence:
+`~/fleet-downloads/rtxpro-q8-exchange-rotation-20261003-r2`.
