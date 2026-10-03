@@ -1,3 +1,9 @@
+> **Historical P4 review branch:** this preserves the earlier draft and its
+> stated validation limits. Current contributions and their enable switches
+> are listed in the [fork branch guide](https://github.com/CC-David-CC/Strata-a5500/blob/contrib/gfx1012-community/docs/FORK_BRANCHES.md).
+> This snapshot's manual build requires CUDA 12.x and
+> `-DSTRATA_EXPERIMENTAL_SM61=ON -DCMAKE_CUDA_ARCHITECTURES=61` (off by default).
+
 # Experimental Tesla P4 8 GB support
 
 This is David's **P4 contribution branch** of
