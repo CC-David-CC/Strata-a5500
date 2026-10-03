@@ -167,9 +167,9 @@ def main():
             save(api + ' recursive language', **result)
             for extra in ({'grammar': 'root ::= missing'}, {'grammar': 'root ::= root'}, {'grammar': 'root ::= "x"\0'},
                           {'grammar': 'root ::= "' + '猫' * 500 + '" invalid_reference'},
-                          {'tools': [{'type': 'function', 'name': 'bad', 'strict': False}]}, {'stop': 'END'},
+                          {'strata_mcp': True}, {'stop': 'END'},
                           {'stream_options': {'include_usage': True}},
-                          {'reasoning': {'effort': 'low'}},
+                          {'reasoning': {'effort': 'invalid'}},
                           {'text': {'format': {'type': 'json_object'}}} if api == 'responses'
                           else {'response_format': {'type': 'json_object'}}):
                 before = len(svc.history)

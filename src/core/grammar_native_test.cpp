@@ -158,6 +158,60 @@ static void dump_vocab(const Vocabulary& vocab, const std::filesystem::path& pat
     if (!out) throw std::runtime_error("vocabulary audit write failed");
 }
 
+static void scoped_unit() {
+    // Synthetic protocol IDs, with ordinary one-byte text tokens. The actual
+    // native matcher and speculative-prefix routine enforce every assertion.
+    std::vector<std::string> bytes(260);
+    for (int i = 0; i < 256; ++i) bytes[i] = std::string(1, (char) i);
+    constexpr int stop = 256, think_end = 257, call_start = 258, call_end = 259;
+    auto vocab = Vocabulary::from_bytes(std::move(bytes), {stop}, {think_end, call_start, call_end});
+    Compiler compiler(vocab);
+    auto compiled = compiler.compile("root ::= \"OK\"");
+    Matcher m(compiled, 2000000, {true, true});
+    REQUIRE(m.allows('x') && !m.allows(stop) && !m.allows(call_start));
+    REQUIRE(m.accept('x') && std::string(m.channel()) == "reasoning");
+    const auto saved = m.checkpoint();
+    const int32_t drafts[] = {think_end, call_start, 'x', call_end, 'O', 'K', stop};
+    PrefixMasks prefix;
+    m.prefix_masks(drafts, 7, prefix);
+    REQUIRE(prefix.rows == 7 && prefix.end_draft && prefix.blocked_draft == -1);
+    REQUIRE(m.tokens() == saved.tokens && std::string(m.phase()) == "reasoning");
+    REQUIRE(m.accept(think_end) && std::string(m.channel()) == "control");
+    REQUIRE(!m.allows('x') && !m.allows(stop) && m.allows(call_start));
+    REQUIRE(m.accept('\n') && std::string(m.channel()) == "control");
+    REQUIRE(m.accept(call_start) && std::string(m.channel()) == "tool");
+    for (char c : std::string("arbitrary parameters: purple 999, not OK")) REQUIRE(m.accept(c));
+    REQUIRE(!m.allows(stop) && !m.allows(think_end));
+    REQUIRE(m.accept(call_end) && m.complete());
+    auto tools_only = m.fork();
+    REQUIRE(tools_only.accept(stop) && tools_only.terminated());
+    REQUIRE(m.accept('\n') && std::string(m.channel()) == "control");
+    REQUIRE(m.accept(call_start) && m.accept('2') && m.accept(call_end));
+    REQUIRE(m.accept('O') && std::string(m.channel()) == "answer");
+    REQUIRE(!m.allows('x') && !m.allows(call_start) && !m.allows(stop));
+    REQUIRE(m.accept('K') && m.complete() && m.accept(stop) && m.terminated());
+    m.restore(saved);
+    REQUIRE(m.tokens() == saved.tokens && std::string(m.phase()) == "reasoning");
+    Matcher raw(compiled);
+    fails([&] { raw.restore(saved); }, "identity mismatch");
+    REQUIRE(!raw.allows(call_start) && !raw.allows('x')); // no state leak from shared compilation
+
+    Matcher reasoning(compiler.compile("root ::= \"\\n<think>literal</think>\""), 2000000, {true, false});
+    REQUIRE(reasoning.accept(think_end));
+    for (char c : std::string("\n<think>literal</think>")) {
+        REQUIRE(reasoning.accept(c));
+        REQUIRE(std::string(reasoning.channel()) == "answer");
+    }
+    REQUIRE(reasoning.complete() && reasoning.accept(stop));
+    Matcher empty(compiler.compile("root ::= \"\""), 2000000, {false, true});
+    REQUIRE(empty.complete() && empty.accept(stop));
+    Matcher limited(compiled, 64, {true, true});
+    fails([&] { for (int i = 0; i < 100; ++i) limited.accept('x'); }, "work budget");
+    REQUIRE(limited.failed());
+    std::cout << "scoped grammar: reasoning, parallel tools, answer bytes, EOS, speculative phase crossings, "
+                 "checkpoints, budgets and isolation passed\n";
+}
+
 int main(int argc, char** argv) {
     try {
         if (argc != 2 && argc != 4) throw std::runtime_error("usage: grammar_native_test CASES [TOKENIZER_DIR VOCAB_AUDIT]");
@@ -167,6 +221,7 @@ int main(int argc, char** argv) {
         auto vocab = Vocabulary::from_bytes(std::move(bytes), {256});
         corpus(argv[1], vocab);
         unit(vocab);
+        scoped_unit();
         if (argc == 4) {
             auto actual = Vocabulary::from_pack(argv[2], {248044, 248046});
             corpus(argv[1], actual);

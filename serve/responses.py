@@ -602,6 +602,8 @@ def create_response(svc, request):
     kwargs = {"enable_thinking": effort != "none", "preserve_thinking": True}
     if effort != "none":
         kwargs["reasoning_effort"] = "xhigh" if effort in ("high", "xhigh", "max") else effort
+    if constraint is not None:
+        constraint = constraint.with_scope(effort != "none", tools)
     ids, thinking, max_new = svc.prepare(messages, tools, kwargs, req.get("max_output_tokens"), constraint=constraint)
     if constraint is not None:
         try:

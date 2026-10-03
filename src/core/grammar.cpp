@@ -92,28 +92,40 @@ struct Compiled {
 };
 
 struct Matcher::Impl {
+    enum class Phase { reasoning, choice, tool, after_tool, answer };
     std::shared_ptr<const Compiled> compiled;
     xgrammar::GrammarMatcher matcher;
     detail::WorkBudget budget;
     std::vector<int32_t> history, bitmask;
     size_t output_bytes = 0;
     bool dirty = true, failed = false;
-    explicit Impl(std::shared_ptr<const Compiled> c, uint64_t limit)
+    Scope scope;
+    Phase phase;
+    const char* channel = "answer";
+    bool stopped = false;
+    std::vector<int32_t> answer_mask;
+    explicit Impl(std::shared_ptr<const Compiled> c, uint64_t limit, Scope s)
         : compiled(std::move(c)), matcher(compiled->grammar, std::nullopt, false), budget{limit},
-          bitmask((compiled->vocabulary->bytes.size() + 31) / 32) {}
+          bitmask((compiled->vocabulary->bytes.size() + 31) / 32), scope(s),
+          phase(s.thinking ? Phase::reasoning : s.tools ? Phase::choice : Phase::answer) {
+        const auto& t = compiled->vocabulary->protocol;
+        if ((s.thinking && t.think_end < 0) || (s.tools && (t.call_start < 0 || t.call_end < 0)))
+            throw std::runtime_error("grammar scope requires the Qwen reasoning/tool special tokens");
+    }
     Impl(const Impl& from)
         : compiled(from.compiled), matcher(from.matcher.Fork()), budget(from.budget), history(from.history),
-          bitmask(from.bitmask), output_bytes(from.output_bytes), dirty(from.dirty), failed(from.failed) {}
+          bitmask(from.bitmask), output_bytes(from.output_bytes), dirty(from.dirty), failed(from.failed),
+          scope(from.scope), phase(from.phase), channel(from.channel), stopped(from.stopped), answer_mask(from.answer_mask) {}
     void usable() const {
         if (failed) throw std::runtime_error("grammar matcher failed; discard this generation");
     }
 };
 
-Matcher::Matcher(std::shared_ptr<const Compiled> c, uint64_t limit) {
+Matcher::Matcher(std::shared_ptr<const Compiled> c, uint64_t limit, Scope s) {
     if (!c) throw std::runtime_error("missing compiled grammar");
     detail::WorkBudget budget{limit};
     detail::WorkScope scope(budget, 1000ms);
-    impl_ = std::make_unique<Impl>(std::move(c), limit);
+    impl_ = std::make_unique<Impl>(std::move(c), limit, s);
     impl_->budget = budget;
     scope.finish();
 }
@@ -125,15 +137,28 @@ Matcher& Matcher::operator=(Matcher&&) noexcept = default;
 const std::vector<int32_t>& Matcher::mask() {
     auto& p = *impl_;
     p.usable();
-    if (p.matcher.IsTerminated()) throw std::runtime_error("grammar matcher is terminal");
+    if (terminated()) throw std::runtime_error("grammar matcher is terminal");
     if (!p.dirty) return p.bitmask;
     try {
         detail::WorkScope scope(p.budget, 1000ms);
-        int64_t shape[2] = {1, (int64_t) p.bitmask.size()};
-        DLTensor tensor{};
-        tensor.data = p.bitmask.data(); tensor.device = {kDLCPU, 0};
-        tensor.ndim = 2; tensor.dtype = {kDLInt, 32, 1}; tensor.shape = shape;
-        p.matcher.FillNextTokenBitmask(&tensor);
+        const auto& v = *p.compiled->vocabulary;
+        auto allow = [&](int32_t id) { p.bitmask[id / 32] |= (int32_t) (1u << (id % 32)); };
+        if (p.phase == Impl::Phase::reasoning || p.phase == Impl::Phase::tool) {
+            p.bitmask = v.text_mask;
+            allow(p.phase == Impl::Phase::reasoning ? v.protocol.think_end : v.protocol.call_end);
+        } else {
+            int64_t shape[2] = {1, (int64_t) p.bitmask.size()};
+            DLTensor tensor{};
+            tensor.data = p.bitmask.data(); tensor.device = {kDLCPU, 0};
+            tensor.ndim = 2; tensor.dtype = {kDLInt, 32, 1}; tensor.shape = shape;
+            p.matcher.FillNextTokenBitmask(&tensor);
+            if (p.phase != Impl::Phase::answer) {
+                p.answer_mask = p.bitmask;
+                for (auto id : v.newline_ids) allow(id);
+                if (p.scope.tools) allow(v.protocol.call_start);
+                if (p.phase == Impl::Phase::after_tool) for (auto id : v.stop_ids) allow(id);
+            }
+        }
         // Always exclude padding beyond the vocabulary, including from an all-true mask.
         const size_t n = p.compiled->vocabulary->bytes.size();
         if (n % 32) p.bitmask.back() = (int32_t) ((uint32_t) p.bitmask.back() & ((1u << (n % 32)) - 1));
@@ -188,15 +213,53 @@ bool Matcher::accept(int32_t token) {
         if (p.history.size() >= kMaxHistoryTokens || p.output_bytes + bytes > kMaxOutputBytes)
             throw std::runtime_error("grammar resource limit: generation history exceeds its bound");
         detail::WorkScope scope(p.budget, 1000ms);
-        if (!p.matcher.AcceptToken(token)) throw std::runtime_error("native grammar rejected an allowed token");
+        const auto before = p.phase;
+        const auto& v = *p.compiled->vocabulary;
+        const bool stop = std::find(v.stop_ids.begin(), v.stop_ids.end(), token) != v.stop_ids.end();
+        if (p.phase == Impl::Phase::reasoning) {
+            p.channel = token == v.protocol.think_end ? "control" : "reasoning";
+            if (token == v.protocol.think_end) p.phase = Impl::Phase::choice;
+        } else if (p.phase == Impl::Phase::tool) {
+            p.channel = "tool";
+            if (token == v.protocol.call_end) p.phase = Impl::Phase::after_tool;
+        } else if (p.phase != Impl::Phase::answer && p.scope.tools && token == v.protocol.call_start) {
+            p.channel = "tool"; p.phase = Impl::Phase::tool;
+        } else if (p.phase == Impl::Phase::after_tool && stop) {
+            p.channel = "control"; p.stopped = true;
+        } else if (p.phase != Impl::Phase::answer &&
+                   !((uint32_t) p.answer_mask[token / 32] & (1u << (token % 32)))) {
+            // A newline that the grammar permits belongs to the answer. Only
+            // other newline-only tokens are protocol framing, never output.
+            p.channel = "control";
+        } else {
+            if (!p.matcher.AcceptToken(token)) throw std::runtime_error("native grammar rejected an allowed token");
+            p.channel = stop ? "control" : "answer"; p.phase = Impl::Phase::answer;
+        }
+        detail::work();
         scope.finish();
-        p.history.push_back(token); p.output_bytes += bytes; p.dirty = true;
+        p.history.push_back(token); p.output_bytes += bytes;
+        p.dirty = before != p.phase || p.phase == Impl::Phase::answer;
         return true;
     } catch (...) { p.failed = true; throw; }
 }
 
-bool Matcher::complete() const { impl_->usable(); return impl_->matcher.IsCompleted(); }
-bool Matcher::terminated() const { impl_->usable(); return impl_->matcher.IsTerminated(); }
+bool Matcher::complete() const {
+    impl_->usable();
+    return impl_->phase == Impl::Phase::after_tool ||
+           (impl_->phase != Impl::Phase::reasoning && impl_->phase != Impl::Phase::tool && impl_->matcher.IsCompleted());
+}
+bool Matcher::terminated() const { impl_->usable(); return impl_->stopped || impl_->matcher.IsTerminated(); }
+const char* Matcher::channel() const { impl_->usable(); return impl_->channel; }
+const char* Matcher::phase() const {
+    impl_->usable();
+    switch (impl_->phase) {
+        case Impl::Phase::reasoning: return "reasoning";
+        case Impl::Phase::choice: return "choice";
+        case Impl::Phase::tool: return "tool";
+        case Impl::Phase::after_tool: return "after_tool";
+        default: return "answer";
+    }
+}
 bool Matcher::failed() const { return impl_->failed; }
 const std::vector<int32_t>& Matcher::tokens() const { return impl_->history; }
 const std::string& Matcher::identity() const { return impl_->compiled->identity; }
@@ -248,15 +311,16 @@ Matcher Matcher::fork() const {
 
 Checkpoint Matcher::checkpoint() const {
     impl_->usable();
-    return {impl_->compiled, impl_->history};
+    return {impl_->compiled, impl_->history, impl_->scope};
 }
 
 void Matcher::restore(const Checkpoint& checkpoint) {
     impl_->usable();
-    if (checkpoint.compiled != impl_->compiled)
+    if (checkpoint.compiled != impl_->compiled || checkpoint.scope.thinking != impl_->scope.thinking ||
+        checkpoint.scope.tools != impl_->scope.tools)
         throw std::runtime_error("grammar/tokenizer/backend identity mismatch in checkpoint");
     if (checkpoint.tokens.size() > kMaxHistoryTokens) throw std::runtime_error("grammar checkpoint is too large");
-    Matcher fresh(impl_->compiled, impl_->budget.remaining);
+    Matcher fresh(impl_->compiled, impl_->budget.remaining, impl_->scope);
     for (int32_t t : checkpoint.tokens)
         if (!fresh.accept(t)) throw std::runtime_error("invalid grammar checkpoint token");
     fresh.impl_->budget.used += impl_->budget.used;

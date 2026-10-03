@@ -4137,6 +4137,7 @@ int main(int argc, char** argv) {
         const bool grammar_capable = !multi_gpu && !o.vision && grammar_end_ids;
         std::unique_ptr<strata::grammar::Compiler> grammar_compiler;
         std::string grammar_vocabulary;
+        strata::grammar::ProtocolTokens grammar_protocol;
         auto compile_grammar = [&](const std::string& source) {
             if (!grammar_compiler) {
                 auto vocab = strata::grammar::Vocabulary::from_pack(
@@ -4145,6 +4146,7 @@ int main(int argc, char** argv) {
                 if ((int64_t) vocab->bytes.size() != n_vocab)
                     throw std::runtime_error("grammar tokenizer vocabulary differs from model head");
                 grammar_vocabulary = vocab->identity;
+                grammar_protocol = vocab->protocol;
                 grammar_compiler = std::make_unique<strata::grammar::Compiler>(std::move(vocab));
             }
             return grammar_compiler->compile(source);
@@ -5066,7 +5068,7 @@ int main(int argc, char** argv) {
                         o.spec_min_p, (long long) o.conversation_cache_mib, o.conversation_cache_slots,
                         (long long) o.conversation_cache_min_free_mib, use_mtp ? "mtp" : "target",
                         requested_spec, requested_lookup, use_mtp ? 1 : 0, (double) mtp.vram_bytes() / 1048576.0,
-                        grammar_capable ? "gbnf-v2" : "none");
+                        grammar_capable ? "gbnf-v3" : "none");
         }
         // issue #29: a request whose heartbeat (tokens, prompt chunks, verify windows) stops for this long is stuck on
         // a flag nobody will raise - end the engine with where it was, so the server starts it again instead of the
@@ -5136,9 +5138,15 @@ int main(int argc, char** argv) {
                 try {
                     // Same compiler and initial matcher as GEN. No prompt, KV,
                     // sampler or generation state is touched by this command.
-                    strata::grammar::Matcher checked(compile_grammar(input.grammar));
+                    strata::grammar::Matcher checked(compile_grammar(input.grammar), 2000000,
+                                                     {input.thinking, input.tools});
                     checked.mask();
-                    std::printf("GRAMMAR_OK %s\n", grammar_vocabulary.c_str());
+                    // Python verifies the same special IDs as well as emitted bytes.
+                    // The native tokenizer remains authoritative for phase changes.
+                    if (input.thinking || input.tools) {
+                        std::printf("GRAMMAR_OK %s:qwen-v1:%d:%d:%d\n", grammar_vocabulary.c_str(),
+                                    grammar_protocol.think_end, grammar_protocol.call_start, grammar_protocol.call_end);
+                    } else std::printf("GRAMMAR_OK %s\n", grammar_vocabulary.c_str());
                 } catch (const std::exception& error) {
                     std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
                 }
@@ -5228,7 +5236,8 @@ int main(int argc, char** argv) {
                 }
 #ifdef STRATA_ENABLE_GBNF
                 try {
-                    matcher = std::make_unique<strata::grammar::Matcher>(compile_grammar(input.grammar));
+                    matcher = std::make_unique<strata::grammar::Matcher>(compile_grammar(input.grammar), 2000000,
+                                strata::grammar::Scope{input.thinking, input.tools});
                 } catch (const std::exception& error) {
                     std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
                     continue;
@@ -5894,13 +5903,16 @@ int main(int argc, char** argv) {
                     window.data(), outv.data(), T, max_new - produced_n, o.eos_ids);
                 const int a = retained.count - 1;
 #ifdef STRATA_ENABLE_GBNF
+                const char* grammar_channels[8] = {};
                 if (matcher) {
                     try {
                         grammar_diagnostics.capture(ver, T, p, retained.count, window.data(), outv.data(),
                                                     prefix_masks.bits.data(), hist_stage.data(), hist_n);
-                        for (int i = 0; i < retained.count; ++i)
+                        for (int i = 0; i < retained.count; ++i) {
                             if (!matcher->accept(outv[(size_t) i]))
                                 throw std::runtime_error("constrained selector returned an illegal token");
+                            grammar_channels[i] = matcher->channel();
+                        }
                     } catch (const std::exception& error) {
                         std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
                         return 1;
@@ -5925,6 +5937,11 @@ int main(int argc, char** argv) {
                 first_window = false;
                 const bool eos = retained.eos;
                 for (int i = 0; i < retained.count; ++i) {
+#ifdef STRATA_ENABLE_GBNF
+                    if (matcher && (input.thinking || input.tools))
+                        std::printf("TG %s %d\n", grammar_channels[i], (int) outv[(size_t) i]);
+                    else
+#endif
                     std::printf("T %d\n", (int) outv[(size_t) i]);
                     strata::core::progress_beat();
                     ++produced_n;

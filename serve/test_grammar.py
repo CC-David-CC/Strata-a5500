@@ -77,11 +77,11 @@ class Contract(unittest.TestCase):
             with self.subTest(source=repr(source)[:50]), self.assertRaises(ValueError):
                 GrammarConstraint(source)
 
-    def test_conflicts_and_explicit_thinking_off(self):
-        common = [dict(tools=[{'type': 'function'}]), dict(stop='END'), dict(strata_mcp=True),
+    def test_conflicts(self):
+        common = [dict(stop='END'), dict(strata_mcp=True),
                   dict(response_format={'type': 'json_object'}), dict(text={'format': {'type': 'json_schema'}}),
-                  dict(reasoning={'effort': 'low'}), dict(reasoning={'effort': 'none', 'summary': 'auto'}),
-                  dict(include=['reasoning.encrypted_content']), dict(temperature=float('nan')), dict(top_p=0),
+                  dict(reasoning={'effort': 'invalid'}), dict(reasoning_budget_tokens=16),
+                  dict(temperature=float('nan')), dict(top_p=0),
                   dict(seed=-1), dict(top_k=65)]
         for api in ('responses', 'chat'):
             for extra in common:
@@ -89,10 +89,9 @@ class Contract(unittest.TestCase):
                     validate_grammar_request(body(api, **extra), api)
             unset = body(api)
             unset.pop('reasoning' if api == 'responses' else 'reasoning_effort')
-            with self.assertRaises(ValueError):
-                validate_grammar_request(unset, api)
+            self.assertIsNotNone(validate_grammar_request(unset, api))
         for extra in (dict(logit_bias={'7': -100}), dict(n=2), dict(logprobs=True), dict(modalities=['audio']),
-                      dict(chat_template_kwargs={'enable_thinking': True}), dict(n=True), dict(max_tokens=True),
+                      dict(chat_template_kwargs={'enable_thinking': 'true'}), dict(n=True), dict(max_tokens=True),
                       dict(max_completion_tokens=8), dict(stream_options={'include_obfuscation': True}),
                       dict(stream_options={'include_usage': True}), dict(stream_options={'include_usage': False})):
             with self.subTest(extra=extra), self.assertRaises(ValueError):

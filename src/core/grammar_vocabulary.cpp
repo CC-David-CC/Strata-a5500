@@ -45,7 +45,7 @@ std::string vocabulary_identity(const std::vector<std::string>& bytes, const std
 } // namespace
 
 std::shared_ptr<const Vocabulary> Vocabulary::from_bytes(std::vector<std::string> bytes,
-                                                        std::vector<int32_t> stops) {
+                                                        std::vector<int32_t> stops, ProtocolTokens protocol) {
     if (bytes.empty() || bytes.size() > 300000 || stops.empty() || stops.size() > 16)
         throw std::runtime_error("unsupported grammar vocabulary or stop-token count");
     std::sort(stops.begin(), stops.end());
@@ -62,6 +62,22 @@ std::shared_ptr<const Vocabulary> Vocabulary::from_bytes(std::vector<std::string
             throw std::runtime_error("grammar token byte table exceeds its resource limit");
     }
     auto out = std::make_shared<Vocabulary>();
+    std::vector<int32_t> controls;
+    for (auto id : {protocol.think_end, protocol.call_start, protocol.call_end}) {
+        if (id == -1) continue;
+        if (id < 0 || (size_t) id >= bytes.size() || !bytes[id].empty() ||
+            std::find(stops.begin(), stops.end(), id) != stops.end() ||
+            std::find(controls.begin(), controls.end(), id) != controls.end())
+            throw std::runtime_error("invalid grammar protocol token IDs");
+        controls.push_back(id);
+    }
+    out->protocol = protocol;
+    out->text_mask.resize((bytes.size() + 31) / 32);
+    for (size_t i = 0; i < bytes.size(); ++i) {
+        if (bytes[i].empty()) continue;
+        out->text_mask[i / 32] |= (int32_t) (1u << (i % 32));
+        if (bytes[i].find_first_not_of('\n') == std::string::npos) out->newline_ids.push_back((int32_t) i);
+    }
     out->identity = vocabulary_identity(bytes, stops);
     out->bytes = std::move(bytes);
     out->stop_ids = std::move(stops);
@@ -95,6 +111,7 @@ std::shared_ptr<const Vocabulary> Vocabulary::from_pack(const std::filesystem::p
         throw std::runtime_error("grammar vocabulary and token-type sizes differ or exceed the limit");
     std::vector<std::string> encoded(vocab.size());
     std::vector<bool> seen(vocab.size());
+    ProtocolTokens protocol;
     for (const auto& [token, id_value] : vocab) {
         if (!id_value.is<double>()) throw std::runtime_error("grammar token ID must be an integer");
         const double raw = id_value.get<double>();
@@ -107,10 +124,15 @@ std::shared_ptr<const Vocabulary> Vocabulary::from_pack(const std::filesystem::p
         if (type < 1 || type > 5 || std::floor(type) != type)
             throw std::runtime_error("unsupported GPT-2 token type for native grammar");
         if (type == 1) encoded[id] = token;
+        if (type == 4) {
+            if (token == "</think>") protocol.think_end = (int32_t) id;
+            if (token == "<tool_call>") protocol.call_start = (int32_t) id;
+            if (token == "</tool_call>") protocol.call_end = (int32_t) id;
+        }
     }
     const xgrammar::TokenizerInfo info(encoded, xgrammar::VocabType::BYTE_LEVEL,
                                        (int) encoded.size(), stops, false);
-    return from_bytes(info.GetDecodedVocab(), std::move(stops));
+    return from_bytes(info.GetDecodedVocab(), std::move(stops), protocol);
 }
 
 } // namespace strata::grammar

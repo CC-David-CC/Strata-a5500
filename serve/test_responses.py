@@ -98,7 +98,7 @@ class Normalization(unittest.TestCase):
                  dict(reasoning={"summary": "unknown"}), dict(include=["file_search_call.results"]),
                  dict(input=[{"type": "item_reference", "id": "msg_missing"}]),
                  dict(input=[{"role": "user", "content": [{"type": "input_image", "image_url": "file://private"}]}]),
-                 dict(grammar="root ::= \"x\""), dict(response_format={"type": "json_object"}),
+                 dict(grammar=""), dict(response_format={"type": "json_object"}),
                  dict(conversation="conv_any"), dict(prompt_cache_key=42), dict(tool_choice="required"),
                  dict(tools=[{"type": "web_search"}]), dict(client_metadata={"bad_type": 42})]
         with mock.patch.object(self.svc, "load") as load:

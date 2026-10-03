@@ -55,7 +55,7 @@ from serve.frontend import (ChatTemplate, Event, OutputParser, anthropic_to_mess
 from serve.mcp import McpCancelled, hub_from_config  # noqa: E402
 from serve.winjob import contain  # noqa: E402
 from serve.structured import StructuredOutputError, prepare_format, validated_json  # noqa: E402
-from serve.grammar import (ANSWER_PREFIX, CAPABILITY, GrammarConstraint, validate_grammar_request,
+from serve.grammar import (ANSWER_PREFIX, THINK_PREFIX, CAPABILITY, GrammarConstraint, GrammarToken, GrammarOutput, validate_grammar_request,
                            validate_sampling, vocabulary_identity)  # noqa: E402
 
 IM_END = "<|im_end|>"
@@ -504,14 +504,16 @@ class StrataEngine:
         on = sampling.get("experimental_speed_projection")
         return f" cvec={int(on)}" if isinstance(on, bool) else ""
 
-    def require_grammar(self):
-        if self.info.get("grammar") != CAPABILITY:
-            raise ValueError("grammar requires a gbnf-v2 native build in a supported single-GPU text mode; "
+    def require_grammar(self, constraint):
+        supported = (CAPABILITY,) if constraint.scoped else (CAPABILITY, "gbnf-v2")
+        if self.info.get("grammar") not in supported:
+            raise ValueError("grammar requires a gbnf-v3 native build for reasoning/tools (gbnf-v2 for plain text) "
+                             "in a supported single-GPU text mode; "
                              "this engine does not advertise that capability")
 
     def validate_constraint(self, constraint):
         """Compile before HTTP headers. Caller owns the ordinary service FIFO."""
-        self.require_grammar()
+        self.require_grammar(constraint)
         try:
             self.proc.stdin.buffer.write(constraint.frame("CHECKG"))
             self.proc.stdin.buffer.flush()
@@ -542,7 +544,7 @@ class StrataEngine:
             f"GEN {int(max_new)}{self.sampling_keys(sampling or {})}"
         command = f"{head} {','.join(str(int(t)) for t in ids)}"
         if constraint is not None:
-            self.require_grammar()
+            self.require_grammar(constraint)
             if embeddings:
                 raise ValueError("grammar cannot be combined with image embeddings")
         try:
@@ -586,6 +588,16 @@ class StrataEngine:
                     if cancel.is_set():
                         return
                     yield int(line[2:])
+                elif line.startswith("TG "):
+                    allow = silence
+                    if cancel.is_set():
+                        return
+                    if constraint is None or not constraint.scoped:
+                        raise ValueError("unexpected scoped native grammar token")
+                    _, channel, token = line.split()
+                    if channel not in ("answer", "reasoning", "tool", "control"):
+                        raise ValueError("invalid native grammar token channel")
+                    yield GrammarToken(int(token), channel)
                 elif line.startswith("PP "):
                     f = line.split()
                     if len(f) >= 3 and f[1].isdigit() and f[2].isdigit():
@@ -1386,8 +1398,10 @@ class Service:
         the rest of the context."""
         prompt = self.template.render(messages, tools=tools, **kwargs)
         if constraint is not None:
-            if tools or kwargs.get("enable_thinking") is not False or not prompt.endswith(ANSWER_PREFIX):
-                raise ValueError("grammar requires the Qwen answer-only template boundary with thinking disabled")
+            thinking = kwargs.get("enable_thinking", True) is not False
+            if constraint.thinking != thinking or constraint.tools != bool(tools) or not prompt.endswith(
+                    THINK_PREFIX if thinking else ANSWER_PREFIX):
+                raise ValueError("grammar requires the matching Qwen reasoning/answer template boundary")
             if images_of(messages):
                 raise ValueError("grammar does not support image inputs")
         ids = self.tok.encode(prompt, parse_special=True)
@@ -1448,15 +1462,19 @@ class Service:
     def prepare_constraint(self, constraint, sampling):
         """Same native compiler, before headers, using existing serialized admission."""
         validate_sampling({**self.sampling_defaults, **self.shared, **sampling})
+        if constraint.thinking and self.reasoning_budget(sampling):
+            raise ValueError("grammar does not support injected reasoning-budget wrap-up; disable reasoning_budget_tokens")
         with self.fifo:
             self.ensure_loaded()
             validate = getattr(self.engine, "validate_constraint", None)
             if validate is None:
                 raise ValueError("this engine does not support native grammar enforcement")
-            if not hasattr(self, "_grammar_vocabulary"):
-                self._grammar_vocabulary = vocabulary_identity(self.tok, self.stop_ids)
+            if not hasattr(self, "_grammar_vocabularies"):
+                self._grammar_vocabularies = {}
+            if constraint.scoped not in self._grammar_vocabularies:
+                self._grammar_vocabularies[constraint.scoped] = vocabulary_identity(self.tok, self.stop_ids, constraint.scoped)
             actual = validate(constraint)
-            if actual != self._grammar_vocabulary:
+            if actual != self._grammar_vocabularies[constraint.scoped]:
                 raise ValueError("native grammar and HTTP tokenizer byte tables differ")
 
     def _note(self, n, evs):
@@ -1503,8 +1521,7 @@ class Service:
         if defaults:                   # the request's own fields win (explicit 0 stays greedy)
             req_values = {k: v for k, v in (sampling or {}).items() if v is not None}
             sampling = {**defaults, **req_values}
-        if constraint is not None and (thinking or tools):
-            raise ValueError("grammar generation requires answer-only content without tools")
+        scoped_output = GrammarOutput(tools) if constraint is not None and constraint.scoped else None
         parser = None if constraint is not None else OutputParser(thinking=thinking, tools=tools, stream_tools=True)
         detok, n, finish = Detokenizer(self.tok, strict=constraint is not None), 0, "length"
         reasoning_tokens = 0  # Responses usage: tokens consumed in the parser's reasoning region.
@@ -1554,6 +1571,10 @@ class Service:
                                     last_print = self._progress(last_print)
                                     yield "ping", None
                                     continue
+                                channel = t.channel if isinstance(t, GrammarToken) else None
+                                t = t.id if isinstance(t, GrammarToken) else t
+                                if scoped_output is not None and channel is None:
+                                    raise ValueError("native grammar omitted a token channel")
                                 n += 1
                                 if trace is not None and trace["first_token_s"] is None:
                                     with self.status_lock:
@@ -1566,15 +1587,16 @@ class Service:
                                     break
                                 raw_ids.append(t)
                                 seg.append(t)
-                                if lifecycle and parser is not None and parser.state == "reasoning":
+                                if lifecycle and (channel == "reasoning" or (parser is not None and parser.state == "reasoning")):
                                     reasoning_tokens += 1
                                 delta = detok.push(t)
-                                evs = parser.feed(delta) if parser is not None else ([Event("content", delta)] if delta else [])
+                                evs = scoped_output.feed(channel, delta) if scoped_output is not None else \
+                                    parser.feed(delta) if parser is not None else ([Event("content", delta)] if delta else [])
                                 self._note(n, evs)
                                 last_print = self._progress(last_print)
                                 for ev in evs:
                                     yield "event", ev
-                                if budget and parser.state == "reasoning":
+                                if budget and parser is not None and parser.state == "reasoning":
                                     thought += 1
                                     # at a clean point: no tag held back, no character split across tokens
                                     if thought >= budget and not parser.buf and not detok.pending():
@@ -1690,7 +1712,7 @@ class Service:
         finally:
             if emb:
                 Path(emb).unlink(missing_ok=True)
-        for ev in parser.finish() if parser is not None else ():
+        for ev in scoped_output.finish(finish) if scoped_output is not None else parser.finish() if parser is not None else ():
             yield "event", ev
         yield "done", {"finish": finish, "completion_tokens": n, "reused": (timings or {}).get("cache_n", 0),
                        "timings": timings, **({"reasoning_tokens": reasoning_tokens} if lifecycle else {})}
@@ -2602,6 +2624,8 @@ def make_handler(svc: Service):
                 use_mcp = bool(extra)
                 tools = (tools or []) + extra or None
             svc.reasoning_budget(req)                         # a bad value is a 400 before anything is sent
+            if constraint is not None:
+                constraint = constraint.with_scope(kw.get("enable_thinking", True) is not False, tools)
             ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new, constraint=constraint)
             if constraint is not None:
                 svc.prepare_constraint(constraint, req)

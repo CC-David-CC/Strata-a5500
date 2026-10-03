@@ -111,6 +111,40 @@ static Result run(Device& dev, std::shared_ptr<const Compiled> compiled, Sampler
     return result;
 }
 
+static void scoped_window(Device& dev) {
+    std::vector<std::string> bytes(nv);
+    for (int i = 0; i < 256; ++i) bytes[i] = std::string(1, (char) i);
+    Compiler compiler(Vocabulary::from_bytes(std::move(bytes), {eos}, {257, 258, 259}));
+    Matcher matcher(compiler.compile("root ::= \"OK\""), 2000000, {true, true});
+    const int32_t expected[] = {'x', 257, 258, 'y', 259, 'O', 'K', eos};
+    const char* channels[] = {"reasoning", "control", "tool", "tool", "tool", "answer", "answer", "control"};
+    PrefixMasks masks;
+    matcher.prefix_masks(expected, 7, masks);
+    REQUIRE(masks.rows == 8 && matcher.tokens().empty());
+    std::vector<float> logits(8 * nv, -10.0f);
+    for (int row = 0; row < 8; ++row) {
+        logits[row * nv + expected[row]] = 20;
+        logits[row * nv + 260] = 100; // unavailable special in every phase
+        if (row >= 5) logits[row * nv + 'z'] = 100; // not an answer continuation
+    }
+    check(cudaMemcpy(dev.logits, logits.data(), logits.size() * sizeof(float), cudaMemcpyHostToDevice));
+    check(cudaMemcpy(dev.masks, masks.bits.data(), masks.bits.size() * sizeof(int32_t), cudaMemcpyHostToDevice));
+    SamplerParams params; params.greedy = true; params.temperature = 0;
+    TokenMask mask{dev.masks, dev.scratch, dev.status};
+    sample_tokens(dev.logits, 8, nv, nullptr, 0, params, dev.out, dev.stream, &mask);
+    check(cudaStreamSynchronize(dev.stream));
+    int32_t picked[8], status[8];
+    check(cudaMemcpy(picked, dev.out, sizeof picked, cudaMemcpyDeviceToHost));
+    check(cudaMemcpy(status, dev.status, sizeof status, cudaMemcpyDeviceToHost));
+    for (int i = 0; i < 8; ++i) {
+        REQUIRE(status[i] == 0 && picked[i] == expected[i]);
+        REQUIRE(matcher.accept(picked[i]) && std::string(matcher.channel()) == channels[i]);
+    }
+    REQUIRE(matcher.terminated());
+    std::cout << "PASS: CUDA selection across reasoning/tool/answer phases in one 8-row speculative window. "
+                 "Synthetic logits; real masks and sampler.\n";
+}
+
 int main() {
     try {
         std::vector<std::string> bytes(nv);
@@ -118,6 +152,7 @@ int main() {
         Compiler compiler(Vocabulary::from_bytes(bytes, {eos}));
         auto compiled = compiler.compile("root ::= [ab]+");
         Device dev;
+        scoped_window(dev);
         int cases = 0;
         for (bool capture : {false, true}) for (int chain = 0; chain < 3; ++chain)
             for (int cap : {1,2,6,12}) for (int seed : {4,49}) {

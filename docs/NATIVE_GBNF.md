@@ -76,8 +76,8 @@ the replay key and enable `--experimental-responses` as described in the
 Both use the same native constraint argument and decoder. A build without GBNF
 rejects grammar requests; it does not download or enable a backend at runtime.
 
-The engine's existing `INFO` diagnostics must advertise `grammar=gbnf-v2`.
-The HTTP service checks that version, verifies the tokenizer byte table against
+The engine's existing `INFO` diagnostics advertise `grammar=gbnf-v3`.
+The HTTP service checks that version (also accepting `gbnf-v2` for plain answers), verifies the tokenizer byte table against
 the native vocabulary, and compiles the request before sending success headers.
 An older engine or an unsupported configuration is rejected explicitly. The server
 does not change its configured inference mode to accommodate a request.
@@ -108,11 +108,11 @@ pieces are in [Responses](gbnf-examples/responses.txt),
 [Chat Completions](gbnf-examples/chat-completions.txt) and
 [recursive Unicode](gbnf-examples/recursive-unicode.txt) examples.
 
-The initial G3 profile is single-GPU target-only text generation with the
-gpt2/qwen35 tokenizer and standard end controls. The rendered prompt must end at
-the Qwen answer-only boundary with thinking explicitly disabled. Requests with
-tools, generated reasoning, summaries, custom stop strings, images or simultaneous
-JSON requirements are rejected. Grammar source is bounded to 8192 UTF-8 bytes,
+The G3 checkpoint originally qualified single-GPU target-only text generation
+with the gpt2/qwen35 tokenizer, standard end controls and thinking disabled.
+The current branch also supports reasoning and client-owned tools, as described below.
+Custom stop strings, images and simultaneous JSON requirements are rejected.
+Grammar source is bounded to 8192 UTF-8 bytes,
 output to 8192 tokens and 65536 native bytes; compilation/matcher work has the
 [G1 limits](gbnf-evidence/G1/grammar-backend-decision.md). No arbitrary grammar
 file path, registry, Lark or JSON converter is exposed.
@@ -138,8 +138,48 @@ native matcher to select an allowed end control. Post-header failures use the
 existing API error lifecycle; they do not become successful completions.
 
 See the [G3 qualification and measured overhead](gbnf-evidence/G3/REPORT.md).
-Raw grammar qualification does not extend the separately tested Codex tool
-profile: grammar cannot be combined with tools or thinking at this checkpoint.
+That historical checkpoint did not qualify grammar with tools or thinking.
+
+## Final-answer grammar with reasoning and tools
+
+With the `gbnf-v3` native build, the same `grammar` field constrains assistant
+answer text while reasoning and client-owned function calls use their ordinary
+protocol. Responses supports flat and namespaced functions with explicit
+`strict: false`; Chat uses its nested `function` definition with `strict: false`.
+The client executes the function and sends its result on the next request.
+Tool results and prior input are prompt data and are never fed to the matcher.
+No tool-argument grammar or server-side tool execution is added.
+
+The native matcher starts in reasoning when enabled. After the Qwen `</think>`
+special token it permits a tool call or the first legal answer token. A completed
+tool call permits another call, an answer, or the end of that tool-calling turn.
+Once answer text starts, every answer token and the end control must satisfy
+the user's grammar. A tool-only turn therefore need not produce an answer.
+These phase decisions are copied with speculative matcher state; discarded
+drafts cannot advance the live grammar or change the emitted channel.
+
+The native pipe labels committed tokens as reasoning, tool, control or answer.
+The server uses its existing tool parser only on tool tokens and emits answer
+bytes directly. Newline-only tokens after reasoning/calls are framing only when
+the grammar does not accept them as the start of the answer. Grammar-permitted
+leading newlines and literal `<think>` text in an answer are preserved exactly.
+No token is silently rewritten after SSE delivery.
+
+Responses reasoning summaries remain a separate, bounded service pass and are
+outside the answer grammar. Injected `reasoning_budget_tokens` wrap-up is not
+supported with grammar: disable that server setting for constrained reasoning.
+Output-token limits still apply to the entire generated turn; incomplete tool
+envelopes are never exposed as unconstrained answer text. JSON Schema enforcement,
+strict tool schemas, hosted tools, Lark custom tools and forced tool choice are
+not added by this feature. This is not a claim of universal Codex compatibility.
+
+Run the synthetic HTTP contract checks with
+`python -m unittest serve.test_grammar serve.test_grammar_scope serve.test_responses`.
+They cover mocked model channels and mocked external results; they are not native
+enforcement evidence. `grammar_native_test` and `grammar_speculation_gpu_test`
+cover native phase masks and speculative selection. The separate
+[`tools/grammar_tool_probe.py`](../tools/grammar_tool_probe.py) runs a real native
+model while mocking only the client's external function result.
 
 ## G4: local inspection and application contracts
 

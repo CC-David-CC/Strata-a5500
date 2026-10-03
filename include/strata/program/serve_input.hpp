@@ -11,10 +11,12 @@ namespace strata::program {
 struct ServeRequest {
     std::string line, grammar, error;
     bool fatal = false;
+    bool thinking = false, tools = false;
 };
 
 // GENG1 <UTF-8 byte count>\n<exact grammar bytes>\nGEN <arguments>\n
-// The gbnf-v2 capability also permits CHECKG as the final command (compile only).
+// GENG2 <byte count> <thinking:0|1> <tools:0|1> adds final-answer scope.
+// Both versions permit CHECKG as the final command (compile only).
 // A malformed/truncated frame terminates this pipe; its body is never reparsed
 // as commands. The caller owns the existing queue and STOP/cancellation flag.
 class ServeInput {
@@ -27,11 +29,20 @@ public:
             bool terminated = false;
             if (!line(request.line, terminated)) { finished_ = true; return std::nullopt; }
             if (request.line.rfind("GENG", 0) != 0) return request;
-            if (!terminated || request.line.rfind("GENG1 ", 0) != 0)
+            const bool scoped = request.line.rfind("GENG2 ", 0) == 0;
+            if (!terminated || (!scoped && request.line.rfind("GENG1 ", 0) != 0))
                 throw std::runtime_error("unsupported or truncated grammar frame header");
             size_t count = 0;
             const char* start = request.line.data() + 6;
             const char* end = request.line.data() + request.line.size();
+            if (scoped) {
+                if (end - start < 5 || end[-4] != ' ' || end[-2] != ' ' ||
+                    (end[-3] != '0' && end[-3] != '1') || (end[-1] != '0' && end[-1] != '1'))
+                    throw std::runtime_error("grammar scope requires thinking/tools boolean flags");
+                request.thinking = end[-3] == '1'; request.tools = end[-1] == '1';
+                if (!request.thinking && !request.tools) throw std::runtime_error("empty grammar scope");
+                end -= 4;
+            }
             const auto number = std::from_chars(start, end, count);
             if (number.ec != std::errc{} || number.ptr != end || count < 1 || count > 8192)
                 throw std::runtime_error("grammar frame length must be 1..8192 bytes");

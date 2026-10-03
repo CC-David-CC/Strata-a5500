@@ -28,11 +28,19 @@ int main() {
             auto check = parse("GENG1 " + std::to_string(source.size()) + "\n" + source + "\nCHECKG\n" + frame, chunk);
             REQUIRE(check.size() == 2 && check[0].line == "CHECKG" && check[0].grammar == source);
             REQUIRE(!check[0].fatal && check[1].line == "GEN 8 1,2,3");
+            for (const std::string flags : {"1 1", "1 0", "0 1"}) {
+                const auto scoped = parse("GENG2 " + std::to_string(source.size()) + " " + flags +
+                                          "\n" + source + "\nCHECKG\n" + frame, chunk);
+                REQUIRE(scoped.size() == 2 && !scoped[0].fatal && scoped[0].grammar == source);
+                REQUIRE(scoped[0].thinking == (flags[0] == '1') && scoped[0].tools == (flags[2] == '1'));
+                REQUIRE(!scoped[1].thinking && !scoped[1].tools);
+            }
             for (size_t cut = 1; cut < frame.size(); ++cut) {
                 auto bad = parse(frame.substr(0, cut), chunk);
                 if (cut >= 4) REQUIRE(bad.size() == 1 && bad[0].fatal);
             }
-            for (const std::string header : {"GENG2 1", "GENG1 -1", "GENG1 8193", "GENG1 0", "GENG1 1x"}) {
+            for (const std::string header : {"GENG2 1", "GENG1 -1", "GENG1 8193", "GENG1 0", "GENG1 1x",
+                                            "GENG2 1 0 0", "GENG2 1 1 2", "GENG2 1 1 1 extra"}) {
                 auto bad = parse(header + "\nSTOP\nGEN 2 1\n", chunk);
                 REQUIRE(bad.size() == 1 && bad[0].fatal);
             }
