@@ -6,6 +6,10 @@ title request also completed with `{"title":"Fix add function in calc.py"}`.
 Seven additional native HTTP cases passed, including typed SSE and a tool loop
 whose external result was deliberately arbitrary text.
 
+This historical checkpoint is followed by the
+[30-schema/12-tool qualification](../schema-inventory/REPORT.md), which adds
+strict function validation, native parser fixes and the complete captured inventory.
+
 ## Source and changed responsibilities
 
 Branch `work/gbnf`, worktree `strata-native-gbnf`, tested source commit
@@ -94,7 +98,7 @@ See [JSON output](../../JSON_OUTPUT.md) and [local Codex setup](../../CODEX_LOCA
 JSON Schema draft 2020-12 validation is mandatory; missing dependencies or unknown
 keywords fail admission. Native compilation may reject unrepresentable or expensive
 schemas. A final schema-validation failure is `response.failed`, not weaker success.
-Strict function-parameter schemas, Lark tools, hosted tools, images, retained
+At this checkpoint, strict function-parameter schemas, Lark tools, hosted tools, images, retained
 responses and long-session compaction remain separate unsupported capabilities.
 This is one pinned client/model/profile qualification, not universal Codex support.
 

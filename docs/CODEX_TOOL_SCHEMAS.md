@@ -53,3 +53,8 @@ separate capabilities; they are not implemented by routing a function name.
 The schema ZIP's SDK wire inventory includes such excluded types for inspection.
 Its compatibility claim concerns the twelve declarations above and individually
 labeled JSON answer examples, not every type in the SDK inventory.
+
+The [native schema/tool checkpoint](gbnf-evidence/schema-inventory/REPORT.md)
+records all twelve real generated calls and mock-result continuations, 30 JSON
+examples, 239 Python checks and the earlier failed attempts. The probe supplies
+known sample arguments; it does not execute these client tools.

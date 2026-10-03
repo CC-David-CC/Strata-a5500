@@ -60,7 +60,8 @@ The remaining protocol limits in [RESPONSES.md](RESPONSES.md) still apply: `stor
 full-history replay, client-owned function tools, no hosted tools, no image input,
 and no Lark tools or server compaction endpoint. [All 12 captured function schemas](CODEX_TOOL_SCHEMAS.md)
 have transport/replay tests, including strict normalized variants. Native JSON
-answer schemas are supported by the stacked GBNF build. This catalog does not enable
+and all twelve generated tool loops have [native qualification evidence](gbnf-evidence/schema-inventory/REPORT.md).
+JSON answer schemas are supported by the stacked GBNF build. This catalog does not enable
 those capabilities or modify a client's requested schema. Long-session compaction is not
 qualified; start a new conversation when approaching the configured context limit.
 Keep the same replay key if you need to replay an earlier encrypted reasoning item. Fresh
@@ -69,3 +70,6 @@ lets the model server remain bound to loopback.
 
 The [real steering checkpoint](responses-evidence/steering/REPORT.md) records the
 read/edit/test task, interrupted output, permission update and successful next turn.
+
+For matched prompts with zero through three explicit examples, including real
+Windows and Ubuntu Codex harness commands, see [prompt examples](PROMPT_EXAMPLES.md).

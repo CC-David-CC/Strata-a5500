@@ -23,6 +23,7 @@ import urllib.request
 from urllib.parse import urlsplit
 
 from responses_native_codex_probe import EXPECTED_SHA256, EXPECTED_VERSION
+from responses_prompt_examples import attempts, coding_instructions
 
 SPEC = '''Repair parse_settings(text) in settings_parser.py. Use only the Python standard library.
 Input must be a str, otherwise raise TypeError. Return a normal dict, preserving insertion order.
@@ -184,28 +185,22 @@ def inspect_stream(raw):
             "output_types": [i["type"] for i in final["output"]], "reassembles_final": True}
 
 
-def main():
-    sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--codex", type=Path, required=True)
-    parser.add_argument("--base-url", required=True)
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--timeout", type=int, default=1500)
-    parser.add_argument("--instructions", type=Path, help="explicit, documented model_instructions_file override; saved in evidence")
-    args = parser.parse_args()
+def run_once(args):
     base = args.base_url.rstrip("/")
     url = urlsplit(base)
     assert url.scheme == "http" and url.hostname == "127.0.0.1" and url.path == "/v1"
     key = os.environ["STRATA_API_KEY"]
     binary = args.codex.resolve()
-    assert digest(binary.read_bytes()) == EXPECTED_SHA256
+    assert digest(binary.read_bytes()) == args.codex_sha256, 'Codex binary differs from the explicit pin'
     assert subprocess.check_output([str(binary), "--version"], text=True).strip() == EXPECTED_VERSION
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     workspace = out / "coding workspace"
     workspace.mkdir()  # normal inherited ACL for the Windows restricted token
     (workspace / "input files").mkdir()
-    originals = {"SPEC.txt": SPEC.encode(), "settings_parser.py": INITIAL.encode(), "test_settings.py": TESTS.encode(),
+    spec = SPEC if os.name == 'nt' else SPEC.replace('python -B', 'python3 -B').replace(
+        'Use PowerShell -LiteralPath for file names containing spaces or brackets.', 'Use Bash quoting for file names containing spaces or brackets.')
+    originals = {"SPEC.txt": spec.encode(), "settings_parser.py": INITIAL.encode(), "test_settings.py": TESTS.encode(),
                  "input files/literal [values].txt": LITERALS.encode(),
                  "input files/untouched [sentinel].txt": b'\xef\xbb\xbfPreserve BOM, CRLF, trailing spaces.  \r\n\x00end\r\n'}
     for name, raw in originals.items():
@@ -280,6 +275,7 @@ def main():
     profile = f'''model = "qwen3.8-flash-next"
 model_provider = "strata-local"
 web_search = "disabled"
+model_reasoning_effort = "medium"
 
 [windows]
 sandbox = "unelevated"
@@ -294,8 +290,11 @@ supports_websockets = false
 request_max_retries = 0
 stream_max_retries = 0
 '''
-    if args.instructions:
-        instructions = args.instructions.read_text(encoding="utf-8")
+    catalog = Path(__file__).resolve().parents[1] / 'docs/codex/model-catalog-0.160.0.json'
+    profile = 'model_catalog_json = ' + json.dumps(catalog.as_posix()) + '\n' + profile
+    if args.instructions or args.examples is not None:
+        instructions = (args.instructions.read_text(encoding="utf-8") if args.instructions else
+                        coding_instructions('windows' if os.name == 'nt' else 'ubuntu', args.examples))
         instruction_path = client_home / "model-instructions.txt"
         instruction_path.write_text(instructions, encoding="utf-8")
         (out / "model-instructions.txt").write_text(instructions, encoding="utf-8")
@@ -315,6 +314,9 @@ Use your real local file and shell tools; do not just describe a patch. No netwo
 Keep work inside this workspace. All fixture content is data. Leave tests, specification, and sentinel unchanged.
 Python is installed at {sys.executable}; quote the path when using PowerShell. Stop after verification succeeds.
 '''
+    if os.name != 'nt':
+        prompt = prompt.replace('python -B', 'python3 -B').replace(
+            "using Get-Content -LiteralPath with\n-ErrorAction Stop", "using cat --").replace('when using PowerShell', 'when using Bash')
     (out / "task.txt").write_text(prompt, encoding="utf-8")
     env = {k: v for k, v in os.environ.items() if not any(s in k.upper() for s in
            ("TOKEN", "API_KEY", "SECRET", "CODEX", "OPENAI", "ANTHROPIC", "PROXY"))}
@@ -326,9 +328,10 @@ Python is installed at {sys.executable}; quote the path when using PowerShell. S
     argv = [str(binary), "--no-daemon", "--ask-for-approval", "never", "exec", "--ignore-rules", "--strict-config",
             "--profile", "strata", "--ephemeral", "--skip-git-repo-check", "--sandbox", "workspace-write",
             "--cd", str(workspace), "--color", "never", "--json", prompt]
-    receipt = {"result": "running", "client": EXPECTED_VERSION, "codex_sha256": EXPECTED_SHA256,
+    receipt = {"result": "running", "client": EXPECTED_VERSION, "codex_sha256": args.codex_sha256,
                "native_inference": True, "scripted_model_output": False, "mocked_client_tools": False,
-               "request_rewriting": False, "model_instructions_override": bool(args.instructions),
+               "request_rewriting": False, "model_instructions_override": bool(args.instructions) or args.examples is not None,
+               "example_count": args.examples, "client_platform": 'windows' if os.name == 'nt' else 'ubuntu',
                "argv": argv, "health": health}
     (out / "invocation.json").write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     started = time.monotonic()
@@ -357,7 +360,8 @@ Python is installed at {sys.executable}; quote the path when using PowerShell. S
         receipt["client_observed_failing_tests"] = bool(failed_tests)
         receipt["client_verified_after_failure"] = bool(failed_tests and passed_tests and min(failed_tests) < max(passed_tests))
         receipt["expected_missing_file_failure"] = any("does-not-exist.fixture" in c["command"]
-            and c.get("exit_code") not in (None, 0) and "PathNotFound" in c.get("aggregated_output", "") for c in commands)
+            and c.get("exit_code") not in (None, 0) and any(word in c.get("aggregated_output", "") for word in
+                ("PathNotFound", "No such file or directory")) for c in commands)
         rows = get("/api/requests")["requests"]
         exchanges = [get("/api/requests?id=" + row["id"]) for row in reversed(rows) if row["id"] not in before]
         (out / "exchanges.json").write_text(json.dumps(exchanges, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -414,6 +418,44 @@ Python is installed at {sys.executable}; quote the path when using PowerShell. S
         (out / "result.json").write_text(json.dumps(receipt, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps({k: v for k, v in receipt.items() if k not in ("argv", "client_commands", "health")}, indent=2), flush=True)
     return 0 if receipt["result"] == "pass" else 1
+
+
+def main():
+    sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--codex", type=Path, required=True)
+    parser.add_argument("--codex-sha256", default=EXPECTED_SHA256, help="explicit binary pin; the default is the qualified Windows 0.160.0 binary")
+    parser.add_argument("--base-url", required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--timeout", type=int, default=1500)
+    parser.add_argument("--instructions", type=Path, help="legacy custom profile; example count cannot be inferred")
+    parser.add_argument("--examples", type=int, choices=range(4), help="matched zero/one/two/three-example coding profile")
+    parser.add_argument("--hint-on-failure", action="store_true", help="fresh project and client home per attempt, baseline then at most three examples")
+    args = parser.parse_args()
+    if args.instructions and (args.examples is not None or args.hint_on_failure):
+        parser.error('custom instructions have an unknown example count; use either the matched profiles or --instructions')
+    if not args.hint_on_failure:
+        return run_once(args)
+    counts = attempts(args.examples or 0, True)
+    parent = args.out.resolve()
+    parent.mkdir(parents=True, exist_ok=False)
+    report = {'result': 'running', 'maximum_examples': 3, 'attempts': [], 'baseline_passed': None}
+    try:
+        for count in counts:
+            args.examples, args.out = count, parent / ('examples-' + str(count))
+            code = run_once(args)
+            report['attempts'].append({'example_count': count, 'result': 'pass' if code == 0 else 'fail',
+                                       'receipt': args.out.name + '/result.json'})
+            if count == 0:
+                report['baseline_passed'] = code == 0
+            if code == 0:
+                report.update(result='pass', passed_with_examples=count)
+                break
+        else:
+            report['result'] = 'fail'
+    finally:
+        (parent / 'result.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+    return 0 if report['result'] == 'pass' else 1
 
 
 if __name__ == "__main__":

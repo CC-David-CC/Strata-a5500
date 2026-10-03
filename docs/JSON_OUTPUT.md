@@ -89,6 +89,9 @@ when Codex sends a JSON title request.
 The [native JSON checkpoint](gbnf-evidence/JSON/REPORT.md) records the real Codex
 task and title, seven GPU-backed HTTP cases, schema/tool/reasoning streaming,
 231 Python tests, ten native tests and the independent BF16 4B comparison.
+The later [schema and tool checkpoint](gbnf-evidence/schema-inventory/REPORT.md)
+adds 30 native JSON examples, all twelve captured Codex tool loops and strict
+function validation, with 239 Python checks and the retained failing cases.
 
 References: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs),
 [XGrammar compiler](https://xgrammar.mlc.ai/docs/latest/api/python/grammar_compiler.html).

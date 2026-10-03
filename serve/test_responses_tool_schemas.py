@@ -26,20 +26,18 @@ def script(name, arguments):
 
 
 class CapturedToolSchemas(unittest.TestCase):
-    def test_zero_parameter_prompt_example_round_trips_without_invented_arguments(self):
+    def test_zero_parameter_native_view_has_no_hidden_example(self):
         original = copy.deepcopy(TOOLS)
         tool = next(native for native, _, _ in native_tools(TOOLS) if native['name'] == 'get_goal')
         self.assertEqual(TOOLS, original)
-        template = ChatTemplate(ROOT / 'serve/chat_template.jinja')
-        prompt = template.render([{'role': 'user', 'content': 'Read the goal.'}], [tool], enable_thinking=False)
         call = '<tool_call>\n<function=get_goal>\n</function>\n</tool_call>'
-        self.assertIn(call, tool['description'])
-        self.assertIn(json.dumps(tool['description'])[1:-1], prompt)
+        original_tool = next(t for t in TOOLS if t.get('name') == 'get_goal')
+        self.assertEqual(tool['description'], original_tool['description'])
+        self.assertNotIn(call, tool['description'])
         parser = OutputParser(thinking=False, tools=[tool], stream_tools=True)
         events = parser.feed(call) + parser.finish()
         self.assertEqual(''.join(e.text for e in events if e.kind == 'tool_args'), '{}')
         self.assertEqual(next(e.call.arguments for e in events if e.kind == 'tool_call'), {})
-        original_tool = next(t for t in TOOLS if t.get('name') == 'get_goal')
         open_tool = {**original_tool, 'parameters': {**original_tool['parameters'], 'additionalProperties': True}}
         native = next(native_tools([open_tool]))[0]
         self.assertNotIn(call, native.get('description', ''))
