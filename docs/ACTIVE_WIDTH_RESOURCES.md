@@ -41,6 +41,9 @@ All four paths were screened on code, prose and editing with 1,024 output
 tokens. The verifier allocation/cap was eight and the MTP cap was four. The best
 improving workload for each path advanced to an **ABBA** sequence with a 4,096
 output budget. Serial did not improve in the screen and was not repeated.
+Each screen job processed the three cases in one engine, without prompt reuse;
+policy timing history could carry between cases. Each selected long repeat used
+one workload in a fresh engine.
 
 | Path and workload | Control output tok/s | Both output tok/s | Change | Control effective tok/s | Both effective tok/s |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -49,7 +52,8 @@ output budget. Serial did not improve in the screen and was not repeated.
 | MTP + n-gram, editing | 313.96 | 324.15 | +3.25% | 85.88 | 86.63 |
 
 Numbers are the means of two observations per arm. Effective throughput is
-output tokens divided by prefill plus decode time. The code requests all
+output tokens divided by request wall time (prefill, decode and protocol
+overhead, excluding engine startup). The code requests all
 stopped naturally after **2,467 tokens**, and editing after **1,238**; each
 matched control/candidate pair had identical output hashes. These are three
 selected workloads, not a broad statistical performance claim.
