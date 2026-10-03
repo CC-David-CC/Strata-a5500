@@ -1,0 +1,2082 @@
+{
+  "commit": "49b4c76",
+  "engine_sha256": "ae4c8e0c1169c1a7fd401f53e907ca2bfdac5382cccc1e2b45e15cbf2cc85a69",
+  "cross_shape_state_gate_passed": true,
+  "repeat_output_gate_passed": true,
+  "completed": true,
+  "started": 1791018014.1265395,
+  "finished": 1791020159.1220784,
+  "selection": [
+    {
+      "path": "serial",
+      "task": "coding",
+      "screen_ratios": {
+        "coding": 1.0003047232097513,
+        "writing": 0.9982612939633347,
+        "editing": 0.9994792198509138
+      }
+    },
+    {
+      "path": "mtp",
+      "task": "coding",
+      "screen_ratios": {
+        "coding": 1.0131152311273697,
+        "writing": 1.0126274056846738,
+        "editing": 1.011325700437696
+      }
+    },
+    {
+      "path": "ngram",
+      "task": "editing",
+      "screen_ratios": {
+        "coding": 1.0068245456915803,
+        "writing": 1.0029814296616637,
+        "editing": 1.046537216828479
+      }
+    },
+    {
+      "path": "mtp-ngram",
+      "task": "editing",
+      "screen_ratios": {
+        "coding": 1.0053623726436498,
+        "writing": 1.0073856848050398,
+        "editing": 1.0282687808682092
+      }
+    }
+  ],
+  "scope": "RTX PRO 6000 Blackwell Workstation Edition 96 GB, 128 GB host RAM, full Unsloth UD-Q4_K_XL, int8 KV; 65536 input, 73728 allocation",
+  "phases": [
+    {
+      "name": "oracle-control",
+      "completed": true,
+      "source": "/home/dflanag3/fleet-downloads/rtxpro-q4-wide-active-shapes-20261003/oracle-control-attempt-01/widths.json",
+      "source_sha256": "87d052e7be9ddc15a33e673e94f76568295b1817705d629c4a7abca17d856137",
+      "records": [
+        {
+          "path": "oracle",
+          "width": 8,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791018633.3624325,
+          "finished": 1791018666.7196681,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10273.6,
+                "decode_ms": 6678.0,
+                "finish": "stop",
+                "drafts_accepted": 2157,
+                "drafts_offered": 2157,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.67320955300238,
+              "wall_seconds": 16.959847207996063,
+              "decode_tps": 369.4219826295298,
+              "effective_output_tps": 145.53198518133982,
+              "wall_output_tps": 145.461216115018,
+              "ttft_seconds": 10.291354278990184,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=8 ms=72.666"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 310 windows, avg T 7.96, 7.96 tokens/window, 21.54 ms/window = verify 21.51 (GPU-reach wait 18.58 + per-layer host 1.45 [plan 0.21 actq 0.83 jobs 0.31 CPU 0.00] + stage 0.52) + commit/emit 0.02 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 79.58, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        },
+        {
+          "path": "oracle",
+          "width": 16,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791018666.7202377,
+          "finished": 1791018699.3293028,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10359.7,
+                "decode_ms": 5856.6,
+                "finish": "stop",
+                "drafts_accepted": 2311,
+                "drafts_offered": 2311,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.609603381002671,
+              "wall_seconds": 16.22370683599729,
+              "decode_tps": 421.2341631663422,
+              "effective_output_tps": 152.1308806571166,
+              "wall_output_tps": 152.06142621649207,
+              "ttft_seconds": 10.376646574994083,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=16 ms=156.907"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 156 windows, avg T 15.81, 15.81 tokens/window, 37.54 ms/window = verify 37.51 (GPU-reach wait 31.93 + per-layer host 3.00 [plan 0.52 actq 1.63 jobs 0.62 CPU 0.00] + stage 0.80) + commit/emit 0.02 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 158.14, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "oracle-hc",
+      "completed": true,
+      "source": "/home/dflanag3/fleet-downloads/rtxpro-q4-wide-active-shapes-20261003/oracle-hc-attempt-01/widths.json",
+      "source_sha256": "2eacf249feb383088830cbf42430310b9af85a73bdb6ba5a9895c45888408efb",
+      "records": [
+        {
+          "path": "oracle",
+          "width": 8,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791018761.7939167,
+          "finished": 1791018794.9908628,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10284.4,
+                "decode_ms": 6472.1,
+                "finish": "stop",
+                "drafts_accepted": 2157,
+                "drafts_offered": 2157,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.707868683006382,
+              "wall_seconds": 16.76477495599829,
+              "decode_tps": 381.1745801208263,
+              "effective_output_tps": 147.2264494375317,
+              "wall_output_tps": 147.15377966450595,
+              "ttft_seconds": 10.302213390998077,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=8 ms=71.927"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 310 windows, avg T 7.96, 7.96 tokens/window, 20.88 ms/window = verify 20.84 (GPU-reach wait 17.92 + per-layer host 1.44 [plan 0.21 actq 0.82 jobs 0.30 CPU 0.00] + stage 0.53) + commit/emit 0.02 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 79.58, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        },
+        {
+          "path": "oracle",
+          "width": 16,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791018794.9914665,
+          "finished": 1791018827.3667088,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10400.6,
+                "decode_ms": 5624.7,
+                "finish": "stop",
+                "drafts_accepted": 2311,
+                "drafts_offered": 2311,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.566070290995413,
+              "wall_seconds": 16.033372705991496,
+              "decode_tps": 438.6011698401693,
+              "effective_output_tps": 153.9440759299358,
+              "wall_output_tps": 153.866566020642,
+              "ttft_seconds": 10.418323270001565,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=16 ms=156.127"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 156 windows, avg T 15.81, 15.81 tokens/window, 36.06 ms/window = verify 36.02 (GPU-reach wait 30.50 + per-layer host 2.92 [plan 0.52 actq 1.61 jobs 0.62 CPU 0.00] + stage 0.82) + commit/emit 0.02 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 158.14, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "oracle-bf16",
+      "completed": true,
+      "source": "/home/dflanag3/fleet-downloads/rtxpro-q4-wide-active-shapes-20261003/oracle-bf16-attempt-01/widths.json",
+      "source_sha256": "a67ead69ced1d80ac6efd82adac06fde3ca5b6885672584471708a550557ae86",
+      "records": [
+        {
+          "path": "oracle",
+          "width": 8,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791018890.1774466,
+          "finished": 1791018923.5164557,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10260.0,
+                "decode_ms": 6681.8,
+                "finish": "stop",
+                "drafts_accepted": 2157,
+                "drafts_offered": 2157,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.66494201599562,
+              "wall_seconds": 16.949992827998358,
+              "decode_tps": 369.2118890119429,
+              "effective_output_tps": 145.61616829380586,
+              "wall_output_tps": 145.5457842982067,
+              "ttft_seconds": 10.277736204006942,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=8 ms=72.751"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 310 windows, avg T 7.96, 7.96 tokens/window, 21.55 ms/window = verify 21.52 (GPU-reach wait 18.59 + per-layer host 1.45 [plan 0.23 actq 0.82 jobs 0.30 CPU 0.00] + stage 0.53) + commit/emit 0.02 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 79.58, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        },
+        {
+          "path": "oracle",
+          "width": 16,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791018923.5171156,
+          "finished": 1791018956.0745914,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10405.3,
+                "decode_ms": 5834.1,
+                "finish": "stop",
+                "drafts_accepted": 2311,
+                "drafts_offered": 2311,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.534392785993987,
+              "wall_seconds": 16.24690225199447,
+              "decode_tps": 422.85870999811453,
+              "effective_output_tps": 151.91447959899997,
+              "wall_output_tps": 151.84433079833119,
+              "ttft_seconds": 10.422276299999794,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=16 ms=156.557"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 156 windows, avg T 15.81, 15.81 tokens/window, 37.40 ms/window = verify 37.36 (GPU-reach wait 31.86 + per-layer host 2.94 [plan 0.52 actq 1.61 jobs 0.62 CPU 0.00] + stage 0.79) + commit/emit 0.03 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 158.14, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "oracle-both",
+      "completed": true,
+      "source": "/home/dflanag3/fleet-downloads/rtxpro-q4-wide-active-shapes-20261003/oracle-both-attempt-01/widths.json",
+      "source_sha256": "113f4f6bc04f469d87ea435704c1bd84dba768fe1f261d644e5ea402e15d14f8",
+      "records": [
+        {
+          "path": "oracle",
+          "width": 8,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791019018.6532247,
+          "finished": 1791019051.8834116,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10291.1,
+                "decode_ms": 6465.4,
+                "finish": "stop",
+                "drafts_accepted": 2157,
+                "drafts_offered": 2157,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.689471425997908,
+              "wall_seconds": 16.76573041100346,
+              "decode_tps": 381.5695857951558,
+              "effective_output_tps": 147.2264494375317,
+              "wall_output_tps": 147.1453935809973,
+              "ttft_seconds": 10.309821742004715,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 308,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=8 ms=72.994"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 310 windows, avg T 7.96, 7.96 tokens/window, 20.86 ms/window = verify 20.82 (GPU-reach wait 17.84 + per-layer host 1.48 [plan 0.23 actq 0.82 jobs 0.30 CPU 0.00] + stage 0.56) + commit/emit 0.02 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 79.58, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        },
+        {
+          "path": "oracle",
+          "width": 16,
+          "cases": [
+            "coding"
+          ],
+          "output_tokens": 4096,
+          "prepare": true,
+          "started": 1791019051.8840156,
+          "finished": 1791019084.291387,
+          "results": [
+            {
+              "task": "coding",
+              "input_tokens": 65536,
+              "prompt_sha256": "a8024ab0ba6b95ae36f2b9bd621723ed0f9b98e64ad82b94d389cdacb2232896",
+              "requested_output_budget": 4096,
+              "engine_output_limit": 2467,
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22",
+              "output_tokens": 2467,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10411.3,
+                "decode_ms": 5597.0,
+                "finish": "stop",
+                "drafts_accepted": 2311,
+                "drafts_offered": 2311,
+                "reused": 0,
+                "hits": 1184160,
+                "lookups": 1184160,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "startup_seconds": 14.615367332997266,
+              "wall_seconds": 16.01605856300739,
+              "decode_tps": 440.7718420582455,
+              "effective_output_tps": 154.1075567049593,
+              "wall_output_tps": 154.03290330731426,
+              "ttft_seconds": 10.42864391200419,
+              "natural_stop": true,
+              "width_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "committed_histogram": {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 154,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0
+              },
+              "graph_setup_lines": [
+                "strata serve: GRAPH_SETUP verify=1 mtp=0 limit=16 ms=156.530"
+              ],
+              "decode_timing_lines": [
+                "strata decode timing: 156 windows, avg T 15.81, 15.81 tokens/window, 35.88 ms/window = verify 35.84 (GPU-reach wait 30.31 + per-layer host 2.96 [plan 0.52 actq 1.63 jobs 0.62 CPU 0.00] + stage 0.80) + commit/emit 0.03 + draft 0.00; per layer-window: CPU experts 0.00 (0.00 entries), VRAM hits 158.14, PCIe 0.00"
+              ],
+              "output_and_count_gate_passed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "shape-four-path-screen",
+      "completed": true,
+      "source": "/home/dflanag3/fleet-downloads/rtxpro-q4-wide-active-shapes-20261003/shape-four-path-screen-attempt-01/matrix.json",
+      "source_sha256": "89ab6eb335c85dd62ca57b40e922a9e72968637d2600c6b5e35ad8134b15b689",
+      "records": [
+        {
+          "path": "ngram",
+          "variant": "both",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "000-ngram-both-screen",
+          "started": 1791019147.2040088,
+          "finished": 1791019216.407742,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 116.0852954846901,
+              "effective_output_tps": 53.64999518998007,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10257.7,
+                "decode_ms": 8821.1,
+                "finish": "length",
+                "drafts_accepted": 157,
+                "drafts_offered": 360,
+                "reused": 0,
+                "hits": 588960,
+                "lookups": 588960,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 104.19740524039685,
+              "effective_output_tps": 51.47267995269446,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10058.5,
+                "decode_ms": 9827.5,
+                "finish": "length",
+                "drafts_accepted": 5,
+                "drafts_offered": 50,
+                "reused": 0,
+                "hits": 513120,
+                "lookups": 513120,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 331.3915857605178,
+              "effective_output_tps": 77.27885727607395,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10152.8,
+                "decode_ms": 3090.0,
+                "finish": "length",
+                "drafts_accepted": 863,
+                "drafts_offered": 980,
+                "reused": 0,
+                "hits": 547680,
+                "lookups": 547680,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        },
+        {
+          "path": "mtp-ngram",
+          "variant": "control",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "001-mtp-ngram-control-screen",
+          "started": 1791019216.408375,
+          "finished": 1791019278.843977,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 210.06851844253885,
+              "effective_output_tps": 66.91135768570749,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10421.4,
+                "decode_ms": 4874.6,
+                "finish": "length",
+                "drafts_accepted": 696,
+                "drafts_offered": 851,
+                "reused": 0,
+                "hits": 565920,
+                "lookups": 565920,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 157.72044666923372,
+              "effective_output_tps": 61.38079974207954,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10181.7,
+                "decode_ms": 6492.5,
+                "finish": "length",
+                "drafts_accepted": 553,
+                "drafts_offered": 916,
+                "reused": 0,
+                "hits": 665760,
+                "lookups": 665760,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 323.57959931744927,
+              "effective_output_tps": 76.21471692760299,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10263.1,
+                "decode_ms": 3164.6,
+                "finish": "length",
+                "drafts_accepted": 872,
+                "drafts_offered": 904,
+                "reused": 0,
+                "hits": 506880,
+                "lookups": 506880,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        },
+        {
+          "path": "mtp",
+          "variant": "both",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "002-mtp-both-screen",
+          "started": 1791019278.8445737,
+          "finished": 1791019342.027512,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 212.8367143332225,
+              "effective_output_tps": 67.3659660861528,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10381.6,
+                "decode_ms": 4811.2,
+                "finish": "length",
+                "drafts_accepted": 696,
+                "drafts_offered": 844,
+                "reused": 0,
+                "hits": 562560,
+                "lookups": 562560,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 159.8326751681833,
+              "effective_output_tps": 61.60775594674967,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10207.2,
+                "decode_ms": 6406.7,
+                "finish": "length",
+                "drafts_accepted": 554,
+                "drafts_offered": 915,
+                "reused": 0,
+                "hits": 664800,
+                "lookups": 664800,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 253.2209006157422,
+              "effective_output_tps": 71.41021500346952,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10288.5,
+                "decode_ms": 4043.9,
+                "finish": "length",
+                "drafts_accepted": 762,
+                "drafts_offered": 778,
+                "reused": 0,
+                "hits": 499200,
+                "lookups": 499200,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        },
+        {
+          "path": "serial",
+          "variant": "both",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "003-serial-both-screen",
+          "started": 1791019342.028079,
+          "finished": 1791019419.136638,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 104.01218892839005,
+              "effective_output_tps": 50.74711465242618,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10326.3,
+                "decode_ms": 9845.0,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 491520,
+                "lookups": 491520,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 104.11900476873177,
+              "effective_output_tps": 51.16389479829297,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10171.3,
+                "decode_ms": 9834.9,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 491520,
+                "lookups": 491520,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 104.56448483610743,
+              "effective_output_tps": 51.07772026458498,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10248.0,
+                "decode_ms": 9793.0,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 491520,
+                "lookups": 491520,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        },
+        {
+          "path": "mtp",
+          "variant": "control",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "004-mtp-control-screen",
+          "started": 1791019419.137308,
+          "finished": 1791019482.6045532,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 210.0814475924748,
+              "effective_output_tps": 66.82901962938276,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10440.8,
+                "decode_ms": 4874.3,
+                "finish": "length",
+                "drafts_accepted": 696,
+                "drafts_offered": 844,
+                "reused": 0,
+                "hits": 562560,
+                "lookups": 562560,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 157.83957087366667,
+              "effective_output_tps": 61.189533866194715,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10240.0,
+                "decode_ms": 6487.6,
+                "finish": "length",
+                "drafts_accepted": 554,
+                "drafts_offered": 915,
+                "reused": 0,
+                "hits": 664800,
+                "lookups": 664800,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 250.38511382252977,
+              "effective_output_tps": 71.07923482369158,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10309.7,
+                "decode_ms": 4089.7,
+                "finish": "length",
+                "drafts_accepted": 762,
+                "drafts_offered": 778,
+                "reused": 0,
+                "hits": 499200,
+                "lookups": 499200,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        },
+        {
+          "path": "mtp-ngram",
+          "variant": "both",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "005-mtp-ngram-both-screen",
+          "started": 1791019482.6054606,
+          "finished": 1791019545.0965714,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 211.19498411912716,
+              "effective_output_tps": 66.7462759755168,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10485.0,
+                "decode_ms": 4848.6,
+                "finish": "length",
+                "drafts_accepted": 696,
+                "drafts_offered": 851,
+                "reused": 0,
+                "hits": 565920,
+                "lookups": 565920,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 158.88532017564276,
+              "effective_output_tps": 61.36899612303488,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10233.0,
+                "decode_ms": 6444.9,
+                "finish": "length",
+                "drafts_accepted": 553,
+                "drafts_offered": 916,
+                "reused": 0,
+                "hits": 665760,
+                "lookups": 665760,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 332.72680010397715,
+              "effective_output_tps": 76.47992900389538,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10304.0,
+                "decode_ms": 3077.6,
+                "finish": "length",
+                "drafts_accepted": 872,
+                "drafts_offered": 904,
+                "reused": 0,
+                "hits": 506880,
+                "lookups": 506880,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        },
+        {
+          "path": "ngram",
+          "variant": "control",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "006-ngram-control-screen",
+          "started": 1791019545.0974433,
+          "finished": 1791019614.8898811,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 115.29843603976896,
+              "effective_output_tps": 52.989940441986285,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10435.0,
+                "decode_ms": 8881.3,
+                "finish": "length",
+                "drafts_accepted": 157,
+                "drafts_offered": 360,
+                "reused": 0,
+                "hits": 588960,
+                "lookups": 588960,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 103.88767145523903,
+              "effective_output_tps": 51.03908234283383,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10198.6,
+                "decode_ms": 9856.8,
+                "finish": "length",
+                "drafts_accepted": 5,
+                "drafts_offered": 50,
+                "reused": 0,
+                "hits": 513120,
+                "lookups": 513120,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 316.65532809697567,
+              "effective_output_tps": 75.75447996686461,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10275.7,
+                "decode_ms": 3233.8,
+                "finish": "length",
+                "drafts_accepted": 861,
+                "drafts_offered": 974,
+                "reused": 0,
+                "hits": 545760,
+                "lookups": 545760,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        },
+        {
+          "path": "serial",
+          "variant": "control",
+          "repeat": "screen",
+          "output_tokens": 1024,
+          "cases": [
+            "coding",
+            "writing",
+            "editing"
+          ],
+          "label": "007-serial-control-screen",
+          "started": 1791019614.890923,
+          "finished": 1791019692.0350108,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 1024,
+              "decode_tps": 103.98050365556458,
+              "effective_output_tps": 50.61198768994605,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10376.9,
+                "decode_ms": 9848.0,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 491520,
+                "lookups": 491520,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "98ecaa325ed3f5213ce76a5b72eb31194697a68364c98606219e168da37fc525"
+            },
+            {
+              "task": "writing",
+              "output_tokens": 1024,
+              "decode_tps": 104.30035242111268,
+              "effective_output_tps": 51.154677038019294,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10192.4,
+                "decode_ms": 9817.8,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 491520,
+                "lookups": 491520,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "23acc3d54569e0a0e786a27e5653d280c521b10ccacb32649791a1d70d31a2a3"
+            },
+            {
+              "task": "editing",
+              "output_tokens": 1024,
+              "decode_tps": 104.61896831802532,
+              "effective_output_tps": 51.04318091833322,
+              "natural_stop": false,
+              "output_budget_reached": true,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10266.3,
+                "decode_ms": 9787.9,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 491520,
+                "lookups": 491520,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "d6c32a176d9e3f6b7a20eb6ca0c7cbdf3e3a6d47b343706572ed587ebe9b448b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "shape-selected-repeats",
+      "completed": true,
+      "source": "/home/dflanag3/fleet-downloads/rtxpro-q4-wide-active-shapes-20261003/shape-selected-repeats-attempt-01/matrix.json",
+      "source_sha256": "86198178806cc1e4373c758e68869ddf40b03234712e25ad04c9bc5b27967eb4",
+      "records": [
+        {
+          "path": "mtp",
+          "variant": "control",
+          "repeat": "A1",
+          "output_tokens": 4096,
+          "cases": [
+            "coding"
+          ],
+          "label": "000-mtp-control-A1",
+          "started": 1791019755.1504157,
+          "finished": 1791019793.74132,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 2467,
+              "decode_tps": 221.1266974409537,
+              "effective_output_tps": 114.88038649618052,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10310.6,
+                "decode_ms": 11156.5,
+                "finish": "stop",
+                "drafts_accepted": 1722,
+                "drafts_offered": 2013,
+                "reused": 0,
+                "hits": 1323840,
+                "lookups": 1323840,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22"
+            }
+          ]
+        },
+        {
+          "path": "mtp",
+          "variant": "both",
+          "repeat": "B1",
+          "output_tokens": 4096,
+          "cases": [
+            "coding"
+          ],
+          "label": "001-mtp-both-B1",
+          "started": 1791019793.7417367,
+          "finished": 1791019832.1558561,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 2467,
+              "decode_tps": 222.85858823104303,
+              "effective_output_tps": 115.16699155723606,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10343.8,
+                "decode_ms": 11069.8,
+                "finish": "stop",
+                "drafts_accepted": 1722,
+                "drafts_offered": 2013,
+                "reused": 0,
+                "hits": 1323840,
+                "lookups": 1323840,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22"
+            }
+          ]
+        },
+        {
+          "path": "mtp",
+          "variant": "both",
+          "repeat": "B2",
+          "output_tokens": 4096,
+          "cases": [
+            "coding"
+          ],
+          "label": "002-mtp-both-B2",
+          "started": 1791019832.1563244,
+          "finished": 1791019870.6428056,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 2467,
+              "decode_tps": 222.93310199618654,
+              "effective_output_tps": 114.91807528355235,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10393.9,
+                "decode_ms": 11066.1,
+                "finish": "stop",
+                "drafts_accepted": 1722,
+                "drafts_offered": 2013,
+                "reused": 0,
+                "hits": 1323840,
+                "lookups": 1323840,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22"
+            }
+          ]
+        },
+        {
+          "path": "mtp",
+          "variant": "control",
+          "repeat": "A2",
+          "output_tokens": 4096,
+          "cases": [
+            "coding"
+          ],
+          "label": "003-mtp-control-A2",
+          "started": 1791019870.643282,
+          "finished": 1791019909.2916076,
+          "results": [
+            {
+              "task": "coding",
+              "output_tokens": 2467,
+              "decode_tps": 220.58297567954222,
+              "effective_output_tps": 114.25017584786832,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 2467,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10401.8,
+                "decode_ms": 11184.0,
+                "finish": "stop",
+                "drafts_accepted": 1722,
+                "drafts_offered": 2013,
+                "reused": 0,
+                "hits": 1323840,
+                "lookups": 1323840,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "fce0995202817550def8b28c008ec5ca527e1d649640f3dae1f35fae43889c22"
+            }
+          ]
+        },
+        {
+          "path": "ngram",
+          "variant": "control",
+          "repeat": "A1",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "004-ngram-control-A1",
+          "started": 1791019909.2921576,
+          "finished": 1791019940.3665097,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 320.95820802654777,
+              "effective_output_tps": 86.78826522507549,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10399.3,
+                "decode_ms": 3857.2,
+                "finish": "stop",
+                "drafts_accepted": 1046,
+                "drafts_offered": 1194,
+                "reused": 0,
+                "hits": 665280,
+                "lookups": 665280,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        },
+        {
+          "path": "ngram",
+          "variant": "both",
+          "repeat": "B1",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "005-ngram-both-B1",
+          "started": 1791019940.3672252,
+          "finished": 1791019971.3729672,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 328.73947794683875,
+              "effective_output_tps": 87.2260813500497,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10419.2,
+                "decode_ms": 3765.9,
+                "finish": "stop",
+                "drafts_accepted": 1038,
+                "drafts_offered": 1182,
+                "reused": 0,
+                "hits": 663360,
+                "lookups": 663360,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        },
+        {
+          "path": "ngram",
+          "variant": "both",
+          "repeat": "B2",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "006-ngram-both-B2",
+          "started": 1791019971.3737152,
+          "finished": 1791020002.381136,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 328.73074880509824,
+              "effective_output_tps": 87.2218680178197,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10419.7,
+                "decode_ms": 3766.0,
+                "finish": "stop",
+                "drafts_accepted": 1038,
+                "drafts_offered": 1182,
+                "reused": 0,
+                "hits": 663360,
+                "lookups": 663360,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        },
+        {
+          "path": "ngram",
+          "variant": "control",
+          "repeat": "A2",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "007-ngram-control-A2",
+          "started": 1791020002.3818595,
+          "finished": 1791020033.437587,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 321.2913941658881,
+              "effective_output_tps": 86.74389351343322,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10410.9,
+                "decode_ms": 3853.2,
+                "finish": "stop",
+                "drafts_accepted": 1046,
+                "drafts_offered": 1194,
+                "reused": 0,
+                "hits": 665280,
+                "lookups": 665280,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        },
+        {
+          "path": "mtp-ngram",
+          "variant": "control",
+          "repeat": "A1",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "008-mtp-ngram-control-A1",
+          "started": 1791020033.438314,
+          "finished": 1791020064.8462338,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 313.9343223025231,
+              "effective_output_tps": 85.84967569127684,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10469.0,
+                "decode_ms": 3943.5,
+                "finish": "stop",
+                "drafts_accepted": 1053,
+                "drafts_offered": 1168,
+                "reused": 0,
+                "hits": 649440,
+                "lookups": 649440,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        },
+        {
+          "path": "mtp-ngram",
+          "variant": "both",
+          "repeat": "B1",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "009-mtp-ngram-both-B1",
+          "started": 1791020064.8470812,
+          "finished": 1791020096.1614804,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 324.03287441763075,
+              "effective_output_tps": 86.62737682550708,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10462.6,
+                "decode_ms": 3820.6,
+                "finish": "stop",
+                "drafts_accepted": 1053,
+                "drafts_offered": 1168,
+                "reused": 0,
+                "hits": 649440,
+                "lookups": 649440,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        },
+        {
+          "path": "mtp-ngram",
+          "variant": "both",
+          "repeat": "B2",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "010-mtp-ngram-both-B2",
+          "started": 1791020096.162252,
+          "finished": 1791020127.455437,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 324.27052229032427,
+              "effective_output_tps": 86.63601147083743,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10464.1,
+                "decode_ms": 3817.8,
+                "finish": "stop",
+                "drafts_accepted": 1053,
+                "drafts_offered": 1168,
+                "reused": 0,
+                "hits": 649440,
+                "lookups": 649440,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        },
+        {
+          "path": "mtp-ngram",
+          "variant": "control",
+          "repeat": "A2",
+          "output_tokens": 4096,
+          "cases": [
+            "editing"
+          ],
+          "label": "011-mtp-ngram-control-A2",
+          "started": 1791020127.45619,
+          "finished": 1791020158.9006166,
+          "results": [
+            {
+              "task": "editing",
+              "output_tokens": 1238,
+              "decode_tps": 313.990057826925,
+              "effective_output_tps": 85.90571348194722,
+              "natural_stop": true,
+              "output_budget_reached": false,
+              "timings": {
+                "generated": 1238,
+                "prompt_tokens": 65536,
+                "prompt_ms": 10460.4,
+                "decode_ms": 3942.8,
+                "finish": "stop",
+                "drafts_accepted": 1053,
+                "drafts_offered": 1168,
+                "reused": 0,
+                "hits": 649440,
+                "lookups": 649440,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0
+              },
+              "token_sha256": "b74dc779d947f508e43ae87bfdea340d83c10ff0f1cc734d5dd95e0bff94b76b"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
