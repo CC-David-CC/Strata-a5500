@@ -143,6 +143,8 @@ def worker(out):
                         rec['conditional_tps_at_measured_streaming_1647_GBs']=1647e9/dram
                         rec['conditional_tps_at_advertised_1792_GBs']=1792e9/dram
                         ref=completed[False][0]['case'];prof=replays[0]['case']
+                        if completed[False][0]['prompt_sha256']!=replays[0]['prompt_sha256']:
+                            raise RuntimeError('Reference and profile prompts differ')
                         rec['profile_matches_reference_tokens']=ref['token_ids']==prof['token_ids']
                         work_keys=('generated','drafts_accepted','drafts_offered','hits','lookups','ram_blobs','file_blobs','file_mb','prompt_read')
                         rec['work_counter_differences']={k:[ref['timings'].get(k),prof['timings'].get(k)]
