@@ -17,8 +17,8 @@ reversed-order pairs versus 384 blocks without overlap. Coding improved
 matched. These are two paired observations, without population confidence
 intervals. A native **128K** MTP triple also passed with exact tokens/work:
 coding **133.72 to 136.52 tok/s (+2.09%)**, editing **107.75 to 112.38 tok/s
-(+4.30%)**. All four decoding modes have now completed 32K comparisons;
-the remaining 128K plain/n-gram/combined comparisons are running.
+(+4.30%)**. All four decoding modes have now completed comparisons at both 32K and
+128K input; n-gram qualifications are retained below and in the report.
 
 | Reversed pair | 384 blocks, serial | 32 blocks, overlap |
 |---|---:|---:|
@@ -41,8 +41,10 @@ with overlap. These are request observations, not isolated same-work kernel
 gains or proof of equivalent answer quality. Full differences and effective
 throughput are in the report below.
 
-The intervention changes upload concurrency, keeping expert placement, math,
-FP16 KV, 15,472 primary slots and four secondary slots per layer fixed.
+The intervention changes upload concurrency, keeping expert math, FP16 KV,
+15,472 primary slots, four secondary slots per layer and the selection policy
+fixed. Timing-sensitive n-gram work can change the subsequent adaptive
+placement trajectory; those comparisons retain their qualifications.
 Complete-byte checks passed at default and 1/32/96/384 blocks; six sanitizer
 runs reported zero errors. Both serial and overlap paths remain available.
 
@@ -50,3 +52,16 @@ See **[evidence, hypothesis, invariants and gates](docs/Q8_MISS_FETCH_GEOMETRY.m
 The parent overlap and secondary-cache controls remain independent options.
 Main is untouched, and this fork preserves the upstream license. For standard
 installation and support, use **[upstream Strata](https://github.com/Niko1221/Strata)**.
+
+## Native 128K input + 1,024 output
+
+| Mode, 32 copy blocks with overlap | Coding output tok/s | Editing output tok/s |
+|---|---:|---:|
+| plain | 75.71 | 61.14 |
+| mtp | 136.52 | 112.38 |
+| ngram* | 75.18 | 104.63 |
+| mtp-ngram* | 135.81 | 113.13 |
+
+Plain and MTP preserve tokens and recorded work. **\* N-gram comparisons
+retain timing-dependent work/output differences**; see the report for the
+control rates, first differing tokens and prefill-inclusive throughput.

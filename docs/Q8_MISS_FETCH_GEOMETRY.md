@@ -27,9 +27,12 @@ at graph capture; absence preserves 384. The same setting controls both copies.
 
 Only launch concurrency changes. The grid-stride loops retain the full copy
 extent, 16-byte accesses, source/destination addresses and complete-fill/tag
-publication dependencies. Primary placement, CPU/GPU assignment, expert math,
-token policy and FP16 KV remain fixed. Captured overlap and the secondary cache
-keep independent switches. No DMA or driver-callback path is added.
+publication dependencies. Primary capacity, CPU/GPU assignment policy, expert
+math, token policy and FP16 KV remain fixed. Matching plain/MTP work preserves
+the measured placement/copy trajectory. N-gram's timing-sensitive policy can
+change work and later adaptive placement; its comparisons remain qualified.
+Captured overlap and the secondary cache keep independent switches. No DMA
+or driver-callback path is added.
 
 Lower concurrency could reduce contention with CPU expert reads or resident
 GPU kernels. It could also lengthen uploads enough to lose overall. Copy time
@@ -177,9 +180,8 @@ slots, FP16 KV and a locked lookup table before sending any prompt. A mismatch
 closes the engine and records the observed configuration and resource limits;
 it does not retry a failed output comparison or change memory policy. This is
 a harness check. The engine under comparison remains the tested `7db4414`
-binary. The completed guarded 32K results are below. All three remaining
-modes at 128K need valid controls; their results are not implied by the MTP
-measurements.
+binary. The completed guarded 32K and 128K results are below, including
+n-gram qualifications. The rejected placement remains separately recorded.
 
 ## Guarded 32K plain-decoding comparison completed
 
@@ -234,3 +236,38 @@ alongside token and speculation differences; these rows are not isolated
 same-work copy-kernel measurements.
 
 [Complete requests, startup evidence and qualified comparisons](benchmarks/q8-miss-geometry-32k-speculation-20261004.json).
+
+
+## Guarded native128K plain, n-gram and combined comparisons completed
+
+All nine arms / 18 requests passed the full-residency startup guard and reached
+1,024 output tokens after 131,072 input tokens. Allocated context was 139,264,
+with native RoPE and FP16 KV. Runtime `7db4414`, primary/secondary capacity and
+PCIe policy stayed fixed; decode expert file reads stayed zero. Each arm used
+a fresh engine, coding then editing. These are one triple per mode, not
+confidence bounds. Effective rates include prefill and exclude model loading.
+
+| Mode | Copy setting | Coding output tok/s | Editing output tok/s | Coding effective tok/s | Editing effective tok/s |
+|---|---|---:|---:|---:|---:|
+| plain | 384 serial | 75.31 | 60.38 | 22.41 | 20.89 |
+| plain | 32 serial | 75.48 | 60.78 | 22.42 | 20.95 |
+| plain | 32 overlap | 75.71 | 61.14 | 22.43 | 20.98 |
+| ngram | 384 serial | 76.42 | 102.68 | 22.50 | 24.37 |
+| ngram | 32 serial | 75.81 | 105.21 | 22.44 | 24.51 |
+| ngram | 32 overlap | 75.18 | 104.63 | 22.38 | 24.51 |
+| mtp-ngram | 384 serial | 133.53 | 106.80 | 25.72 | 24.56 |
+| mtp-ngram | 32 serial | 134.64 | 111.30 | 25.77 | 24.80 |
+| mtp-ngram | 32 overlap | 135.81 | 113.13 | 25.78 | 24.89 |
+
+- **plain**, overlap versus 384 serial: coding +0.53% (tokens/work exact); editing +1.27% (tokens/work exact).
+- **ngram**, overlap versus 384 serial: coding -1.62% (first token difference at zero-based index 308, work differs); editing +1.91% (tokens match, work differs).
+- **mtp-ngram**, overlap versus 384 serial: coding +1.71% (tokens/work exact); editing +5.93% (tokens match, work differs).
+
+N-gram policy decisions depend on measured timing. Work/output differences
+above and in the artifact qualify these rows: a matched editing token stream
+does not make them isolated same-work kernel gains. The 32K n-gram editing
+gain cannot be generalized to longer context. Both serial and overlap remain
+available as independent settings. The separate 128K MTP triple above does
+preserve output/work/copy counts and gained 2.09% coding / 4.30% editing.
+
+[Complete guarded requests and paired differences](benchmarks/q8-miss-geometry-128k-other-modes-20261004.json).
