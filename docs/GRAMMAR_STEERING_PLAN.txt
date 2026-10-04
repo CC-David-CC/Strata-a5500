@@ -1,0 +1,56 @@
+Follow-up: interactive grammar steering, independent of logprobs
+
+Status: design only. Not an implemented Chat API capability.
+Intended separate branch: work/grammar-steering, from the tested logprobs checkpoint.
+Do not start this branch from an unfinished snapshot or mix its endpoint into #675.
+
+Server opt-in required, disabled by default. Reuse Strata's existing service,
+single-engine ownership, authentication, cancellation and STOP/drain. No new
+inference scheduler. Ordinary Chat JSON/SSE remains a fixed request.
+
+Two independent options:
+  pause at token boundaries and accept grammar updates;
+  report scores (selected/top-N and explicitly labeled draft diagnostics).
+Steering must work with scoring disabled. Scores must work without steering.
+
+Initial implementation: one target token per step, no MTP/suffix speculation.
+  begin -> validate/compile initial grammar -> prepare prompt
+  generate one token -> commit one token -> publish step(index, token, bytes)
+  wait for authenticated continue(index, grammar update or keep current)
+  validate/compile replacement -> acknowledge revision -> generate next token
+  cancel/disconnect/timeout -> stop, drain and release resources
+Never hold an HTTP handler lock while awaiting the steering client. A paused
+request holds the single engine lease, with a bounded timeout and cancellation.
+Commands need request ownership and expected step/revision checks. Reject stale,
+duplicate, out-of-order and concurrent updates before they can affect generation.
+
+Default update semantics: new grammar starts at the NEXT generated answer byte.
+Optional whole-answer semantics: replay retained answer bytes through the new
+matcher and reject it if the prefix cannot match. Never rewrite emitted output.
+Grammar describes generated output, not incoming tool results. Specify update
+behavior during reasoning/tool channels and inside a split UTF-8 character;
+initially accept revisions only at a complete answer UTF-8 boundary.
+
+Ordinary SSE is an output view, not an inbound command channel. Design a small
+authenticated command endpoint and SSE session before selecting names/wire shape;
+do not present an extension as a standard OpenAI API feature. No WebSocket or
+new framework is required just to acknowledge steps and receive updates.
+
+Score meanings (do not conflate):
+  raw target head before selection/masks: standard Chat logprobs;
+  MTP draft head at proposal time: draft/source and sampling stage labeled;
+  target verification conditioned on each proposed prefix: proposed-token scores;
+  retained target decisions: actual generated-output scores.
+MTP acceptance is not a probability or another probability normalization. Rejected
+proposal-prefix scores remain valid for that proposal, not the emitted correction.
+
+Later speculation gate: rollback uncommitted target/draft state and grammar state
+at each acknowledged token boundary. A client can update every token, so no future
+token may be committed or emitted before acknowledgement. Precomputed rows are
+reusable only when their conditioning prefix and sampling/grammar assumptions
+remain valid. Explicit client lookahead permission can allow larger windows.
+
+Qualification: no-score steering; scored steering; keep/replace/replay grammar;
+no legal continuation; split UTF-8; reasoning/tools; timeout/disconnect/cancel;
+stale revisions; unauthorized commands; subsequent request cache independence;
+speculative rollback only after target-only correctness is independently tested.

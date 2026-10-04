@@ -1,0 +1,66 @@
+{
+  "selected_rows": 68,
+  "proposal_rows": 55,
+  "rejected_or_post_rejection_rows": 7,
+  "max_absolute_logprob_error": 3.821371929828288e-13,
+  "raw_sha256": "850d03d19605bc4a5f3c1de7a38e007d41c31777b7e6c46dbdd11057961c75e6",
+  "reference": "Python math.fsum FP64",
+  "windows": 80,
+  "example_rejection": {
+    "type": "verification",
+    "request": 1,
+    "window": 2,
+    "position": 227,
+    "proposal_source": "mtp",
+    "probability_source": "target_raw_full_vocabulary",
+    "target_vocab": 248320,
+    "scored_length": 3,
+    "proposed_length": 3,
+    "complete": true,
+    "retained_outputs": 3,
+    "accepted_proposals": 2,
+    "termination_included": false,
+    "proposal": [
+      {
+        "token_id": 1110,
+        "target_logprob": -5.348256011227928e-05,
+        "draft_distribution": "raw_draft_vocabulary",
+        "draft_vocab": 40525,
+        "draft_probability": 0.999999523,
+        "draft_logprob": -4.768372718899988e-07
+      },
+      {
+        "token_id": 1850,
+        "target_logprob": -4.220685515302049e-06,
+        "draft_distribution": "raw_draft_vocabulary",
+        "draft_vocab": 40525,
+        "draft_probability": 0.999999881,
+        "draft_logprob": -1.1920929665620916e-07
+      },
+      {
+        "token_id": 198,
+        "target_logprob": -12.361689907642042,
+        "draft_distribution": "raw_draft_vocabulary",
+        "draft_vocab": 40525,
+        "draft_probability": 0.523891985,
+        "draft_logprob": -0.6464697506112758
+      }
+    ],
+    "target_sequence_logprob": -12.361747610887669,
+    "emitted": [
+      {
+        "token_id": 1110,
+        "logprob": -5.348256011227928e-05
+      },
+      {
+        "token_id": 1850,
+        "logprob": -4.220685515302049e-06
+      },
+      {
+        "token_id": 37705,
+        "logprob": -2.132091108547665e-05
+      }
+    ]
+  },
+  "suffix_windows": 7
+}

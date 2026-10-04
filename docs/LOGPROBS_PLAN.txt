@@ -1,6 +1,7 @@
 PLAN: Chat Completions logprobs / top_logprobs, issue #675
 
-Status: planning only; no feature implementation or native qualification yet.
+Status: implemented locally; native qualification and public evidence are in
+docs/logprobs-evidence/RECEIPT.md. This file preserves the original phase plan.
 Issue: https://github.com/Niko1221/Strata/issues/675
 Branch: work/logprobs-675
 Worktree: C:\Users\dflanag3\Documents\fleet\strata-logprobs

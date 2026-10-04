@@ -1,0 +1,25 @@
+{
+  "native_source": "new logprobs build, uncommitted development snapshot",
+  "results": [
+    {
+      "name": "json",
+      "status": 200,
+      "seconds": 4.644670001012855,
+      "has_logprobs": true
+    },
+    {
+      "name": "stream",
+      "status": 200,
+      "seconds": 0.3146850600023754,
+      "has_logprobs": true
+    },
+    {
+      "name": "disabled",
+      "status": 200,
+      "seconds": 0.3170454350038199,
+      "has_logprobs": false
+    }
+  ],
+  "base_python_commit": "320e4e78db1be873c106c779908ce916884c1470",
+  "python_source_state": "Uncommitted logprobs prototype exported from work/logprobs-675, not the unchanged base commit."
+}

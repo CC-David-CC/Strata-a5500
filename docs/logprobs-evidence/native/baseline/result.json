@@ -1,0 +1,24 @@
+{
+  "python_source": "320e4e78db1be873c106c779908ce916884c1470",
+  "native_source": "existing work/gbnf JSON build, not upstream native",
+  "results": [
+    {
+      "name": "json",
+      "status": 200,
+      "seconds": 4.789037560010911,
+      "has_logprobs": false
+    },
+    {
+      "name": "stream",
+      "status": 200,
+      "seconds": 0.3080318440042902,
+      "has_logprobs": false
+    },
+    {
+      "name": "disabled",
+      "status": 200,
+      "seconds": 0.3048377579980297,
+      "has_logprobs": false
+    }
+  ]
+}

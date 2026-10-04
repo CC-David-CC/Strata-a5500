@@ -1,0 +1,18 @@
+Chat Completions currently accepts logprobs/top_logprobs and omits the scores. This change returns selected-token scores and up to 20 alternatives through JSON and streaming, directly from the target logits already computed by the native engine. It addresses #675 without another HTTP adapter or inference service.
+
+For the issue's one-token A/B request, the local Qwen model returned A with logprob -0.0381748433 (96.25% raw probability). The same typed token records drive both HTTP views. Scores use the full target vocabulary before temperature, penalties, truncation or grammar masks; top_logprobs changes reporting, not normalization.
+
+The patch selectively reuses native GBNF/JSON and retained-prefix work from work/gbnf at 0c087036f59bedee17a2de6bef46b238236bc37e. This is an independent branch from upstream main 99f3dbd0b21d1401b3769e0c0d963913607f380b. It does not bring in Responses routes or storage. Optional constraints preserve the selected token's raw score even when that token is outside raw top-N. Native scored JSON validates the original schema without rewriting the answer.
+
+MTP and suffix output scores come from retained target rows. Separate opt-in diagnostics report draft probabilities and target scores for proposed sequences, including rejected proposals. They are not mixed into standard Chat content scores. Mid-generation grammar steering is documented as a separate, default-off follow-up, not claimed as implemented.
+
+Validation:
+- 214 portable Python tests ran: 209 passed, 5 optional-fixture skips; final focused run: 22 passed, 5 skips.
+- Eight native numerical, grammar and GPU sampler checks passed. Grammar-enabled and disabled builds returned scores.
+- llm-49 / RTX 4090: 96 matrix HTTP requests passed across target-only, MTP, suffix enabled and coupled modes. All ten public request examples ran; separate edge tests exercised actual suffix windows and decode/prefill disconnect draining.
+- Independent same-tensor FP64 calculation matched within 2.132e-12 logprob. Cold target-only replay of a proposed prefix differed slightly; the receipt records the initially failed logprob tolerance and actual cross-path differences.
+- Three warmed target-only pairs measured 2771.4 ms without scores versus 2828.8 ms with scores for 40 tokens (about 2.1%); this is a small configuration-specific measurement.
+
+The README links to docs/LOGPROBS.md, runnable Windows/Linux/Python examples, a recorded demo and docs/logprobs-evidence/RECEIPT.md. The receipt contains exact source/binary/model identities, commands, output artifacts and limitations.
+
+Limits: n=1 text requests; unsupported parameters fail preflight. Mixed hidden/visible token boundaries fail explicitly. Draft scores are diagnostic, not a new standard API field. HIP, Windows native and multi-GPU inference have not been qualified. The CPU row reduction is deliberately simple; compact GPU summaries can be a later optimization if measurements justify them.

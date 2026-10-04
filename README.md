@@ -1,5 +1,21 @@
 <h1 align="center">Strata</h1>
 
+> **This branch: see the alternatives your local model considered.**
+> `work/logprobs-675` adds Chat `logprobs` / `top_logprobs`, including native
+> GBNF and JSON constraints. Inspect labeled decisions, compare prompts, and
+> distinguish MTP draft scores from target verification scores.
+>
+> **[Start with the demo and examples](docs/LOGPROBS.md)** ?
+> [Test evidence](docs/logprobs-evidence/RECEIPT.md) ?
+> [Per-token grammar steering plan](docs/GRAMMAR_STEERING_PLAN.txt)
+>
+> Quick demo, no model needed: `python tools/demo_logprobs.py --recorded`
+>
+> This is the independent contribution for [#675](https://github.com/Niko1221/Strata/issues/675).
+> For the existing Responses API / local Codex setup, use
+> [work/gbnf](https://github.com/CC-David-CC/Strata-a5500/blob/work/gbnf/docs/CODEX_LOCAL.md).
+
+
 <p align="center"><b>Run a 125-billion-parameter AI model on your own gaming PC</b><br>
 NVIDIA or AMD graphics card (12 GB or more) · Windows or Linux · free and open source</p>
 

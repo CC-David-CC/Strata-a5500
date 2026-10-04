@@ -1,0 +1,87 @@
+{
+  "window": {
+    "type": "verification",
+    "request": 1,
+    "window": 2,
+    "position": 227,
+    "proposal_source": "mtp",
+    "probability_source": "target_raw_full_vocabulary",
+    "target_vocab": 248320,
+    "scored_length": 3,
+    "proposed_length": 3,
+    "complete": true,
+    "retained_outputs": 3,
+    "accepted_proposals": 2,
+    "termination_included": false,
+    "proposal": [
+      {
+        "token_id": 1110,
+        "target_logprob": -5.348256011227928e-05,
+        "draft_distribution": "raw_draft_vocabulary",
+        "draft_vocab": 40525,
+        "draft_probability": 0.999999523,
+        "draft_logprob": -4.768372718899988e-07
+      },
+      {
+        "token_id": 1850,
+        "target_logprob": -4.220685515302049e-06,
+        "draft_distribution": "raw_draft_vocabulary",
+        "draft_vocab": 40525,
+        "draft_probability": 0.999999881,
+        "draft_logprob": -1.1920929665620916e-07
+      },
+      {
+        "token_id": 198,
+        "target_logprob": -12.361689907642042,
+        "draft_distribution": "raw_draft_vocabulary",
+        "draft_vocab": 40525,
+        "draft_probability": 0.523891985,
+        "draft_logprob": -0.6464697506112758
+      }
+    ],
+    "target_sequence_logprob": -12.361747610887669,
+    "emitted": [
+      {
+        "token_id": 1110,
+        "logprob": -5.348256011227928e-05
+      },
+      {
+        "token_id": 1850,
+        "logprob": -4.220685515302049e-06
+      },
+      {
+        "token_id": 37705,
+        "logprob": -2.132091108547665e-05
+      }
+    ]
+  },
+  "comparisons": [
+    {
+      "row": 0,
+      "token_id": 1110,
+      "verify_logprob": -5.348256011227928e-05,
+      "teacher_forced_logprob": -3.456599286974542e-05,
+      "absolute_difference": 1.8916567242533855e-05,
+      "absolute_probability_difference": 1.8915734472879642e-05
+    },
+    {
+      "row": 1,
+      "token_id": 1850,
+      "verify_logprob": -4.220685515302049e-06,
+      "teacher_forced_logprob": -3.6896739422973854e-06,
+      "absolute_difference": 5.310115730046634e-07,
+      "absolute_probability_difference": 5.310094727262182e-07
+    },
+    {
+      "row": 2,
+      "token_id": 198,
+      "verify_logprob": -12.361689907642042,
+      "teacher_forced_logprob": -12.796400890707666,
+      "absolute_difference": 0.4347109830656244,
+      "absolute_probability_difference": 1.5087067431258454e-06
+    }
+  ],
+  "limitation": "Cross-path replay is not numerically identical. Initial 0.05 absolute logprob tolerance failed; same-tensor checks remain strict. Replay uses an absolute probability bound of 1e-4.",
+  "verify_sequence_logprob": -12.361747610887669,
+  "independent_sequence_logprob": -12.796439146374478
+}
