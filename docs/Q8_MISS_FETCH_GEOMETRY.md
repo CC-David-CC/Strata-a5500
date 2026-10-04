@@ -177,8 +177,9 @@ slots, FP16 KV and a locked lookup table before sending any prompt. A mismatch
 closes the engine and records the observed configuration and resource limits;
 it does not retry a failed output comparison or change memory policy. This is
 a harness check. The engine under comparison remains the tested `7db4414`
-binary. Remaining n-gram/combined tests at 32K and all three modes at 128K
-need valid controls; their results are not implied by the MTP measurements.
+binary. The completed guarded 32K results are below. All three remaining
+modes at 128K need valid controls; their results are not implied by the MTP
+measurements.
 
 ## Guarded 32K plain-decoding comparison completed
 
@@ -200,3 +201,36 @@ decoding's gain is smaller than the separately measured MTP gain. This is one
 fresh triple; it does not establish a confidence interval or a 128K result.
 
 [Full startup checks, requests and paired analysis](benchmarks/q8-miss-geometry-plain-guarded-20261004.json).
+
+## Guarded 32K n-gram and combined comparisons completed
+
+All six arms passed full-residency/locked-table startup checks and completed
+1,024 coding and 1,024 editing output tokens. Expert file reads stayed zero.
+Each row uses the same `7db4414` binary, 32K input, FP16 KV and the placement
+above. The n-gram policy is timing-sensitive: speculative work can change
+when scheduling changes. These rows must retain that qualification.
+
+| Mode | Setting | Coding output tok/s | Editing output tok/s | Coding effective tok/s | Editing effective tok/s |
+|---|---|---:|---:|---:|---:|
+| N-gram | 384 blocks, serial | 78.76 | 107.04 | 49.02 | 59.12 |
+| N-gram | 32 blocks, serial | 79.18 | 115.37 | 49.21 | 61.63 |
+| N-gram | 32 blocks, overlap | 75.80 | 118.53 | 47.84 | 62.56 |
+| MTP + n-gram | 384 blocks, serial | 131.85 | 111.48 | 65.26 | 60.43 |
+| MTP + n-gram | 32 blocks, serial | 132.90 | 114.62 | 65.55 | 61.35 |
+| MTP + n-gram | 32 blocks, overlap | 135.90 | 120.21 | 66.25 | 62.86 |
+
+Versus 384 serial, n-gram overlap changed coding **-3.76%** and editing
+**+10.73%**; combined overlap changed coding **+3.07%** and editing **+7.83%**.
+These are single request pairs, with no confidence intervals. Editing output
+tokens matched in every comparison, but n-gram accepted/offered counts and
+expert work differed. Coding first differed at zero-based token index **316**
+for n-gram overlap and **122** for combined overlap. No quality-equivalence
+claim follows from these differences.
+
+The 32-block serial combined coding pair did match tokens and recorded work
+and improved **0.80%**. Other speculative comparisons changed recorded work,
+even where tokens matched. All copy/cache counter differences are preserved
+alongside token and speculation differences; these rows are not isolated
+same-work copy-kernel measurements.
+
+[Complete requests, startup evidence and qualified comparisons](benchmarks/q8-miss-geometry-32k-speculation-20261004.json).

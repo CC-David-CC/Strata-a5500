@@ -17,7 +17,8 @@ reversed-order pairs versus 384 blocks without overlap. Coding improved
 matched. These are two paired observations, without population confidence
 intervals. A native **128K** MTP triple also passed with exact tokens/work:
 coding **133.72 to 136.52 tok/s (+2.09%)**, editing **107.75 to 112.38 tok/s
-(+4.30%)**. Other decoding-mode comparisons are still running.
+(+4.30%)**. All four decoding modes have now completed 32K comparisons;
+the remaining 128K plain/n-gram/combined comparisons are running.
 
 | Reversed pair | 384 blocks, serial | 32 blocks, overlap |
 |---|---:|---:|
@@ -25,6 +26,20 @@ coding **133.72 to 136.52 tok/s (+2.09%)**, editing **107.75 to 112.38 tok/s
 | Editing generation | 113.46 tok/s | 118.34 tok/s |
 | Coding effective, including prefill | 65.47 tok/s | 66.04 tok/s |
 | Editing effective, including prefill | 61.01 tok/s | 62.45 tok/s |
+
+Other completed **32K input + 1,024 output** pairs:
+
+| Mode | Coding: 384 serial → 32 overlap | Editing: 384 serial → 32 overlap |
+|---|---:|---:|
+| Plain | 74.21 → 74.66 tok/s | 62.38 → 63.22 tok/s |
+| N-gram* | 78.76 → 75.80 tok/s | 107.04 → 118.53 tok/s |
+| MTP + n-gram* | 131.85 → 135.90 tok/s | 111.48 → 120.21 tok/s |
+
+Plain tokens and recorded work matched. **\* N-gram comparisons are qualified:**
+editing tokens matched, but speculative work changed; coding tokens diverged
+with overlap. These are request observations, not isolated same-work kernel
+gains or proof of equivalent answer quality. Full differences and effective
+throughput are in the report below.
 
 The intervention changes upload concurrency, keeping expert placement, math,
 FP16 KV, 15,472 primary slots and four secondary slots per layer fixed.
