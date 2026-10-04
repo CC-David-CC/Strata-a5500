@@ -76,9 +76,37 @@ and 574 cached accesses per stream arrangement; the cached case included
 107 hits and seven abandoned plans. CUDA memcheck and initcheck reported zero
 errors. These component results do not establish model correctness or speed.
 
-The new full-model job is queued behind the cache follow-up. It checks six
-lifecycle arms (plain/MTP x serial, overlap, overlap plus four cache slots per
-layer), then 16 throughput arms (all four decoding modes x overlap off/on x
-cache off/on). The same component-tested binary is used throughout.
+The full-model job completed six lifecycle arms (plain/MTP x serial, overlap,
+overlap plus four cache slots per layer). The 16 throughput arms (all four
+decoding modes x overlap off/on x cache off/on) are running. The same
+component-tested binary is used throughout.
 
 Evidence: [component/build results](benchmarks/q8-miss-overlap-components-20261004.json).
+
+## Completed lifecycle checks
+
+All six arms / 33 requests passed on llm-60, using runtime `bcacb884` and binary
+SHA-256 `f50a1d1116d91983a690555dcd3dee114be6da928879a83b7bfa34e563ab7d12`.
+The recorded configuration was full Unsloth Q8_0, FP16 KV, native RoPE, and
+40,960 allocated context. Base prompts had 32,768 tokens; checkpoint continuations
+appended the recorded assistant token and user message. Primary expert slots
+were 15,472, automatic miss fraction was 0.55, and ownership rotation and duplex
+copies were enabled.
+
+| Mode | Serial control | Overlap | Overlap + four cache slots/layer |
+|---|---:|---:|---:|
+| Plain | 3 requests passed | 3 passed | 3 passed |
+| MTP | 8 requests passed | 8 passed | 8 passed |
+
+Plain requests covered normal generation, STOP after 16 delivered tokens, and
+a subsequent request. MTP additionally covered A/B/A+ checkpoint restoration,
+repeated B and A+ requests. All 22 candidate/control request comparisons matched
+output tokens, recorded work and recorded main-model state fingerprints. The
+asynchronous STOP cases also performed matching work, so their post-cancel
+state comparisons required and achieved exact agreement. Every engine exited
+cleanly. This validates these recorded interleavings, not every possible schedule.
+
+The separate 1,024-output-token throughput matrix is still in progress. These
+lifecycle results establish no speed gain.
+
+Evidence: [complete lifecycle results](benchmarks/q8-miss-overlap-lifecycle-20261004.json).
