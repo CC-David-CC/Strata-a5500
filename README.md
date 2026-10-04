@@ -16,6 +16,13 @@ It also joins the existing committed-exchange trace to count primary-cache
 promotions whose bytes are already in the secondary GPU cache. That measures
 the opportunity for a device-to-device refill; it does not implement one.
 
-**Prepared, not yet measured.** See the [diagnostic and limits](docs/Q8_CACHE_ROUTING.md).
+**Measured at 32K:** 23-26% of CPU-assigned expert groups already had copies in
+this sixteen-entry GPU cache. Across coding/editing, 59% of plain and 62% of MTP
+committed primary promotions also had GPU copies (18.9/25.6GB of potential
+refill payload). This is an opportunity census, **not a measured speedup**.
+
+All four requests matched untraced tokens/work; GPU and committed-exchange
+counters validated the replay. Seven replay tests and native build/sanitizer
+gates passed. See the [census, exact scope and limits](docs/Q8_CACHE_ROUTING.md#native-census-complete).
 The inherited [copy-grid results](docs/Q8_MISS_FETCH_GEOMETRY.md) belong to a
 different measured intervention. Main is untouched.
