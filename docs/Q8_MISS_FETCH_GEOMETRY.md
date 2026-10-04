@@ -135,5 +135,27 @@ identify the contended resource; separate valid traffic profiling is needed.
 
 [Complete reversed-triple records and correctly oriented comparisons](benchmarks/q8-miss-geometry-reverse-20261004.json).
 
-Native 128K MTP and 32K plain/n-gram/combined follow-ups are running. Those
-results are not yet implied by this 32K MTP report.
+## Native 128K MTP comparison completed
+
+Each request supplied 131,072 input tokens and generated all 1,024 requested
+outputs, with 139,264 allocated context, native RoPE and FP16 KV. The runtime,
+primary and secondary slot counts and PCIe policy stayed fixed. Output tokens,
+recorded work, secondary-cache counts and primary exchange payload matched
+across all three arms. Expert file reads remained zero during decode.
+
+| Setting | Coding output tok/s | Editing output tok/s | Coding effective tok/s | Editing effective tok/s |
+|---|---:|---:|---:|---:|
+| 384 blocks, serial | 133.72 | 107.75 | 25.72 | 24.62 |
+| 32 blocks, serial | 134.91 | 110.09 | 25.77 | 24.74 |
+| 32 blocks, overlap | 136.52 | 112.38 | 25.84 | 24.85 |
+
+The combined change gained **2.09% coding / 4.30% editing** on generation.
+Holding 32 blocks fixed, overlap added **1.19% / 2.08%** over serial. Effective
+throughput improved **0.48% / 0.91%** versus the original serial control;
+prefill dominates more of total request time at this length. This is one 128K
+triple, alongside the separate repeated 32K evidence, not a confidence bound.
+
+[Complete native128K MTP records and comparisons](benchmarks/q8-miss-geometry-128k-mtp-20261004.json).
+
+The 32K plain/n-gram/combined follow-ups are running. Their results and native
+128K results for those modes are not implied by these MTP comparisons.

@@ -15,7 +15,9 @@ overlap improved editing generation by **4.26% and 4.31%** in the initial and
 reversed-order pairs versus 384 blocks without overlap. Coding improved
 **1.47% and 1.78%**. All output tokens, recorded work and logical copy counts
 matched. These are two paired observations, without population confidence
-intervals; native 128K and other decoding modes are still being tested.
+intervals. A native **128K** MTP triple also passed with exact tokens/work:
+coding **133.72 to 136.52 tok/s (+2.09%)**, editing **107.75 to 112.38 tok/s
+(+4.30%)**. Other decoding-mode comparisons are still running.
 
 | Reversed pair | 384 blocks, serial | 32 blocks, overlap |
 |---|---:|---:|
