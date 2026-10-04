@@ -76,3 +76,34 @@ Later mode/context expansion depends on these results. No copy-grid model
 performance result is claimed yet.
 
 Evidence: [parent stage profile and semantic comparison](benchmarks/q8-miss-fetch-geometry-parent-gpu-profile-20261004.json).
+
+## Initial model factorial completed
+
+All six arms / 12 requests completed on the same `7db4414` binary above.
+Every request reached 1,024 output tokens. All output tokens, recorded work,
+secondary-cache hit/upload counts and primary-exchange payload matched the
+384-block serial control exactly. Decode expert file reads stayed zero.
+
+| Copy blocks | Scheduling | Coding output tok/s | Editing output tok/s | Change vs 384 serial: code / edit |
+|---:|---|---:|---:|---:|
+| 384 | Serial | 131.93 | 113.66 | +0.00% / +0.00% |
+| 384 | Overlap | 133.75 | 115.86 | +1.38% / +1.93% |
+| 96 | Serial | 132.99 | 114.48 | +0.81% / +0.72% |
+| 96 | Overlap | 134.03 | 117.04 | +1.59% / +2.97% |
+| 32 | Serial | 132.66 | 115.68 | +0.55% / +1.78% |
+| 32 | Overlap | 133.87 | 118.50 | +1.47% / +4.26% |
+
+The 32-block overlap candidate reached 118.50 editing tok/s versus 113.66 for
+the original serial control (+4.26%). Holding overlap enabled, changing384 to32
+blocks improved editing from 115.86 to118.50 (+2.28%); coding was essentially
+unchanged (133.75 to133.87). Ninety-six blocks gave slightly higher coding than
+32, but that difference is only0.12%, not an established advantage.
+
+This initial screen supports retaining both32-block serial and overlap paths.
+Repeat in reversed order and extend native128K; screen plain/n-gram/combined
+separately. These finite sequential pairs have no confidence intervals yet.
+Lower launch concurrency helped measured request time, but this alone does
+not identify which memory/scheduling resource was limiting overlap.
+
+[Complete model records](benchmarks/q8-miss-geometry-model-20261004.json) and
+[same-work comparisons, effective throughput and host timing](benchmarks/q8-miss-geometry-analysis-20261004.json).
