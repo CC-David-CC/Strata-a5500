@@ -2044,6 +2044,23 @@ void expert_pool_dispatch_multi(ExpertDispatch& d, const float* x_f, const int32
         if (P.publish) P.publish(P.ctx);
         pt("fetch", fetches);
         if (P.fetch) P.fetch(P.ctx, dma_src, P.pcie_mode != 0 ? 0 : fetches, (size_t) bb);   // the copy engine, beside the CPU's work
+        static const bool miss_trace = [] {
+            const char* value = std::getenv("STRATA_MISS_TRACE");
+            return value && std::strcmp(value, "1") == 0;
+        }();
+        if (miss_trace && fetches > 0) {
+            static thread_local uint64_t sequence = 0;
+            std::ostringstream row;
+            row << "{\"schema\":1,\"sequence\":" << sequence++ << ",\"layer\":" << d.layers
+                << ",\"layers\":" << d.usage.size() / (size_t)d.n_expert
+                << ",\"per_layer\":" << d.n_expert << ",\"bytes\":" << bb << ",\"experts\":[";
+            for (int q = 0; q < fetches; ++q) {
+                if (q) row << ',';
+                row << ids[pcie_i0[q]];
+            }
+            row << "]}";
+            std::fprintf(stderr, "strata miss trace: %s\n", row.str().c_str());
+        }
     } else {
         for (int64_t i = 0; i < n; ++i) {
             const int32_t e = ids[i];
