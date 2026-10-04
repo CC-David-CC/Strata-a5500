@@ -157,5 +157,25 @@ triple, alongside the separate repeated 32K evidence, not a confidence bound.
 
 [Complete native128K MTP records and comparisons](benchmarks/q8-miss-geometry-128k-mtp-20261004.json).
 
-The 32K plain/n-gram/combined follow-ups are running. Their results and native
-128K results for those modes are not implied by these MTP comparisons.
+## Rejected plain-decoding attempt and benchmark guard
+
+The first 32K plain overlap attempt was rejected. Its startup clamped the RAM
+complement from the intended **44.28 GiB / 9,104 experts** to **43.64 GiB /
+8,973 experts**. INFO reported `arena_mib=44689` instead of `45342`. The coding
+and editing requests then recorded 353 and 787 expert file reads, respectively.
+Coding first differed at token index 120. This changed placement is a confound;
+the attempt is not evidence of an overlap speed gain or a kernel correctness
+failure. Its successful process exit alone is insufficient to accept it.
+
+The valid serial controls and completed MTP comparisons remain recorded. The
+rejected record and startup evidence are preserved in
+[the placement investigation](benchmarks/q8-miss-geometry-rejected-placement-20261004.json).
+
+The benchmark now supports an explicit expected INFO mapping and required
+startup log patterns. These comparisons require the full RAM arena, fixed GPU
+slots, FP16 KV and a locked lookup table before sending any prompt. A mismatch
+closes the engine and records the observed configuration and resource limits;
+it does not retry a failed output comparison or change memory policy. This is
+a harness check. The engine under comparison remains the tested `7db4414`
+binary. Remaining plain/n-gram/combined tests at 32K and 128K need fresh valid
+controls; their results are not implied by the MTP measurements.

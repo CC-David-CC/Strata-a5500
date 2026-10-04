@@ -69,10 +69,14 @@ def worker(plan_path, out):
             option(cfg['args'], '--expert-cache', trial.get('expert_cache', 15472))
             for key, value in trial.get('options', {}).items():
                 option(cfg['args'], key, value)
+            if trial.get('expected_engine_info'):
+                cfg['benchmark_expected_engine_info'] = trial['expected_engine_info']
+                cfg['benchmark_required_startup_patterns'] = trial.get('required_startup_patterns', [])
             config = out / (label + '-config.json')
             save(config, cfg)
             result_dir = out / label
-            cmd = [PY, engine / 'tools/bench_mtp_modes.py', '--config', config,
+            benchmark = Path(trial.get('benchmark_script', engine / 'tools/bench_mtp_modes.py'))
+            cmd = [PY, benchmark, '--config', config,
                    '--output', result_dir, '--input-tokens', str(trial['input_tokens']),
                    '--output-tokens', str(trial.get('output_tokens', 1024)),
                    '--mode', trial['mtp'], '--suffix-draft', str(trial['suffix']),
@@ -81,6 +85,7 @@ def worker(plan_path, out):
                    '--cases', *trial.get('cases', ['coding', 'editing']),
                    '--source-commit', source]
             record = dict(trial=trial, started=time.time(), command=list(map(str, cmd)),
+                          benchmark_sha256=hashlib.sha256(benchmark.read_bytes()).hexdigest(),
                           engine_sha256=hashlib.sha256((engine / 'build/strata').read_bytes()).hexdigest())
             state['records'].append(record)
             save(target, state)
@@ -101,7 +106,7 @@ def worker(plan_path, out):
                     'exchange buffer rotation', 'host memcpy bytes avoided', 'GPU stages',
                     'pool phases', 'RAM budget', 'cache complement ready', 'CPU pool:',
                     'PCIe', 'adaptive worker', 'exchange duplex:', 'resident RAM mode:', 'pinned',
-                    'readonly miss cache:', 'miss fetch overlap:', 'miss fetch geometry:'))]
+                    'readonly miss cache:', 'miss fetch overlap:', 'miss fetch geometry:', 'PLE startup'))]
                 record['rotation_active'] = 'exchange buffer rotation enabled' in log
                 record['duplex_active'] = 'strata exchange duplex: enabled,' in log
                 record['duplex_swaps'] = sum(map(int, re.findall(r'\bduplex_swaps (\d+)', log)))
@@ -113,6 +118,9 @@ def worker(plan_path, out):
             save(target, state)
             if run.returncode:
                 raise RuntimeError(label + ' failed; inspect preserved logs')
+            if trial.get('expected_engine_info') and any(
+                    not v.get('startup_precondition', {}).get('passed') for v in record['runs']):
+                raise RuntimeError(label + ': required benchmark startup precondition was not checked')
             if not record.get('rotation_active'):
                 raise RuntimeError(label + ': ownership rotation did not activate')
             cache_ways = int(trial.get('env', {}).get('STRATA_Q8_MISS_CACHE_WAYS','0'))
@@ -132,7 +140,7 @@ def worker(plan_path, out):
                 raise RuntimeError(label + ': duplex copies did not activate; inspect fallback before timing claims')
             cases = [c for run in record['runs'] for c in run['cases']]
             if not cases or any(c['input_tokens'] != trial['input_tokens'] or
-                                not c['output_tokens'] or c['timings']['file_blobs'] != 0
+                                c['output_tokens'] != trial.get('output_tokens', 1024) or c['timings']['file_blobs'] != 0
                                 for c in cases):
                 raise RuntimeError(label + ': missing output or unexpected file expert reads')
             if trial.get('reference_label'):

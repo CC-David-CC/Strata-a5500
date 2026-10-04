@@ -21,6 +21,7 @@ sys.path[:0] = [str(ROOT), str(ROOT / "tools")]
 from serve.server import StrataEngine, child_env
 from serve.frontend import ChatTemplate
 from strata_tokenizer import Tokenizer
+from benchmark_startup import start_checked_engine
 
 
 def option(args, name, default=None):
@@ -186,8 +187,11 @@ def main():
             env["STRATA_DECODE_TIMING"] = "1"
             env.pop("STRATA_VERIFY_PROFILE", None)
             start = time.monotonic()
-            engine = StrataEngine(cfg["exe"], args, cfg.get("cwd", str(ROOT)),
-                                  str(opt.output / f"engine-mtp-{mode}.log"), env)
+            engine_log = opt.output / f"engine-mtp-{mode}.log"
+            engine = start_checked_engine(
+                lambda: StrataEngine(cfg["exe"], args, cfg.get("cwd", str(ROOT)), str(engine_log), env),
+                cfg.get("benchmark_expected_engine_info"), engine_log,
+                cfg.get("benchmark_required_startup_patterns", []), run)
             run["startup_seconds"] = time.monotonic() - start
             run["engine_info"] = engine.info
             print(f"READY mtp={mode} " + json.dumps(engine.info), flush=True)
