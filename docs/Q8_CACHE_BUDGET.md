@@ -70,7 +70,8 @@ All arms keep copy32 overlap, ownership rotation, duplex transfers, PCIe fractio
 per-layer admission: those remain independently measured candidates.
 
 Status: fresh byte-identical build and all 22 lifecycle requests passed.
-New primary-placement and 128K throughput results are still pending. Both the duplicate-cache and primary-cache designs
+An initial 32K MTP placement triple has now completed below; plain repetition
+and native128K throughput are still pending. Both the duplicate-cache and primary-cache designs
 remain alternatives; a smaller upload count alone is not a speedup.
 
 
@@ -115,3 +116,46 @@ The [complete initial 32K capacity screen](benchmarks/q8-cache-capacity-model-32
 is also retained here, including plain and n-gram results and qualifications.
 The fifteen-arm throughput follow-up proceeds after this gate; its results
 remain separate from these functional checks.
+
+
+## First follow-up MTP triple at 32K
+
+All six requests below finished with 32,768 input + 1,024 output tokens,
+40,960 allocated and FP16 KV. Full placement/locked-PLE guards passed and no
+expert file reads occurred. These generation/effective rates exclude model
+startup; effective throughput includes prompt processing. Coding ran before
+editing in each fresh engine.
+
+| Primary experts | Secondary entries/layer | Coding generation | Editing generation | Coding effective | Editing effective |
+|---:|---:|---:|---:|---:|---:|
+| 15472 | 16 | 137.51 | 123.36 | 66.55 | 63.75 |
+| 16048 | 4 | 139.16 | 121.50 | 68.94 | 64.88 |
+| 15472 | 4 | 135.38 | 118.23 | 66.13 | 62.35 |
+
+For unchanged primary residency, running sixteen entries first and four last
+gave **+1.58% coding / +4.34% editing**
+for sixteen versus four. All tokens, recorded work and primary exchange bytes
+matched. Secondary hit/upload counts changed as intended. This is the reversed
+pair following the initial +1.67%/+3.98% capacity observations.
+
+Spending the same extra 2.802GiB on 576 more primary experts instead of twelve
+more secondary entries per layer gave **+1.20% coding /
+-1.50% editing generation** relative to the larger
+secondary cache. Throughput including prefill improved
+**+3.59% / +1.77%** in this pair.
+
+This placement comparison changes arithmetic placement and is qualified:
+
+| Task | First differing output token, zero-based | Recorded work matches |
+|---|---:|---|
+| coding | 120 | no |
+| editing | none | no |
+
+Keep both uses of spare VRAM as alternatives: the primary placement changes
+which experts the CPU computes, while the secondary cache removes repeated
+uploads without changing that assignment. These first placement results do not
+establish a universal winner or equivalent answer quality. Native128K, the
+other capacity modes, and the more aggressive primary allocation are still
+running or queued in the same suite.
+
+[Full records, first divergence, work/copy counts and resource samples](benchmarks/q8-cache-budget-first-mtp32k-20261004.json).

@@ -12,11 +12,16 @@ against more primary resident experts. The former avoids repeated uploads;
 the latter can also reduce CPU work. It changes configuration and test
 coverage, with no inference kernel or model-weight changes.
 
-**Fresh build and all 22 lifecycle requests passed.** Four- and sixteen-entry
-caches matched tokens, work and main-model state through normal requests,
-cancellation and MTP checkpoint restoration. Throughput repetitions, native
-128K comparisons and the new primary placements are still pending. The
-initial capacity gains do not establish a result for those placements.
+**The 32K MTP capacity gain repeated:** sixteen versus four secondary entries
+improved coding +1.58% and editing +4.34% in reversed order, with exact tokens,
+recorded work and primary exchange bytes. Initial gains were +1.67%/+3.98%.
+Fresh build and all 22 normal/cancel/checkpoint requests also passed.
+
+The same extra weight-storage budget spent on primary experts reached
+139.16 tok/s coding /121.50 editing, versus 137.51/123.36 for the larger
+secondary cache. That placement changes output/work; details and effective
+throughput are in the report. Plain repetition, native128K and the remaining
+configurations are still running. These pairs have no confidence intervals.
 See [memory budgets, invariants and required measurements](docs/Q8_CACHE_BUDGET.md).
 
 The fresh build matches the previously tested engine bytes. Lifecycle checks
