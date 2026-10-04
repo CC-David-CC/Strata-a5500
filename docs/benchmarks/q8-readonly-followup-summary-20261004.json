@@ -1,0 +1,318 @@
+{
+  "source": "eb22e571e1fd43384b998cfc7447a37bc5b7a2ff",
+  "engine_sha256": "9541ee14db3aee6f28f4427fdb43d9910f4039f780f962d1534099d3dc68144e",
+  "completed": true,
+  "comparisons": [
+    {
+      "name": "32,768 MTP",
+      "control": "32768-mtp-readonly-0-repeat",
+      "candidate": "32768-mtp-readonly-4-repeat",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 2.073780472008524,
+          "effective_gain_pct": 0.9419191814356465
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 1.3822275512922921,
+          "effective_gain_pct": 0.7639167014063197
+        }
+      ]
+    },
+    {
+      "name": "32,768 N-gram*",
+      "control": "32768-ngram-readonly-0-repeat",
+      "candidate": "32768-ngram-readonly-4-repeat",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": 488,
+          "work_differences": {
+            "drafts_accepted": [
+              81,
+              117
+            ],
+            "drafts_offered": [
+              201,
+              299
+            ],
+            "hits": [
+              523158,
+              552767
+            ],
+            "lookups": [
+              541913,
+              571482
+            ],
+            "ram_blobs": [
+              28643,
+              28727
+            ]
+          },
+          "decode_gain_pct": 2.3391767763629723,
+          "effective_gain_pct": 1.4757772119829982
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {
+            "drafts_accepted": [
+              737,
+              801
+            ],
+            "drafts_offered": [
+              861,
+              895
+            ],
+            "hits": [
+              505808,
+              492475
+            ],
+            "lookups": [
+              532160,
+              517649
+            ],
+            "ram_blobs": [
+              46270,
+              45271
+            ]
+          },
+          "decode_gain_pct": 8.808336401468253,
+          "effective_gain_pct": 4.6180957590595595
+        }
+      ]
+    },
+    {
+      "name": "131,072 Plain",
+      "control": "131072-plain-readonly-0",
+      "candidate": "131072-plain-readonly-4",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 0.3449690187059762,
+          "effective_gain_pct": 0.18680578664378444
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 0.8559318546561778,
+          "effective_gain_pct": 0.25408238795985305
+        }
+      ]
+    },
+    {
+      "name": "131,072 MTP",
+      "control": "131072-mtp-readonly-0",
+      "candidate": "131072-mtp-readonly-4",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 1.3527834107411651,
+          "effective_gain_pct": 0.20509941505530982
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 1.3408810600550325,
+          "effective_gain_pct": 0.37286019364370926
+        }
+      ]
+    },
+    {
+      "name": "131,072 N-gram*",
+      "control": "131072-ngram-readonly-0",
+      "candidate": "131072-ngram-readonly-4",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": 452,
+          "work_differences": {
+            "drafts_accepted": [
+              9,
+              41
+            ],
+            "drafts_offered": [
+              34,
+              94
+            ],
+            "hits": [
+              478644,
+              491980
+            ],
+            "lookups": [
+              496975,
+              510204
+            ],
+            "ram_blobs": [
+              27463,
+              27544
+            ]
+          },
+          "decode_gain_pct": 2.4409296512319933,
+          "effective_gain_pct": 0.8299286761704439
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {
+            "drafts_accepted": [
+              753,
+              730
+            ],
+            "drafts_offered": [
+              889,
+              831
+            ],
+            "hits": [
+              509278,
+              494043
+            ],
+            "lookups": [
+              536680,
+              520932
+            ],
+            "ram_blobs": [
+              49155,
+              47696
+            ]
+          },
+          "decode_gain_pct": 2.2320844528977757,
+          "effective_gain_pct": 0.47041522625455023
+        }
+      ]
+    },
+    {
+      "name": "131,072 MTP + n-gram*",
+      "control": "131072-mtp-ngram-readonly-0",
+      "candidate": "131072-mtp-ngram-readonly-4",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 1.3740239085374695,
+          "effective_gain_pct": 0.3463550170302421
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {
+            "drafts_accepted": [
+              769,
+              774
+            ],
+            "drafts_offered": [
+              812,
+              797
+            ],
+            "hits": [
+              465863,
+              455869
+            ],
+            "lookups": [
+              492395,
+              482548
+            ],
+            "ram_blobs": [
+              47608,
+              47770
+            ]
+          },
+          "decode_gain_pct": 1.9566830152907722,
+          "effective_gain_pct": 0.431119077184583
+        }
+      ]
+    },
+    {
+      "name": "32K MTP, eight slots",
+      "control": "32768-mtp-readonly-0-repeat",
+      "candidate": "32768-mtp-readonly-8",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 2.195564777590464,
+          "effective_gain_pct": 1.019272818965966
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {},
+          "decode_gain_pct": 3.1119793136933804,
+          "effective_gain_pct": 1.679772743099539
+        }
+      ]
+    },
+    {
+      "name": "32K MTP, larger primary",
+      "control": "32768-mtp-readonly-0-repeat",
+      "candidate": "32768-mtp-primary-plus192",
+      "cases": [
+        {
+          "task": "coding",
+          "first_token_difference": 13,
+          "work_differences": {
+            "drafts_accepted": [
+              707,
+              705
+            ],
+            "drafts_offered": [
+              844,
+              850
+            ],
+            "hits": [
+              532161,
+              536305
+            ],
+            "lookups": [
+              548726,
+              552721
+            ],
+            "ram_blobs": [
+              25526,
+              25412
+            ]
+          },
+          "decode_gain_pct": 0.1856160290883313,
+          "effective_gain_pct": 0.8066536375893385
+        },
+        {
+          "task": "editing",
+          "first_token_difference": null,
+          "work_differences": {
+            "drafts_offered": [
+              775,
+              778
+            ],
+            "hits": [
+              457432,
+              460633
+            ],
+            "lookups": [
+              481193,
+              483506
+            ],
+            "ram_blobs": [
+              42273,
+              40437
+            ]
+          },
+          "decode_gain_pct": 2.590691038186299,
+          "effective_gain_pct": 2.369496612618738
+        }
+      ]
+    }
+  ]
+}

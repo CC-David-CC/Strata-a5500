@@ -40,12 +40,10 @@ prove full-model cancellation or speculative-state correctness.
 
 ## Evidence gates
 
-The independent miss trace, component gates and paired full-model lifecycle
-checks are complete. The first 32K performance screen is complete below; repeated gains are not yet established.
-It compares default-off and four slots per layer using the same binary, with exact
-token/work checks for plain and MTP and first-divergence/work reporting for n-gram
-and combined. Repeat gains and test both native contexts before publishing a
-speed claim.
+The independent miss trace, component gates, paired full-model lifecycle checks,
+32K repeats and native-128K pairs are complete. The sections below report each
+measurement and its output/work qualifications. The small 32K MTP gain repeated;
+plain decoding remained essentially tied.
 
 Per-request logs report cumulative completed groups, hits, uploads, bypasses
 and logical bytes saved/uploaded. Difference adjacent reports for a request.
@@ -89,8 +87,9 @@ miss-upload payload. The following are trace replay projections, not TPS:
 
 The native-128K MTP control had 5,128 MiB free at readiness. Four slots per layer
 leave useful headroom without changing the 15,472 primary slots. Larger caches
-still need actual allocation and model tests; the projection alone proves no fit
-or speed gain.
+require their own allocation and model tests; the projection alone proves no fit
+or speed gain. Eight slots were tested at 32K MTP in the follow-up below;
+sixteen slots remain untested in full-model inference.
 
 Runtime source `eb22e57` built successfully. Its binary SHA-256 is
 `9541ee14db3aee6f28f4427fdb43d9910f4039f780f962d1534099d3dc68144e`.
@@ -103,10 +102,10 @@ and seven abandoned plans. This is component evidence, not full-model parity.
 Evidence: [miss trace replay](benchmarks/q8-miss-reuse-20261004.json),
 [component/build results](benchmarks/q8-readonly-components-20261004.json).
 
-## Next comparisons
+## Competing designs
 
 The four-way cache uses the same memory as 192 additional primary expert slots.
-Compare that alternative before attributing a win to the secondary organization.
+The follow-up below measures that alternative alongside the secondary cache.
 Changing primary placement can change CPU/GPU arithmetic, so its token/work
 comparison is reported separately from the fixed-placement cache test.
 
@@ -115,9 +114,11 @@ expert computation completes before missed-expert staging starts. An independent
 experiment can fork after the route/plan is ready, stage misses on another stream
 while resident expert kernels run, and join before consuming those misses. Both
 plan readiness and completed fills require explicit dependencies. The same join
-must protect later staging-buffer reuse and cancellation. This overlap has not
-yet been implemented or measured; concurrent kernels may compete for memory
-bandwidth and reduce the apparent opportunity.
+must protect later staging-buffer reuse and cancellation. The separate
+`perf/q8-miss-fetch-overlap` branch implements this design and
+has passed component checks. Its full-model tests are separate from this cache
+report; concurrent kernels may compete for memory bandwidth and reduce the
+apparent opportunity.
 
 ## First completed 32K performance screen
 
@@ -171,8 +172,118 @@ counters, and do not include primary-cache eviction traffic. The inherited
 savings; use the new cache counters to account for uploaded payload.
 
 No decode expert file reads or OOMs occurred. Plain speed is essentially tied;
-MTP has a small initial gain that needs repetition. Reverse-order MTP/n-gram
-repeats, an eight-way MTP cache, an equal-VRAM primary-cache competitor, and
-paired native-128K measurements are queued before a broader performance claim.
+MTP showed a small initial gain. The follow-up below reports completed
+reverse-order MTP/n-gram repeats, an eight-way MTP cache, an equal-VRAM
+primary-cache competitor, and paired native-128K measurements.
 
 Evidence: [complete first matrix](benchmarks/q8-readonly-first-32k-20261004.json).
+
+## Completed repeats and native 128K
+
+The follow-up completed 14 arms / 28 requests. Together with the first screen,
+this is 44 throughput requests, plus the separate 22-request lifecycle gate.
+Every throughput request reached 1,024 output tokens with no decode expert file
+reads. All arms used the same component-tested `eb22e57` binary. The baseline
+already includes this fork's buffer-ownership rotation and duplex copies; the
+cache results measure an additional change, not a stock-upstream comparison.
+
+Actual input was 32,768 or 131,072 tokens; allocation was input plus 8,192. KV is
+FP16, RoPE is native, the automatic miss fraction is 0.55, and the CPU pool has
+15 workers. A fresh engine per arm ran coding then editing, carrying adaptation
+from coding into editing. These are finite paired measurements, not confidence
+intervals or a task-quality evaluation.
+
+### 32K reversed-order repeats: output tokens/s
+
+Four-slot arms ran before their cache-off controls, reversing the first screen.
+
+| Mode | Cache off, code / edit | Four slots/layer, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| MTP | 129.94 / 112.14 | 132.64 / 113.69 | +2.07% / +1.38% |
+| N-gram* | 77.17 / 105.00 | 78.98 / 114.25 | +2.34% / +8.81% |
+
+### Capacity and equal-VRAM competitor
+
+| 32K MTP configuration | Extra VRAM | Coding tok/s | Editing tok/s |
+|---|---:|---:|---:|
+| Baseline | 0 | 129.94 | 112.14 |
+| Four slots/layer | 0.934 GiB | 132.64 | 113.69 |
+| Eight slots/layer | 1.868 GiB | 132.80 | 115.63 |
+| 192 more primary slots* | 0.934 GiB | 130.19 | 115.04 |
+
+Four and eight secondary slots per layer preserve the 15,472 primary slots and
+CPU/GPU assignment. Their MTP output and recorded work matched exactly. Eight
+slots were measured once; doubling cache capacity gave little additional coding
+benefit. *The larger-primary arm uses 15,664 slots and changes placement: coding
+diverged at token 13 and both tasks' work changed. It is a useful competing
+configuration, not an exact-work control for the secondary cache.
+
+### Native 128K: output tokens/s
+
+The first pairs at this context ran cache off, then four slots per layer.
+
+| Mode | Cache off, code / edit | Four slots/layer, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| Plain | 74.74 / 59.69 | 75.00 / 60.20 | +0.34% / +0.86% |
+| MTP | 132.18 / 106.52 | 133.97 / 107.95 | +1.35% / +1.34% |
+| N-gram* | 74.37 / 100.80 | 76.18 / 103.05 | +2.44% / +2.23% |
+| MTP + n-gram* | 131.68 / 103.49 | 133.49 / 105.51 | +1.37% / +1.96% |
+
+### Prefill-inclusive effective output tokens/s
+
+Output tokens divided by complete request wall time; engine startup is excluded.
+
+32K repeats:
+
+| Mode | Cache off, code / edit | Four slots/layer, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| MTP | 64.83 / 60.59 | 65.44 / 61.06 | +0.94% / +0.76% |
+| N-gram* | 48.39 / 58.62 | 49.11 / 61.33 | +1.48% / +4.62% |
+
+128K:
+
+| Mode | Cache off, code / edit | Four slots/layer, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| Plain | 22.33 / 20.81 | 22.37 / 20.87 | +0.19% / +0.25% |
+| MTP | 25.66 / 24.54 | 25.71 / 24.63 | +0.21% / +0.37% |
+| N-gram* | 22.29 / 24.29 | 22.48 / 24.40 | +0.83% / +0.47% |
+| MTP + n-gram* | 25.62 / 24.39 | 25.71 / 24.49 | +0.35% / +0.43% |
+
+### Token and work qualifications
+
+| Comparison | First different token, code / edit (zero-based) | Recorded work matches, code / edit |
+|---|---|---|
+| 32,768 MTP | match / match | yes / yes |
+| 32,768 N-gram* | 488 / match | no / no |
+| 131,072 Plain | match / match | yes / yes |
+| 131,072 MTP | match / match | yes / yes |
+| 131,072 N-gram* | 452 / match | no / no |
+| 131,072 MTP + n-gram* | match / match | yes / no |
+| 32K MTP, eight slots | match / match | yes / yes |
+| 32K MTP, larger primary | 13 / match | no / no |
+
+*N-gram scheduling is timing-sensitive. Matching editing output with different
+draft/work counts remains useful workload evidence, but it does not isolate a
+kernel improvement on identical work. Keep those rows separate from plain/MTP
+matching-work comparisons. No quality gain follows from these speed results.
+
+### Interpretation and reproduce/disable
+
+The small 32K MTP gain survived the reversed pair. Plain decoding changed by less
+than 1% in these pairs. Logical upload savings alone overstate the end-to-end
+benefit. Lower CPU-expert times suggest reduced host-memory contention as a
+possible contributor; this is an inference, not measured DRAM bandwidth or a
+proof of the mechanism. The separate captured-upload experiment tests actual
+overlap without replacing this serial-cache configuration.
+
+Starting from the recorded launch arguments, set `STRATA_Q8_MISS_CACHE_WAYS=4`
+for the tested cache, or `0` to disable it. Eight slots were tested only in 32K
+MTP here. Keep FP16 KV, native context, `--expert-cache 15472`, `--pcie-frac 0.55`,
+`STRATA_EXCHANGE_ROTATE=1`, `STRATA_EXCHANGE_DUPLEX=1`,
+`STRATA_ADAPT_NOWAIT=0`, `STRATA_ADAPT_WORKER=0` and
+`STRATA_Q8_EXPERT_REUSE=0`. The raw evidence includes all launch commands,
+source/binary hashes, prompt hashes, tokens, work, readiness memory and timings.
+The switch defaults off; main, public services and model files are unchanged.
+
+Evidence: [completed follow-up matrix](benchmarks/q8-readonly-followup-20261004.json),
+[pair comparisons](benchmarks/q8-readonly-followup-summary-20261004.json).
