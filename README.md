@@ -11,7 +11,8 @@ The secondary GPU cache is a separate optional switch.
 Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
 128GB RAM; full Unsloth Q8_0, FP16 KV, native 32K and 128K.
 
-**Implementation prepared; correctness/build gates and model timings pending.**
+**Build and 20 GPU component cases passed; memcheck/initcheck: zero errors.**
+Full-model lifecycle checks and paired throughput measurements are queued.
 No speed gain is claimed for overlap. The earlier read-only cache's lifecycle
 results apply to its serial implementation, not this new stream arrangement.
 

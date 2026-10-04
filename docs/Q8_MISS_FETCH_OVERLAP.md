@@ -65,3 +65,20 @@ The hypothesis is falsified if the transfer finishes earlier without improving
 request time, if concurrent kernels lose more throughput to resource contention
 than they hide, or if any unexplained token/state discrepancy appears. Retain
 the serial path and CPU-only miss configuration as independent alternatives.
+
+## Completed component/build checks
+
+Runtime `bcacb884` built on llm-60. All 20 component cases passed, with staged
+copies and cache copies, serial and captured-fork execution, complete-byte
+checks, independent resident outputs, changing graph inputs, slot guards and
+source immutability. Actual Q8 expert-size cases covered 651 uncached accesses
+and 574 cached accesses per stream arrangement; the cached case included
+107 hits and seven abandoned plans. CUDA memcheck and initcheck reported zero
+errors. These component results do not establish model correctness or speed.
+
+The new full-model job is queued behind the cache follow-up. It checks six
+lifecycle arms (plain/MTP x serial, overlap, overlap plus four cache slots per
+layer), then 16 throughput arms (all four decoding modes x overlap off/on x
+cache off/on). The same component-tested binary is used throughout.
+
+Evidence: [component/build results](benchmarks/q8-miss-overlap-components-20261004.json).

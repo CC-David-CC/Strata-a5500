@@ -1,0 +1,346 @@
+{
+  "unit": "MainPID=0\nExecMainStatus=0\nActiveState=inactive\n",
+  "status": [
+    {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/status.json",
+      "data": {
+        "commit": "bcacb88408c7ee9c6e692e51cbbbbf8cb1fc8c2f",
+        "started": 1791099730.0481799,
+        "cutoff_utc": "2026-10-04T19:42:10.048065+00:00",
+        "steps": [],
+        "attempts": [
+          {
+            "label": "readonly-gates-attempt-01",
+            "args": [
+              "/home/dflanag3/src/Strata/.venv/bin/python",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/tools/run_q8_readonly_candidate_fleet.py",
+              "--gates",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01"
+            ],
+            "environment": {},
+            "started": 1791099790.8669436,
+            "pid": 975326,
+            "exit": 0,
+            "finished": 1791099819.6009755
+          }
+        ],
+        "runner_sha256": "44a42448eacda620933e740e136c2e5fe1b04fc57e6d20264c19345f1fa14a2d",
+        "helper_sha256": "e22bb314d2ffd73334ea2ae49476685a2d7ab2fbf2690aa575053324f74deb2a",
+        "current": "readonly-gates-attempt-01",
+        "shutdown_afterwards": false,
+        "operational_guard_not_user_deadline": true,
+        "idle_seconds": 60.77967195099336,
+        "component_result": "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/result.json",
+        "engine_sha256": "f50a1d1116d91983a690555dcd3dee114be6da928879a83b7bfa34e563ab7d12",
+        "completed": true,
+        "finished": 1791099819.6018224
+      }
+    }
+  ],
+  "gate": [
+    {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/result.json",
+      "data": {
+        "started": 1791099790.8878481,
+        "steps": [
+          {
+            "label": "fixture-compile",
+            "command": [
+              "ccache",
+              "/usr/local/cuda/bin/nvcc",
+              "-std=c++17",
+              "-O2",
+              "-lineinfo",
+              "-arch=sm_120",
+              "-I/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/include",
+              "-c",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/tools/readonly_miss_cache_fixture.cu",
+              "-o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture.o"
+            ],
+            "exit": 0,
+            "seconds": 1.4163434530200902
+          },
+          {
+            "label": "cache-compile",
+            "command": [
+              "ccache",
+              "/usr/local/cuda/bin/nvcc",
+              "-std=c++17",
+              "-O2",
+              "-lineinfo",
+              "-arch=sm_120",
+              "-I/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/include",
+              "-c",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/src/kernels/cuda/readonly_miss_cache.cu",
+              "-o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/cache.o"
+            ],
+            "exit": 0,
+            "seconds": 0.007560002995887771
+          },
+          {
+            "label": "verify-compile",
+            "command": [
+              "ccache",
+              "/usr/local/cuda/bin/nvcc",
+              "-std=c++17",
+              "-O2",
+              "-lineinfo",
+              "-arch=sm_120",
+              "-I/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/include",
+              "-c",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/src/kernels/cuda/verify_kernels.cu",
+              "-o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/verify.o"
+            ],
+            "exit": 0,
+            "seconds": 1.0150203140219674
+          },
+          {
+            "label": "fixture-link",
+            "command": [
+              "/usr/local/cuda/bin/nvcc",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture.o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/cache.o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/verify.o",
+              "-o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture"
+            ],
+            "exit": 0,
+            "seconds": 0.11405867701978423
+          },
+          {
+            "label": "fixture",
+            "command": [
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture"
+            ],
+            "exit": 0,
+            "seconds": 4.523546080017695
+          },
+          {
+            "label": "fixture-memcheck",
+            "command": [
+              "/usr/local/cuda/bin/compute-sanitizer",
+              "--tool",
+              "memcheck",
+              "--error-exitcode",
+              "42",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture",
+              "--quick"
+            ],
+            "exit": 0,
+            "seconds": 3.3698082960036118
+          },
+          {
+            "label": "fixture-initcheck",
+            "command": [
+              "/usr/local/cuda/bin/compute-sanitizer",
+              "--tool",
+              "initcheck",
+              "--error-exitcode",
+              "42",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture",
+              "--quick"
+            ],
+            "exit": 0,
+            "seconds": 3.3698960480105598
+          }
+        ],
+        "completed": true,
+        "source": "bcacb88408c7ee9c6e692e51cbbbbf8cb1fc8c2f",
+        "engine_sha256": "f50a1d1116d91983a690555dcd3dee114be6da928879a83b7bfa34e563ab7d12",
+        "finished": 1791099818.3971186
+      }
+    }
+  ],
+  "build": [
+    {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/engine-build/result.json",
+      "data": {
+        "started": 1791099804.7062585,
+        "steps": [
+          {
+            "name": "worker-sanitize-build",
+            "command": [
+              "g++",
+              "-std=c++20",
+              "-pthread",
+              "-O1",
+              "-g",
+              "-fsanitize=address,undefined",
+              "-fno-omit-frame-pointer",
+              "-I/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/include",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/tests/core/serial_worker_test.cpp",
+              "-o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/engine-build/worker-sanitize"
+            ],
+            "exit": 0,
+            "seconds": 1.0652357359940652
+          },
+          {
+            "name": "worker-sanitize",
+            "command": [
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/engine-build/worker-sanitize"
+            ],
+            "exit": 0,
+            "seconds": 0.11385280700051226
+          },
+          {
+            "name": "worker-tsan-build",
+            "command": [
+              "g++",
+              "-std=c++20",
+              "-pthread",
+              "-O1",
+              "-g",
+              "-fsanitize=thread",
+              "-fno-omit-frame-pointer",
+              "-I/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/include",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/tests/core/serial_worker_test.cpp",
+              "-o",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/engine-build/worker-tsan"
+            ],
+            "exit": 0,
+            "seconds": 0.7646843309921678
+          },
+          {
+            "name": "worker-tsan-noaslr",
+            "command": [
+              "setarch",
+              "x86_64",
+              "-R",
+              "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/engine-build/worker-tsan"
+            ],
+            "exit": 0,
+            "seconds": 0.46480957098538056
+          },
+          {
+            "name": "ccache-before",
+            "command": [
+              "/usr/bin/ccache",
+              "--show-stats",
+              "--verbose"
+            ],
+            "exit": 0,
+            "seconds": 0.031662388995755464
+          },
+          {
+            "name": "configure",
+            "command": [
+              "cmake",
+              "-S",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884",
+              "-B",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/build",
+              "-G",
+              "Ninja",
+              "-DCMAKE_BUILD_TYPE=Release",
+              "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+              "-DCMAKE_CUDA_ARCHITECTURES=120",
+              "-DSTRATA_ENABLE_CUDA=ON",
+              "-DSTRATA_ENABLE_HIP=OFF",
+              "-DSTRATA_NATIVE_EXPERTS=ON",
+              "-DSTRATA_GGML_DIR=/home/dflanag3/src/Strata/third_party/llama.cpp",
+              "-DSTRATA_MMQ_KQUANTS=ON",
+              "-DSTRATA_FLEET_CUDA_TRACE=ON",
+              "-DSTRATA_BUILD_TESTS=OFF",
+              "-DIQ_FIXTURE_PYTHON=/home/dflanag3/src/Strata/.venv/bin/python",
+              "-DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884;/usr/bin/ccache",
+              "-DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884;/usr/bin/ccache",
+              "-DCMAKE_CUDA_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884;/usr/bin/ccache"
+            ],
+            "exit": 0,
+            "seconds": 1.6167282790120225
+          },
+          {
+            "name": "build",
+            "command": [
+              "cmake",
+              "--build",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/build",
+              "--target",
+              "strata",
+              "-j",
+              "8"
+            ],
+            "exit": 0,
+            "seconds": 9.225595453986898
+          },
+          {
+            "name": "ccache-replay",
+            "command": [
+              "cmake",
+              "--build",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/build",
+              "--target",
+              "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+              "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+              "-j",
+              "2"
+            ],
+            "exit": 0,
+            "seconds": 0.0317012729938142
+          },
+          {
+            "name": "relink",
+            "command": [
+              "cmake",
+              "--build",
+              "/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884/build",
+              "--target",
+              "strata",
+              "-j",
+              "8"
+            ],
+            "exit": 0,
+            "seconds": 0.2642531220044475
+          },
+          {
+            "name": "ccache-after",
+            "command": [
+              "/usr/bin/ccache",
+              "--show-stats",
+              "--verbose"
+            ],
+            "exit": 0,
+            "seconds": 0.007597084011649713
+          }
+        ],
+        "source": "bcacb88408c7ee9c6e692e51cbbbbf8cb1fc8c2f",
+        "tsan_mapping_workaround": "ASLR off for this sanitizer process only",
+        "ccache": {
+          "version": "ccache version 4.9.1",
+          "launcher": "/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-overlap-candidate-bcacb884;/usr/bin/ccache",
+          "probe": {
+            "cache_hits": 2,
+            "objects": [
+              {
+                "path": "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+                "sha256": "11e36dd2ba963b0f3c37fce75d97d93e517dbbf808a472584596f9d05e3fe729",
+                "byte_identical": true
+              },
+              {
+                "path": "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+                "sha256": "14302189a1f0503c4e0610291fc0f5dcb2f12fa89a36abc1e253e228ea9792a3",
+                "byte_identical": true
+              }
+            ]
+          }
+        },
+        "completed": true,
+        "engine_sha256": "f50a1d1116d91983a690555dcd3dee114be6da928879a83b7bfa34e563ab7d12",
+        "finished": 1791099818.3562043
+      }
+    }
+  ],
+  "logs": {
+    "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture.log": "PASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n",
+    "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture-initcheck.log": "========= COMPUTE-SANITIZER\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+    "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture-memcheck.log": "========= COMPUTE-SANITIZER\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+    "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture-compile.log": "",
+    "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/verify-compile.log": "",
+    "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/fixture-link.log": "",
+    "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-overlap-components-20261004/readonly-gates-attempt-01/cache-compile.log": ""
+  }
+}
