@@ -10,8 +10,11 @@ Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
 cache entries per layer while retaining canonical RAM copies. The goal is to
 avoid repeated uploads without adding secondary-cache eviction writebacks.
 
-**Tests are pending; no new speed gain is claimed.** This branch changes test
-coverage and configuration, with no new inference kernel or cache policy.
+**Component gates passed; model comparisons are running.** All 24 byte-test
+cases and both GPU sanitizer runs passed. The built engine is byte-identical
+to the measured copy-grid engine. No capacity speed gain is claimed yet.
+This branch changes test coverage and configuration, with no new inference
+kernel or cache policy.
 
 See **[the experiment, memory budget and required gates](docs/Q8_MISS_CACHE_CAPACITY.md)**.
 Earlier copy-grid results remain in the inherited

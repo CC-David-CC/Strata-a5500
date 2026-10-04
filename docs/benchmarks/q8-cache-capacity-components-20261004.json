@@ -1,0 +1,412 @@
+{
+  "collected_utc": "2026-10-04T12:53:07.146695+00:00",
+  "gate": {
+    "started": 1791118277.5870483,
+    "steps": [
+      {
+        "label": "fixture-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-cache-capacity-bcb5ce37/include",
+          "-c",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/tools/readonly_miss_cache_fixture.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 1.415987257991219
+      },
+      {
+        "label": "cache-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-cache-capacity-bcb5ce37/include",
+          "-c",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/src/kernels/cuda/readonly_miss_cache.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/cache.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.007753721991321072
+      },
+      {
+        "label": "verify-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-cache-capacity-bcb5ce37/include",
+          "-c",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/src/kernels/cuda/verify_kernels.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/verify.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.007404367002891377
+      },
+      {
+        "label": "fixture-link",
+        "command": [
+          "/usr/local/cuda/bin/nvcc",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture.o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/cache.o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/verify.o",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.11363178200554103
+      },
+      {
+        "label": "fixture-blocks32",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32"
+        },
+        "expected_exit": 0,
+        "seconds": 8.331819378014188
+      },
+      {
+        "label": "fixture-memcheck-blocks32",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "memcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32"
+        },
+        "expected_exit": 0,
+        "seconds": 6.475520653999411
+      },
+      {
+        "label": "fixture-initcheck-blocks32",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "initcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32"
+        },
+        "expected_exit": 0,
+        "seconds": 6.57583618798526
+      }
+    ],
+    "completed": true,
+    "source": "bcb5ce37246ad82fc2af5cd9b3cfc653240f3b71",
+    "capacity_full_blob_passes": [
+      "PASS bytes=5222400 ways=8 overlap=0",
+      "PASS bytes=5222400 ways=8 overlap=1",
+      "PASS bytes=5222400 ways=16 overlap=0",
+      "PASS bytes=5222400 ways=16 overlap=1"
+    ],
+    "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+    "finished": 1791118305.3963299
+  },
+  "build": {
+    "started": 1791118300.5177498,
+    "steps": [
+      {
+        "name": "worker-sanitize-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=address,undefined",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-cache-capacity-bcb5ce37/include",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 1.0653675479989033
+      },
+      {
+        "name": "worker-sanitize",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 0.11394119300530292
+      },
+      {
+        "name": "worker-tsan-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=thread",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-cache-capacity-bcb5ce37/include",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.7647523100022227
+      },
+      {
+        "name": "worker-tsan-noaslr",
+        "command": [
+          "setarch",
+          "x86_64",
+          "-R",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.4144597839913331
+      },
+      {
+        "name": "ccache-before",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.03163956798380241
+      },
+      {
+        "name": "configure",
+        "command": [
+          "cmake",
+          "-S",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37",
+          "-B",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/build",
+          "-G",
+          "Ninja",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+          "-DCMAKE_CUDA_ARCHITECTURES=120",
+          "-DSTRATA_ENABLE_CUDA=ON",
+          "-DSTRATA_ENABLE_HIP=OFF",
+          "-DSTRATA_NATIVE_EXPERTS=ON",
+          "-DSTRATA_GGML_DIR=/home/dflanag3/src/Strata/third_party/llama.cpp",
+          "-DSTRATA_MMQ_KQUANTS=ON",
+          "-DSTRATA_FLEET_CUDA_TRACE=ON",
+          "-DSTRATA_BUILD_TESTS=OFF",
+          "-DIQ_FIXTURE_PYTHON=/home/dflanag3/src/Strata/.venv/bin/python",
+          "-DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-cache-capacity-bcb5ce37;/usr/bin/ccache",
+          "-DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-cache-capacity-bcb5ce37;/usr/bin/ccache",
+          "-DCMAKE_CUDA_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-cache-capacity-bcb5ce37;/usr/bin/ccache"
+        ],
+        "exit": 0,
+        "seconds": 1.6160508779867087
+      },
+      {
+        "name": "build",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 0.46434834599494934
+      },
+      {
+        "name": "ccache-replay",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/build",
+          "--target",
+          "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+          "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+          "-j",
+          "2"
+        ],
+        "exit": 0,
+        "seconds": 0.031586847006110474
+      },
+      {
+        "name": "relink",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-cache-capacity-bcb5ce37/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 0.2645079840149265
+      },
+      {
+        "name": "ccache-after",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.007659851980861276
+      }
+    ],
+    "source": "bcb5ce37246ad82fc2af5cd9b3cfc653240f3b71",
+    "tsan_mapping_workaround": "ASLR off for this sanitizer process only",
+    "ccache": {
+      "version": "ccache version 4.9.1",
+      "launcher": "/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-cache-capacity-bcb5ce37;/usr/bin/ccache",
+      "probe": {
+        "cache_hits": 2,
+        "objects": [
+          {
+            "path": "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+            "sha256": "11e36dd2ba963b0f3c37fce75d97d93e517dbbf808a472584596f9d05e3fe729",
+            "byte_identical": true
+          },
+          {
+            "path": "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+            "sha256": "14302189a1f0503c4e0610291fc0f5dcb2f12fa89a36abc1e253e228ea9792a3",
+            "byte_identical": true
+          }
+        ]
+      }
+    },
+    "completed": true,
+    "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+    "finished": 1791118305.3553925
+  },
+  "logs": {
+    "fixture-blocks32.log": {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture-blocks32.log",
+      "sha256": "da1940637bf4a3841a3c37c747daa993ef16b2a4e4da89cfa69474ad3486de35",
+      "log": "strata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=5222400 ways=8 overlap=0 requests=574 hits=194 fills=380 bypasses=156 abandoned=7\nPASS bytes=5222400 ways=16 overlap=0 requests=574 hits=373 fills=201 bypasses=0 abandoned=7\nPASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=5222400 ways=8 overlap=1 requests=574 hits=194 fills=380 bypasses=156 abandoned=7\nPASS bytes=5222400 ways=16 overlap=1 requests=574 hits=373 fills=201 bypasses=0 abandoned=7\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n",
+      "full_byte_cases": [
+        "PASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0",
+        "PASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0",
+        "PASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14",
+        "PASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14",
+        "PASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14",
+        "PASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14",
+        "PASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14",
+        "PASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14",
+        "PASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0",
+        "PASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7",
+        "PASS bytes=5222400 ways=8 overlap=0 requests=574 hits=194 fills=380 bypasses=156 abandoned=7",
+        "PASS bytes=5222400 ways=16 overlap=0 requests=574 hits=373 fills=201 bypasses=0 abandoned=7",
+        "PASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0",
+        "PASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0",
+        "PASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14",
+        "PASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14",
+        "PASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14",
+        "PASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14",
+        "PASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14",
+        "PASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14",
+        "PASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0",
+        "PASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7",
+        "PASS bytes=5222400 ways=8 overlap=1 requests=574 hits=194 fills=380 bypasses=156 abandoned=7",
+        "PASS bytes=5222400 ways=16 overlap=1 requests=574 hits=373 fills=201 bypasses=0 abandoned=7"
+      ]
+    },
+    "fixture-memcheck-blocks32.log": {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture-memcheck-blocks32.log",
+      "sha256": "8349cda1edaea4abf0f2e1cb609a27411f8516c8f05be803f63e35cd35894574",
+      "log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=8 overlap=0 requests=160 hits=53 fills=107 bypasses=46 abandoned=2\nPASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=8 overlap=1 requests=160 hits=53 fills=107 bypasses=46 abandoned=2\nPASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+      "full_byte_cases": [
+        "PASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0",
+        "PASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2",
+        "PASS bytes=5222400 ways=8 overlap=0 requests=160 hits=53 fills=107 bypasses=46 abandoned=2",
+        "PASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2",
+        "PASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0",
+        "PASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2",
+        "PASS bytes=5222400 ways=8 overlap=1 requests=160 hits=53 fills=107 bypasses=46 abandoned=2",
+        "PASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2"
+      ]
+    },
+    "fixture-initcheck-blocks32.log": {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-capacity-20261004/readonly-gates-attempt-01/fixture-initcheck-blocks32.log",
+      "sha256": "8349cda1edaea4abf0f2e1cb609a27411f8516c8f05be803f63e35cd35894574",
+      "log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=8 overlap=0 requests=160 hits=53 fills=107 bypasses=46 abandoned=2\nPASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=8 overlap=1 requests=160 hits=53 fills=107 bypasses=46 abandoned=2\nPASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+      "full_byte_cases": [
+        "PASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0",
+        "PASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2",
+        "PASS bytes=5222400 ways=8 overlap=0 requests=160 hits=53 fills=107 bypasses=46 abandoned=2",
+        "PASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2",
+        "PASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0",
+        "PASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2",
+        "PASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2",
+        "PASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2",
+        "PASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0",
+        "PASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2",
+        "PASS bytes=5222400 ways=8 overlap=1 requests=160 hits=53 fills=107 bypasses=46 abandoned=2",
+        "PASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2"
+      ]
+    }
+  },
+  "interpretation": "Twenty-four complete-byte cases, including full 5,222,400-byte experts with 8/16ways in serial/overlap paths. Memcheck/initcheck zero errors; worker ASan/UBSan/TSan passed. The produced engine is byte-identical to measured geometry7db44142. This is configuration-only capacity work; no model throughput result follows from these gates."
+}

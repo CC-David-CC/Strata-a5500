@@ -53,8 +53,25 @@ then editing. Require exact plain/MTP output and recorded work; preserve any
 timing-sensitive n-gram work or token differences. The changed upload/hit counts
 are the intended intervention, not an exact-transfer-work comparison.
 
-No component or throughput result is claimed yet. Extend only useful paths to
+Component validation below has passed; model throughput is still running.
+Extend only useful paths to
 native 128K, repeat gains with reversed ordering, and add lifecycle coverage
 before claiming broader readiness. A miss-rate improvement without better
 request time, excessive VRAM pressure, or any unexplained output/state change
 falsifies the proposed benefit. Keep the four-way path as an alternative.
+
+
+## Component gates passed
+
+All 24 complete-byte cases passed at 32 copy blocks, including full-size
+experts with eight and sixteen slots per layer in serial and overlap paths.
+Compute Sanitizer memcheck and initcheck both reported zero errors. Worker
+ASan/UBSan and TSan checks passed. The fresh CUDA build produced exactly the
+same engine bytes as the measured copy-grid engine (`7db44142` runtime source):
+`96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7`.
+
+The nine-arm 32K model comparison has started. This gate establishes component
+correctness and build identity; it does not establish a throughput gain or
+128K capacity. Preserve the primary/RAM placement guard throughout.
+
+[Component logs, sanitizer summaries and build identity](benchmarks/q8-cache-capacity-components-20261004.json).
