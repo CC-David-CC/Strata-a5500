@@ -70,8 +70,8 @@ All arms keep copy32 overlap, ownership rotation, duplex transfers, PCIe fractio
 per-layer admission: those remain independently measured candidates.
 
 Status: fresh byte-identical build and all 22 lifecycle requests passed.
-An initial 32K MTP placement triple has now completed below; plain repetition
-and native128K throughput are still pending. Both the duplicate-cache and primary-cache designs
+The 32K MTP placement triple and reversed plain pair have completed below;
+native128K throughput is still pending. Both the duplicate-cache and primary-cache designs
 remain alternatives; a smaller upload count alone is not a speedup.
 
 
@@ -159,3 +159,32 @@ other capacity modes, and the more aggressive primary allocation are still
 running or queued in the same suite.
 
 [Full records, first divergence, work/copy counts and resource samples](benchmarks/q8-cache-budget-first-mtp32k-20261004.json).
+
+
+## Reversed plain pair and both-order 32K summary
+
+The reversed plain pair also passed full placement guards and all token/work
+checks. At 32,768 input + 1,024 output (40,960 allocated, FP16 KV), four to
+sixteen entries gave:
+
+| Task | Four entries tok/s | Sixteen entries tok/s | Change |
+|---|---:|---:|---:|
+| coding | 74.61 | 75.50 | +1.20% |
+| editing | 63.22 | 64.71 | +2.36% |
+
+Primary residency, primary exchange bytes, tokens and recorded work matched.
+Secondary hit/upload counts changed, as intended. The two orders now show:
+
+| Mode / order | Coding gain | Editing gain |
+|---|---:|---:|
+| plain / ascending | +1.05% | +2.66% |
+| plain / reversed | +1.20% | +2.36% |
+| mtp / ascending | +1.67% | +3.98% |
+| mtp / reversed | +1.58% | +4.34% |
+
+Both modes improved in both orders. This supports a repeated gain for these
+requests, not a confidence interval or a general workload guarantee. The
+initial n-gram qualifications and primary-placement differences remain in
+their respective sections. Native128K testing continues separately.
+
+[Plain request records, timings/copy counts and both-order summary](benchmarks/q8-cache-budget-plain-repeat-20261004.json).

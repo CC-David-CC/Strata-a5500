@@ -15,12 +15,14 @@ coverage, with no inference kernel or model-weight changes.
 **The 32K MTP capacity gain repeated:** sixteen versus four secondary entries
 improved coding +1.58% and editing +4.34% in reversed order, with exact tokens,
 recorded work and primary exchange bytes. Initial gains were +1.67%/+3.98%.
-Fresh build and all 22 normal/cancel/checkpoint requests also passed.
+Plain also repeated (+1.20% coding /+2.36% editing, versus +1.05%/+2.65%
+initially), with exact tokens/work. Fresh build and all 22 normal/cancel/
+checkpoint requests also passed.
 
 The same extra weight-storage budget spent on primary experts reached
 139.16 tok/s coding /121.50 editing, versus 137.51/123.36 for the larger
 secondary cache. That placement changes output/work; details and effective
-throughput are in the report. Plain repetition, native128K and the remaining
+throughput are in the report. Native128K and the remaining
 configurations are still running. These pairs have no confidence intervals.
 See [memory budgets, invariants and required measurements](docs/Q8_CACHE_BUDGET.md).
 
