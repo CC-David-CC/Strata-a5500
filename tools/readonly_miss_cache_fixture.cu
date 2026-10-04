@@ -186,7 +186,7 @@ int main(int argc,char** argv) {
             exercise(16,ways,quick?32:160,overlap);
             exercise(144,ways,quick?32:160,overlap);
         }
-        for(int ways : {0,4}) exercise(5222400,ways,quick?24:80,overlap);
+        for(int ways : {0,4,8,16}) exercise(5222400,ways,quick?24:80,overlap);
     }
     std::puts("PASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills");
 }
