@@ -10,10 +10,11 @@ expert arithmetic and explicit buffer dependencies stay fixed.
 Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
 128GB RAM; full Unsloth Q8_0 with FP16 KV and native context.
 
-**Unverified prototype: no speed gain claimed.** The parent overlap experiment
+**Build and component checks passed; no model speed gain claimed.** The parent overlap experiment
 reduced host wait but increased CPU expert time. This branch tests whether
-copy concurrency contributes to that tradeoff. Component and full-model checks
-are required before selecting a setting.
+copy concurrency contributes to that tradeoff. Complete-byte checks passed at
+default and 1/32/96/384 blocks; six sanitizer runs reported zero errors.
+Full-model comparisons are required before selecting a setting.
 
 See **[evidence, hypothesis, invariants and gates](docs/Q8_MISS_FETCH_GEOMETRY.md)**.
 The parent overlap and secondary-cache controls remain independent options.

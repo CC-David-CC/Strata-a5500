@@ -1,0 +1,507 @@
+{
+  "components": {
+    "started": 1791106518.4146867,
+    "steps": [
+      {
+        "label": "fixture-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/include",
+          "-c",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/tools/readonly_miss_cache_fixture.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.03197406101389788
+      },
+      {
+        "label": "cache-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/include",
+          "-c",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/src/kernels/cuda/readonly_miss_cache.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/cache.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.7648967050190549
+      },
+      {
+        "label": "verify-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/include",
+          "-c",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/src/kernels/cuda/verify_kernels.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/verify.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 1.065140409016749
+      },
+      {
+        "label": "fixture-link",
+        "command": [
+          "/usr/local/cuda/bin/nvcc",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture.o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/cache.o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/verify.o",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.11388272800832056
+      },
+      {
+        "label": "fixture-default",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 4.523835183994379
+      },
+      {
+        "label": "fixture-blocks1",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "1"
+        },
+        "expected_exit": 0,
+        "seconds": 6.277150926005561
+      },
+      {
+        "label": "fixture-blocks32",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32"
+        },
+        "expected_exit": 0,
+        "seconds": 4.423163807019591
+      },
+      {
+        "label": "fixture-blocks96",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "96"
+        },
+        "expected_exit": 0,
+        "seconds": 4.423357702995418
+      },
+      {
+        "label": "fixture-blocks384",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "384"
+        },
+        "expected_exit": 0,
+        "seconds": 4.423753443988971
+      },
+      {
+        "label": "fixture-memcheck-blocks32",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "memcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32"
+        },
+        "expected_exit": 0,
+        "seconds": 3.451362302992493
+      },
+      {
+        "label": "fixture-initcheck-blocks32",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "initcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32"
+        },
+        "expected_exit": 0,
+        "seconds": 3.4702244689979125
+      },
+      {
+        "label": "fixture-memcheck-blocks96",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "memcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "96"
+        },
+        "expected_exit": 0,
+        "seconds": 3.269340530008776
+      },
+      {
+        "label": "fixture-initcheck-blocks96",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "initcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "96"
+        },
+        "expected_exit": 0,
+        "seconds": 3.3700947560137138
+      },
+      {
+        "label": "fixture-memcheck-blocks384",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "memcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "384"
+        },
+        "expected_exit": 0,
+        "seconds": 3.269793487008428
+      },
+      {
+        "label": "fixture-initcheck-blocks384",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "initcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "384"
+        },
+        "expected_exit": 0,
+        "seconds": 3.369856720993994
+      },
+      {
+        "label": "invalid-geometry-0",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": ""
+        },
+        "expected_exit": 1,
+        "seconds": 0.21399348598788492
+      },
+      {
+        "label": "invalid-geometry-1",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "0"
+        },
+        "expected_exit": 1,
+        "seconds": 0.21401151199825108
+      },
+      {
+        "label": "invalid-geometry-2",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "-1"
+        },
+        "expected_exit": 1,
+        "seconds": 0.2143418999912683
+      },
+      {
+        "label": "invalid-geometry-3",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "4097"
+        },
+        "expected_exit": 1,
+        "seconds": 0.26453364998451434
+      },
+      {
+        "label": "invalid-geometry-4",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32x"
+        },
+        "expected_exit": 1,
+        "seconds": 0.2141873459913768
+      }
+    ],
+    "completed": true,
+    "source": "7db44142cbb623a6b96bca0f995a7da498f6f834",
+    "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+    "finished": 1791106571.724192
+  },
+  "build": {
+    "started": 1791106565.791908,
+    "steps": [
+      {
+        "name": "worker-sanitize-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=address,undefined",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/include",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 1.0654853449959774
+      },
+      {
+        "name": "worker-sanitize",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 0.11388398101553321
+      },
+      {
+        "name": "worker-tsan-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=thread",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/include",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.7646741649950854
+      },
+      {
+        "name": "worker-tsan-noaslr",
+        "command": [
+          "setarch",
+          "x86_64",
+          "-R",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-geometry-components-20261004/readonly-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.4646878320199903
+      },
+      {
+        "name": "ccache-before",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.031625457981135696
+      },
+      {
+        "name": "configure",
+        "command": [
+          "cmake",
+          "-S",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142",
+          "-B",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/build",
+          "-G",
+          "Ninja",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+          "-DCMAKE_CUDA_ARCHITECTURES=120",
+          "-DSTRATA_ENABLE_CUDA=ON",
+          "-DSTRATA_ENABLE_HIP=OFF",
+          "-DSTRATA_NATIVE_EXPERTS=ON",
+          "-DSTRATA_GGML_DIR=/home/dflanag3/src/Strata/third_party/llama.cpp",
+          "-DSTRATA_MMQ_KQUANTS=ON",
+          "-DSTRATA_FLEET_CUDA_TRACE=ON",
+          "-DSTRATA_BUILD_TESTS=OFF",
+          "-DIQ_FIXTURE_PYTHON=/home/dflanag3/src/Strata/.venv/bin/python",
+          "-DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-geometry-candidate-7db44142;/usr/bin/ccache",
+          "-DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-geometry-candidate-7db44142;/usr/bin/ccache",
+          "-DCMAKE_CUDA_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-geometry-candidate-7db44142;/usr/bin/ccache"
+        ],
+        "exit": 0,
+        "seconds": 1.616295457992237
+      },
+      {
+        "name": "build",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 1.465862715995172
+      },
+      {
+        "name": "ccache-replay",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/build",
+          "--target",
+          "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+          "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+          "-j",
+          "2"
+        ],
+        "exit": 0,
+        "seconds": 0.03166869000415318
+      },
+      {
+        "name": "relink",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-miss-geometry-candidate-7db44142/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 0.26388297000085004
+      },
+      {
+        "name": "ccache-after",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.0035243080055806786
+      }
+    ],
+    "source": "7db44142cbb623a6b96bca0f995a7da498f6f834",
+    "tsan_mapping_workaround": "ASLR off for this sanitizer process only",
+    "ccache": {
+      "version": "ccache version 4.9.1",
+      "launcher": "/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-miss-geometry-candidate-7db44142;/usr/bin/ccache",
+      "probe": {
+        "cache_hits": 2,
+        "objects": [
+          {
+            "path": "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+            "sha256": "11e36dd2ba963b0f3c37fce75d97d93e517dbbf808a472584596f9d05e3fe729",
+            "byte_identical": true
+          },
+          {
+            "path": "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+            "sha256": "14302189a1f0503c4e0610291fc0f5dcb2f12fa89a36abc1e253e228ea9792a3",
+            "byte_identical": true
+          }
+        ]
+      }
+    },
+    "completed": true,
+    "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+    "finished": 1791106571.680497
+  },
+  "logs": {
+    "fixture-default.log": "PASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n",
+    "fixture-memcheck-blocks32.log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+    "fixture-blocks32.log": "strata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n",
+    "fixture-blocks384.log": "strata miss fetch geometry: blocks=384 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n",
+    "fixture-blocks96.log": "strata miss fetch geometry: blocks=96 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n",
+    "fixture-initcheck-blocks96.log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=96 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+    "fixture-compile.log": "",
+    "fixture-blocks1.log": "strata miss fetch geometry: blocks=1 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=0 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=0 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=0 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=0 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS bytes=16 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=1291 hits=0 fills=1291 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=144 ways=1 overlap=1 requests=1141 hits=54 fills=1087 bypasses=1008 abandoned=14\nPASS bytes=16 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=144 ways=4 overlap=1 requests=1141 hits=206 fills=935 bypasses=648 abandoned=14\nPASS bytes=16 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=144 ways=16 overlap=1 requests=1141 hits=749 fills=392 bypasses=0 abandoned=14\nPASS bytes=5222400 ways=0 overlap=1 requests=651 hits=0 fills=651 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=574 hits=107 fills=467 bypasses=331 abandoned=7\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n",
+    "fixture-memcheck-blocks96.log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=96 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+    "fixture-initcheck-blocks384.log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=384 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+    "fixture-link.log": "",
+    "fixture-memcheck-blocks384.log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=384 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n",
+    "fixture-initcheck-blocks32.log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n"
+  }
+}

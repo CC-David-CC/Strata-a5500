@@ -38,14 +38,22 @@ resident-kernel and exposed fetch/join intervals together.
 
 ## Validation and selection
 
-Implementation prepared; no build, parity or speed result yet. Component gates
-run the original 384-block default and explicit 1/32/96/384 configurations with
+Component gates passed the original 384-block default and explicit 1/32/96/384 configurations with
 the actual 5,222,400-byte expert, small/tail shapes, captured serial/overlap paths,
 cache eviction/bypass, complete-byte output, source immutability and guards.
-Memcheck/initcheck run at 32/96/384, and invalid values must be rejected.
+Memcheck/initcheck passed at 32/96/384, and invalid values were rejected.
 
 After these gates and the parent stage profile, select a small full-model
 comparison. Keep serial and overlap, cache off/on and all decoding modes as
 separate paths. Require exact plain/MTP tokens and recorded work; qualify n-gram
 work changes. Repeat useful gains, then extend them to native 128K. No result
 from the parent branch establishes a gain for this block-count change.
+
+Runtime `7db4414` built with binary SHA-256
+`96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7`.
+There were 20 full component cases per setting, 100 total across the default
+and four explicit block counts. All six sanitizer runs reported zero errors.
+Five invalid values exited with the expected error. No full-model result is
+claimed for changing block count yet.
+
+Evidence: [complete gates and fixture logs](benchmarks/q8-miss-fetch-geometry-components-20261004.json).
