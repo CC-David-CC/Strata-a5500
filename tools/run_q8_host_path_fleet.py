@@ -106,7 +106,8 @@ def worker(plan_path, out):
                     'exchange buffer rotation', 'host memcpy bytes avoided', 'GPU stages',
                     'pool phases', 'RAM budget', 'cache complement ready', 'CPU pool:',
                     'PCIe', 'adaptive worker', 'exchange duplex:', 'resident RAM mode:', 'pinned',
-                    'readonly miss cache:', 'miss fetch overlap:', 'miss fetch geometry:', 'PLE startup'))]
+                    'readonly miss cache:', 'miss fetch overlap:', 'miss fetch geometry:', 'PLE startup',
+                    'miss cache tag snapshot:', 'GPU refills:'))]
                 record['rotation_active'] = 'exchange buffer rotation enabled' in log
                 record['duplex_active'] = 'strata exchange duplex: enabled,' in log
                 record['duplex_swaps'] = sum(map(int, re.findall(r'\bduplex_swaps (\d+)', log)))
@@ -115,6 +116,14 @@ def worker(plan_path, out):
                 record['miss_fetch_blocks'] = list(map(int,re.findall(r'strata miss fetch geometry: blocks=(\d+) threads=256;',log)))
                 record['miss_cache_reports'] = [dict(zip(('groups','hits','uploads','bypasses','avoided_upload_bytes','uploaded_bytes'),map(int,m)))
                     for m in re.findall(r'strata readonly miss cache: cumulative groups=(\d+) hits=(\d+) uploads=(\d+) bypasses=(\d+) avoided_upload_bytes=(\d+) uploaded_bytes=(\d+)',log)]
+                record['tag_snapshot_reports'] = [dict(zip(('generations','bytes'),map(int,m)))
+                    for m in re.findall(r' tag_snapshots=(\d+) tag_snapshot_bytes=(\d+)',log)]
+                record['gpu_refill_reports'] = [dict(zip(('d2d_bytes','refills'),map(int,m)))
+                    for m in re.findall(r'strata GPU refills: D2D_bytes (\d+) D2D_refills (\d+);',log)]
+                record['primary_transfer_reports'] = [dict(zip(('d2h_bytes','h2d_bytes','swaps','duplex_swaps'),map(int,m)))
+                    for m in re.findall(r'; D2H_bytes (\d+) H2D_bytes (\d+) swaps (\d+) duplex_swaps (\d+);',log)]
+                record['gpu_refill_active'] = 'strata GPU refills: enabled;' in log
+                record['tag_snapshot_active'] = 'strata miss cache tag snapshot: enabled,' in log
             save(target, state)
             if run.returncode:
                 raise RuntimeError(label + ' failed; inspect preserved logs')
@@ -143,6 +152,22 @@ def worker(plan_path, out):
                                 c['output_tokens'] != trial.get('output_tokens', 1024) or c['timings']['file_blobs'] != 0
                                 for c in cases):
                 raise RuntimeError(label + ': missing output or unexpected file expert reads')
+            # These guards are opt-in so older benchmark exports remain readable.
+            if trial.get('check_refill_counters'):
+                snap = trial['env'].get('STRATA_Q8_CACHE_TAG_SNAPSHOT') == '1'
+                refill = trial['env'].get('STRATA_Q8_GPU_REFILL') == '1'
+                if record.get('tag_snapshot_active') != snap or record.get('gpu_refill_active') != refill:
+                    raise RuntimeError(label + ': snapshot/refill option did not activate as requested')
+                for key in ('tag_snapshot_reports','gpu_refill_reports','primary_transfer_reports'):
+                    if len(record.get(key,[])) != len(cases):
+                        raise RuntimeError(label + ': missing per-request '+key)
+                for s,d,p in zip(record['tag_snapshot_reports'],record['gpu_refill_reports'],record['primary_transfer_reports']):
+                    if (s['generations'] > 0) != snap or s['bytes'] != s['generations']*48*cache_ways*4:
+                        raise RuntimeError(label + ': invalid snapshot generation/byte accounting')
+                    if (d['refills'] > 0) != refill or d['d2d_bytes'] != d['refills']*5222400:
+                        raise RuntimeError(label + ': expected GPU refills were absent or inconsistent')
+                    if p['d2h_bytes'] != p['h2d_bytes'] + d['d2d_bytes']:
+                        raise RuntimeError(label + ': primary victim/refill byte accounting differs')
             if trial.get('reference_label'):
                 ref = references[trial['reference_label']]
                 if ref['prompt_sha256'] != record['prompt_sha256']:
@@ -168,6 +193,11 @@ def worker(plan_path, out):
                 if trial.get('require_exact') and any(c['first_token_difference'] is not None or
                                                      c['work_differences'] for c in comparisons):
                     raise RuntimeError(label + ': default-off parity gate failed')
+                if trial.get('check_refill_counters') and trial.get('require_exact') and ref.get('primary_transfer_reports'):
+                    oldp,newp = ref['primary_transfer_reports'],record['primary_transfer_reports']
+                    if len(oldp) != len(newp) or any(any(a[k] != b[k] for k in ('d2h_bytes','swaps','duplex_swaps'))
+                                                   for a,b in zip(oldp,newp)):
+                        raise RuntimeError(label + ': refill changed primary exchanges')
             # Later arms may use a fresh, same-binary control from this matrix.
             # Retain the declared external reference for the first control.
             references[label] = record

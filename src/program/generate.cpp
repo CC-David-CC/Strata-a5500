@@ -160,7 +160,8 @@ template <class Swap>
 bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::ExpertCache& cache,
                           const std::vector<int32_t>& host_res, int64_t n_expert, std::vector<Swap>& swaps,
                           cudaStream_t stream, HostPathTiming* timing = nullptr,
-                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr) {
+                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr,
+                          const strata::core::Verifier* refill_cache = nullptr) {
     if (fills_queued) *fills_queued = false;
     if (!src.complement_ready() || swaps.empty()) return true;
     // Restrict this first path to pinned resident inputs whose evictions all
@@ -178,10 +179,20 @@ bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::Exp
         for (size_t q = 0; q < swaps.size(); ++q) {
             const Swap& s = swaps[q];
             const int32_t slot = host_res[(size_t)s.layer * (size_t)n_expert + (size_t)s.out];
-            const uint8_t* incoming = src.blob(s.layer, s.in); // exactly one source read, as before
+            // Keep the existing logical blob lookup/accounting. It returns a
+            // pointer; a secondary-cache hit avoids transferring those bytes.
+            const uint8_t* incoming = src.blob(s.layer, s.in);
             const size_t bytes = (size_t)strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
             if (!incoming || !src.exchange_buffer((int64_t)q)) return false;
-            copies.push_back({cache.device_slot(slot), incoming, src.exchange_buffer((int64_t)q), bytes});
+            cudaMemcpyKind kind = cudaMemcpyHostToDevice;
+            if (refill_cache) {
+                if (bytes > refill_cache->cached_refill_bytes()) return false;
+                if (const uint8_t* cached = refill_cache->cached_refill_source(s.layer, s.in)) {
+                    incoming = cached;
+                    kind = cudaMemcpyDeviceToDevice;
+                }
+            }
+            copies.push_back({cache.device_slot(slot), incoming, src.exchange_buffer((int64_t)q), bytes, kind});
         }
         {
             double unused = 0;
@@ -201,6 +212,10 @@ bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::Exp
             if (timing && timing->enabled) {
                 timing->d2h_bytes += copies[q].bytes;
                 ++timing->duplex_swaps;
+                if (copies[q].incoming_kind == cudaMemcpyDeviceToDevice) {
+                    timing->d2d_refill_bytes += copies[q].bytes;
+                    ++timing->d2d_refills;
+                } else timing->h2d_bytes += copies[q].bytes;
             }
         }
         *fills_queued = true;
@@ -1425,6 +1440,18 @@ int main(int argc, char** argv) {
             usage();
             return 2;
         }
+        }
+    }
+    bool gpu_refills = false;
+    if (const char* flag = std::getenv("STRATA_Q8_GPU_REFILL")) {
+        if (std::strcmp(flag, "0") != 0 && std::strcmp(flag, "1") != 0) {
+            std::fprintf(stderr, "strata: STRATA_Q8_GPU_REFILL must be 0 or 1\n");
+            return 2;
+        }
+        gpu_refills = *flag == '1';
+        if (gpu_refills && !o.serve) {
+            std::fprintf(stderr, "strata: experimental GPU refills require --serve\n");
+            return 2;
         }
     }
     strata::core::set_coupled_draft(o.coupled_draft);
@@ -4881,8 +4908,34 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "strata exchange duplex: unavailable for this placement; using sequential exchanges\n");
             }
         }
+        if (gpu_refills) {
+            if (!duplex_exchange || !src.exchange_rotation() || !ver.miss_cache_snapshot_enabled() ||
+                n_stages != 1 || o.spec_split || ver.device_plan_enabled() || adapt_nowait() ||
+                remote_caches || peer.valid() || drive.d.lookahead) {
+                std::fprintf(stderr, "strata serve: GPU refills require the Q8 tag snapshot, duplex ownership "
+                    "rotation, one unsplit host-planned stage, blocking admission, no remote/peer/lookahead\n");
+                return 2;
+            }
+            std::fprintf(stderr, "strata GPU refills: enabled; immutable secondary source, unchanged ranked "
+                "swaps, victim D2H retained, all refills complete before next verifier window\n");
+        }
+        // On every return, including an error after partially queued copies,
+        // stop reading the verifier's secondary cache before it is destroyed.
+        struct RefillDrain {
+            bool active;
+            cudaStream_t stream;
+            strata::core::DuplexExchange* duplex;
+            ~RefillDrain() {
+                if (!active) return;
+                if (duplex) duplex->wait_evictions();
+                cudaStreamSynchronize(stream);
+            }
+        } refill_drain{gpu_refills, adapt_stream, duplex_exchange.get()};
         cudaEvent_t adapt_ev = nullptr;
-        cudaEventCreateWithFlags(&adapt_ev, cudaEventDisableTiming);
+        if (cudaEventCreateWithFlags(&adapt_ev, cudaEventDisableTiming) != cudaSuccess) {
+            std::fprintf(stderr, "strata serve: cannot create refill completion event\n");
+            return 1;
+        }
         // a layer split's later stages keep a copy of the residency table on their devices, and swap on their own
         auto res_upload = [&]() {
             HostPathTimer timer(host_timing.table_upload, host_timing.enabled);
@@ -4893,18 +4946,19 @@ int main(int argc, char** argv) {
                 cudaMemcpy(st->d_res, host_res.data(), host_res.size() * sizeof(int32_t), cudaMemcpyHostToDevice);
             }
         };
-        auto apply_pending = [&](bool wait) {
+        auto apply_pending = [&](bool wait) -> bool {
             if (peer.valid()) peer.apply_pending(wait);
-            if (pending.empty()) return;
+            if (pending.empty()) return true;
             if (wait) {
                 HostPathTimer timer(host_timing.admission_wait, host_timing.enabled);
-                cudaEventSynchronize(adapt_ev);
+                if (cudaEventSynchronize(adapt_ev) != cudaSuccess) return false;
             }
-            else if (cudaEventQuery(adapt_ev) != cudaSuccess) return;
+            else if (cudaEventQuery(adapt_ev) != cudaSuccess) return true;
             for (auto& st : stages)
                 if (st->adapt_live) {
-                    if (wait) cudaEventSynchronize(st->adapt_ev);
-                    else if (cudaEventQuery(st->adapt_ev) != cudaSuccess) return;
+                    if (wait) {
+                        if (cudaEventSynchronize(st->adapt_ev) != cudaSuccess) return false;
+                    } else if (cudaEventQuery(st->adapt_ev) != cudaSuccess) return true;
                 }
             for (auto& st : stages) st->adapt_live = false;
             {
@@ -4914,6 +4968,7 @@ int main(int argc, char** argv) {
             for (const auto& [i, slot] : pending) host_res[(size_t) i] = slot;
             pending.clear();
             res_upload();
+            return true;
         };
         // the VRAM tier follows the conversation (the same rule as the speculative loop below)
         auto adapt = [&]() -> bool {
@@ -4950,7 +5005,8 @@ int main(int argc, char** argv) {
             }
             bool fills_queued = false;
             if (!resident_stage_swaps(src, xcache, host_res, g.n_expert, swaps, adapt_stream,
-                                      &host_timing, duplex_exchange.get(), &fills_queued)) return false;
+                                      &host_timing, duplex_exchange.get(), &fills_queued,
+                                      gpu_refills ? &ver : nullptr)) return false;
             const auto h2d0 = host_timing.enabled ? Clock::now() : Clock::time_point{};
             bool main_live = false;
             for (const Swap& s : swaps) {
@@ -4965,14 +5021,15 @@ int main(int argc, char** argv) {
                                     (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer),
                                     cudaMemcpyHostToDevice, gs ? gs->adapt_stream : adapt_stream) != cudaSuccess)))
                     return false;
-                if (host_timing.enabled) host_timing.h2d_bytes += strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
+                if (host_timing.enabled && !fills_queued)
+                    host_timing.h2d_bytes += strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
                 if (gs) gs->adapt_live = true;
                 else main_live = true;
                 host_res[out] = strata::core::kNotResident;   // evicted now: the CPU computes it meanwhile
                 pending.emplace_back((int32_t) in, slot);      // resident once the copy has landed
             }
             if (host_timing.enabled) host_timing.h2d_enqueue += std::chrono::duration<double, std::milli>(Clock::now() - h2d0).count();
-            if (!swaps.empty()) cudaEventRecord(adapt_ev, adapt_stream);
+            if (!swaps.empty() && cudaEventRecord(adapt_ev, adapt_stream) != cudaSuccess) return false;
             (void) main_live;
             for (auto& st : stages)
                 if (st->adapt_live) {
@@ -5700,7 +5757,10 @@ int main(int argc, char** argv) {
                 }
                 return true;
             };
-            apply_pending(true);
+            if (!apply_pending(true)) {
+                std::printf("ERR adaptive refill completion failed\n");
+                return 1;
+            }
             // per-request sampling for the verify window's head (greedy when temperature is absent)
             strata::kernels::SamplerParams req_sp;
             req_sp.greedy = req_temperature <= 0.0f;
@@ -5879,7 +5939,10 @@ int main(int argc, char** argv) {
                 // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
                 // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
                 // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-                fleet_capture.phase("adaptive admission and wait", [&] { apply_pending(!adapt_nowait()); });
+                if (!fleet_capture.phase("adaptive admission and wait", [&] { return apply_pending(!adapt_nowait()); })) {
+                    std::printf("ERR adaptive refill completion failed\n");
+                    return 1;
+                }
                 if (hist_n > 0) {
                     // the tails the penalties count over, ONE PER ROW: the tokens the state has consumed, the
                     // fed-back head `x` (it joins `consumed` only after this window commits), then the drafts
@@ -5985,6 +6048,10 @@ int main(int argc, char** argv) {
                     (unsigned long long) (host_timing.h2d_bytes-ht0.h2d_bytes),
                     (unsigned long long) (host_timing.swaps-ht0.swaps),
                     (unsigned long long) (host_timing.duplex_swaps-ht0.duplex_swaps));
+                std::fprintf(stderr, "strata GPU refills: D2D_bytes %llu D2D_refills %llu; "
+                    "H2D_bytes above excludes D2D; victim D2H unchanged\n",
+                    (unsigned long long)(host_timing.d2d_refill_bytes-ht0.d2d_refill_bytes),
+                    (unsigned long long)(host_timing.d2d_refills-ht0.d2d_refills));
             }
             if (dec_timing && dec_windows > 0) {
                 const DecSnap d1 = dec_snap();

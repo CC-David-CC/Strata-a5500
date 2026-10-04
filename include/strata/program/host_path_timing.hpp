@@ -13,6 +13,7 @@ struct HostPathTiming {
     double duplex_enqueue = 0;
     uint64_t d2h_bytes = 0, h2d_bytes = 0, swaps = 0;
     uint64_t duplex_swaps = 0;
+    uint64_t d2d_refill_bytes = 0, d2d_refills = 0;
 };
 
 // Each field has one writer at a time. The adaptive task is joined before a

@@ -6,13 +6,20 @@
 
 namespace strata::core {
 
-// Every slot is unique within a batch. Incoming/outgoing host buffers are
-// pinned, distinct and live through completion. The caller waits for H2D before
+// Every destination slot is unique within a batch. Host buffers are pinned;
+// device sources are immutable, distinct from every destination, and live
+// through completion. The caller waits for all refills before
 // changing ownership or issuing the next batch. Each overwrite waits for that
 // slot's eviction, while opposite-direction copies of other slots can overlap.
 class DuplexExchange {
 public:
-    struct Copy { void* slot; const void* incoming; void* outgoing; size_t bytes; };
+    struct Copy {
+        void* slot;
+        const void* incoming;
+        void* outgoing;
+        size_t bytes;
+        cudaMemcpyKind incoming_kind = cudaMemcpyHostToDevice;
+    };
     DuplexExchange() = default;
     DuplexExchange(const DuplexExchange&) = delete;
     DuplexExchange& operator=(const DuplexExchange&) = delete;
@@ -34,7 +41,9 @@ public:
         if (!evict_ || count > events_.size() || (count && !copies)) return cudaErrorInvalidValue;
         // Validate the whole list before submitting any transfer.
         for (size_t i = 0; i < count; ++i)
-            if (!copies[i].slot || !copies[i].incoming || !copies[i].outgoing || !copies[i].bytes)
+            if (!copies[i].slot || !copies[i].incoming || !copies[i].outgoing || !copies[i].bytes ||
+                (copies[i].incoming_kind != cudaMemcpyHostToDevice &&
+                 copies[i].incoming_kind != cudaMemcpyDeviceToDevice))
                 return cudaErrorInvalidValue;
         for (size_t i = 0; i < count; ++i) {
             const Copy& c = copies[i];
@@ -44,7 +53,7 @@ public:
             if (e != cudaSuccess) return e;
             e = cudaStreamWaitEvent(fill, events_[i], 0);
             if (e != cudaSuccess) return e;
-            e = cudaMemcpyAsync(c.slot, c.incoming, c.bytes, cudaMemcpyHostToDevice, fill);
+            e = cudaMemcpyAsync(c.slot, c.incoming, c.bytes, c.incoming_kind, fill);
             if (e != cudaSuccess) return e;
         }
         return cudaSuccess;
@@ -55,7 +64,7 @@ public:
     }
 
     void close() {
-        // H2D is owned and completed by the caller; this object owns only D2H.
+        // Refills are owned and completed by the caller; this object owns only D2H.
         if (evict_) cudaStreamSynchronize(evict_);
         for (auto e : events_) if (e) cudaEventDestroy(e);
         events_.clear();

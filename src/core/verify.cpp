@@ -174,6 +174,7 @@ Verifier::~Verifier() {
         slot.compare_exchange_strong(me, nullptr);
     }
     if (cs_) cudaStreamSynchronize(cs_);
+    miss_cache_snapshot_.close(); // its pending copy's stream must still exist
     for (auto& e : exec_)
         if (e) cudaGraphExecDestroy(e);
     if (commit_exec_) cudaGraphExecDestroy(commit_exec_);
@@ -393,6 +394,23 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         std::fprintf(stderr, "strata readonly miss cache: enabled, ways=%d layers=%lld bytes=%llu; "
                              "immutable secondary copies, no writebacks\n", miss_cache_ways_, (long long)g.n_layers,
                      (unsigned long long)((uint64_t)g.n_layers * miss_cache_ways_ * strata::kernels::cpu::expert_layout().max_blob));
+    }
+    if (const char* value = std::getenv("STRATA_Q8_CACHE_TAG_SNAPSHOT")) {
+        if (std::strcmp(value, "0") != 0 && std::strcmp(value, "1") != 0) {
+            err = "verify: STRATA_Q8_CACHE_TAG_SNAPSHOT must be 0 or 1";
+            return false;
+        }
+        if (*value == '1') {
+            if (!miss_cache_ways_ || miss_cache_snapshot_.open(g.n_layers, g.n_expert, miss_cache_ways_,
+                    (size_t)strata::kernels::cpu::expert_layout().max_blob,
+                    miss_cache_tags_, miss_cache_data_) != cudaSuccess) {
+                err = "verify: cannot create snapshot of the active Q8 secondary cache";
+                return false;
+            }
+            std::fprintf(stderr, "strata miss cache tag snapshot: enabled, bytes=%llu; "
+                                 "copy before existing end-of-window synchronization\n",
+                         (unsigned long long)miss_cache_snapshot_.bytes());
+        }
     }
     sink_.staging = (unsigned long long) staging_;
     sink_.staging_cap = kStagingBlobs;
@@ -979,7 +997,9 @@ std::string Verifier::miss_cache_report() {
     return "cumulative groups=" + std::to_string(sum[0]) + " hits=" + std::to_string(sum[1]) +
            " uploads=" + std::to_string(sum[2]) + " bypasses=" + std::to_string(sum[3]) +
            " avoided_upload_bytes=" + std::to_string(sum[1]*bytes) +
-           " uploaded_bytes=" + std::to_string(sum[2]*bytes);
+           " uploaded_bytes=" + std::to_string(sum[2]*bytes) +
+           " tag_snapshots=" + std::to_string(miss_cache_snapshot_.generations()) +
+           " tag_snapshot_bytes=" + std::to_string(miss_cache_snapshot_.generations()*miss_cache_snapshot_.bytes());
 }
 
 std::string Verifier::profile_report() {
@@ -1183,6 +1203,10 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
     for (int t = 0; t < T; ++t) last_tokens_[t] = tokens[t];
     ms_host += ms_since(t0);
     VDBG("staged; launching\n");
+    if (!miss_cache_snapshot_.invalidate()) {
+        err = "verify: previous cache tag snapshot is still in flight";
+        return false;
+    }
     const cudaError_t le = cudaGraphLaunch(exec_[T], cs_);
     if (le != cudaSuccess) { err = std::string("verify: launch: ") + cudaGetErrorString(le); return false; }
     (void) cudaStreamQuery(cs_);
@@ -1253,7 +1277,15 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
     // spin kernel outlives the process - the case that left Windows GPUs "lost" until a power cycle.  The wait
     // itself stays a blocking sync: a cudaStreamQuery poll here cost IQ3_S ~3% decode (a core calling the driver
     // beside the expert workers).
+    if (miss_cache_snapshot_.enabled() && miss_cache_snapshot_.enqueue(cs_) != cudaSuccess) {
+        err = "verify: cannot enqueue cache tag snapshot";
+        return false;
+    }
     const cudaError_t se = cudaStreamSynchronize(cs_);
+    if (miss_cache_snapshot_.enabled() && !miss_cache_snapshot_.complete_after_stream_sync(se)) {
+        err = "verify: cache tag snapshot completion failed";
+        return false;
+    }
     if (se != cudaSuccess) { err = std::string("verify: ") + cudaGetErrorString(se); return false; }
     progress_at("verify window: waiting for the expert copies", (int64_t) T);
     cudaStreamSynchronize(copy_);   // no host function of this window may raise flag B in the next one
