@@ -4,6 +4,7 @@
 // elementwise.cu) with the same operation order, so a verify window reproduces plain decode bit for bit.
 #include "strata/kernels/verify_kernels.hpp"
 #include "strata/kernels/dp4a.hpp"
+#include "strata/kernels/miss_fetch_launch.hpp"
 
 #include <cuda_runtime.h>
 
@@ -308,7 +309,7 @@ __global__ void dense_steps_kernel(const int32_t* __restrict__ cells, int n, int
 void fetch_blobs(const unsigned long long* src, const int32_t* n, uint8_t* dst, int64_t blob_bytes, int cap, void* stream) {
     if (cap <= 0) return;
     if (blob_bytes % 16 != 0) { std::fprintf(stderr, "fetch_blobs: blob size must be a multiple of 16\n"); std::exit(1); }
-    fetch_blobs_kernel<<<48 * 8, 256, 0, (cudaStream_t) stream>>>(src, n, (uint4*) dst, (long long) (blob_bytes / 16));
+    fetch_blobs_kernel<<<miss_fetch_blocks(), 256, 0, (cudaStream_t) stream>>>(src, n, (uint4*) dst, (long long) (blob_bytes / 16));
     check("fetch_blobs");
 }
 

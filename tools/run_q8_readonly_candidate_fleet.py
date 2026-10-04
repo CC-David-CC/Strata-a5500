@@ -26,15 +26,19 @@ def gates(out):
     out.mkdir(parents=True, exist_ok=False)
     state = dict(started=time.time(), steps=[], completed=False,
                  source=(R / 'source-commit.txt').read_text().strip())
-    def run(label, args):
+    def run(label, args, env=None, expected=0):
         start = time.monotonic()
+        environment = {k:v for k,v in os.environ.items() if k != 'STRATA_MISS_FETCH_BLOCKS'}
+        environment.update(CCACHE_BASEDIR=str(R))
+        environment.update(env or {})
         with (out / (label + '.log')).open('w') as log:
             p = subprocess.run(list(map(str,args)),stdout=log,stderr=subprocess.STDOUT,timeout=900,
-                               env={**os.environ,'CCACHE_BASEDIR':str(R)})
+                               env=environment)
         state['steps'].append(dict(label=label,command=list(map(str,args)),exit=p.returncode,
+                                   environment=env or {},expected_exit=expected,
                                    seconds=time.monotonic()-start))
         save(out/'result.json',state)
-        if p.returncode:
+        if p.returncode != expected:
             raise RuntimeError(label+' failed; inspect preserved log')
     try:
         nvcc = '/usr/local/cuda/bin/nvcc'
@@ -44,10 +48,25 @@ def gates(out):
             run(label+'-compile',['ccache',nvcc,'-std=c++17','-O2','-lineinfo','-arch=sm_120',
                 '-I'+str(R/'include'),'-c',R/source,'-o',out/(label+'.o')])
         run('fixture-link',[nvcc,out/'fixture.o',out/'cache.o',out/'verify.o','-o',out/'fixture'])
-        run('fixture',[out/'fixture'])
-        for sanitizer in ['memcheck','initcheck']:
-            run('fixture-'+sanitizer,['/usr/local/cuda/bin/compute-sanitizer','--tool',sanitizer,
-                '--error-exitcode','42',out/'fixture','--quick'])
+        run('fixture-default',[out/'fixture'])
+        for blocks in (1,32,96,384):
+            env={'STRATA_MISS_FETCH_BLOCKS':str(blocks)}
+            label='fixture-blocks'+str(blocks)
+            run(label,[out/'fixture'],env)
+            text=(out/(label+'.log')).read_text()
+            if f'strata miss fetch geometry: blocks={blocks} threads=256;' not in text:
+                raise RuntimeError('Missing geometry activation: '+label)
+        for blocks in (32,96,384):
+            for sanitizer in ['memcheck','initcheck']:
+                run(f'fixture-{sanitizer}-blocks{blocks}',
+                    ['/usr/local/cuda/bin/compute-sanitizer','--tool',sanitizer,
+                     '--error-exitcode','42',out/'fixture','--quick'],
+                    {'STRATA_MISS_FETCH_BLOCKS':str(blocks)})
+        for index,value in enumerate(('', '0', '-1', '4097', '32x')):
+            label='invalid-geometry-'+str(index)
+            run(label,[out/'fixture','--quick'],{'STRATA_MISS_FETCH_BLOCKS':value},expected=1)
+            if 'must be an integer from 1 to 4096' not in (out/(label+'.log')).read_text():
+                raise RuntimeError('Invalid geometry failed for an unexpected reason: '+label)
         build(out/'engine-build')
         state.update(completed=True,engine_sha256=hashlib.sha256((R/'build/strata').read_bytes()).hexdigest())
     except BaseException as error:

@@ -1,4 +1,5 @@
 #include "strata/kernels/readonly_miss_cache.hpp"
+#include "strata/kernels/miss_fetch_launch.hpp"
 
 #include <cuda_runtime.h>
 #include <cstdio>
@@ -101,7 +102,7 @@ void plan_readonly_misses(const int32_t* count, const int32_t* starts,
 
 void fill_readonly_misses(const unsigned long long* src, int64_t bytes,
                          const ReadonlyMissCachePlan* plan, void* stream) {
-    fill_kernel<<<48 * 8, 256, 0, (cudaStream_t)stream>>>(src, bytes / 16, plan);
+    fill_kernel<<<miss_fetch_blocks(), 256, 0, (cudaStream_t)stream>>>(src, bytes / 16, plan);
     check("readonly miss cache fill");
 }
 
