@@ -7741,6 +7741,10 @@ int main(int argc, char** argv) {
             if (ajob)   // --adapt-async, cumulative (a round may still be in flight: it lands before the next request)
                 std::fprintf(stderr, "strata serve: asynchronous adaptive tier: %lld rounds, %lld experts swapped in\n",
                              (long long) a_rounds, (long long) a_swapped);
+            if (src.exchange_rotation())
+                std::fprintf(stderr, "strata serve: exchange rotation: %llu blocks, %llu host memcpy bytes avoided (cumulative payload)\n",
+                             (unsigned long long)src.rotated_exchanges(),
+                             (unsigned long long)src.avoided_exchange_copy_bytes());
             // CS-T: the tiers, cumulative - GPU cache hits (the decode lookups above), RAM copy, files (SSD / OS cache)
             if (srcp == &src)
                 std::fprintf(stderr, "strata serve: expert tiers: GPU %lld hits this request; since the start RAM %lld blobs, files %lld blobs "
