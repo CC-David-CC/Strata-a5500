@@ -77,7 +77,7 @@ no HIP result is claimed.
   logical D2H/H2D payload, wait/ownership/worker timing and effective throughput.
 - Repeat useful gains and extend to native 128K before a performance claim.
 
-Status: component/sanitizer/build gates passed; lifecycle and model results pending.
+Status: component/sanitizer/build gates and all 33 lifecycle requests passed. The first MTP comparison is complete; other modes and repeat runs remain pending.
 The raw schedule analysis is included in
 [the supporting trace analysis](benchmarks/q8-layer-readiness-projection-20261004.json).
 
@@ -96,6 +96,38 @@ even with an explicit variant list. The corrected helper selects explicit
 variants first, retains the legacy plan, and rejects empty or malformed lists.
 Local checks exercised both actual explicit plans, legacy fallback, and
 empty/null/object rejection. This correction changes no engine code. A fresh
-frozen run retains all lifecycle and model gates. There is no speed result yet.
+frozen run retained all lifecycle and model gates. The results below were collected after that correction.
 
 [Passed gates and rejected harness attempt](benchmarks/q8-layer-components-harness-repair-20261004.json).
+
+
+## First same-binary MTP result (provisional)
+
+Native **32,768 input + 1,024 output**, FP16 KV, 40,960 allocated context.
+Same `ac398f5e` source and SHA256
+`95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9`
+in all three configurations; all fixed placement/startup checks passed.
+
+| Schedule | Coding output tok/s | Editing output tok/s | Coding effective tok/s | Editing effective tok/s |
+|---|---:|---:|---:|---:|
+| Parent whole-batch wait | 135.007 | 119.003 | 66.002 | 62.551 |
+| Whole-batch deferred publication | 136.355 | 119.565 | 66.342 | 62.646 |
+| Per-layer admission | **144.557** | **124.430** | **68.267** | **64.016** |
+
+Per-layer admission improved generation by **7.07% / 4.56%** (coding/editing)
+and effective output throughput by **3.43% / 2.34%**. Tokens, measured work,
+secondary-cache counters and primary D2H/H2D bytes matched exactly. Each
+configuration moved 19.71456GB for coding and 21.6938496GB for editing in each
+primary transfer direction. The improvement came from scheduling, with the
+same payload. Worker join/admission intervals overlap GPU work and must not
+be summed as separate time savings.
+
+All six lifecycle arms passed: plain/MTP times parent, deferred and per-layer
+schedules, **33 requests**, including STOP/following requests and MTP checkpoint
+switching/restoration. Those checks are not throughput measurements.
+
+**This is a first pair, without a confidence interval or 128K result.** Remaining
+plain/n-gram/combined cases and reverse-order repetitions are still needed.
+N-gram's timing-dependent policy will be qualified separately.
+
+[Raw lifecycle, build and first MTP evidence](benchmarks/q8-layer-first-mtp-20261004.json).

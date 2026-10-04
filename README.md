@@ -14,11 +14,14 @@ Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
 The initial path requires one GPU, unsplit host-planned verification, fully
 pinned resident expert exchanges and ownership rotation/duplex enabled.
 
-**Component, sanitizer and build gates passed; model validation is pending.**
-The first lifecycle attempt stopped before loading a model because of a
-test-harness configuration bug. The harness is corrected; no inference code
-changed in that correction, and no model correctness or speed pass is claimed.
-The inherited copy-grid branch's measured gains do not establish a gain here.
+**First native 32K-input/1K-output MTP comparison:** coding **135.0 ? 144.6 tok/s
+(+7.1%)**, editing **119.0 ? 124.4 (+4.6%)**, with identical tokens, measured work
+and transfer payloads. Effective throughput improved **3.4% / 2.3%**.
+This is one pair; repeatability and 128K results are pending.
+
+All **33 lifecycle requests** and component/sanitizer/build checks passed.
+The earlier test-harness failure and its correction remain in the report.
+Other modes are still running. This branch has not yet been published.
 
 See [hypothesis, state and validation](docs/Q8_LAYER_ADMISSION.md) and
 [the measured parent](docs/Q8_MISS_FETCH_GEOMETRY.md).
