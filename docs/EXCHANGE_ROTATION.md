@@ -103,58 +103,79 @@ On 2026-10-04, the clean patch on upstream
 CUDA fixture passed. Compute Sanitizer reported **0 errors**. AMD and Windows
 GPU execution were not tested for this patch.
 
-## One native token-identical A/B
+## Three native token-identical comparisons
 
-Freshly built and measured on 2026-10-04 at
-`18a30ad775bce86e99a54e6dc552ccb72c66d16e`, on upstream
-`6f32ec070f23ced9f50e704d854d775da52591ab`. The tested source contains only
-the rotation patch and its tests/docs; no Q8 PLE reader extension.
+Measured on the clean branch at `aaff1617daf59954799f336960499cdc9970e356`,
+based on upstream `6f32ec070f23ced9f50e704d854d775da52591ab`, on 2026-10-04.
+The same Release binary was used for every arm: GCC 13.3, CUDA 13.2,
+RTX PRO 6000 Blackwell 96GB, Ryzen 9 7950X, and 128GB installed RAM.
+The fresh Blackwell build passed all four CTest checks, the three-mode CUDA
+rotation fixture, and Compute Sanitizer (0 errors). On the actual Q8 PLE table,
+1,059 row probes plus batch/issue-collect checks matched ggml bit-for-bit.
 
-Both arms used the same Release binary (GCC 13.3, CUDA 13.2), RTX PRO 6000
-Blackwell 96GB, Ryzen 9 7950X and 128GB installed RAM. A fresh engine per arm
-generated exactly 1,024 tokens after the same 1,024-token counting prompt.
-The context allocation was 40,960, with 16,400 GPU expert slots, a 39.77 GiB
-pinned/mapped resident complement, FP16 KV, greedy target-only decoding and
-zero offered drafts or reused prompt tokens. Only `STRATA_EXCHANGE_ROTATE`
-changed. Transfer completion is awaited before admission.
+Every arm started a fresh engine with the same 1,024-token counting prompt,
+40,960-token context allocation, FP16 KV, 16,400 GPU expert slots and 39.77 GiB
+pinned/mapped resident expert complement. Expert weights and PLE use Q8_0;
+the existing pack uses compatibility BF16 small projections and a Q5_K output
+head. The PLE table was prefaulted into RAM but was not locked (`mlock` failed);
+this is separate from the fully pinned expert complement required by rotation.
 
-The fixture uses uniform Q8_0 experts, compatibility BF16 small projections,
-a Q5_K output head and an explicitly selected **IQ4_NL PLE table**, all read
-through existing upstream paths. This mixed-format fixture tests storage
-parity; it is not a full-Q8 model or answer-quality claim. The out-of-vocabulary
-EOS sentinel `2147483647` forces the exact generated length.
+Both arms enable `STRATA_EXPERIMENTAL_Q8_PLE=1`. Only
+`STRATA_EXCHANGE_ROTATE` changes. Decoding is greedy and target-only:
+`--mtp-max-t 1 --suffix-draft 0`; upstream's serving loop still requires a
+loaded MTP runtime. Each arm reported zero offered drafts and zero reused
+prompt tokens. Adaptive exchanges wait for transfer completion.
 
-| Rotation | Decode tokens/s | Resident exchanges | Avoided host-copy payload | Output IDs |
-|---|---:|---:|---:|---|
-| `0` | 60.12 | 2,555 | 0 bytes | 1,024, identical |
-| `1` | 75.12 | 2,555 | 13,343,232,000 bytes | 1,024, identical |
+| Generated tokens per arm | Rotation off, tokens/s | Rotation on, tokens/s | Rotated blocks | Avoided host-copy payload | Token IDs |
+|---:|---:|---:|---:|---:|---|
+| 1,024 | 58.06 | 62.07 | 2,549 | 13,311,897,600 bytes | Identical |
+| 16,384 | 87.98 | 87.81 | 7,372 | 38,499,532,800 bytes | Identical |
+| 32,768 | 90.00 | 91.73 | 9,341 | 48,782,438,400 bytes | Identical |
 
-Decode rates exclude startup and prefill. This single pair is not a general
-speedup or speculative-path parity guarantee. The fresh Blackwell build also
-passed both CTest checks and the three-mode CUDA fixture; Compute Sanitizer
-reported 0 errors. AMD and Windows GPU execution remain untested.
+These are **generated output lengths**, each after the same 1,024-token input.
+The test uses the out-of-vocabulary EOS sentinel `2147483647` to reach exact
+lengths. This is a storage parity stress test, not an answer-quality benchmark.
+Decode rates exclude model startup and prompt prefill. One pair per length on
+one repetitive prompt does not establish a general speedup or speculative-path
+parity. AMD and Windows GPU execution remain untested for this patch.
 
-The [receipt](../bench/results/exchange-rotation-ab.json) contains the source,
-binary, model, PLE and profile hashes, arguments, timings and diagnostics.
-The [raw IDs](../bench/results/exchange-rotation-token-ids.json) retain the
-input and both outputs. Model-shard hashes come from the retained download
-manifest; their size/inode/mtime were checked before each arm. The PLE override
-was hashed in this run. To check the token comparison without a model:
+The [receipt](../bench/results/exchange-rotation-ab.json) records the source,
+binary/model/profile hashes, full argument template, arm order, timings and
+exchange counters. The [raw token IDs](../bench/results/exchange-rotation-token-ids.json)
+contain the exact input and both outputs for all three pairs. Model hashes
+are from the retained download manifest; file size/inode/mtime stability was
+checked before each arm, without rehashing the large model files.
+
+To verify the published token comparisons from the checkout, without a GPU:
 
 ```bash
 python - <<'PY'
 import hashlib, json
 from pathlib import Path
-p = Path('bench/results')
-r = json.loads((p / 'exchange-rotation-ab.json').read_text())
-raw = (p / r['token_ids_file']).read_bytes()
+root = Path('bench/results')
+r = json.loads((root / 'exchange-rotation-ab.json').read_text())
+raw = (root / r['token_ids_file']).read_bytes()
 assert hashlib.sha256(raw).hexdigest() == r['token_ids_file_sha256']
-d = json.loads(raw)
-assert len(d['input']) == len(d['off']) == len(d['on']) == 1024
-assert d['off'] == d['on']
-for name, arm in zip(('off', 'on'), r['arms']):
-    sha = hashlib.sha256(json.dumps(d[name], separators=(',', ':')).encode()).hexdigest()
-    assert sha == arm['output_token_ids_sha256']
-print('1,024 identical output token IDs')
+ids = json.loads(raw)
+for pair in r['comparisons']:
+    n = pair['output_tokens']
+    outputs = ids['outputs'][str(n)]
+    assert outputs['off'] == outputs['on']
+    for mode in ('off', 'on'):
+        tokens = outputs[mode]
+        assert len(tokens) == n
+        digest = hashlib.sha256(json.dumps(tokens, separators=(',', ':')).encode()).hexdigest()
+        assert digest == pair[mode]['output_token_ids_sha256']
+    print(n, 'identical token IDs')
 PY
 ```
+
+To repeat generation, use the receipt's `args_template` with paths to your
+prepared pack, its first native GGUF shard, MTP runtime and this source checkout.
+Start one `StrataEngine` per arm with those arguments and the receipt's
+`environment`, plus `STRATA_EXCHANGE_ROTATE=0` or `1`. Pass `ids['input']` to
+`engine.generate(ids['input'], n, {'temperature': 0}, threading.Event())`,
+collect every non-`None` token, and close the engine in `finally`. Require the
+requested count, identical token arrays, zero offered drafts, nonzero resident
+exchanges, and the activation/counter diagnostics above. This configuration
+needs the stated memory capacity; it is not a general-purpose preset.
