@@ -152,3 +152,32 @@ Reverse ordering and native 128K validation remain pending before a broader
 performance claim. Keep ordinary traversal as the default and an alternative.
 
 [Full model records and qualified comparisons](benchmarks/q8-compact-fill-model-32k-20261004.json).
+
+
+## Reversed 32K pair and native 128K: no repeated gain
+
+The four follow-up arms (eight requests) completed using the same measured
+engine bytes and placement. Every request generated 1,024 output tokens; the
+full RAM/locked lookup guard passed and no expert file reads occurred. Both
+pairs matched tokens, recorded work, primary exchange payload and secondary
+hit/upload/bypass counts exactly. Approximately two-second samples recorded
+no foreign GPU processes. Timings below are generation rates.
+
+| MTP pair | Coding ordinary -> compact tok/s | Change | Editing ordinary -> compact tok/s | Change |
+|---|---:|---:|---:|---:|
+| 32K, compact first | 135.04 -> 134.80 | -0.174% | 118.16 -> 118.43 | +0.231% |
+| 128K, ordinary first | 136.62 -> 136.11 | -0.373% | 112.44 -> 112.41 | -0.030% |
+
+The initial +1.40% coding observation did not repeat. Keep this option off for
+the measured four-entry secondary cache. Faster isolated fill traversal did
+not establish a sustained whole-model benefit. There are no confidence
+intervals or blanket equivalence claims from these pairs.
+
+The complete scope is 24 throughput requests: all four modes at 32K initially,
+then a reversed 32K MTP pair and one native 128K MTP pair. This does not claim
+128K plain/n-gram coverage for compaction. The earlier n-gram output/work
+qualifications remain part of the report. The code and negative evidence stay
+available as an alternative; a substantially higher cache-hit workload could
+justify revisiting it, but would require a new measured comparison.
+
+[Follow-up raw records, exactness/copy checks and resource samples](benchmarks/q8-compact-followup-20261004.json).
