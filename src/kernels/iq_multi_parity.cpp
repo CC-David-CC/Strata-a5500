@@ -176,6 +176,8 @@ struct Grouped {
     k::NativeExpertLayout L;
     int n_groups = 0, n_ent = 0, cap_groups = 0, cap_ent = 0, n_tok = 0;
     std::vector<uint8_t*> blobs;
+    std::vector<uint8_t*> host_blobs;
+    int64_t grid_groups = 0;
     unsigned long long* dptr = nullptr;
     int32_t *dstart = nullptr, *dn = nullptr, *ddst = nullptr, *dtok = nullptr;
     float* dx = nullptr;
@@ -231,13 +233,31 @@ struct Grouped {
     }
     ~Grouped() {
         for (auto* b : blobs) cudaFree(b);
+        for (auto* b : host_blobs) cudaFreeHost(b);
         cudaFree(dptr); cudaFree(dstart); cudaFree(dn); cudaFree(ddst); cudaFree(dtok);
         cudaFree(dx); cudaFree(dxq); cudaFree(dscr); cudaFree(dout);
+    }
+    void mapped_weights(bool mapped) {
+        if (mapped && host_blobs.empty()) {
+            for (auto* gpu : blobs) {
+                uint8_t* host = nullptr;
+                ck(cudaHostAlloc((void**) &host, L.bytes, cudaHostAllocMapped), "mapped weights");
+                ck(cudaMemcpy(host, gpu, L.bytes, cudaMemcpyDeviceToHost), "mapped weight contents");
+                host_blobs.push_back(host);
+            }
+        }
+        std::vector<unsigned long long> ptr;
+        for (size_t i = 0; i < blobs.size(); ++i) {
+            void* alias = blobs[i];
+            if (mapped) ck(cudaHostGetDevicePointer(&alias, host_blobs[i], 0), "mapped weight alias");
+            ptr.push_back((unsigned long long) alias);
+        }
+        ck(cudaMemcpy(dptr, ptr.data(), ptr.size() * sizeof(ptr[0]), cudaMemcpyHostToDevice), "weight placement");
     }
     void run(bool old, cudaStream_t s) {
         k::iq_set_old_kernels(old);
         k::quantize_q8_1_rows(dx, n_tok, L.n_embd, dxq, s);
-        k::native_expert_grouped(L, dptr, dstart, dn, ddst, dtok, cap_groups, cap_ent, dxq, dscr, dout, s);
+        k::native_expert_grouped(L, dptr, dstart, dn, ddst, dtok, cap_groups, cap_ent, dxq, dscr, dout, s, grid_groups);
         k::iq_set_old_kernels(false);
     }
     std::vector<float> result(bool old, cudaStream_t s) {
@@ -330,29 +350,34 @@ void bench(cudaStream_t s, std::mt19937& rng) {
 
 // Full Q8 experts, not the dense Q8 tensors inside a Q4 checkpoint. Rotate
 // eight independent 16-expert weight sets (> 600 MiB) to avoid an L2-only test.
-void bench_q8_experts(cudaStream_t s, std::mt19937& rng) {
+void bench_q8_experts(cudaStream_t s, std::mt19937& rng, bool mapped = false) {
     for (int m : {1, 2, 3, 4, 8, 12, 24}) {
         if (m > strata::kSpecMaxT) continue;
         std::vector<std::unique_ptr<Grouped>> ring;
         for (int i = 0; i < 8; ++i)
             ring.emplace_back(std::make_unique<Grouped>(8, 8, 2560, 640, std::vector<int>(16, m),
                                                         strata::kSpecMaxT, rng));
+        for (auto& G : ring) {
+            if (mapped) G->mapped_weights(true);
+            G->grid_groups = mapped ? 4 : 0; // the model's PCIe and resident launch shapes
+        }
         for (int rep = 0; rep < 4; ++rep) {
             for (int arm = 0; arm < 2; ++arm) {
                 const bool old = (arm == (rep % 2));
                 int at = 0;
-                const float us = 1000.f * time_ms(s, 96, [&] {
+                const float us = 1000.f * time_ms(s, mapped ? 12 : 96, [&] {
                     ring[(at++) % ring.size()]->run(old, s);
                 });
-                std::printf("Q8_EXPERT_REUSE_BENCH m=%d rep=%d old=%d us=%.6f weight_sets=8\n",
-                            m, rep, (int) old, us);
+                std::printf("Q8_EXPERT_REUSE_BENCH m=%d rep=%d old=%d us=%.6f weight_sets=8 placement=%s grid_groups=%d\n",
+                            m, rep, (int) old, us, mapped ? "mapped" : "vram", mapped ? 4 : 0);
             }
         }
     }
 }
 
-void check_q8_graph_replay(cudaStream_t s, std::mt19937& rng) {
+void check_q8_graph_replay(cudaStream_t s, std::mt19937& rng, bool mapped = false) {
     Grouped G(8, 8, 2560, 640, {1, 4, 0, 5, strata::kSpecMaxT}, strata::kSpecMaxT, rng);
+    if (mapped) { G.mapped_weights(true); G.grid_groups = 4; }
     cudaGraph_t graph;
     cudaGraphExec_t executable;
     ck(cudaStreamBeginCapture(s, cudaStreamCaptureModeGlobal), "capture begin");
@@ -365,6 +390,7 @@ void check_q8_graph_replay(cudaStream_t s, std::mt19937& rng) {
             const auto down = random_rows(8, G.L.n_embd, G.L.n_ff, rng);
             b.insert(b.end(), down.begin(), down.end());
             ck(cudaMemcpy(G.blobs[0], b.data(), b.size(), cudaMemcpyHostToDevice), "changed weights");
+            if (mapped) std::memcpy(G.host_blobs[0], b.data(), b.size());
             const auto x = random_x((size_t) G.n_tok * G.L.n_embd, rng);
             ck(cudaMemcpy(G.dx, x.data(), x.size() * 4, cudaMemcpyHostToDevice), "changed activations");
         }
@@ -375,20 +401,36 @@ void check_q8_graph_replay(cudaStream_t s, std::mt19937& rng) {
         std::vector<float> actual(G.out_floats);
         ck(cudaMemcpy(actual.data(), G.dout, actual.size() * 4, cudaMemcpyDeviceToHost), "replay output");
         const bool ok = std::memcmp(actual.data(), expected.data(), actual.size() * 4) == 0;
-        std::printf("Q8_EXPERT_REUSE_GRAPH changed=%d %s\n", changed, ok ? "PASS" : "FAIL");
+        std::printf("Q8_EXPERT_REUSE_GRAPH changed=%d mapped=%d %s\n", changed, (int) mapped, ok ? "PASS" : "FAIL");
         if (!ok) ++g_fail;
     }
     cudaGraphExecDestroy(executable);
     cudaGraphDestroy(graph);
 }
 
+void check_q8_mapped_placement(cudaStream_t s, std::mt19937& rng) {
+    Grouped G(8, 8, 2560, 640, {0, 1, 2, 3, 4, 5, 8, 11}, strata::kSpecMaxT, rng);
+    const auto reference = G.result(true, s);
+    G.mapped_weights(true);
+    for (int grid : {1, 4, 0}) {
+        G.grid_groups = grid;
+        for (bool old : {true, false}) {
+            const auto actual = G.result(old, s);
+            const bool ok = std::memcmp(reference.data(), actual.data(), reference.size()*sizeof(float)) == 0;
+            std::printf("Q8_MAPPED_PLACEMENT grid=%d old=%d %s\n", grid, (int) old, ok ? "PASS" : "FAIL");
+            if (!ok) ++g_fail;
+        }
+    }
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
-    bool do_bench = false, q8_only = false;
+    bool do_bench = false, q8_only = false, mapped_bench = false;
     for (int i = 1; i < argc; ++i) {
         if (std::string(argv[i]) == "--bench") do_bench = true;
         else if (std::string(argv[i]) == "--q8-experts") q8_only = true;
+        else if (std::string(argv[i]) == "--mapped-bench") mapped_bench = true;
         else { std::fprintf(stderr, "unknown option: %s\n", argv[i]); return 2; }
     }
     if (q8_only) {
@@ -404,7 +446,10 @@ int main(int argc, char** argv) {
         for (const auto shape : {std::pair<int, int>{2560, 640}, {1024, 512}, {96, 64}, {32, 32}})
             check_grouped(8, 8, shape.first, shape.second, s, rng);
         check_q8_graph_replay(s, rng);
+        check_q8_graph_replay(s, rng, true);
+        check_q8_mapped_placement(s, rng);
         if (do_bench && g_fail == 0) bench_q8_experts(s, rng);
+        if (do_bench && mapped_bench && g_fail == 0) bench_q8_experts(s, rng, true);
         std::printf("q8_expert_reuse: %d failures\n", g_fail);
         cudaStreamDestroy(s);
         return g_fail ? 1 : 0;

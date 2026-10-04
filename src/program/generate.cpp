@@ -5997,6 +5997,17 @@ int main(int argc, char** argv) {
                              (d1.actq - ds0.actq) / w, (d1.jobs - ds0.jobs) / w, (d1.run - ds0.run) / w,
                              (d1.host - ds0.host) / w, dt_commit / w, dt_draft / w, (d1.misses - ds0.misses) / (w * L),
                              (d1.entries - ds0.entries) / (w * L), (d1.hits - ds0.hits) / (w * L), (d1.pcie - ds0.pcie) / (w * L));
+                const auto& traffic_layout = strata::kernels::cpu::expert_layout();
+                uint64_t uniform_blob = traffic_layout.blob_bytes(0);
+                for (int64_t layer = 1; layer < g.n_layers; ++layer)
+                    if (traffic_layout.blob_bytes(layer) != uniform_blob) { uniform_blob = 0; break; }
+                const uint64_t pcie_groups = (uint64_t) (d1.pcie - ds0.pcie);
+                std::fprintf(stderr, "strata decode traffic: committed=%lld pcie_expert_groups=%llu "
+                                     "uniform_blob_bytes=%llu logical_pcie_weight_bytes=%llu pcie_mode=%s "
+                                     "(logical minimum, not a hardware traffic counter)\n",
+                             (long long) produced_n, (unsigned long long) pcie_groups,
+                             (unsigned long long) uniform_blob, (unsigned long long) (pcie_groups * uniform_blob),
+                             o.pcie_mode.c_str());
                 const std::string pr = ver.profile_report();
                 if (!pr.empty()) std::fprintf(stderr, "strata decode GPU stages (ms/window):%s\n", pr.c_str());
             }

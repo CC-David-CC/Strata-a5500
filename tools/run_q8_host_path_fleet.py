@@ -97,7 +97,7 @@ def worker(plan_path, out):
             if engine_log.exists():
                 log = engine_log.read_text(errors='replace')
                 record['diagnostics'] = [line for line in log.splitlines() if any(s in line for s in (
-                    'decode timing:', 'host critical:', 'resident RAM:', 'expert cache auto',
+                    'decode timing:', 'decode traffic:', 'host critical:', 'resident RAM:', 'expert cache auto',
                     'exchange buffer rotation', 'host memcpy bytes avoided', 'GPU stages',
                     'pool phases', 'RAM budget', 'cache complement ready', 'CPU pool:',
                     'PCIe', 'adaptive worker', 'exchange duplex:', 'resident RAM mode:', 'pinned'))]
