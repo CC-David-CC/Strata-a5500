@@ -19,6 +19,24 @@ def save(p, data):
     t = p.with_suffix('.tmp'); t.write_text(json.dumps(data, indent=2) + '\n'); t.replace(p)
 
 
+def validate_fixture(plan):
+    gate = plan.get('fixture_gate')
+    if not gate:
+        return
+    artifact = Path(gate['result'])
+    if hashlib.sha256(artifact.read_bytes()).hexdigest() != gate['result_sha256']:
+        raise RuntimeError('Fixture evidence changed')
+    evidence = json.loads(artifact.read_text())
+    if not evidence.get('completed') or evidence.get('source') != gate['source']:
+        raise RuntimeError('Fixture did not pass on the expected source')
+    steps = {s['label']: s['exit'] for s in evidence['steps']}
+    if any(steps.get(k) != 0 for k in ('compile', 'memcheck', 'benchmark')):
+        raise RuntimeError('Fixture build, exact-copy benchmark or memory sanitizer failed')
+    for name, expected in gate['source_sha256'].items():
+        if hashlib.sha256((R / name).read_bytes()).hexdigest() != expected:
+            raise RuntimeError('Fixture-tested source changed: ' + name)
+
+
 def build(out):
     out.mkdir(parents=True, exist_ok=False)
     result = {'started': time.time(), 'steps': [], 'source': (R/'source-commit.txt').read_text().strip()}
@@ -70,6 +88,7 @@ def main():
                cutoff_utc=datetime.datetime.fromtimestamp(base.wh.CUTOFF,datetime.timezone.utc).isoformat())
     r.save();lock=(H/'fleet-downloads/.rtxpro-bandwidth.lock').open('a')
     try:
+        validate_fixture(plan)
         while not prior.exists() or not json.loads(prior.read_text()).get('finished'):
             r.check_time();time.sleep(5)
         if not json.loads(prior.read_text()).get('completed'):raise RuntimeError('Baseline failed; inspect before candidates')

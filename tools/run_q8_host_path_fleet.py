@@ -11,6 +11,7 @@ import fcntl
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -99,13 +100,18 @@ def worker(plan_path, out):
                     'decode timing:', 'host critical:', 'resident RAM:', 'expert cache auto',
                     'exchange buffer rotation', 'host memcpy bytes avoided', 'GPU stages',
                     'pool phases', 'RAM budget', 'cache complement ready', 'CPU pool:',
-                    'PCIe', 'adaptive worker', 'resident RAM mode:', 'pinned'))]
+                    'PCIe', 'adaptive worker', 'exchange duplex:', 'resident RAM mode:', 'pinned'))]
                 record['rotation_active'] = 'exchange buffer rotation enabled' in log
+                record['duplex_active'] = 'strata exchange duplex: enabled,' in log
+                record['duplex_swaps'] = sum(map(int, re.findall(r'\bduplex_swaps (\d+)', log)))
             save(target, state)
             if run.returncode:
                 raise RuntimeError(label + ' failed; inspect preserved logs')
             if not record.get('rotation_active'):
                 raise RuntimeError(label + ': ownership rotation did not activate')
+            if trial.get('env', {}).get('STRATA_EXCHANGE_DUPLEX') == '1' and (
+                    not record.get('duplex_active') or not record.get('duplex_swaps')):
+                raise RuntimeError(label + ': duplex copies did not activate; inspect fallback before timing claims')
             cases = [c for run in record['runs'] for c in run['cases']]
             if not cases or any(c['input_tokens'] != trial['input_tokens'] or
                                 not c['output_tokens'] or c['timings']['file_blobs'] != 0
