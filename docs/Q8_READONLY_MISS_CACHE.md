@@ -41,7 +41,7 @@ prove full-model cancellation or speculative-state correctness.
 ## Evidence gates
 
 The independent miss trace, component gates and paired full-model lifecycle
-checks are complete. The 32K performance screen is running; no speedup claim yet.
+checks are complete. The first 32K performance screen is complete below; repeated gains are not yet established.
 It compares default-off and four slots per layer using the same binary, with exact
 token/work checks for plain and MTP and first-divergence/work reporting for n-gram
 and combined. Repeat gains and test both native contexts before publishing a
@@ -63,7 +63,7 @@ The revised harness passed all four arms (22 requests total). Cache on/off had
 identical output tokens, recorded work and all recorded main-model state
 fingerprints, including both cancellation and recovery comparisons. MTP also
 passed the checkpoint restores. This validates the recorded cases, not every
-possible interleaving. The 32K throughput runs have now started. The serving
+possible interleaving. The first 32K throughput screen is complete below. The serving
 path remains private.
 
 Evidence: [full lifecycle results](benchmarks/q8-readonly-lifecycle-20261004.json).
@@ -118,3 +118,61 @@ plan readiness and completed fills require explicit dependencies. The same join
 must protect later staging-buffer reuse and cancellation. This overlap has not
 yet been implemented or measured; concurrent kernels may compete for memory
 bandwidth and reduce the apparent opportunity.
+
+## First completed 32K performance screen
+
+All eight arms / 16 requests completed. Full Unsloth Q8_0, FP16 KV, native
+32,768 input tokens, 40,960 allocation, 1,024 output tokens, 15,472 primary expert
+slots, automatic miss fraction 0.55. A fresh engine per arm ran coding then
+editing. Within each mode the cache-off arm ran first, then four ways per layer
+(0.934 GiB extra VRAM). Both used component-tested runtime `eb22e57` and the same
+binary. These are first paired measurements, not confidence intervals.
+
+### Output tokens/s
+
+| Mode | Cache off, code / edit | Cache on, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| Plain | 73.70 / 61.87 | 73.53 / 62.32 | -0.24% / +0.74% |
+| MTP | 130.01 / 111.92 | 132.69 / 113.79 | +2.06% / +1.67% |
+| N-gram* | 74.96 / 100.18 | 74.53 / 106.31 | -0.57% / +6.12% |
+| MTP + n-gram* | 129.78 / 108.84 | 131.18 / 112.49 | +1.08% / +3.36% |
+
+### Prefill-inclusive effective output tokens/s
+
+Output count divided by complete request wall time, excluding model startup.
+
+| Mode | Cache off, code / edit | Cache on, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| Plain | 47.04 / 42.19 | 46.95 / 42.39 | -0.20% / +0.49% |
+| MTP | 64.87 / 60.55 | 65.08 / 61.09 | +0.33% / +0.89% |
+| N-gram* | 47.43 / 57.00 | 47.35 / 59.05 | -0.18% / +3.60% |
+| MTP + n-gram* | 64.74 / 59.65 | 65.10 / 60.75 | +0.55% / +1.85% |
+
+### Output/work and upload accounting
+
+| Mode | First different token, code / edit (zero-based) | Work matches, code / edit | Avoided upload payload |
+|---|---|---|---:|
+| Plain | match / match | yes / yes | 8.49% |
+| MTP | match / match | yes / yes | 8.04% |
+| N-gram* | 173 / match | no / no | 8.31% |
+| MTP + n-gram* | match / match | yes / no | 7.81% |
+
+Plain and MTP matched every output token and all recorded work. MTP + n-gram
+coding also matched. *N-gram coding diverged at token 173, while editing matched
+tokens but had different draft/work counts. Combined editing matched tokens
+with different work. These timing-sensitive rows do not isolate a kernel gain
+on identical work. No quality improvement is inferred from speed.
+
+The MTP run consumed 1,945 secondary-cache hits out of 24,188 miss groups,
+avoiding exactly 10,157,568,000 upload bytes. Those counts match the independent
+trace prediction. Upload savings are logical expert payload, not hardware PCIe
+counters, and do not include primary-cache eviction traffic. The inherited
+`logical_pcie_weight_bytes` diagnostic describes demand before secondary-cache
+savings; use the new cache counters to account for uploaded payload.
+
+No decode expert file reads or OOMs occurred. Plain speed is essentially tied;
+MTP has a small initial gain that needs repetition. Reverse-order MTP/n-gram
+repeats, an eight-way MTP cache, an equal-VRAM primary-cache competitor, and
+paired native-128K measurements are queued before a broader performance claim.
+
+Evidence: [complete first matrix](benchmarks/q8-readonly-first-32k-20261004.json).

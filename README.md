@@ -23,9 +23,21 @@ full Unsloth Q8_0, FP16 KV, native 32K and 128K.
 MTP checkpoint restoration, cancellation and recovery matched output tokens,
 recorded work and main-model state fingerprints with the cache off/on.
 
-**No model speedup is claimed yet.** The 32K four-mode throughput screen is running.
-The initial harness attempt requested unsupported conversation caching with MTP
-off; its replacement respects the engine's existing restriction.
+## First paired 32K measurements
+
+32K input + 1,024 output, same binary, 0.934 GiB extra cache. Output tokens/s:
+
+| Mode | Cache off, code / edit | Cache on, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| Plain | 73.70 / 61.87 | 73.53 / 62.32 | -0.24% / +0.74% |
+| MTP | 130.01 / 111.92 | 132.69 / 113.79 | +2.06% / +1.67% |
+| N-gram* | 74.96 / 100.18 | 74.53 / 106.31 | -0.57% / +6.12% |
+| MTP + n-gram* | 129.78 / 108.84 | 131.18 / 112.49 | +1.08% / +3.36% |
+
+Plain/MTP tokens and work matched. *N-gram and combined comparisons have the
+per-case qualifications in the report. This is one pair per mode; reverse-order
+repeats, capacity/equal-VRAM comparisons and native-128K tests are queued. The
+initial MTP gain is small and has not yet been established by repeated runs.
 
 See **[implementation, conditions, evidence and remaining gates](docs/Q8_READONLY_MISS_CACHE.md)**.
 This branch retains the upstream license. For standard installation and support,
