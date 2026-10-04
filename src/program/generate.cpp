@@ -6011,6 +6011,8 @@ int main(int argc, char** argv) {
                              o.pcie_mode.c_str());
                 const std::string pr = ver.profile_report();
                 if (!pr.empty()) std::fprintf(stderr, "strata decode GPU stages (ms/window):%s\n", pr.c_str());
+                const std::string mc = ver.miss_cache_report();
+                if (!mc.empty()) std::fprintf(stderr, "strata readonly miss cache: %s\n", mc.c_str());
             }
             if (!cancelled) {
                 // a prompt stopped halfway leaves the session somewhere between two chunks: nothing to continue from
