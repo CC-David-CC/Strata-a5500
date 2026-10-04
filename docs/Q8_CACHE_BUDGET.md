@@ -50,11 +50,13 @@ must remain zero. Measure actual sampled VRAM/RAM use, not just this budget.
    following requests, MTP checkpoint switching/restoration and state hashes.
    Enforce full placement and locked PLE before the first prompt.
 3. Fifteen fresh-engine arms, coding then editing, 1,024 committed output
-   tokens. At 32K MTP run secondary16 first, then the two primary alternatives,
-   then baseline4; also reverse plain16/four. At 128K test four/sixteen entries
+   tokens. At 32K MTP run secondary16 first, equal-memory primary and baseline4;
+   also reverse plain16/four. At 128K test four/sixteen entries
    in all four modes, plus equal-memory primary with MTP. The primary placement
    screen is MTP-only; this does not establish primary-placement performance
    for the other modes.
+   Run the most aggressive 32K primary allocation last, so an allocation failure
+   there does not prevent collecting the native128K capacity comparisons.
 4. Require exact tokens/work for unchanged-primary four/sixteen comparisons.
    Primary placement changes which implementation computes an expert, so retain
    first differing tokens, speculative work, routing/cache counts and timings.
