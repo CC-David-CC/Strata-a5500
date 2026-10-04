@@ -58,14 +58,12 @@ def build(out, q8_components=False):
         run('worker-tsan-build', ['g++','-std=c++20','-pthread','-O1','-g','-fsanitize=thread',
             '-fno-omit-frame-pointer','-I'+str(R/'include'),R/'tests/core/serial_worker_test.cpp',
             '-o',out/'worker-tsan'])
-        if run('worker-tsan', [out/'worker-tsan'], required=False):
-            text = (out/'worker-tsan.log').read_text()
-            if 'FATAL: ThreadSanitizer: unexpected memory mapping' not in text:
-                raise RuntimeError('Worker ThreadSanitizer reported a failure')
-            # Newer kernels can map DSOs into GCC TSan's shadow address range.
-            # Change only this fixture process, never the system ASLR setting.
-            run('worker-tsan-noaslr', ['setarch', os.uname().machine, '-R', out/'worker-tsan'])
-            result['tsan_mapping_workaround'] = 'ASLR off for this sanitizer process only'
+        # This host's GCC TSan has repeatedly failed its shadow-memory mapping
+        # during startup. Use the already verified process-local workaround up
+        # front; every diagnostic from the actual test remains a hard failure.
+        # The earlier failed attempts and their logs remain in fleet evidence.
+        run('worker-tsan-noaslr', ['setarch', os.uname().machine, '-R', out/'worker-tsan'])
+        result['tsan_mapping_workaround'] = 'ASLR off for this sanitizer process only'
         ccache = shutil.which('ccache')
         launchers = []
         if ccache:
