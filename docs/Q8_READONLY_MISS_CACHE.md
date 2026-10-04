@@ -40,12 +40,12 @@ prove full-model cancellation or speculative-state correctness.
 
 ## Evidence gates
 
-The independent miss trace and component gates are complete; no performance
-claim yet. The first full-model candidate uses four slots per layer. Then compare
-default-off and cache-on with the same binary, exact
-token/work checks for plain and MTP, first-divergence/work reporting for n-gram
-and combined, and a request cancellation/checkpoint test. Repeat gains and
-test both native contexts before publishing a speed claim.
+The independent miss trace, component gates and paired full-model lifecycle
+checks are complete. The 32K performance screen is running; no speedup claim yet.
+It compares default-off and four slots per layer using the same binary, with exact
+token/work checks for plain and MTP and first-divergence/work reporting for n-gram
+and combined. Repeat gains and test both native contexts before publishing a
+speed claim.
 
 Per-request logs report cumulative completed groups, hits, uploads, bypasses
 and logical bytes saved/uploaded. Difference adjacent reports for a request.
@@ -59,8 +59,14 @@ restoration; this engine rejects conversation caching with MTP off. It requires
 matching main-model state fingerprints and tokens on the normal/checkpoint
 requests. If asynchronous STOP performs different work between arms, the
 post-cancel state comparison is reported as unequal-work, not claimed exact.
-This harness is prepared, not yet passed. Performance runs follow only after
-its successful completion. The serving path remains private.
+The revised harness passed all four arms (22 requests total). Cache on/off had
+identical output tokens, recorded work and all recorded main-model state
+fingerprints, including both cancellation and recovery comparisons. MTP also
+passed the checkpoint restores. This validates the recorded cases, not every
+possible interleaving. The 32K throughput runs have now started. The serving
+path remains private.
+
+Evidence: [full lifecycle results](benchmarks/q8-readonly-lifecycle-20261004.json).
 
 The first lifecycle attempt stopped before readiness because its plain-mode
 control requested a nonzero conversation-cache budget, an unsupported engine
@@ -96,3 +102,19 @@ and seven abandoned plans. This is component evidence, not full-model parity.
 
 Evidence: [miss trace replay](benchmarks/q8-miss-reuse-20261004.json),
 [component/build results](benchmarks/q8-readonly-components-20261004.json).
+
+## Next comparisons
+
+The four-way cache uses the same memory as 192 additional primary expert slots.
+Compare that alternative before attributing a win to the secondary organization.
+Changing primary placement can change CPU/GPU arithmetic, so its token/work
+comparison is reported separately from the fixed-placement cache test.
+
+Code inspection also found a serial section in the verifier's `post` lambda: resident
+expert computation completes before missed-expert staging starts. An independent
+experiment can fork after the route/plan is ready, stage misses on another stream
+while resident expert kernels run, and join before consuming those misses. Both
+plan readiness and completed fills require explicit dependencies. The same join
+must protect later staging-buffer reuse and cancellation. This overlap has not
+yet been implemented or measured; concurrent kernels may compete for memory
+bandwidth and reduce the apparent opportunity.

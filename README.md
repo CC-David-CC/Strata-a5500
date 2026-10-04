@@ -19,10 +19,13 @@ full Unsloth Q8_0, FP16 KV, native 32K and 128K.
   eviction/bypass, abandoned fills, source immutability and allocation guards.
 - CUDA memcheck and initcheck each reported **zero errors**. The engine built.
 
-**These are byte savings and component checks, not a model speedup.** Full-model
-normal-request, checkpoint and cancellation gates are running before throughput
-comparisons. The initial harness attempt requested unsupported conversation caching
-with MTP off; its replacement respects the engine's existing restriction.
+**Paired plain/MTP lifecycle checks passed all 22 requests:** normal generation,
+MTP checkpoint restoration, cancellation and recovery matched output tokens,
+recorded work and main-model state fingerprints with the cache off/on.
+
+**No model speedup is claimed yet.** The 32K four-mode throughput screen is running.
+The initial harness attempt requested unsupported conversation caching with MTP
+off; its replacement respects the engine's existing restriction.
 
 See **[implementation, conditions, evidence and remaining gates](docs/Q8_READONLY_MISS_CACHE.md)**.
 This branch retains the upstream license. For standard installation and support,
