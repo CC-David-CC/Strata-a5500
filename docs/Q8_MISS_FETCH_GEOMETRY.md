@@ -57,3 +57,22 @@ Five invalid values exited with the expected error. No full-model result is
 claimed for changing block count yet.
 
 Evidence: [complete gates and fixture logs](benchmarks/q8-miss-fetch-geometry-components-20261004.json).
+
+## Measured GPU interval tradeoff and selected model screen
+
+The corrected parent GPU profile (`bcacb884` runtime, `096742c` harness) used
+32K input + 1K output with four secondary-cache slots/layer. Tokens and recorded
+work matched. Summing GDN/QSA stage timestamps, overlap changed editing's
+resident-expert interval from 4.93 to 16.44 ms/window while staging/exposed join
+fell 13.08 to 0.68 ms. Coding changed 4.18 to 8.71 ms and 5.17 to 0.19 ms,
+respectively. These are instrumented intervals; the fork/concurrent work is
+inside the resident-expert interval, so individual kernel slowdown is unproven.
+
+The initial unprofiled model screen is now queued: 384, 96 and 32 copy blocks,
+each in serial and overlapped modes. Every arm uses the same component-tested
+`7db4414` binary, MTP, 32K input + 1K output, FP16 KV, four secondary slots/layer,
+15,472 primary slots and PCIe fraction 0.55. Exact tokens/work are required.
+Later mode/context expansion depends on these results. No copy-grid model
+performance result is claimed yet.
+
+Evidence: [parent stage profile and semantic comparison](benchmarks/q8-miss-fetch-geometry-parent-gpu-profile-20261004.json).
