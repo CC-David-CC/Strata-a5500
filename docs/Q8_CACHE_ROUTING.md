@@ -42,8 +42,37 @@ it cannot be advertised as an identical-work kernel gain. More GPU work can
 also slow current GPU computation despite avoiding uploads. Only a measured
 whole-request gain would justify adoption.
 
+## Can primary refills reuse a secondary GPU copy?
+
+The same capture enables the existing `STRATA_EXCHANGE_TRACE=1` flag. It logs
+committed primary ownership exchanges. At those boundaries the replay checks
+whether each incoming expert already has an immutable secondary GPU copy.
+The combined trace changes neither cache policy nor refill behavior.
+
+The parser requires contiguous exchange counters, valid within-layer pairs,
+consistent primary ownership and complete verification-window boundaries.
+At every request footer, the traced committed count must equal the engine's
+reported cumulative count. Report available copies and payload bytes for the
+actual sixteen-entry cache, with zero/four/eight-entry trace projections.
+
+These are **committed exchanges**, not all enqueued H2D copies. A delayed
+commit can appear under the following request's footer; a final uncommitted
+refill is excluded. The opportunity count is not a throughput prediction.
+
+If the count is large enough, a separate opt-in implementation could choose a
+GPU source for that primary refill. It would need full-byte identity checks,
+an explicit source lifetime until the D2D completes, the existing victim-D2H
+dependency, unchanged primary placement and separate D2D/H2D counters. The
+current whole-batch admission is a simple initial boundary; a later per-layer
+version must also keep its secondary source from being evicted by the next
+layer lookup. A copy saved is useful only if the measured request improves.
+
 ## Status
 
-Diagnostic code and parser/replay checks prepared. No native build, model trace,
-CPU-cache-hit frequency or speed gain is claimed yet. The queued capacity and
-per-layer experiments retain priority. Main and public services are unchanged.
+Diagnostic code and seven parser/replay tests pass locally. They include
+corrupted exchange counters, ownership, request footers and boundary rejection.
+The first queue was superseded while waiting, before any build or request,
+to include this existing exchange trace in the same four diagnostic requests.
+No native build, model trace, CPU-cache-hit frequency, promotion-reuse frequency
+or speed gain is claimed yet. The queued capacity and per-layer experiments
+retain priority. Main and public services are unchanged.

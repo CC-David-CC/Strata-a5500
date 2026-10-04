@@ -61,7 +61,7 @@ def main():
                 raise RuntimeError('Trace suite used another engine')
             trial = record['trial']
             log = matrix.parent / trial['label'] / ('engine-mtp-' + trial['mtp'] + '.log')
-            result = analyze(log)
+            result = analyze(log, require_exchanges=True)
             result['trial'] = trial
             result['comparisons'] = record.get('comparisons', [])
             traces.append(result)

@@ -5,7 +5,7 @@ import json
 import tempfile
 import unittest
 
-from analyze_q8_cache_routing import Replay, analyze
+from analyze_q8_cache_routing import EXCHANGE_PREFIX, ExchangeOpportunity, Replay, analyze
 
 
 def row(sequence, groups):
@@ -36,12 +36,32 @@ def fixture():
     return text
 
 
+def exchange(first, pairs, layers=1):
+    return dict(schema=1, first=first, experts=512*layers, per_layer=512,
+                bytes=16, applied=len(pairs), pairs=pairs)
+
+
+def promotion_fixture():
+    lines = []
+    for line in fixture().splitlines():
+        if line.startswith('strata decode traffic: committed=2'):
+            lines.append(EXCHANGE_PREFIX+json.dumps(exchange(0, [[5, 200], [10, 201]])))
+        elif line.startswith('strata decode traffic: committed=1'):
+            lines.append(EXCHANGE_PREFIX+json.dumps(exchange(2, [[6, 5]])))
+        lines.append(line)
+        if line.startswith('strata readonly miss cache: cumulative'):
+            count = 2 if 'groups=6' in line else 3
+            lines.append(f'strata serve: resident RAM: 1.00 GiB of experts in RAM, {count} exchanged '
+                         'with the VRAM tier, 0 blob reads from the file')
+    return '\n'.join(lines)+'\n'
+
+
 class RoutingReplayTest(unittest.TestCase):
-    def analyze_text(self, text):
+    def analyze_text(self, text, **options):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)/'trace.log'
             path.write_text(text)
-            return analyze(path)
+            return analyze(path, **options)
 
     def test_later_gpu_hit_protected_and_cpu_eviction_visible(self):
         sim = Replay(2, 1)
@@ -79,6 +99,47 @@ class RoutingReplayTest(unittest.TestCase):
                     text.rsplit('strata readonly miss cache: cumulative', 1)[0]):
             with self.subTest(bad=bad[-120:]), self.assertRaises(ValueError):
                 self.analyze_text(bad)
+
+    def test_promotion_opportunity_and_footer_accounting(self):
+        result = self.analyze_text(promotion_fixture(), require_exchanges=True)
+        promotion = result['promotion_opportunity']
+        self.assertTrue(promotion['committed_counter_exact'])
+        self.assertEqual(promotion['batches'], 2)
+        self.assertEqual(promotion['totals'][4]['committed_promotions'], 3)
+        self.assertEqual(promotion['totals'][4]['cached_promotions'], 2)
+        self.assertEqual(promotion['totals'][4]['reusable_gpu_bytes'], 32)
+        self.assertEqual(promotion['totals'][0]['cached_promotions'], 0)
+        self.assertEqual(result['requests'][0]['exchange_opportunity']['since_prior_footer'][4]
+                         ['cached_promotions'], 1)
+        self.assertEqual(result['requests'][1]['exchange_opportunity']['since_prior_footer'][4]
+                         ['committed_promotions'], 1)
+        # The extra observation cannot mutate the GPU-only cache replay.
+        self.assertEqual(result['totals'], self.analyze_text(fixture())['totals'])
+
+    def test_promotion_bad_sequence_ownership_and_footer_rejected(self):
+        text = promotion_fixture()
+        for bad in (text.replace('"first": 2', '"first": 3'),
+                    text.replace('"applied": 2', '"applied": 1'),
+                    text.replace('[[6, 5]]', '[[5, 6]]'),
+                    text.replace('[[6, 5]]', '[[512, 5]]'),
+                    text.replace('[[5, 200], [10, 201]]', '[[5, 200], [10, 200]]'),
+                    text.replace('3 exchanged with', '4 exchanged with'),
+                    text.replace('0 blob reads', '1 blob reads'),
+                    text.rsplit('strata serve: resident RAM:', 1)[0],
+                    fixture()):
+            with self.subTest(bad=bad[-140:]), self.assertRaises(ValueError):
+                self.analyze_text(bad, require_exchanges=True)
+
+    def test_promotion_rejects_midwindow_crosslayer_and_geometry_changes(self):
+        opportunity = ExchangeOpportunity({4: Replay(4, 2)})
+        shape = (2, 512, 16)
+        with self.assertRaises(ValueError):
+            opportunity.add(exchange(0, [[5, 200]], layers=2), shape, 1)
+        with self.assertRaises(ValueError):
+            opportunity.add(exchange(0, [[5, 600]], layers=2), shape, 2)
+        with self.assertRaises(ValueError):
+            opportunity.add(exchange(0, [[5, 200]], layers=1), shape, 2)
+        self.assertEqual(opportunity.count, 0)
 
 
 if __name__ == '__main__':

@@ -11,6 +11,9 @@ import json
 import re
 
 PREFIX = 'strata miss route trace: '
+EXCHANGE_PREFIX = 'strata exchange trace: '
+RAM_COUNTER = re.compile(r'strata serve: resident RAM: [0-9.]+ GiB of experts in RAM, (\d+) '
+                         r'exchanged with the VRAM tier, (\d+) blob reads from the file')
 COUNTERS = re.compile(r'strata readonly miss cache: cumulative groups=(\d+) hits=(\d+) '
                      r'uploads=(\d+) bypasses=(\d+) avoided_upload_bytes=(\d+) uploaded_bytes=(\d+)')
 TRAFFIC = re.compile(r'strata decode traffic: committed=(\d+) pcie_expert_groups=(\d+) '
@@ -76,6 +79,58 @@ class Replay:
             self.by_layer[row['layer']][key] += value
 
 
+class ExchangeOpportunity:
+    """Observe immutable copies at committed exchange boundaries; never alter the cache."""
+    def __init__(self, simulations):
+        self.simulations = simulations
+        self.known_ownership = {}
+        self.count = 0
+        self.batches = 0
+        self.bytes = 0
+        self.hits = dict.fromkeys(simulations, 0)
+        self.hit_bytes = dict.fromkeys(simulations, 0)
+        self.by_layer = {ways: [dict(promotions=0, cached_promotions=0)
+                               for _ in sim.banks] for ways, sim in simulations.items()}
+
+    def add(self, row, shape, sequence):
+        if not shape or sequence % shape[0]:
+            raise ValueError('Exchange was not between complete verification windows')
+        layers, per_layer, blob = shape
+        pairs = row['pairs']
+        if (row['schema'] != 1 or row['first'] != self.count or row['experts'] != layers*per_layer
+                or row['per_layer'] != per_layer or row['bytes'] != blob
+                or not pairs or row['applied'] != len(pairs)
+                or any(len(pair) != 2 for pair in pairs)):
+            raise ValueError('Missing, repeated or malformed committed exchange')
+        ids = [expert for pair in pairs for expert in pair]
+        if len(ids) != len(set(ids)) or any(not 0 <= expert < layers*per_layer for expert in ids):
+            raise ValueError('Repeated or invalid expert in exchange batch')
+        for incoming, outgoing in pairs:
+            if incoming // per_layer != outgoing // per_layer:
+                raise ValueError('Exchange crosses layers')
+            if (self.known_ownership.get(incoming, 'ram') != 'ram'
+                    or self.known_ownership.get(outgoing, 'gpu') != 'gpu'):
+                raise ValueError('Inconsistent primary ownership sequence')
+        for incoming, outgoing in pairs:
+            layer, expert = divmod(incoming, per_layer)
+            for ways, sim in self.simulations.items():
+                hit = expert in sim.banks[layer]['tags']
+                self.hits[ways] += int(hit)
+                self.hit_bytes[ways] += int(hit)*blob
+                self.by_layer[ways][layer]['promotions'] += 1
+                self.by_layer[ways][layer]['cached_promotions'] += int(hit)
+            self.known_ownership[incoming], self.known_ownership[outgoing] = 'gpu', 'ram'
+        self.count += len(pairs)
+        self.bytes += len(pairs)*blob
+        self.batches += 1
+
+    def totals(self):
+        return {ways: dict(committed_promotions=self.count, committed_upload_bytes=self.bytes,
+                          cached_promotions=self.hits[ways], reusable_gpu_bytes=self.hit_bytes[ways],
+                          cached_fraction=self.hits[ways]/self.count if self.count else 0)
+                for ways in self.simulations}
+
+
 def validate_row(row, sequence, shape):
     geometry = (row['layers'], row['per_layer'], row['bytes'])
     if row['schema'] != 1 or row['sequence'] != sequence or min(geometry) < 1:
@@ -99,7 +154,7 @@ def validate_row(row, sequence, shape):
     return geometry
 
 
-def analyze(path):
+def analyze(path, require_exchanges=False):
     raw = path.read_bytes()
     text = raw.decode('utf-8', errors='strict')
     enabled = re.findall(r'strata readonly miss cache: enabled, ways=(\d+) layers=(\d+) bytes=(\d+);', text)
@@ -111,6 +166,11 @@ def analyze(path):
         raise ValueError('Actual capacity not replayed')
     shape = None
     sequence = 0
+    exchange_enabled = require_exchanges or EXCHANGE_PREFIX in text
+    exchanges = ExchangeOpportunity(simulations)
+    previous_exchanges = exchanges.totals()
+    exchange_footers = 0
+    last_exchange_footer = 0
     previous = {ways: dict(sim.total) for ways, sim in simulations.items()}
     requests = []
     traffic = None
@@ -128,6 +188,26 @@ def analyze(path):
             for sim in simulations.values():
                 sim.add(row)
             sequence += 1
+        elif EXCHANGE_PREFIX in line:
+            row = json.loads(line.split(EXCHANGE_PREFIX, 1)[1])
+            exchanges.add(row, shape, sequence)
+        elif match := RAM_COUNTER.search(line):
+            if not exchange_enabled:
+                continue
+            observed, file_reads = map(int, match.groups())
+            if (not requests or 'exchange_opportunity' in requests[-1] or observed != exchanges.count
+                    or file_reads != 0):
+                raise ValueError('Committed exchange trace differs from request footer or lacks residency')
+            current = exchanges.totals()
+            deltas = {ways: {key: total[key]-previous_exchanges[ways][key]
+                            for key in ('committed_promotions', 'committed_upload_bytes',
+                                        'cached_promotions', 'reusable_gpu_bytes')}
+                      for ways, total in current.items()}
+            requests[-1]['exchange_opportunity'] = dict(observed_committed_exchanges=observed,
+                                                        cumulative=current, since_prior_footer=deltas)
+            previous_exchanges = current
+            exchange_footers += 1
+            last_exchange_footer = observed
         elif match := TRAFFIC.search(line):
             if traffic is not None:
                 raise ValueError('Traffic record missing its cache counters')
@@ -159,10 +239,20 @@ def analyze(path):
             traffic = None
     if not requests or traffic is not None or sequence != requests[-1]['cumulative_rows']:
         raise ValueError('Trace is incomplete at the last request boundary')
+    if exchange_enabled and (exchange_footers != len(requests) or last_exchange_footer != exchanges.count):
+        raise ValueError('Exchange trace lacks its final request footer')
     return dict(log=str(path), sha256=hashlib.sha256(raw).hexdigest(), rows=sequence,
                 geometry=shape, actual_ways=actual_ways, device_counters_exact=True,
                 requests=requests, totals={ways: sim.total for ways, sim in simulations.items()},
                 per_layer={ways: sim.by_layer for ways, sim in simulations.items()},
+                promotion_opportunity=(dict(committed_counter_exact=True, batches=exchanges.batches,
+                    totals=exchanges.totals(), per_layer=exchanges.by_layer,
+                    interpretation='Only committed exchanges in this trace. Copies present in the secondary '
+                      'GPU cache could potentially supply a device-to-device primary refill. No refill was '
+                      'changed. Counts between request footers include delayed commits from a preceding '
+                      'request; uncommitted final refills are excluded. Both source lifetime and full-byte '
+                      'identity require separate validation before implementation; bytes are not speed gains.')
+                    if exchange_enabled else None),
                 interpretation='Baseline CPU/GPU assignment replay only. Actual-capacity hit/upload/bypass '
                     'counts match device counters at every request boundary. CPU cached-before counts '
                     'weights present before current GPU fills; surviving counts also exclude weights those '
@@ -175,8 +265,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('logs', nargs='+', type=Path)
     parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--require-exchanges', action='store_true')
     args = parser.parse_args()
-    results = [analyze(path) for path in args.logs]
+    results = [analyze(path, require_exchanges=args.require_exchanges) for path in args.logs]
     args.output.write_text(json.dumps(dict(traces=results), indent=2)+'\n')
     for result in results:
         print(result['log'], 'device counters exact:', result['device_counters_exact'])
@@ -185,6 +276,10 @@ def main():
             print(request['index'], actual['cpu_groups'], 'CPU groups;',
                   actual['cpu_cached_before_groups'], 'cached before;',
                   actual['cpu_cached_surviving_groups'], 'survive current fills')
+        if result['promotion_opportunity']:
+            promotion = result['promotion_opportunity']['totals'][result['actual_ways']]
+            print('Committed promotions:', promotion['committed_promotions'],
+                  'already cached on GPU:', promotion['cached_promotions'])
 
 
 if __name__ == '__main__':
