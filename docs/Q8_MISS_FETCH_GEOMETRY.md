@@ -53,8 +53,8 @@ Runtime `7db4414` built with binary SHA-256
 `96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7`.
 There were 20 full component cases per setting, 100 total across the default
 and four explicit block counts. All six sanitizer runs reported zero errors.
-Five invalid values exited with the expected error. No full-model result is
-claimed for changing block count yet.
+Five invalid values exited with the expected error. These component gates
+preceded the full-model comparisons reported below.
 
 Evidence: [complete gates and fixture logs](benchmarks/q8-miss-fetch-geometry-components-20261004.json).
 
@@ -68,12 +68,11 @@ fell 13.08 to 0.68 ms. Coding changed 4.18 to 8.71 ms and 5.17 to 0.19 ms,
 respectively. These are instrumented intervals; the fork/concurrent work is
 inside the resident-expert interval, so individual kernel slowdown is unproven.
 
-The initial unprofiled model screen is now queued: 384, 96 and 32 copy blocks,
-each in serial and overlapped modes. Every arm uses the same component-tested
+The initial unprofiled model screen used 384, 96 and 32 copy blocks,
+each in serial and overlapped modes. Every arm used the same component-tested
 `7db4414` binary, MTP, 32K input + 1K output, FP16 KV, four secondary slots/layer,
 15,472 primary slots and PCIe fraction 0.55. Exact tokens/work are required.
-Later mode/context expansion depends on these results. No copy-grid model
-performance result is claimed yet.
+The completed initial comparisons and their follow-up are below.
 
 Evidence: [parent stage profile and semantic comparison](benchmarks/q8-miss-fetch-geometry-parent-gpu-profile-20261004.json).
 
@@ -94,16 +93,47 @@ secondary-cache hit/upload counts and primary-exchange payload matched the
 | 32 | Overlap | 133.87 | 118.50 | +1.47% / +4.26% |
 
 The 32-block overlap candidate reached 118.50 editing tok/s versus 113.66 for
-the original serial control (+4.26%). Holding overlap enabled, changing384 to32
-blocks improved editing from 115.86 to118.50 (+2.28%); coding was essentially
-unchanged (133.75 to133.87). Ninety-six blocks gave slightly higher coding than
-32, but that difference is only0.12%, not an established advantage.
+the original serial control (+4.26%). Holding overlap enabled, changing 384 to 32
+blocks improved editing from 115.86 to 118.50 (+2.28%); coding was essentially
+unchanged (133.75 to 133.87). Ninety-six blocks gave slightly higher coding than
+32, but that difference is only 0.12%, not an established advantage.
 
-This initial screen supports retaining both32-block serial and overlap paths.
-Repeat in reversed order and extend native128K; screen plain/n-gram/combined
+This initial screen supports retaining both 32-block serial and overlap paths.
+Repeat in reversed order and extend native 128K; screen plain/n-gram/combined
 separately. These finite sequential pairs have no confidence intervals yet.
 Lower launch concurrency helped measured request time, but this alone does
 not identify which memory/scheduling resource was limiting overlap.
 
 [Complete model records](benchmarks/q8-miss-geometry-model-20261004.json) and
 [same-work comparisons, effective throughput and host timing](benchmarks/q8-miss-geometry-analysis-20261004.json).
+
+## Reversed 32K MTP comparison completed
+
+The candidate ran first, then 32-block serial, then the original 384-block
+serial control. Every arm again reached 1,024 output tokens for coding and
+editing. Tokens, recorded speculative work, secondary hit/upload counts and
+primary D2H/H2D payload all matched, including between the two candidate runs.
+This uses the same `7db4414` binary and unchanged configuration above.
+
+| Setting | Coding output tok/s | Editing output tok/s | Coding effective tok/s | Editing effective tok/s |
+|---|---:|---:|---:|---:|
+| 384 blocks, serial | 132.52 | 113.46 | 65.47 | 61.01 |
+| 32 blocks, serial | 133.82 | 115.99 | 65.75 | 61.70 |
+| 32 blocks, overlap | 134.88 | 118.34 | 66.04 | 62.45 |
+
+Against 384-block serial, the candidate gained **1.78% coding / 4.31% editing**
+on generation. Against 32-block serial, overlap gained **0.79% / 2.02%**.
+Effective throughput includes each request's prefill and generation; it
+excludes engine loading. These are paired finite tests, not confidence bounds
+or claims about every prompt. The reverse ordering supports the direction of
+the initial result while keeping both serial and overlap as useful alternatives.
+
+Editing's mean host wait for GPU progress fell 14.45 to 12.26 ms/window while
+CPU expert work rose 13.60 to 14.41 ms/window. Whole-window time fell 34.45 to
+33.03 ms. Host waiting is not GPU idle time. The measurements still do not
+identify the contended resource; separate valid traffic profiling is needed.
+
+[Complete reversed-triple records and correctly oriented comparisons](benchmarks/q8-miss-geometry-reverse-20261004.json).
+
+Native 128K MTP and 32K plain/n-gram/combined follow-ups are running. Those
+results are not yet implied by this 32K MTP report.
