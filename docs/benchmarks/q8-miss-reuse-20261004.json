@@ -1,0 +1,223 @@
+{
+  "source": "9e960e4294bd5c7dcea5a66f09b2f61aaa7b5787",
+  "engine_sha256": "1cdc7f32af3b80534a5313b5b0c01db71f90cf93ce34ef2ebfe628e583268264",
+  "completed": true,
+  "traces": [
+    {
+      "log": "/home/dflanag3/fleet-downloads/rtxpro-q8-miss-trace-20261004/miss-trace-attempt-01/32768-mtp-miss-trace/engine-mtp-on.log",
+      "sha256": "8f23fe1ea56729d6a5bbe154cd941849cff6dae2b6fe3e87e4ef7b7c812bc63d",
+      "groups": 13727,
+      "logical_payload_verified": true,
+      "limit": "Replay only. Same primary GPU placement and CPU/GPU split; extra GPU memory assumed available. Saved uploads do not directly predict speed. Original staging capacity remains additional.",
+      "projections": [
+        {
+          "policy": "global_lru",
+          "capacity": 0,
+          "total_slots": 0,
+          "extra_gpu_bytes": 0,
+          "requested_groups": 24188,
+          "hit_groups": 0,
+          "bypassed_groups": 24188,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 0,
+          "avoided_upload_fraction": 0.0
+        },
+        {
+          "policy": "global_lru",
+          "capacity": 32,
+          "total_slots": 32,
+          "extra_gpu_bytes": 167116800,
+          "requested_groups": 24188,
+          "hit_groups": 142,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 741580800,
+          "avoided_upload_fraction": 0.005870679675872333
+        },
+        {
+          "policy": "global_lru",
+          "capacity": 64,
+          "total_slots": 64,
+          "extra_gpu_bytes": 334233600,
+          "requested_groups": 24188,
+          "hit_groups": 440,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 2297856000,
+          "avoided_upload_fraction": 0.01819083843228047
+        },
+        {
+          "policy": "global_lru",
+          "capacity": 128,
+          "total_slots": 128,
+          "extra_gpu_bytes": 668467200,
+          "requested_groups": 24188,
+          "hit_groups": 1297,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 6773452800,
+          "avoided_upload_fraction": 0.05362163056060856
+        },
+        {
+          "policy": "global_lru",
+          "capacity": 192,
+          "total_slots": 192,
+          "extra_gpu_bytes": 1002700800,
+          "requested_groups": 24188,
+          "hit_groups": 1880,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 9818112000,
+          "avoided_upload_fraction": 0.07772449148338019
+        },
+        {
+          "policy": "global_lru",
+          "capacity": 256,
+          "total_slots": 256,
+          "extra_gpu_bytes": 1336934400,
+          "requested_groups": 24188,
+          "hit_groups": 2361,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 12330086400,
+          "avoided_upload_fraction": 0.09761038531503224
+        },
+        {
+          "policy": "global_lru",
+          "capacity": 384,
+          "total_slots": 384,
+          "extra_gpu_bytes": 2005401600,
+          "requested_groups": 24188,
+          "hit_groups": 3276,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 17108582400,
+          "avoided_upload_fraction": 0.13543906069125186
+        },
+        {
+          "policy": "global_lru",
+          "capacity": 512,
+          "total_slots": 512,
+          "extra_gpu_bytes": 2673868800,
+          "requested_groups": 24188,
+          "hit_groups": 4549,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 23756697600,
+          "avoided_upload_fraction": 0.18806846370100877
+        },
+        {
+          "policy": "per_layer_lru",
+          "capacity": 1,
+          "total_slots": 48,
+          "extra_gpu_bytes": 250675200,
+          "requested_groups": 24188,
+          "hit_groups": 578,
+          "bypassed_groups": 10461,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 3018547200,
+          "avoided_upload_fraction": 0.023896146849677526
+        },
+        {
+          "policy": "per_layer_lru",
+          "capacity": 2,
+          "total_slots": 96,
+          "extra_gpu_bytes": 501350400,
+          "requested_groups": 24188,
+          "hit_groups": 1088,
+          "bypassed_groups": 4469,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 5681971200,
+          "avoided_upload_fraction": 0.04498098230527534
+        },
+        {
+          "policy": "per_layer_lru",
+          "capacity": 4,
+          "total_slots": 192,
+          "extra_gpu_bytes": 1002700800,
+          "requested_groups": 24188,
+          "hit_groups": 1945,
+          "bypassed_groups": 883,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 10157568000,
+          "avoided_upload_fraction": 0.08041177443360344
+        },
+        {
+          "policy": "per_layer_lru",
+          "capacity": 8,
+          "total_slots": 384,
+          "extra_gpu_bytes": 2005401600,
+          "requested_groups": 24188,
+          "hit_groups": 3422,
+          "bypassed_groups": 26,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 17871052800,
+          "avoided_upload_fraction": 0.14147511162559948
+        },
+        {
+          "policy": "per_layer_lru",
+          "capacity": 16,
+          "total_slots": 768,
+          "extra_gpu_bytes": 4010803200,
+          "requested_groups": 24188,
+          "hit_groups": 6227,
+          "bypassed_groups": 0,
+          "baseline_upload_payload_bytes": 126319411200,
+          "avoided_upload_payload_bytes": 32519884800,
+          "avoided_upload_fraction": 0.2574417066313875
+        }
+      ],
+      "trial": {
+        "label": "32768-mtp-miss-trace",
+        "input_tokens": 32768,
+        "output_tokens": 1024,
+        "mtp": "on",
+        "suffix": 0,
+        "expert_cache": 15472,
+        "cases": [
+          "coding",
+          "editing"
+        ],
+        "engine": "/home/dflanag3/src/q8-miss-trace-9e960e42",
+        "source": "9e960e4294bd5c7dcea5a66f09b2f61aaa7b5787",
+        "env": {
+          "STRATA_HOST_TIMING": "1",
+          "STRATA_DECODE_TIMING": "1",
+          "STRATA_ADAPT_WORKER": "0",
+          "STRATA_EXCHANGE_DUPLEX": "1",
+          "STRATA_Q8_EXPERT_REUSE": "0",
+          "STRATA_MISS_TRACE": "1"
+        },
+        "options": {
+          "--pcie-mode": "auto"
+        },
+        "reference_label": "32768-mtp-reuse-off",
+        "require_exact": true,
+        "diagnostic": true
+      },
+      "comparisons": [
+        {
+          "task": "coding",
+          "reference_label": "32768-mtp-reuse-off",
+          "first_token_difference": null,
+          "work_differences": {},
+          "reference_tps": 129.0355099674891,
+          "candidate_tps": 130.62057529179157,
+          "decode_gain_pct": 1.2283946680272884,
+          "effective_gain_pct": 0.36869030970010375
+        },
+        {
+          "task": "editing",
+          "reference_label": "32768-mtp-reuse-off",
+          "first_token_difference": null,
+          "work_differences": {},
+          "reference_tps": 111.93458822500601,
+          "candidate_tps": 112.25854546251837,
+          "decode_gain_pct": 0.28941656252057246,
+          "effective_gain_pct": 0.14323877553035214
+        }
+      ]
+    }
+  ],
+  "timing_notice": "Diagnostic trace. Token/work parity and payload-reuse projection only; trace TPS is not a performance result."
+}

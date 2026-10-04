@@ -40,10 +40,9 @@ prove full-model cancellation or speculative-state correctness.
 
 ## Evidence gates
 
-Implementation is prepared; no performance claim yet. The independent miss
-trace is queued ahead of this branch's component gates. Use measured reuse and
-native-128K free VRAM to select capacity. Component gates must pass before a
-model run. Then compare default-off and cache-on with the same binary, exact
+The independent miss trace and component gates are complete; no performance
+claim yet. The first full-model candidate uses four slots per layer. Then compare
+default-off and cache-on with the same binary, exact
 token/work checks for plain and MTP, first-divergence/work reporting for n-gram
 and combined, and a request cancellation/checkpoint test. Repeat gains and
 test both native contexts before publishing a speed claim.
@@ -67,3 +66,33 @@ The first lifecycle attempt stopped before readiness because its plain-mode
 control requested a nonzero conversation-cache budget, an unsupported engine
 configuration. The revised harness uses zero for plain mode. Its logs are kept;
 this was a harness configuration failure before any candidate inference.
+
+## Completed trace and component evidence
+
+The diagnostic MTP trace used 32,768 input tokens and 1,024 output tokens each
+for coding then editing. All output tokens and recorded work matched the frozen
+control. Its 13,727 nonempty groups accounted for exactly the engine's logical
+miss-upload payload. The following are trace replay projections, not TPS:
+
+| Policy | Extra VRAM | Avoided miss-upload bytes |
+|---|---:|---:|
+| Global LRU, 192 slots | 0.934 GiB | 7.77% |
+| Per-layer LRU, 4 slots/layer | 0.934 GiB | 8.04% |
+| Per-layer LRU, 8 slots/layer | 1.868 GiB | 14.15% |
+| Per-layer LRU, 16 slots/layer | 3.735 GiB | 25.74% |
+
+The native-128K MTP control had 5,128 MiB free at readiness. Four slots per layer
+leave useful headroom without changing the 15,472 primary slots. Larger caches
+still need actual allocation and model tests; the projection alone proves no fit
+or speed gain.
+
+Runtime source `eb22e57` built successfully. Its binary SHA-256 is
+`9541ee14db3aee6f28f4427fdb43d9910f4039f780f962d1534099d3dc68144e`.
+Seven fixture shape/capacity cases passed full-byte comparisons, graph replay,
+eviction/bypass, source immutability, guards, and plans abandoned before or after
+fill without publication. Both memcheck and initcheck reported zero errors.
+The actual 5,222,400-byte expert case checked 574 accesses (107 hits, 467 fills)
+and seven abandoned plans. This is component evidence, not full-model parity.
+
+Evidence: [miss trace replay](benchmarks/q8-miss-reuse-20261004.json),
+[component/build results](benchmarks/q8-readonly-components-20261004.json).
