@@ -24,8 +24,11 @@ requires uniform Q8_0, whole-model CUDA verification, `--pcie-mode auto` or
 3. A parallel copy kernel fills missing weights. A separate publication kernel
    runs after the entire copy kernel; only then does the new expert tag become
    valid. The host never treats an enqueued copy as a completed cache fill.
-4. Copies, publication, expert consumers and later eviction use the same stream.
-   This initial implementation adds no cross-stream lifetime dependency.
+4. By default, copies, publication, expert consumers and later eviction use the
+   same stream. This branch also adds a separately gated
+   [overlap experiment](Q8_MISS_FETCH_OVERLAP.md), whose explicit join protects
+   consumers and later reuse across streams. Earlier results below used serial
+   staging and do not validate the new overlap path.
 5. Cache tags describe immutable weights, not KV or recurrent state. Accepted
    or rejected drafts may warm the cache, but cannot publish a partial fill.
    The existing fatal verifier-release path continues refusing later windows.

@@ -1,32 +1,20 @@
-# Experimental Q8 read-only GPU miss cache
+# Experimental Q8 miss-fetch overlap
 
 This is an experimental fork of **[Niko1221/Strata](https://github.com/Niko1221/Strata)**.
 Credit for Strata and its existing kernels belongs to upstream and its contributors.
 
-This branch adds a small secondary GPU cache for repeatedly uploaded Q8 experts.
-It preserves primary expert placement and the CPU/GPU split. Its immutable copies
-can be discarded without writebacks; primary-cache evictions still use the existing
-ownership/duplex path. The switch defaults off: `STRATA_Q8_MISS_CACHE_WAYS=0`.
+This branch tests uploading missed Q8 experts while resident experts compute.
+Explicit captured CUDA dependencies protect plan readiness, completed fills and
+buffer reuse. `STRATA_Q8_MISS_FETCH_OVERLAP=0` keeps the original serial path.
+The secondary GPU cache is a separate optional switch.
 
-Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X, 128GB RAM;
-full Unsloth Q8_0, FP16 KV, native 32K and 128K.
+Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
+128GB RAM; full Unsloth Q8_0, FP16 KV, native 32K and 128K.
 
-## What is verified so far
+**Implementation prepared; correctness/build gates and model timings pending.**
+No speed gain is claimed for overlap. The earlier read-only cache's lifecycle
+results apply to its serial implementation, not this new stream arrangement.
 
-- A matched-output/work 32K MTP trace projected **8.04% fewer miss-upload bytes**
-  with four slots per layer (0.934 GiB), or **14.15%** with eight (1.868 GiB).
-- GPU component checks passed complete byte comparisons, changing graph inputs,
-  eviction/bypass, abandoned fills, source immutability and allocation guards.
-- CUDA memcheck and initcheck each reported **zero errors**. The engine built.
-
-**Paired plain/MTP lifecycle checks passed all 22 requests:** normal generation,
-MTP checkpoint restoration, cancellation and recovery matched output tokens,
-recorded work and main-model state fingerprints with the cache off/on.
-
-**No model speedup is claimed yet.** The 32K four-mode throughput screen is running.
-The initial harness attempt requested unsupported conversation caching with MTP
-off; its replacement respects the engine's existing restriction.
-
-See **[implementation, conditions, evidence and remaining gates](docs/Q8_READONLY_MISS_CACHE.md)**.
-This branch retains the upstream license. For standard installation and support,
-use **[upstream Strata](https://github.com/Niko1221/Strata)**.
+See **[design, invariants and validation plan](docs/Q8_MISS_FETCH_OVERLAP.md)**.
+Main and default behavior are unchanged. This fork preserves the upstream license;
+use **[upstream Strata](https://github.com/Niko1221/Strata)** for standard installation.

@@ -1,4 +1,6 @@
 #include "strata/kernels/readonly_miss_cache.hpp"
+#include "strata/kernels/captured_branch.hpp"
+#include "strata/kernels/verify_kernels.hpp"
 #include <cuda_runtime.h>
 #include <algorithm>
 #include <cstdio>
@@ -26,7 +28,14 @@ __global__ void consume(const unsigned long long* ptrs, const int32_t* n,
         output[i] = ((const uint4*)ptrs[i/per])[i%per];
 }
 
-void exercise(size_t bytes, int ways, int iterations) {
+__global__ void resident_work(const int32_t* count, uint32_t* out) {
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    uint32_t v = (uint32_t)(*count * 103 + i);
+    for (int j=0;j<512;++j) v = (v ^ (v >> 13)) * 1664525u + 1013904223u;
+    out[i] = v;
+}
+
+void exercise(size_t bytes, int ways, int iterations, bool overlap=false) {
     constexpr int layers = 3, experts = 23, cap = 16;
     const size_t stride = bytes + 32;  // guard each cache slot, not only the allocation
     uint8_t *host = nullptr, *alias = nullptr;
@@ -36,27 +45,43 @@ void exercise(size_t bytes, int ways, int iterations) {
         for (int e = 0; e < experts; ++e)
             for (size_t i = 0; i < bytes; ++i)
                 host[((size_t)l * experts + e) * bytes + i] = (uint8_t)(i*37 + (i>>8) + e*101 + l*19);
-    Device<uint8_t> cache(layers * ways * stride), stage(cap * bytes + 64), output(cap * bytes);
-    Device<int32_t> tags(layers * ways), count(1), starts(cap+1), dst(cap*2), ids(64);
-    Device<uint64_t> ages(layers*ways), clocks(layers), counters(layers*4);
+    const int storage_ways = std::max(ways,1);
+    Device<uint8_t> cache(layers * storage_ways * stride), stage(cap * bytes + 64), output(cap * bytes);
+    Device<int32_t> tags(layers * storage_ways), count(1), starts(cap+1), dst(cap*2), ids(64);
+    Device<uint32_t> resident_out(256);
+    Device<uint64_t> ages(layers*storage_ways), clocks(layers), counters(layers*4);
     Device<unsigned long long> ptrs(cap);
     Device<ReadonlyMissCachePlan> plan(1);
-    CU(cudaMemset(cache.p, 0xcd, layers * ways * stride));
+    CU(cudaMemset(cache.p, 0xcd, layers * storage_ways * stride));
     CU(cudaMemset(stage.p, 0xcd, cap * bytes + 64));
-    CU(cudaMemset(tags.p, 0xff, layers * ways * sizeof(int32_t)));
-    CU(cudaMemset(ages.p, 0, layers * ways * sizeof(uint64_t)));
+    CU(cudaMemset(tags.p, 0xff, layers * storage_ways * sizeof(int32_t)));
+    CU(cudaMemset(ages.p, 0, layers * storage_ways * sizeof(uint64_t)));
     CU(cudaMemset(clocks.p, 0, layers * sizeof(uint64_t)));
     CU(cudaMemset(counters.p, 0, layers * 4 * sizeof(uint64_t)));
-    cudaStream_t stream;
+    CU(cudaDeviceSynchronize()); // the nonblocking streams do not inherit default-stream initialization
+    cudaStream_t stream, branch;
+    cudaEvent_t ready, done;
     CU(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
+    CU(cudaStreamCreateWithFlags(&branch, cudaStreamNonBlocking));
+    CU(cudaEventCreateWithFlags(&ready, cudaEventDisableTiming));
+    CU(cudaEventCreateWithFlags(&done, cudaEventDisableTiming));
     ReadonlyMissCacheBank banks[layers];
     cudaGraphExec_t graph[layers] = {};
     for (int l = 0; l < layers; ++l) {
         banks[l] = {cache.p + (size_t)l*ways*stride, tags.p+l*ways, ages.p+l*ways,
                     clocks.p+l, counters.p+l*4, ways, (int64_t)stride};
         CU(cudaStreamBeginCapture(stream, cudaStreamCaptureModeThreadLocal));
-        fetch_readonly_misses(ptrs.p, count.p, starts.p, dst.p, ids.p, stage.p,
-                              bytes, cap, banks[l], plan.p, stream);
+        if (overlap) CU(begin_captured_branch(stream, branch, ready));
+        const cudaStream_t fetch = overlap ? branch : stream;
+        if (ways) fetch_readonly_misses(ptrs.p, count.p, starts.p, dst.p, ids.p, stage.p,
+                                       bytes, cap, banks[l], plan.p, fetch);
+        else {
+            fetch_blobs(ptrs.p, count.p, stage.p, bytes, cap, fetch);
+            rebase_ptrs(ptrs.p, count.p, stage.p, bytes, fetch);
+        }
+        resident_work<<<1,256,0,stream>>>(count.p,resident_out.p);
+        CU(cudaGetLastError());
+        if (overlap) CU(join_captured_branch(stream, branch, done));
         consume<<<64,256,0,stream>>>(ptrs.p,count.p,(uint4*)output.p,bytes/16);
         CU(cudaGetLastError());
         cudaGraph_t g;
@@ -82,7 +107,7 @@ void exercise(size_t bytes, int ways, int iterations) {
         const int n = (int)chosen.size();
         std::vector<int32_t> htags(ways), hstarts(cap+1,0), hdst(cap*2,0), hids(64,-1);
         std::vector<unsigned long long> hptrs(cap,0);
-        CU(cudaMemcpy(htags.data(),banks[layer].tags,ways*sizeof(int32_t),cudaMemcpyDeviceToHost));
+        if (ways) CU(cudaMemcpy(htags.data(),banks[layer].tags,ways*sizeof(int32_t),cudaMemcpyDeviceToHost));
         for (int q = 0; q < n; ++q) {
             hstarts[q] = q*2; hdst[q*2] = (q*7)%64; hids[hdst[q*2]] = chosen[q];
             bool hit = std::find(htags.begin(),htags.end(),chosen[q]) != htags.end();
@@ -97,7 +122,7 @@ void exercise(size_t bytes, int ways, int iterations) {
         CU(cudaMemcpyAsync(dst.p,hdst.data(),hdst.size()*4,cudaMemcpyHostToDevice,stream));
         CU(cudaMemcpyAsync(ids.p,hids.data(),hids.size()*4,cudaMemcpyHostToDevice,stream));
         CU(cudaMemcpyAsync(ptrs.p,hptrs.data(),hptrs.size()*8,cudaMemcpyHostToDevice,stream));
-        if (it > 8 && it % 11 == 0) {
+        if (ways && it > 8 && it % 11 == 0) {
             plan_readonly_misses(count.p, starts.p, dst.p, ids.p, stage.p, bytes, cap, banks[layer],plan.p,stream);
             if (it % 22 == 0) fill_readonly_misses(ptrs.p,bytes,plan.p,stream);
             CU(cudaStreamSynchronize(stream));
@@ -112,6 +137,13 @@ void exercise(size_t bytes, int ways, int iterations) {
         CU(cudaGraphLaunch(graph[layer],stream));
         CU(cudaMemcpyAsync(got.data(),output.p,n*bytes,cudaMemcpyDeviceToHost,stream));
         CU(cudaStreamSynchronize(stream));
+        uint32_t resident[256];
+        CU(cudaMemcpy(resident,resident_out.p,sizeof(resident),cudaMemcpyDeviceToHost));
+        for (int i=0;i<256;++i) {
+            uint32_t v=(uint32_t)(n*103+i);
+            for (int j=0;j<512;++j) v=(v^(v>>13))*1664525u+1013904223u;
+            REQUIRE(resident[i]==v);
+        }
         for (int q = 0; q < n; ++q)
             REQUIRE(std::memcmp(got.data()+q*bytes,host+((size_t)layer*experts+chosen[q])*bytes,bytes)==0);
         requested += n;
@@ -120,10 +152,15 @@ void exercise(size_t bytes, int ways, int iterations) {
     CU(cudaMemcpy(stats,counters.p,sizeof(stats),cudaMemcpyDeviceToHost));
     uint64_t total=0,hits=0,fills=0,bypasses=0;
     for(int l=0;l<layers;++l) {total+=stats[l*4];hits+=stats[l*4+1];fills+=stats[l*4+2];bypasses+=stats[l*4+3];}
-    REQUIRE(total==requested && hits+fills==total && bypasses<=fills && hits>0 && null_hit_sources>0);
-    if (ways < cap) REQUIRE(bypasses>0);
-    REQUIRE(abandoned>0);
-    CU(cudaMemcpy(guard.data(),cache.p,guard.size(),cudaMemcpyDeviceToHost));
+    if (ways) {
+        REQUIRE(total==requested && hits+fills==total && bypasses<=fills && hits>0 && null_hit_sources>0);
+        if (ways < cap) REQUIRE(bypasses>0);
+        REQUIRE(abandoned>0);
+    } else {
+        REQUIRE(total==0 && hits==0 && fills==0 && bypasses==0);
+        total=requested;fills=requested;
+    }
+    if (ways) CU(cudaMemcpy(guard.data(),cache.p,guard.size(),cudaMemcpyDeviceToHost));
     for(int s=0;s<layers*ways;++s)
         for(size_t i=bytes;i<stride;++i) REQUIRE(guard[(size_t)s*stride+i]==0xcd);
     CU(cudaMemcpy(stage_guard.data(),stage.p+cap*bytes,64,cudaMemcpyDeviceToHost));
@@ -131,20 +168,25 @@ void exercise(size_t bytes, int ways, int iterations) {
     // Cache use never mutates authoritative host weights.
     for(int l=0;l<layers;++l) for(int e=0;e<experts;++e) for(size_t i=0;i<bytes;++i)
         REQUIRE(host[((size_t)l*experts+e)*bytes+i]==(uint8_t)(i*37+(i>>8)+e*101+l*19));
-    std::printf("PASS bytes=%zu ways=%d requests=%llu hits=%llu fills=%llu bypasses=%llu abandoned=%llu\n",
-        bytes,ways,(unsigned long long)total,(unsigned long long)hits,(unsigned long long)fills,
+    std::printf("PASS bytes=%zu ways=%d overlap=%d requests=%llu hits=%llu fills=%llu bypasses=%llu abandoned=%llu\n",
+        bytes,ways,(int)overlap,(unsigned long long)total,(unsigned long long)hits,(unsigned long long)fills,
         (unsigned long long)bypasses,(unsigned long long)abandoned);
     for(auto g:graph) CU(cudaGraphExecDestroy(g));
     CU(cudaStreamDestroy(stream));
+    CU(cudaStreamSynchronize(branch));
+    CU(cudaStreamDestroy(branch));
+    CU(cudaEventDestroy(ready));CU(cudaEventDestroy(done));
     CU(cudaFreeHost(host));
 }
 
 int main(int argc,char** argv) {
     bool quick = argc>1 && std::strcmp(argv[1],"--quick")==0;
-    for(int ways : {1,4,16}) {
-        exercise(16,ways,quick?32:160);
-        exercise(144,ways,quick?32:160);
+    for(bool overlap : {false,true}) {
+        for(int ways : {0,1,4,16}) {
+            exercise(16,ways,quick?32:160,overlap);
+            exercise(144,ways,quick?32:160,overlap);
+        }
+        for(int ways : {0,4}) exercise(5222400,ways,quick?24:80,overlap);
     }
-    exercise(5222400,4,quick?24:80); // this model's actual Q8 expert payload
-    std::puts("PASS readonly miss cache: complete bytes, source immutability, graph replay, guards, abandoned fills");
+    std::puts("PASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills");
 }

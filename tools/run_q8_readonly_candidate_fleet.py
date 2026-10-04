@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gated Q8 read-only miss-cache build and GPU component checks on llm-60."""
+"""Gated Q8 miss-cache/overlap build and GPU component checks on llm-60."""
 from pathlib import Path
 import datetime
 import fcntl
@@ -39,10 +39,11 @@ def gates(out):
     try:
         nvcc = '/usr/local/cuda/bin/nvcc'
         for label,source in [('fixture','tools/readonly_miss_cache_fixture.cu'),
-                             ('cache','src/kernels/cuda/readonly_miss_cache.cu')]:
+                             ('cache','src/kernels/cuda/readonly_miss_cache.cu'),
+                             ('verify','src/kernels/cuda/verify_kernels.cu')]:
             run(label+'-compile',['ccache',nvcc,'-std=c++17','-O2','-lineinfo','-arch=sm_120',
                 '-I'+str(R/'include'),'-c',R/source,'-o',out/(label+'.o')])
-        run('fixture-link',[nvcc,out/'fixture.o',out/'cache.o','-o',out/'fixture'])
+        run('fixture-link',[nvcc,out/'fixture.o',out/'cache.o',out/'verify.o','-o',out/'fixture'])
         run('fixture',[out/'fixture'])
         for sanitizer in ['memcheck','initcheck']:
             run('fixture-'+sanitizer,['/usr/local/cuda/bin/compute-sanitizer','--tool',sanitizer,

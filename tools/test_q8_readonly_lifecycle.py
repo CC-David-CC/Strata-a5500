@@ -42,7 +42,12 @@ def main():
     work_keys=('generated','drafts_accepted','drafts_offered','hits','lookups','ram_blobs','file_blobs','prompt_read')
     controls={}
     try:
-        for mode,ways in [('off',0),('off',plan['ways']),('on',0),('on',plan['ways'])]:
+        variants=plan.get('lifecycle_variants',[
+            dict(label='ways0',ways=0,overlap=0),
+            dict(label='ways'+str(plan['ways']),ways=plan['ways'],overlap=0,reference='ways0')])
+        arms=[(mode,variant) for mode in ('off','on') for variant in variants]
+        for mode,variant in arms:
+            ways=variant['ways'];overlap=variant.get('overlap',0)
             cfg=configure({'weights':'Q8_0','kv':'fp16','load_projection':False},engine_root,Path.home(),40960)
             for key,value in [('--expert-cache',15472),('--prompt-cache',6),('--conversation-cache-mib',4096 if mode=='on' else 0),
                               ('--suffix-draft',0),('--spec',8),('--mtp-max-t',4),('--pcie-frac',0.55)]:
@@ -51,9 +56,10 @@ def main():
             cfg['env'].update(STRATA_PLE_PREFAULT_THREADS='8',STRATA_EXCHANGE_ROTATE='1',
                 STRATA_EXCHANGE_DUPLEX='1',STRATA_ADAPT_WORKER='0',STRATA_ADAPT_NOWAIT='0',
                 STRATA_HOST_TIMING='1',STRATA_DECODE_TIMING='1',STRATA_STATE_HASH='1',
-                STRATA_Q8_EXPERT_REUSE='0',STRATA_Q8_MISS_CACHE_WAYS=str(ways))
-            label=mode+'-ways'+str(ways);log=opt.output/(label+'.log')
-            arm=dict(label=label,mode=mode,ways=ways,config=cfg,requests=[])
+                STRATA_Q8_EXPERT_REUSE='0',STRATA_Q8_MISS_CACHE_WAYS=str(ways),
+                STRATA_Q8_MISS_FETCH_OVERLAP=str(overlap))
+            label=mode+'-'+variant['label'];log=opt.output/(label+'.log')
+            arm=dict(label=label,mode=mode,ways=ways,overlap=overlap,config=cfg,requests=[])
             result['arms'].append(arm);save()
             engine=None
             try:
@@ -96,14 +102,14 @@ def main():
                 text=log.read_text(errors='replace');hashes=state_hashes(text)
                 require(len(hashes)==len(arm['requests']),'Missing request state fingerprints')
                 for req,state in zip(arm['requests'],hashes):req['state']=state
-                if ways==0:
-                    controls[mode]=arm
-                else:
+                if overlap:require('strata miss fetch overlap: enabled;' in text,'Overlap did not activate')
+                if ways:
                     require('strata readonly miss cache: enabled,' in text,'Cache did not activate')
                     reports=re.findall(r'cumulative groups=(\d+) hits=(\d+) uploads=(\d+) bypasses=(\d+)',text)
                     require(reports and int(reports[-1][1])>0,'No cached GPU weights consumed')
                     arm['cache_reports']=[dict(zip(('groups','hits','uploads','bypasses'),map(int,r))) for r in reports]
-                    baseline=controls[mode]['requests'];current=arm['requests']
+                if variant.get('reference'):
+                    baseline=controls[(mode,variant['reference'])]['requests'];current=arm['requests']
                     comparisons=[]
                     cancel_work={k:[baseline[-2]['timings'].get(k),current[-2]['timings'].get(k)] for k in work_keys
                         if baseline[-2]['timings'].get(k)!=current[-2]['timings'].get(k)}
@@ -120,6 +126,7 @@ def main():
                         if c['exact_comparison_required']:
                             require(c['first_token_difference'] is None and not c['state_differences'],c['name']+': output/state differs')
                         if c['name']=='normal':require(not c['work_differences'],'Normal request work differs')
+                controls[(mode,variant['label'])]=arm
                 arm['passed']=True;print('LIFECYCLE_PASS '+label,flush=True)
             finally:
                 if engine:
