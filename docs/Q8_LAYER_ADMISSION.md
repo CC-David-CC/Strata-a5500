@@ -77,7 +77,7 @@ no HIP result is claimed.
   logical D2H/H2D payload, wait/ownership/worker timing and effective throughput.
 - Repeat useful gains and extend to native 128K before a performance claim.
 
-Status: component/sanitizer/build gates and all 33 lifecycle requests passed. All nine 32K configurations (18 throughput requests) completed. Reverse-order MTP and native 128K tests remain queued.
+Status: component/sanitizer/build gates and all 33 lifecycle requests passed. All nine 32K configurations (18 throughput requests) completed. Reverse-order 32K MTP completed with positive exact gains; native 128K is running.
 The raw schedule analysis is included in
 [the supporting trace analysis](benchmarks/q8-layer-readiness-projection-20261004.json).
 
@@ -159,3 +159,22 @@ configuration is declared best for every mode.
 [Complete first 32K evidence](benchmarks/q8-layer-complete-32k-20261004.json).
 Reverse-order MTP and native 128K pairs in all four modes use the same already
 built binary; they are queued, not reported as passed here.
+
+
+## Reversed-order 32K MTP repeat
+
+Candidate ran first, then a fresh same-binary control. These numbers use that
+fresh control, not the older forward-order control. Same 32,768 input + 1,024
+output, 40,960 allocation and configuration as the first matrix.
+
+| Task | Fresh control tok/s | Per-layer tok/s | Gain | Control effective tok/s | Per-layer effective tok/s |
+|---|---:|---:|---:|---:|---:|
+| coding | 136.422 | 144.427 | +5.87% | 66.372 | 67.831 |
+| editing | 119.304 | 124.356 | +4.23% | 62.637 | 64.008 |
+
+Both requests matched tokens, measured work, primary transfer/swap counts and
+secondary-cache counters. The gain survived both run orders; two pairs are
+not a confidence interval or a broader-workload guarantee.
+
+[Raw reverse pair](benchmarks/q8-layer-reverse-32k-20261004.json). Native 128K
+pairs in all four modes are running on the same unchanged binary.

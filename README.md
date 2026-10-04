@@ -30,3 +30,7 @@ See [hypothesis, state and validation](docs/Q8_LAYER_ADMISSION.md) and
 [the measured parent](docs/Q8_MISS_FETCH_GEOMETRY.md).
 Main is untouched and the upstream license is retained. For standard
 installation and support, use [upstream Strata](https://github.com/Niko1221/Strata).
+
+The reversed-order 32K MTP repeat also matched tokens/work/counters: coding
+136.42 -> 144.43 tok/s (+5.87%), editing 119.30 -> 124.36 (+4.23%).
+Native 128K tests are running; no 128K result is claimed yet.
