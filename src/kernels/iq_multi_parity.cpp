@@ -16,6 +16,7 @@
 // are set, small enough that the grouped path's SwiGLU output keeps a finite fp16 q8_1 scale.
 #include "strata/kernels/f16_bits.hpp"
 #include "strata/kernels/iq_kernels.hpp"
+#include "strata/kernels/verify_kernels.hpp"
 
 #include <cuda_runtime.h>
 
@@ -352,11 +353,11 @@ void bench(cudaStream_t s, std::mt19937& rng) {
 // eight independent 16-expert weight sets (> 600 MiB) to avoid an L2-only test.
 void bench_q8_experts(cudaStream_t s, std::mt19937& rng, bool mapped = false) {
     for (int m : {1, 2, 3, 4, 8, 12, 24}) {
-        if (m > strata::kSpecMaxT) continue;
+        if (m > k::kVerifyMaxT) continue;
         std::vector<std::unique_ptr<Grouped>> ring;
         for (int i = 0; i < 8; ++i)
             ring.emplace_back(std::make_unique<Grouped>(8, 8, 2560, 640, std::vector<int>(16, m),
-                                                        strata::kSpecMaxT, rng));
+                                                        k::kVerifyMaxT, rng));
         for (auto& G : ring) {
             if (mapped) G->mapped_weights(true);
             G->grid_groups = mapped ? 4 : 0; // the model's PCIe and resident launch shapes
@@ -376,7 +377,7 @@ void bench_q8_experts(cudaStream_t s, std::mt19937& rng, bool mapped = false) {
 }
 
 void check_q8_graph_replay(cudaStream_t s, std::mt19937& rng, bool mapped = false) {
-    Grouped G(8, 8, 2560, 640, {1, 4, 0, 5, strata::kSpecMaxT}, strata::kSpecMaxT, rng);
+    Grouped G(8, 8, 2560, 640, {1, 4, 0, 5, k::kVerifyMaxT}, k::kVerifyMaxT, rng);
     if (mapped) { G.mapped_weights(true); G.grid_groups = 4; }
     cudaGraph_t graph;
     cudaGraphExec_t executable;
@@ -409,7 +410,7 @@ void check_q8_graph_replay(cudaStream_t s, std::mt19937& rng, bool mapped = fals
 }
 
 void check_q8_mapped_placement(cudaStream_t s, std::mt19937& rng) {
-    Grouped G(8, 8, 2560, 640, {0, 1, 2, 3, 4, 5, 8, 11}, strata::kSpecMaxT, rng);
+    Grouped G(8, 8, 2560, 640, {0, 1, 2, 3, 4, 5, 8, 11}, k::kVerifyMaxT, rng);
     const auto reference = G.result(true, s);
     G.mapped_weights(true);
     for (int grid : {1, 4, 0}) {
