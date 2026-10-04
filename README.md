@@ -21,7 +21,10 @@ This is one pair; repeatability and 128K results are pending.
 
 All **33 lifecycle requests** and component/sanitizer/build checks passed.
 The earlier test-harness failure and its correction remain in the report.
-Other modes are still running. This branch has not yet been published.
+All four 32K modes finished: plain gained 3.1%/2.7%; n-gram alone lost 1.9%/6.0%,
+and combined gained 5.0%/1.7% with changed work. Preserve the earlier n-gram
+configuration. Reverse-order MTP and 128K tests are queued. This branch has not
+yet been published.
 
 See [hypothesis, state and validation](docs/Q8_LAYER_ADMISSION.md) and
 [the measured parent](docs/Q8_MISS_FETCH_GEOMETRY.md).

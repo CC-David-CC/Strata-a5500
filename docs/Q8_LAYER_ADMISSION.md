@@ -77,7 +77,7 @@ no HIP result is claimed.
   logical D2H/H2D payload, wait/ownership/worker timing and effective throughput.
 - Repeat useful gains and extend to native 128K before a performance claim.
 
-Status: component/sanitizer/build gates and all 33 lifecycle requests passed. The first MTP comparison is complete; other modes and repeat runs remain pending.
+Status: component/sanitizer/build gates and all 33 lifecycle requests passed. All nine 32K configurations (18 throughput requests) completed. Reverse-order MTP and native 128K tests remain queued.
 The raw schedule analysis is included in
 [the supporting trace analysis](benchmarks/q8-layer-readiness-projection-20261004.json).
 
@@ -131,3 +131,31 @@ plain/n-gram/combined cases and reverse-order repetitions are still needed.
 N-gram's timing-dependent policy will be qualified separately.
 
 [Raw lifecycle, build and first MTP evidence](benchmarks/q8-layer-first-mtp-20261004.json).
+
+
+## Complete first 32K matrix
+
+Nine configurations completed, including the deferred MTP comparator above. All
+requests used 32,768 input + 1,024 output and the same fixed configuration.
+
+| Mode / task | Control output tok/s | Per-layer output tok/s | Output gain | Control effective tok/s | Per-layer effective tok/s | Qualification |
+|---|---:|---:|---:|---:|---:|---|
+| plain / coding | 75.195 | 77.516 | +3.09% | 47.666 | 48.537 | Exact tokens and measured work |
+| plain / editing | 63.784 | 65.536 | +2.75% | 43.062 | 43.851 | Exact tokens and measured work |
+| mtp / coding | 135.007 | 144.557 | +7.07% | 66.002 | 68.267 | Exact tokens and measured work |
+| mtp / editing | 119.003 | 124.430 | +4.56% | 62.551 | 64.016 | Exact tokens and measured work |
+| ngram / coding | 80.431 | 78.870 | -1.94% | 49.674 | 49.059 | First token difference 120, different work |
+| ngram / editing | 115.595 | 108.651 | -6.01% | 61.761 | 59.715 | Matching tokens, different work |
+| mtp-ngram / coding | 136.944 | 143.822 | +5.02% | 66.510 | 68.169 | First token difference 311, different work |
+| mtp-ngram / editing | 120.726 | 122.801 | +1.72% | 63.040 | 63.564 | Matching tokens, different work |
+
+Plain and MTP also matched primary exchange bytes and secondary cache counters.
+The n-gram-only path lost 1.94% coding and 6.01% editing, with different chosen
+windows/work; the earlier schedule remains a useful configuration for that
+path. Combined MTP+n-gram gained 5.02%/1.72%, also with different work. Those
+comparisons are not isolated identical-work scheduling gains. No single
+configuration is declared best for every mode.
+
+[Complete first 32K evidence](benchmarks/q8-layer-complete-32k-20261004.json).
+Reverse-order MTP and native 128K pairs in all four modes use the same already
+built binary; they are queued, not reported as passed here.
