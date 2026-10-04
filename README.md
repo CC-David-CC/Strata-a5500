@@ -12,10 +12,13 @@ against more primary resident experts. The former avoids repeated uploads;
 the latter can also reduce CPU work. It changes configuration and test
 coverage, with no inference kernel or model-weight changes.
 
-**Tests are pending.** The initial sixteen-entry capacity result motivates
-this comparison; it is not a result for the new primary configurations.
+**Fresh build and all 22 lifecycle requests passed.** Four- and sixteen-entry
+caches matched tokens, work and main-model state through normal requests,
+cancellation and MTP checkpoint restoration. Throughput repetitions, native
+128K comparisons and the new primary placements are still pending. The
+initial capacity gains do not establish a result for those placements.
 See [memory budgets, invariants and required measurements](docs/Q8_CACHE_BUDGET.md).
 
-The fresh build must match the previously tested engine bytes. Lifecycle checks
-precede new throughput tests; placement-dependent output differences remain
+The fresh build matches the previously tested engine bytes. Lifecycle checks
+passed before the new throughput tests; placement-dependent output differences remain
 visible in the report. Use upstream Strata for standard installation/support.

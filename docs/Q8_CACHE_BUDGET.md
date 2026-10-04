@@ -69,8 +69,8 @@ All arms keep copy32 overlap, ownership rotation, duplex transfers, PCIe fractio
 0.55, native context and FP16 KV. This branch does not enable compact fills or
 per-layer admission: those remain independently measured candidates.
 
-Status: preparation only. No result for the new configurations, lifecycle gate
-or fresh build is claimed. Both the duplicate-cache and primary-cache designs
+Status: fresh byte-identical build and all 22 lifecycle requests passed.
+New primary-placement and 128K throughput results are still pending. Both the duplicate-cache and primary-cache designs
 remain alternatives; a smaller upload count alone is not a speedup.
 
 
@@ -83,3 +83,35 @@ variant list. The same helper is corrected here before requeueing. Explicit
 and legacy plans plus empty/null/object rejection were checked locally; no
 engine source changed. The fresh queue must still pass byte-identical build,
 normal/STOP/checkpoint checks and the planned throughput comparisons.
+
+
+## Build and lifecycle gate passed
+
+The frozen `3745a0d` branch built successfully with ccache, producing exactly
+the capacity engine bytes:
+`96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7`.
+The prior complete-byte/sanitizer evidence hash was checked before admitting
+this build. Worker ASan/UBSan and TSan also passed in the fresh build stage.
+
+All four lifecycle arms completed and exited cleanly:
+
+| MTP | Secondary entries/layer | Requests | Covered |
+|---|---:|---:|---|
+| Off | 4 | 3 | Normal, stop at 16 delivered tokens, following request |
+| Off | 16 | 3 | Same sequence, compared with four entries |
+| On | 4 | 8 | Above plus five checkpoint/switch/restore requests |
+| On | 16 | 8 | Same sequence, compared with four entries |
+
+All **11 paired comparisons** matched output tokens, recorded work and
+main-model state fingerprints exactly, including cancellation and the request
+after cancellation. No comparison needed the unequal-cancellation-work
+qualification. All startup guards passed with full RAM residency, locked PLE,
+FP16 KV, 15,472 primary experts and 40,960 allocated context; no expert file
+reads occurred. These checks use 32K prompts. They do not establish 128K
+lifecycle coverage or correctness for a different primary placement.
+
+[Build identity, complete request records and state comparisons](benchmarks/q8-cache-budget-lifecycle-20261004.json).
+The [complete initial 32K capacity screen](benchmarks/q8-cache-capacity-model-32k-20261004.json)
+is also retained here, including plain and n-gram results and qualifications.
+The fifteen-arm throughput follow-up proceeds after this gate; its results
+remain separate from these functional checks.
