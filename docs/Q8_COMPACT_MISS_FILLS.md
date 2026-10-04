@@ -1,0 +1,63 @@
+# Q8 secondary-cache upload compaction
+
+Branch `perf/q8-compact-miss-fills`, based on the fork's measured copy-grid
+branch and [Niko1221/Strata](https://github.com/Niko1221/Strata).
+Target: llm-60, RTX PRO 6000 Blackwell Workstation Edition 96GB, Ryzen 7950X,
+128GB RAM, full Unsloth Q8_0 and FP16 KV.
+
+## Evidence and intervention
+
+The measured four-slot-per-layer cache avoided 1,945 of 24,188 uploads in the
+32K MTP coding/editing pair, or 8.04%. Cache hits avoid RAM reads, but the fill
+kernel still iterates through `group_count * expert_bytes / 16` positions.
+Each hit position calculates its group/offset and skips the copy. An all-hit
+group still visits the entire range. Smaller copy grids increase the number
+of loop iterations per thread, so this is a concrete remaining source of work.
+
+`STRATA_Q8_COMPACT_MISS_FILL=1` records upload indices in the existing plan
+kernel. The fill kernel visits only those indices. Its loop remains a complete
+16-byte grid-stride copy of every actual miss. A miss that bypasses the small
+cache still needs an upload and is included. The ordinary template remains
+available and is the default. The plan adds a fixed 64-entry index list and a
+count; arena alignment still applies. No additional kernel or synchronization
+is introduced, and no physical read/write savings are claimed for this change.
+
+The extra index read and plan writes could outweigh the skipped iterations.
+The component experiment and full model comparison, rather than the existence
+of redundant instructions alone, decide whether to keep it.
+
+## Invariants
+
+- Preserve group order, source/destination addresses and all expert bytes.
+- Reserve existing hits before replacements; retain the same LRU decisions.
+- Upload all misses, including cache-capacity bypasses.
+- A cache key becomes valid only after the complete fill kernel finishes.
+- Join the upload branch before expert consumers; retain their buffer lifetimes.
+- Preserve primary expert placement, CPU/GPU split, arithmetic and output policy.
+- Reject malformed flag values; absent or `0` keeps ordinary traversal.
+
+## Required validation
+
+The component fixture uses independent complete-byte comparisons, guarded
+destinations, immutable RAM sources and null RAM pointers for actual hits.
+It covers empty/all-hit/all-miss/mixed groups, hit reservation, eviction,
+staging bypass, graph replay, serial/overlap, abandoned fills and full
+5,222,400-byte experts with cache capacities 0/4/16. Small/tail cases also use
+capacity 1. The prepared gate runs both templates at 32/384 blocks, then
+Compute Sanitizer memcheck/initcheck at 32, plus invalid-flag rejections.
+
+A separate fixed-plan microbenchmark measures only fill traversal, using real
+expert size and groups of 1/4/16 with varying misses. It checks every copied
+byte and untouched hit destination after replay. Off/on/on/off ordering is
+recorded. These timings exclude planning, publication and model computation
+and cannot establish a model speedup.
+
+After component gates and the CUDA build, use the same new binary for native
+32K + 1,024-output coding/editing comparisons in plain, MTP, n-gram and combined
+modes. Hold primary slots at 15,472, secondary slots at four per layer, copy
+blocks at 32, overlap on, PCIe fraction 0.55 and ownership/duplex enabled.
+Check default-off against the earlier binary as well. Exact plain/MTP tokens
+and recorded work are required; timing-sensitive n-gram changes remain visible.
+Extend useful paths to native 128K and repeat before a speed claim or push.
+
+Status: implementation prepared. No component/model result yet.

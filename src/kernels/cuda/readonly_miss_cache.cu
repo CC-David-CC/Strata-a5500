@@ -4,6 +4,7 @@
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 namespace strata::kernels {
 namespace {
@@ -16,6 +17,21 @@ void check(const char* where) {
     }
 }
 
+bool compact_miss_fills() {
+    static const bool enabled = [] {
+        const char* value = std::getenv("STRATA_Q8_COMPACT_MISS_FILL");
+        if (!value || std::strcmp(value, "0") == 0) return false;
+        if (std::strcmp(value, "1") != 0) {
+            std::fprintf(stderr, "STRATA_Q8_COMPACT_MISS_FILL must be 0 or 1\n");
+            std::exit(1);
+        }
+        std::fprintf(stderr, "strata compact miss fill: enabled; visit only upload groups, unchanged bytes and publication\n");
+        return true;
+    }();
+    return enabled;
+}
+
+template<bool Compact>
 __global__ void plan_kernel(const int32_t* count, const int32_t* starts,
                             const int32_t* dst, const int32_t* ids,
                             uint8_t* staging, int64_t bytes,
@@ -25,6 +41,7 @@ __global__ void plan_kernel(const int32_t* count, const int32_t* starts,
     bool used[kMissCacheMaxWays] = {};
     const int n = *count;
     plan->count = n;
+    if constexpr (Compact) plan->fill_count = 0;
     for (int q = 0; q < n; ++q) {
         const int expert = ids[dst[starts[q]]];
         plan->expert[q] = expert;
@@ -43,6 +60,8 @@ __global__ void plan_kernel(const int32_t* count, const int32_t* starts,
     }
     for (int q = 0; q < n; ++q) {
         if (!plan->fill[q]) continue;
+        // Staging bypasses also require a complete upload.
+        if constexpr (Compact) plan->fill_groups[plan->fill_count++] = q;
         int victim = -1;
         for (int s = 0; s < bank.ways; ++s) {
             if (used[s]) continue;
@@ -60,13 +79,19 @@ __global__ void plan_kernel(const int32_t* count, const int32_t* starts,
     }
 }
 
+template<bool Compact>
 __global__ void fill_kernel(const unsigned long long* src, long long per,
                             const ReadonlyMissCachePlan* plan) {
-    const long long total = (long long)plan->count * per;
+    const long long total = (long long)(Compact ? plan->fill_count : plan->count) * per;
     for (long long i = (long long)blockIdx.x * blockDim.x + threadIdx.x; i < total;
          i += (long long)gridDim.x * blockDim.x) {
-        const long long q = i / per, off = i - q * per;
-        if (plan->fill[q]) ((uint4*)plan->target[q])[off] = ((const uint4*)src[q])[off];
+        const long long group = i / per, off = i - group * per;
+        if constexpr (Compact) {
+            const int q = plan->fill_groups[group];
+            ((uint4*)plan->target[q])[off] = ((const uint4*)src[q])[off];
+        } else if (plan->fill[group]) {
+            ((uint4*)plan->target[group])[off] = ((const uint4*)src[group])[off];
+        }
     }
 }
 
@@ -96,13 +121,19 @@ void plan_readonly_misses(const int32_t* count, const int32_t* starts,
         std::fprintf(stderr, "readonly miss cache: invalid geometry\n");
         std::exit(1);
     }
-    plan_kernel<<<1, 1, 0, (cudaStream_t)stream>>>(count, starts, dst, ids, staging, bytes, bank, plan);
+    if (compact_miss_fills())
+        plan_kernel<true><<<1, 1, 0, (cudaStream_t)stream>>>(count, starts, dst, ids, staging, bytes, bank, plan);
+    else
+        plan_kernel<false><<<1, 1, 0, (cudaStream_t)stream>>>(count, starts, dst, ids, staging, bytes, bank, plan);
     check("readonly miss cache plan");
 }
 
 void fill_readonly_misses(const unsigned long long* src, int64_t bytes,
                          const ReadonlyMissCachePlan* plan, void* stream) {
-    fill_kernel<<<miss_fetch_blocks(), 256, 0, (cudaStream_t)stream>>>(src, bytes / 16, plan);
+    if (compact_miss_fills())
+        fill_kernel<true><<<miss_fetch_blocks(), 256, 0, (cudaStream_t)stream>>>(src, bytes / 16, plan);
+    else
+        fill_kernel<false><<<miss_fetch_blocks(), 256, 0, (cudaStream_t)stream>>>(src, bytes / 16, plan);
     check("readonly miss cache fill");
 }
 

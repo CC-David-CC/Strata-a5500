@@ -27,6 +27,8 @@ struct ReadonlyMissCachePlan {
     int32_t fill[kMissCacheMaxGroups];
     int32_t expert[kMissCacheMaxGroups];
     int32_t count;
+    int32_t fill_groups[kMissCacheMaxGroups];  // compact upload-only group indices
+    int32_t fill_count;
 };
 
 /// Preconditions: distinct expert IDs within a group, 0 <= *count <= cap <= 64,

@@ -107,6 +107,7 @@ void exercise(size_t bytes, int ways, int iterations, bool overlap=false) {
         const int n = (int)chosen.size();
         std::vector<int32_t> htags(ways), hstarts(cap+1,0), hdst(cap*2,0), hids(64,-1);
         std::vector<unsigned long long> hptrs(cap,0);
+        std::vector<int> expected_fills;
         if (ways) CU(cudaMemcpy(htags.data(),banks[layer].tags,ways*sizeof(int32_t),cudaMemcpyDeviceToHost));
         for (int q = 0; q < n; ++q) {
             hstarts[q] = q*2; hdst[q*2] = (q*7)%64; hids[hdst[q*2]] = chosen[q];
@@ -115,6 +116,7 @@ void exercise(size_t bytes, int ways, int iterations, bool overlap=false) {
             // still fails the independent full-byte check of the consumer.
             hptrs[q] = hit ? 0 : (unsigned long long)(alias + ((size_t)layer*experts+chosen[q])*bytes);
             if (hit) ++null_hit_sources;
+            else expected_fills.push_back(q);
         }
         hstarts[n] = 2*n;
         CU(cudaMemcpyAsync(count.p,&n,sizeof(n),cudaMemcpyHostToDevice,stream));
@@ -137,6 +139,14 @@ void exercise(size_t bytes, int ways, int iterations, bool overlap=false) {
         CU(cudaGraphLaunch(graph[layer],stream));
         CU(cudaMemcpyAsync(got.data(),output.p,n*bytes,cudaMemcpyDeviceToHost,stream));
         CU(cudaStreamSynchronize(stream));
+        if (ways && std::getenv("STRATA_Q8_COMPACT_MISS_FILL") &&
+            std::strcmp(std::getenv("STRATA_Q8_COMPACT_MISS_FILL"), "1") == 0) {
+            ReadonlyMissCachePlan got_plan;
+            CU(cudaMemcpy(&got_plan,plan.p,sizeof(got_plan),cudaMemcpyDeviceToHost));
+            REQUIRE(got_plan.count==n && got_plan.fill_count==(int)expected_fills.size());
+            for (size_t q=0;q<expected_fills.size();++q)
+                REQUIRE(got_plan.fill_groups[q]==expected_fills[q]);
+        }
         uint32_t resident[256];
         CU(cudaMemcpy(resident,resident_out.p,sizeof(resident),cudaMemcpyDeviceToHost));
         for (int i=0;i<256;++i) {
@@ -179,14 +189,77 @@ void exercise(size_t bytes, int ways, int iterations, bool overlap=false) {
     CU(cudaFreeHost(host));
 }
 
+// Component timing only. Fixed plans isolate fill traversal; complete copies
+// and untouched hits are checked independently after each timed graph replay.
+void measure_fill() {
+    constexpr int cap=16, repetitions=64;
+    constexpr size_t bytes=5222400;
+    uint8_t *host=nullptr,*alias=nullptr;
+    CU(cudaHostAlloc((void**)&host,cap*bytes,cudaHostAllocMapped));
+    CU(cudaHostGetDevicePointer((void**)&alias,host,0));
+    for(size_t i=0;i<cap*bytes;++i) host[i]=(uint8_t)(i*31+(i>>10));
+    Device<uint8_t> output(cap*bytes+64);
+    Device<unsigned long long> pointers(cap);
+    Device<ReadonlyMissCachePlan> plan(1);
+    std::vector<uint8_t> got(cap*bytes+64);
+    cudaStream_t stream;
+    cudaEvent_t start,stop;
+    CU(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
+    CU(cudaEventCreate(&start));CU(cudaEventCreate(&stop));
+    for(int count : {1,4,16}) {
+        std::vector<int> miss_counts={0,1,count/2,count};
+        std::sort(miss_counts.begin(),miss_counts.end());
+        miss_counts.erase(std::unique(miss_counts.begin(),miss_counts.end()),miss_counts.end());
+        for(int misses : miss_counts) {
+            ReadonlyMissCachePlan hp={}; hp.count=count;
+            unsigned long long ptrs[cap]={};
+            for(int j=0;j<misses;++j) hp.fill[(j*7)%count]=1;
+            for(int q=0;q<count;++q) {
+                hp.target[q]=(unsigned long long)(output.p+q*bytes);
+                if(hp.fill[q]) {
+                    ptrs[q]=(unsigned long long)(alias+q*bytes);
+                    hp.fill_groups[hp.fill_count++]=q;
+                }
+            }
+            REQUIRE(hp.fill_count==misses);
+            CU(cudaMemset(output.p,0xcd,cap*bytes+64));
+            CU(cudaMemcpy(pointers.p,ptrs,sizeof(ptrs),cudaMemcpyHostToDevice));
+            CU(cudaMemcpy(plan.p,&hp,sizeof(hp),cudaMemcpyHostToDevice));
+            CU(cudaDeviceSynchronize());
+            CU(cudaStreamBeginCapture(stream,cudaStreamCaptureModeThreadLocal));
+            fill_readonly_misses(pointers.p,bytes,plan.p,stream);
+            cudaGraph_t graph;cudaGraphExec_t exec;
+            CU(cudaStreamEndCapture(stream,&graph));
+            CU(cudaGraphInstantiate(&exec,graph,nullptr,nullptr,0));
+            for(int j=0;j<8;++j) CU(cudaGraphLaunch(exec,stream));
+            CU(cudaEventRecord(start,stream));
+            for(int j=0;j<repetitions;++j) CU(cudaGraphLaunch(exec,stream));
+            CU(cudaEventRecord(stop,stream));CU(cudaEventSynchronize(stop));
+            float ms=0;CU(cudaEventElapsedTime(&ms,start,stop));
+            CU(cudaMemcpy(got.data(),output.p,got.size(),cudaMemcpyDeviceToHost));
+            for(int q=0;q<cap;++q) {
+                if(q<count && hp.fill[q]) REQUIRE(std::memcmp(got.data()+q*bytes,host+q*bytes,bytes)==0);
+                else for(size_t i=q*bytes;i<(q+1)*bytes;++i) REQUIRE(got[i]==0xcd);
+            }
+            for(size_t i=cap*bytes;i<got.size();++i) REQUIRE(got[i]==0xcd);
+            std::printf("FILL_BENCH {\"groups\":%d,\"misses\":%d,\"bytes_per_expert\":%zu,\"repetitions\":%d,\"ms_per_fill\":%.9f,\"bytes_exact\":true}\n",
+                        count,misses,bytes,repetitions,(double)ms/repetitions);
+            CU(cudaGraphExecDestroy(exec));CU(cudaGraphDestroy(graph));
+        }
+    }
+    CU(cudaEventDestroy(start));CU(cudaEventDestroy(stop));
+    CU(cudaStreamDestroy(stream));CU(cudaFreeHost(host));
+}
+
 int main(int argc,char** argv) {
+    if(argc>1 && std::strcmp(argv[1],"--measure-fill")==0) {measure_fill();return 0;}
     bool quick = argc>1 && std::strcmp(argv[1],"--quick")==0;
     for(bool overlap : {false,true}) {
         for(int ways : {0,1,4,16}) {
             exercise(16,ways,quick?32:160,overlap);
             exercise(144,ways,quick?32:160,overlap);
         }
-        for(int ways : {0,4}) exercise(5222400,ways,quick?24:80,overlap);
+        for(int ways : {0,4,16}) exercise(5222400,ways,quick?24:80,overlap);
     }
     std::puts("PASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills");
 }

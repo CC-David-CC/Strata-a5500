@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gated Q8 miss-cache/overlap build and GPU component checks on llm-60."""
+"""Gated Q8 compact-fill experiment on llm-60; no model run before byte gates."""
 from pathlib import Path
 import datetime
 import fcntl
@@ -28,7 +28,8 @@ def gates(out):
                  source=(R / 'source-commit.txt').read_text().strip())
     def run(label, args, env=None, expected=0):
         start = time.monotonic()
-        environment = {k:v for k,v in os.environ.items() if k != 'STRATA_MISS_FETCH_BLOCKS'}
+        environment = {k:v for k,v in os.environ.items()
+                       if k not in ('STRATA_MISS_FETCH_BLOCKS','STRATA_Q8_COMPACT_MISS_FILL')}
         environment.update(CCACHE_BASEDIR=str(R))
         environment.update(env or {})
         with (out / (label + '.log')).open('w') as log:
@@ -48,25 +49,39 @@ def gates(out):
             run(label+'-compile',['ccache',nvcc,'-std=c++17','-O2','-lineinfo','-arch=sm_120',
                 '-I'+str(R/'include'),'-c',R/source,'-o',out/(label+'.o')])
         run('fixture-link',[nvcc,out/'fixture.o',out/'cache.o',out/'verify.o','-o',out/'fixture'])
-        run('fixture-default',[out/'fixture'])
-        for blocks in (1,32,96,384):
-            env={'STRATA_MISS_FETCH_BLOCKS':str(blocks)}
-            label='fixture-blocks'+str(blocks)
-            run(label,[out/'fixture'],env)
-            text=(out/(label+'.log')).read_text()
-            if f'strata miss fetch geometry: blocks={blocks} threads=256;' not in text:
-                raise RuntimeError('Missing geometry activation: '+label)
-        for blocks in (32,96,384):
+        for blocks in (32,384):
+            for compact in (0,1):
+                env={'STRATA_MISS_FETCH_BLOCKS':str(blocks),'STRATA_Q8_COMPACT_MISS_FILL':str(compact)}
+                label=f'fixture-blocks{blocks}-compact{compact}'
+                run(label,[out/'fixture'],env)
+                text=(out/(label+'.log')).read_text()
+                if f'strata miss fetch geometry: blocks={blocks} threads=256;' not in text:
+                    raise RuntimeError('Missing geometry activation: '+label)
+                if ('strata compact miss fill: enabled;' in text) != bool(compact):
+                    raise RuntimeError('Wrong compact-fill activation: '+label)
+        for compact in (0,1):
             for sanitizer in ['memcheck','initcheck']:
-                run(f'fixture-{sanitizer}-blocks{blocks}',
+                run(f'fixture-{sanitizer}-compact{compact}',
                     ['/usr/local/cuda/bin/compute-sanitizer','--tool',sanitizer,
                      '--error-exitcode','42',out/'fixture','--quick'],
-                    {'STRATA_MISS_FETCH_BLOCKS':str(blocks)})
-        for index,value in enumerate(('', '0', '-1', '4097', '32x')):
-            label='invalid-geometry-'+str(index)
-            run(label,[out/'fixture','--quick'],{'STRATA_MISS_FETCH_BLOCKS':value},expected=1)
-            if 'must be an integer from 1 to 4096' not in (out/(label+'.log')).read_text():
-                raise RuntimeError('Invalid geometry failed for an unexpected reason: '+label)
+                    {'STRATA_MISS_FETCH_BLOCKS':'32','STRATA_Q8_COMPACT_MISS_FILL':str(compact)})
+        for index,value in enumerate(('', '2', 'yes')):
+            label='invalid-compact-'+str(index)
+            run(label,[out/'fixture','--quick'],{'STRATA_Q8_COMPACT_MISS_FILL':value},expected=1)
+            if 'STRATA_Q8_COMPACT_MISS_FILL must be 0 or 1' not in (out/(label+'.log')).read_text():
+                raise RuntimeError('Invalid compact setting failed for an unexpected reason: '+label)
+        # Component timings use both orderings, outside any model benchmark.
+        state['fill_benchmarks']=[]
+        for index,compact in enumerate((0,1,1,0)):
+            label=f'fill-bench-{index}-compact{compact}'
+            run(label,[out/'fixture','--measure-fill'],
+                {'STRATA_MISS_FETCH_BLOCKS':'32','STRATA_Q8_COMPACT_MISS_FILL':str(compact)})
+            rows=[json.loads(line[len('FILL_BENCH '):]) for line in (out/(label+'.log')).read_text().splitlines()
+                  if line.startswith('FILL_BENCH ')]
+            if len(rows)!=10 or not all(row['bytes_exact'] for row in rows):
+                raise RuntimeError('Missing fill microbenchmark/copy checks')
+            state['fill_benchmarks'].append(dict(label=label,compact=compact,cases=rows))
+            save(out/'result.json',state)
         build(out/'engine-build')
         state.update(completed=True,engine_sha256=hashlib.sha256((R/'build/strata').read_bytes()).hexdigest())
     except BaseException as error:

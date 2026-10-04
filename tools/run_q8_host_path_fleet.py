@@ -101,12 +101,13 @@ def worker(plan_path, out):
                     'exchange buffer rotation', 'host memcpy bytes avoided', 'GPU stages',
                     'pool phases', 'RAM budget', 'cache complement ready', 'CPU pool:',
                     'PCIe', 'adaptive worker', 'exchange duplex:', 'resident RAM mode:', 'pinned',
-                    'readonly miss cache:', 'miss fetch overlap:', 'miss fetch geometry:'))]
+                    'readonly miss cache:', 'miss fetch overlap:', 'miss fetch geometry:', 'compact miss fill:'))]
                 record['rotation_active'] = 'exchange buffer rotation enabled' in log
                 record['duplex_active'] = 'strata exchange duplex: enabled,' in log
                 record['duplex_swaps'] = sum(map(int, re.findall(r'\bduplex_swaps (\d+)', log)))
                 record['miss_cache_active'] = 'strata readonly miss cache: enabled,' in log
                 record['miss_overlap_active'] = 'strata miss fetch overlap: enabled;' in log
+                record['compact_miss_fill_active'] = 'strata compact miss fill: enabled;' in log
                 record['miss_fetch_blocks'] = list(map(int,re.findall(r'strata miss fetch geometry: blocks=(\d+) threads=256;',log)))
                 record['miss_cache_reports'] = [dict(zip(('groups','hits','uploads','bypasses','avoided_upload_bytes','uploaded_bytes'),map(int,m)))
                     for m in re.findall(r'strata readonly miss cache: cumulative groups=(\d+) hits=(\d+) uploads=(\d+) bypasses=(\d+) avoided_upload_bytes=(\d+) uploaded_bytes=(\d+)',log)]
@@ -122,6 +123,8 @@ def worker(plan_path, out):
                 raise RuntimeError(label + ': miss-fetch geometry did not activate')
             if trial.get('env', {}).get('STRATA_Q8_MISS_FETCH_OVERLAP') == '1' and not record.get('miss_overlap_active'):
                 raise RuntimeError(label + ': miss-fetch overlap did not activate')
+            if trial.get('env', {}).get('STRATA_Q8_COMPACT_MISS_FILL') == '1' and not record.get('compact_miss_fill_active'):
+                raise RuntimeError(label + ': compact miss fill did not activate')
             if cache_ways and (not record.get('miss_cache_active') or not record.get('miss_cache_reports')):
                 raise RuntimeError(label + ': read-only miss cache did not activate/report')
             for report in record.get('miss_cache_reports',[]):
