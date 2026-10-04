@@ -49,3 +49,13 @@ reversed order, and test 128K. The all-four-mode scope remains intact.
 Falsifier: additional PCIe and GPU computation cost outweighs the removed CPU
 work, or correctness/state failures appear. Actual link counters and timelines
 will test that explanation; nominal fraction alone is insufficient evidence.
+
+## Model identification
+
+The frozen engine prints a stale hardcoded `Q5_K head` label. Inspection of the
+actual input GGUF found `output.weight` in Q8 shard 2: Q8_0, shape
+`[2560, 248320]`, 675,430,400 bytes, exactly the uploaded byte count. The loader
+uploads the original tensor bytes and records its actual type. This branch
+corrects the log/help text for future builds; the queued configuration test
+continues using the already validated `b926ad75` binary. No head conversion or
+model replacement was performed.
