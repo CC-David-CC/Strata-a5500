@@ -9,9 +9,9 @@ Hardware: llm-60, RTX PRO 6000 Blackwell Workstation Edition 96GB, Ryzen 7950X,
 The first 32K capacity screen found that 16 secondary entries per layer improved
 MTP coding from 135.45 to 137.72 tok/s (+1.67%) and editing from 118.23 to 122.93
 (+3.98%) versus four entries, with identical output and recorded work. These
-are initial pairs, not repeated gains. Secondary upload payload fell from
+were initial pairs; the repeated results are recorded below. Secondary upload payload fell from
 36.93 to 31.00GB for coding and 79.23 to 62.80GB for editing; primary exchanges
-were unchanged. The remaining modes are still running in the capacity branch.
+were unchanged. All initial capacity modes have now completed; their full artifact is linked below.
 [MTP records and resource measurements](benchmarks/q8-cache-capacity-mtp-32k-20261004.json).
 
 A previous equal-memory comparison added 192 primary slots and improved
@@ -57,7 +57,9 @@ must remain zero. Measure actual sampled VRAM/RAM use, not just this budget.
    for the other modes.
    Run the most aggressive 32K primary allocation last, so an allocation failure
    there does not prevent collecting the native128K capacity comparisons.
-4. Require exact tokens/work for unchanged-primary four/sixteen comparisons.
+4. Require exact tokens/work for plain and MTP unchanged-primary four/sixteen
+   comparisons. N-gram and combined runs retain any output/work differences
+   as qualified observations; they do not pass that exact-work gate.
    Primary placement changes which implementation computes an expert, so retain
    first differing tokens, speculative work, routing/cache counts and timings.
    Do not describe placement-dependent comparisons as equal-work kernel gains.
@@ -70,8 +72,9 @@ All arms keep copy32 overlap, ownership rotation, duplex transfers, PCIe fractio
 per-layer admission: those remain independently measured candidates.
 
 Status: fresh byte-identical build and all 22 lifecycle requests passed.
-The 32K MTP placement triple and reversed plain pair have completed below;
-native128K throughput is still pending. Both the duplicate-cache and primary-cache designs
+The 32K MTP placement triple, reversed plain pair and first full native128K
+MTP pair have completed below; other 128K modes and primary placements are
+still running. Both the duplicate-cache and primary-cache designs
 remain alternatives; a smaller upload count alone is not a speedup.
 
 
@@ -188,3 +191,37 @@ initial n-gram qualifications and primary-placement differences remain in
 their respective sections. Native128K testing continues separately.
 
 [Plain request records, timings/copy counts and both-order summary](benchmarks/q8-cache-budget-plain-repeat-20261004.json).
+
+
+## First full native128K MTP capacity pair
+
+All four requests completed with **131,072 input + 1,024 output tokens**, 139,264
+allocated and FP16 KV. Each fresh engine ran coding then editing. Sixteen
+secondary entries per layer fit with the same 15,472 primary experts, the full
+44.28GiB RAM expert complement and locked PLE; expert file reads stayed zero.
+
+| Task | Four entries generation | Sixteen entries generation | Change | Four entries effective | Sixteen entries effective |
+|---|---:|---:|---:|---:|---:|
+| coding | 136.49 | 138.43 | +1.42% | 25.82 | 25.89 |
+| editing | 112.74 | 116.35 | +3.19% | 24.86 | 25.03 |
+
+All rates are output tokens/s; effective includes prompt processing and excludes
+model startup. Tokens, recorded work and primary exchange payload matched
+exactly. Total secondary upload payload across coding and editing fell from
+118.59GB to 96.58GB (18.56%); these are logical payload counts, not measured
+hardware DRAM or PCIe transactions. The much smaller speed gain indicates that
+the removed uploads were only part of the request's critical path.
+
+The lowest two-second GPU free-memory sample was **1,862MiB** for sixteen
+entries (four entries: 4,732MiB). The engine's startup free-memory report was
+**1,302MiB** for sixteen entries. These are distinct observations from different
+measurement points, not a claim that free memory never fell below 1,862MiB.
+Sampled host available memory stayed at or above 20.07GiB, with no foreign GPU
+process observed.
+
+This is one completed 128K pair. The repeated result and lifecycle/state checks
+above apply to 32K; 128K cancellation/checkpoint behavior has not been tested by
+this pair. Plain, n-gram, combined and primary-placement 128K comparisons remain
+in the running suite.
+
+[Full 128K request records, copies, timing and resource evidence](benchmarks/q8-cache-budget-mtp128k-20261004.json).

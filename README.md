@@ -22,8 +22,14 @@ checkpoint requests also passed.
 The same extra weight-storage budget spent on primary experts reached
 139.16 tok/s coding /121.50 editing, versus 137.51/123.36 for the larger
 secondary cache. That placement changes output/work; details and effective
-throughput are in the report. Native128K and the remaining
-configurations are still running. These pairs have no confidence intervals.
+throughput are in the report.
+
+**The first full native 128K MTP pair also passed:** coding 136.49 -> 138.43
+tok/s (+1.42%), editing 112.74 -> 116.35 (+3.19%), with exact tokens/work.
+Sixteen entries fit with 1,862MiB at the lowest GPU sample; the engine
+reported 1,302MiB free at startup. These are different measurement points.
+Other 128K modes and primary-placement configurations are still running.
+These pairs have no confidence intervals.
 See [memory budgets, invariants and required measurements](docs/Q8_CACHE_BUDGET.md).
 
 The fresh build matches the previously tested engine bytes. Lifecycle checks
