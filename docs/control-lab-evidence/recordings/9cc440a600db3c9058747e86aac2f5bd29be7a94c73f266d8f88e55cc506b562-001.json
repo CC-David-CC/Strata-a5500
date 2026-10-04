@@ -1,0 +1,114 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer only OK."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 8,
+    "logprobs": true,
+    "top_logprobs": 5
+  },
+  "response": {
+    "id": "chatcmpl-353ec26ea215428699acc619",
+    "object": "chat.completion",
+    "created": 1791078001,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "OK"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "OK",
+              "logprob": -0.00787523901214979,
+              "bytes": [
+                79,
+                75
+              ],
+              "top_logprobs": [
+                {
+                  "token": "OK",
+                  "logprob": -0.00787523901214979,
+                  "bytes": [
+                    79,
+                    75
+                  ]
+                },
+                {
+                  "token": " OK",
+                  "logprob": -6.066039835569767,
+                  "bytes": [
+                    32,
+                    79,
+                    75
+                  ]
+                },
+                {
+                  "token": "Ok",
+                  "logprob": -7.331105982420353,
+                  "bytes": [
+                    79,
+                    107
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -7.649543558714298,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -7.756927286741642,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 16,
+      "completion_tokens": 2,
+      "total_tokens": 18,
+      "prompt_tokens_details": {
+        "cached_tokens": 9
+      }
+    },
+    "timings": {
+      "cache_n": 9,
+      "prompt_n": 7,
+      "prompt_ms": 196.6,
+      "prompt_per_token_ms": 28.086,
+      "prompt_per_second": 35.6,
+      "predicted_n": 2,
+      "predicted_ms": 60.1,
+      "predicted_per_token_ms": 30.05,
+      "predicted_per_second": 33.3,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 323.00990002113394,
+  "captured_at": "2026-10-04T01:40:02Z"
+}

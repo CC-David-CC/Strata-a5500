@@ -1,0 +1,70 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer with only A or B: is the sky blue? A) yes B) no"
+      }
+    ],
+    "max_tokens": 1,
+    "temperature": 0,
+    "logprobs": true,
+    "top_logprobs": 0,
+    "reasoning_effort": "none"
+  },
+  "response": {
+    "id": "chatcmpl-a9cf19aeb3f74491ae92b522",
+    "object": "chat.completion",
+    "created": 1791078035,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "length",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.03817484330845816,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": []
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 30,
+      "completion_tokens": 1,
+      "total_tokens": 31,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 30,
+      "prompt_ms": 1093.1,
+      "prompt_per_token_ms": 36.437,
+      "prompt_per_second": 27.4,
+      "predicted_n": 1,
+      "predicted_ms": 27.3,
+      "predicted_per_token_ms": 27.3,
+      "predicted_per_second": 36.6,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 1143.1632000021636,
+  "captured_at": "2026-10-04T01:40:37Z"
+}

@@ -1,0 +1,133 @@
+{
+  "browser": "Playwright Chromium, headless",
+  "checks": [
+    {
+      "case": "choice",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "boolean",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "score",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "candidates",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "controller",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "rerank",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "graph",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "scene",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "wire",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "speculation",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "performance",
+      "mode": "recorded",
+      "status": "passed"
+    },
+    {
+      "case": "choice-fast-and-raw",
+      "status": "passed"
+    },
+    {
+      "case": "boolean-fast-and-raw",
+      "status": "passed"
+    },
+    {
+      "case": "score-fast-and-raw",
+      "status": "passed"
+    },
+    {
+      "case": "four-step-controller",
+      "status": "passed"
+    },
+    {
+      "case": "multi-token-inspection-and-export",
+      "status": "passed"
+    },
+    {
+      "case": "wire-decision",
+      "status": "passed"
+    },
+    {
+      "case": "wire-router",
+      "status": "passed"
+    },
+    {
+      "case": "wire-ambiguity",
+      "status": "passed"
+    },
+    {
+      "case": "wire-stream",
+      "status": "passed"
+    },
+    {
+      "case": "wire-grammar",
+      "status": "passed"
+    },
+    {
+      "case": "wire-json-schema",
+      "status": "passed"
+    },
+    {
+      "case": "wire-reasoning-json",
+      "status": "passed"
+    },
+    {
+      "case": "wire-tool-call",
+      "status": "passed"
+    },
+    {
+      "case": "wire-tool-result",
+      "status": "passed"
+    },
+    {
+      "case": "wire-selected-only",
+      "status": "passed"
+    },
+    {
+      "case": "recorded-miss-and-reset",
+      "status": "passed"
+    },
+    {
+      "case": "live-cancel-drain-next-request",
+      "status": "passed"
+    },
+    {
+      "case": "seven-mobile-layouts-390px",
+      "status": "passed"
+    }
+  ],
+  "page_errors": []
+}

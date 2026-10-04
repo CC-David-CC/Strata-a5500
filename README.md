@@ -1,19 +1,24 @@
 <h1 align="center">Strata</h1>
 
-> **This branch: see the alternatives your local model considered.**
-> `work/logprobs-675` adds Chat `logprobs` / `top_logprobs`, including native
-> GBNF and JSON constraints. Inspect labeled decisions, compare prompts, and
-> distinguish MTP draft scores from target verification scores.
+> **This branch: Strata Control Lab — learn by controlling a local model.**
+> `work/control-lab` builds an educational web interface on the tested
+> `work/logprobs-675` branch. Ask a small question, inspect its answer distribution,
+> compare multi-token grammar branches, and step a state-controlled application.
 >
-> **[Start with the demo and examples](docs/LOGPROBS.md)** ?
-> [Test evidence](docs/logprobs-evidence/RECEIPT.md) ?
-> [Per-token grammar steering plan](docs/GRAMMAR_STEERING_PLAN.txt)
+> **[Launch the Control Lab: Windows / Linux](docs/CONTROL_LAB.md)** ·
+> [What each page teaches](docs/CONTROL_LAB.md#eleven-experiments) ·
+> [Lab test evidence](docs/control-lab-evidence/RECEIPT.md) ·
+> [Next experiments](docs/CONTROL_LAB_ROADMAP.md)
 >
-> Quick demo, no model needed: `python tools/demo_logprobs.py --recorded`
+> Recorded native runs work without a model. Live mode uses your existing Strata
+> server. The lab adds no inference engine and changes no native serving code.
 >
-> This is the independent contribution for [#675](https://github.com/Niko1221/Strata/issues/675).
-> For the existing Responses API / local Codex setup, use
+> The underlying [logprobs contribution](docs/LOGPROBS.md) addresses
+> [#675](https://github.com/Niko1221/Strata/issues/675). This educational aside is a
+> separate dependent branch. For Responses / local Codex setup, use
 > [work/gbnf](https://github.com/CC-David-CC/Strata-a5500/blob/work/gbnf/docs/CODEX_LOCAL.md).
+
+[![The Control Lab compares whole candidate paths and lets you inspect each token](docs/control-lab-evidence/browser/preview.png)](docs/CONTROL_LAB.md)
 
 
 <p align="center"><b>Run a 125-billion-parameter AI model on your own gaming PC</b><br>

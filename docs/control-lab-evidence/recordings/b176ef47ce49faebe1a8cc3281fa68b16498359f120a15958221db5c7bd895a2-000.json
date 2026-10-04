@@ -1,0 +1,114 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer with only A or B: is the sky blue? A) yes B) no"
+      }
+    ],
+    "max_tokens": 1,
+    "temperature": 0,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "reasoning_effort": "none"
+  },
+  "response": {
+    "id": "chatcmpl-ffaccb9d623348099a43e7da",
+    "object": "chat.completion",
+    "created": 1791078023,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "length",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.03817484330845816,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -0.03817484330845816,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": " A",
+                  "logprob": -3.313945030686388,
+                  "bytes": [
+                    32,
+                    65
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -8.28805754136754,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -8.779160713669786,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -9.14862940263463,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 30,
+      "completion_tokens": 1,
+      "total_tokens": 31,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 30,
+      "prompt_ms": 1138.4,
+      "prompt_per_token_ms": 37.947,
+      "prompt_per_second": 26.4,
+      "predicted_n": 1,
+      "predicted_ms": 27.5,
+      "predicted_per_token_ms": 27.5,
+      "predicted_per_second": 36.4,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 1189.5362999930512,
+  "captured_at": "2026-10-04T01:40:25Z"
+}

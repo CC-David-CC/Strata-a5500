@@ -1,0 +1,3115 @@
+{
+  "page": "candidates",
+  "options": {},
+  "result": {
+    "paths": [
+      {
+        "group": "Inspect first",
+        "text": "read the failing test\n",
+        "tokens": [
+          {
+            "token": "read",
+            "logprob": -0.014773794151847283,
+            "bytes": [
+              114,
+              101,
+              97,
+              100
+            ],
+            "top_logprobs": [
+              {
+                "token": "read",
+                "logprob": -0.014773794151847283,
+                "bytes": [
+                  114,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "inspect",
+                "logprob": -5.509812780357902,
+                "bytes": [
+                  105,
+                  110,
+                  115,
+                  112,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -6.851059385277336,
+                "bytes": null
+              },
+              {
+                "token": "Read",
+                "logprob": -7.325881429649894,
+                "bytes": [
+                  82,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "The",
+                "logprob": -7.363380857445304,
+                "bytes": [
+                  84,
+                  104,
+                  101
+                ]
+              }
+            ]
+          },
+          {
+            "token": " the",
+            "logprob": -0.006931206346203982,
+            "bytes": [
+              32,
+              116,
+              104,
+              101
+            ],
+            "top_logprobs": [
+              {
+                "token": " the",
+                "logprob": -0.006931206346203982,
+                "bytes": [
+                  32,
+                  116,
+                  104,
+                  101
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -5.110092064500501,
+                "bytes": null
+              },
+              {
+                "token": " failing",
+                "logprob": -7.518730064988782,
+                "bytes": [
+                  32,
+                  102,
+                  97,
+                  105,
+                  108,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "token": "\n",
+                "logprob": -9.126460930467298,
+                "bytes": [
+                  10
+                ]
+              },
+              {
+                "token": " test",
+                "logprob": -9.683280846238782,
+                "bytes": [
+                  32,
+                  116,
+                  101,
+                  115,
+                  116
+                ]
+              }
+            ]
+          },
+          {
+            "token": " failing",
+            "logprob": -0.00042481938857517025,
+            "bytes": [
+              32,
+              102,
+              97,
+              105,
+              108,
+              105,
+              110,
+              103
+            ],
+            "top_logprobs": [
+              {
+                "token": " failing",
+                "logprob": -0.00042481938857517025,
+                "bytes": [
+                  32,
+                  102,
+                  97,
+                  105,
+                  108,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "token": " test",
+                "logprob": -8.617803054251857,
+                "bytes": [
+                  32,
+                  116,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -9.050813155570216,
+                "bytes": null
+              },
+              {
+                "token": " failure",
+                "logprob": -9.533397155204005,
+                "bytes": [
+                  32,
+                  102,
+                  97,
+                  105,
+                  108,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "token": "\n",
+                "logprob": -12.08558602849502,
+                "bytes": [
+                  10
+                ]
+              }
+            ]
+          },
+          {
+            "token": " test",
+            "logprob": -0.00112881486931698,
+            "bytes": [
+              32,
+              116,
+              101,
+              115,
+              116
+            ],
+            "top_logprobs": [
+              {
+                "token": " test",
+                "logprob": -0.00112881486931698,
+                "bytes": [
+                  32,
+                  116,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -7.03051533525506,
+                "bytes": null
+              },
+              {
+                "token": " tests",
+                "logprob": -9.828118942432793,
+                "bytes": [
+                  32,
+                  116,
+                  101,
+                  115,
+                  116,
+                  115
+                ]
+              },
+              {
+                "token": "test",
+                "logprob": -10.335337303333672,
+                "bytes": [
+                  116,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "token": " tes",
+                "logprob": -10.950902603321465,
+                "bytes": [
+                  32,
+                  116,
+                  101,
+                  115
+                ]
+              }
+            ]
+          },
+          {
+            "token": "\n",
+            "logprob": -5.230186225420821,
+            "bytes": [
+              10
+            ],
+            "top_logprobs": [
+              {
+                "token": "<|im_end|>",
+                "logprob": -0.0061032786434772985,
+                "bytes": null
+              },
+              {
+                "token": "\n",
+                "logprob": -5.230186225420821,
+                "bytes": [
+                  10
+                ]
+              },
+              {
+                "token": "\n\n",
+                "logprob": -7.499154807574142,
+                "bytes": [
+                  10,
+                  10
+                ]
+              },
+              {
+                "token": ".",
+                "logprob": -10.322641135699142,
+                "bytes": [
+                  46
+                ]
+              },
+              {
+                "token": " read",
+                "logprob": -10.495612861163009,
+                "bytes": [
+                  32,
+                  114,
+                  101,
+                  97,
+                  100
+                ]
+              }
+            ]
+          }
+        ],
+        "token_count": 5,
+        "logprob": -5.2534448601767645,
+        "path_probability": 0.005229472532610705,
+        "mean_logprob": -1.050688972035353,
+        "finish_reason": "stop",
+        "weight": 0.9934259249825516
+      },
+      {
+        "group": "Inspect first",
+        "text": "inspect the error log\n",
+        "tokens": [
+          {
+            "token": "inspect",
+            "logprob": -5.509812780357902,
+            "bytes": [
+              105,
+              110,
+              115,
+              112,
+              101,
+              99,
+              116
+            ],
+            "top_logprobs": [
+              {
+                "token": "read",
+                "logprob": -0.014773794151847283,
+                "bytes": [
+                  114,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "inspect",
+                "logprob": -5.509812780357902,
+                "bytes": [
+                  105,
+                  110,
+                  115,
+                  112,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -6.851059385277336,
+                "bytes": null
+              },
+              {
+                "token": "Read",
+                "logprob": -7.325881429649894,
+                "bytes": [
+                  82,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "The",
+                "logprob": -7.363380857445304,
+                "bytes": [
+                  84,
+                  104,
+                  101
+                ]
+              }
+            ]
+          },
+          {
+            "token": " the",
+            "logprob": -0.004556592997028303,
+            "bytes": [
+              32,
+              116,
+              104,
+              101
+            ],
+            "top_logprobs": [
+              {
+                "token": " the",
+                "logprob": -0.004556592997028303,
+                "bytes": [
+                  32,
+                  116,
+                  104,
+                  101
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -5.745447095926716,
+                "bytes": null
+              },
+              {
+                "token": " error",
+                "logprob": -7.311811384256794,
+                "bytes": [
+                  32,
+                  101,
+                  114,
+                  114,
+                  111,
+                  114
+                ]
+              },
+              {
+                "token": "_error",
+                "logprob": -8.222139295633747,
+                "bytes": [
+                  95,
+                  101,
+                  114,
+                  114,
+                  111,
+                  114
+                ]
+              },
+              {
+                "token": "_the",
+                "logprob": -8.86482804685445,
+                "bytes": [
+                  95,
+                  116,
+                  104,
+                  101
+                ]
+              }
+            ]
+          },
+          {
+            "token": " error",
+            "logprob": -0.0015231463404942864,
+            "bytes": [
+              32,
+              101,
+              114,
+              114,
+              111,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": " error",
+                "logprob": -0.0015231463404942864,
+                "bytes": [
+                  32,
+                  101,
+                  114,
+                  114,
+                  111,
+                  114
+                ]
+              },
+              {
+                "token": " failure",
+                "logprob": -7.8067818972560215,
+                "bytes": [
+                  32,
+                  102,
+                  97,
+                  105,
+                  108,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -7.927029738137369,
+                "bytes": null
+              },
+              {
+                "token": " log",
+                "logprob": -8.762200483986978,
+                "bytes": [
+                  32,
+                  108,
+                  111,
+                  103
+                ]
+              },
+              {
+                "token": " parser",
+                "logprob": -9.135831007668619,
+                "bytes": [
+                  32,
+                  112,
+                  97,
+                  114,
+                  115,
+                  101,
+                  114
+                ]
+              }
+            ]
+          },
+          {
+            "token": " log",
+            "logprob": -0.0013536828449673406,
+            "bytes": [
+              32,
+              108,
+              111,
+              103
+            ],
+            "top_logprobs": [
+              {
+                "token": " log",
+                "logprob": -0.0013536828449673406,
+                "bytes": [
+                  32,
+                  108,
+                  111,
+                  103
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -6.914559783308834,
+                "bytes": null
+              },
+              {
+                "token": "log",
+                "logprob": -9.329953612654538,
+                "bytes": [
+                  108,
+                  111,
+                  103
+                ]
+              },
+              {
+                "token": " logs",
+                "logprob": -10.148077430098386,
+                "bytes": [
+                  32,
+                  108,
+                  111,
+                  103,
+                  115
+                ]
+              },
+              {
+                "token": "_log",
+                "logprob": -10.613452376692624,
+                "bytes": [
+                  95,
+                  108,
+                  111,
+                  103
+                ]
+              }
+            ]
+          },
+          {
+            "token": "\n",
+            "logprob": -4.981889711691588,
+            "bytes": [
+              10
+            ],
+            "top_logprobs": [
+              {
+                "token": "<|im_end|>",
+                "logprob": -0.008005129172056945,
+                "bytes": null
+              },
+              {
+                "token": "\n",
+                "logprob": -4.981889711691588,
+                "bytes": [
+                  10
+                ]
+              },
+              {
+                "token": "\n\n",
+                "logprob": -7.090496050192565,
+                "bytes": [
+                  10,
+                  10
+                ]
+              },
+              {
+                "token": " read",
+                "logprob": -9.944873796774596,
+                "bytes": [
+                  32,
+                  114,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "\\n",
+                "logprob": -10.241533266379088,
+                "bytes": [
+                  92,
+                  110
+                ]
+              }
+            ]
+          }
+        ],
+        "token_count": 5,
+        "logprob": -10.49913591423198,
+        "path_probability": 2.7560253486658944e-05,
+        "mean_logprob": -2.099827182846396,
+        "finish_reason": "stop",
+        "weight": 0.005235531909194162
+      },
+      {
+        "group": "Change something",
+        "text": "edit the parser\n",
+        "tokens": [
+          {
+            "token": "edit",
+            "logprob": -7.635573812462394,
+            "bytes": [
+              101,
+              100,
+              105,
+              116
+            ],
+            "top_logprobs": [
+              {
+                "token": "read",
+                "logprob": -0.014773794151847283,
+                "bytes": [
+                  114,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "inspect",
+                "logprob": -5.509812780357902,
+                "bytes": [
+                  105,
+                  110,
+                  115,
+                  112,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -6.851059385277336,
+                "bytes": null
+              },
+              {
+                "token": "Read",
+                "logprob": -7.325881429649894,
+                "bytes": [
+                  82,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "The",
+                "logprob": -7.363380857445304,
+                "bytes": [
+                  84,
+                  104,
+                  101
+                ]
+              }
+            ]
+          },
+          {
+            "token": " the",
+            "logprob": -0.01011065479857072,
+            "bytes": [
+              32,
+              116,
+              104,
+              101
+            ],
+            "top_logprobs": [
+              {
+                "token": " the",
+                "logprob": -0.01011065479857072,
+                "bytes": [
+                  32,
+                  116,
+                  104,
+                  101
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -4.886565961805407,
+                "bytes": null
+              },
+              {
+                "token": " parser",
+                "logprob": -6.512525358167712,
+                "bytes": [
+                  32,
+                  112,
+                  97,
+                  114,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "\n",
+                "logprob": -8.235631742445054,
+                "bytes": [
+                  10
+                ]
+              },
+              {
+                "token": "_the",
+                "logprob": -9.06039027210814,
+                "bytes": [
+                  95,
+                  116,
+                  104,
+                  101
+                ]
+              }
+            ]
+          },
+          {
+            "token": " parser",
+            "logprob": -0.0012131359113490222,
+            "bytes": [
+              32,
+              112,
+              97,
+              114,
+              115,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": " parser",
+                "logprob": -0.0012131359113490222,
+                "bytes": [
+                  32,
+                  112,
+                  97,
+                  114,
+                  115,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": " test",
+                "logprob": -8.84755045433176,
+                "bytes": [
+                  32,
+                  116,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -8.84937864799631,
+                "bytes": null
+              },
+              {
+                "token": " error",
+                "logprob": -9.36020857353342,
+                "bytes": [
+                  32,
+                  101,
+                  114,
+                  114,
+                  111,
+                  114
+                ]
+              },
+              {
+                "token": " parse",
+                "logprob": -9.363420548631076,
+                "bytes": [
+                  32,
+                  112,
+                  97,
+                  114,
+                  115,
+                  101
+                ]
+              }
+            ]
+          },
+          {
+            "token": "\n",
+            "logprob": -4.604947925993889,
+            "bytes": [
+              10
+            ],
+            "top_logprobs": [
+              {
+                "token": "<|im_end|>",
+                "logprob": -0.011485935637443148,
+                "bytes": null
+              },
+              {
+                "token": "\n",
+                "logprob": -4.604947925993889,
+                "bytes": [
+                  10
+                ]
+              },
+              {
+                "token": "\n\n",
+                "logprob": -6.989815594145744,
+                "bytes": [
+                  10,
+                  10
+                ]
+              },
+              {
+                "token": "\\n",
+                "logprob": -9.66562736172387,
+                "bytes": [
+                  92,
+                  110
+                ]
+              },
+              {
+                "token": "  \n",
+                "logprob": -9.782014728972404,
+                "bytes": [
+                  32,
+                  32,
+                  10
+                ]
+              }
+            ]
+          }
+        ],
+        "token_count": 4,
+        "logprob": -12.251845529166204,
+        "path_probability": 4.776294462409417e-06,
+        "mean_logprob": -3.062961382291551,
+        "finish_reason": "stop",
+        "weight": 0.000907337157757156
+      },
+      {
+        "group": "Change something",
+        "text": "restart the service\n",
+        "tokens": [
+          {
+            "token": "restart",
+            "logprob": -8.04934258077294,
+            "bytes": [
+              114,
+              101,
+              115,
+              116,
+              97,
+              114,
+              116
+            ],
+            "top_logprobs": [
+              {
+                "token": "read",
+                "logprob": -0.014773794151847283,
+                "bytes": [
+                  114,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "inspect",
+                "logprob": -5.509812780357902,
+                "bytes": [
+                  105,
+                  110,
+                  115,
+                  112,
+                  101,
+                  99,
+                  116
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -6.851059385277336,
+                "bytes": null
+              },
+              {
+                "token": "Read",
+                "logprob": -7.325881429649894,
+                "bytes": [
+                  82,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "The",
+                "logprob": -7.363380857445304,
+                "bytes": [
+                  84,
+                  104,
+                  101
+                ]
+              }
+            ]
+          },
+          {
+            "token": " the",
+            "logprob": -0.02326054762894504,
+            "bytes": [
+              32,
+              116,
+              104,
+              101
+            ],
+            "top_logprobs": [
+              {
+                "token": " the",
+                "logprob": -0.02326054762894504,
+                "bytes": [
+                  32,
+                  116,
+                  104,
+                  101
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -3.915766193380898,
+                "bytes": null
+              },
+              {
+                "token": " service",
+                "logprob": -6.911396457663125,
+                "bytes": [
+                  32,
+                  115,
+                  101,
+                  114,
+                  118,
+                  105,
+                  99,
+                  101
+                ]
+              },
+              {
+                "token": "\n",
+                "logprob": -7.16534657668168,
+                "bytes": [
+                  10
+                ]
+              },
+              {
+                "token": "\n\n",
+                "logprob": -8.986203624716348,
+                "bytes": [
+                  10,
+                  10
+                ]
+              }
+            ]
+          },
+          {
+            "token": " service",
+            "logprob": -0.0021656210126136314,
+            "bytes": [
+              32,
+              115,
+              101,
+              114,
+              118,
+              105,
+              99,
+              101
+            ],
+            "top_logprobs": [
+              {
+                "token": " service",
+                "logprob": -0.0021656210126136314,
+                "bytes": [
+                  32,
+                  115,
+                  101,
+                  114,
+                  118,
+                  105,
+                  99,
+                  101
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -7.235253160685465,
+                "bytes": null
+              },
+              {
+                "token": " test",
+                "logprob": -8.717716997355387,
+                "bytes": [
+                  32,
+                  116,
+                  101,
+                  115,
+                  116
+                ]
+              },
+              {
+                "token": "service",
+                "logprob": -9.365632837504313,
+                "bytes": [
+                  115,
+                  101,
+                  114,
+                  118,
+                  105,
+                  99,
+                  101
+                ]
+              },
+              {
+                "token": " servic",
+                "logprob": -9.591128175944254,
+                "bytes": [
+                  32,
+                  115,
+                  101,
+                  114,
+                  118,
+                  105,
+                  99
+                ]
+              }
+            ]
+          },
+          {
+            "token": "\n",
+            "logprob": -4.921005069947994,
+            "bytes": [
+              10
+            ],
+            "top_logprobs": [
+              {
+                "token": "<|im_end|>",
+                "logprob": -0.009250461793697283,
+                "bytes": null
+              },
+              {
+                "token": "\n",
+                "logprob": -4.921005069947994,
+                "bytes": [
+                  10
+                ]
+              },
+              {
+                "token": "\n\n",
+                "logprob": -6.496558963990963,
+                "bytes": [
+                  10,
+                  10
+                ]
+              },
+              {
+                "token": " read",
+                "logprob": -10.008779346681393,
+                "bytes": [
+                  32,
+                  114,
+                  101,
+                  97,
+                  100
+                ]
+              },
+              {
+                "token": "  \n",
+                "logprob": -10.162605106569089,
+                "bytes": [
+                  32,
+                  32,
+                  10
+                ]
+              }
+            ]
+          }
+        ],
+        "token_count": 4,
+        "logprob": -12.995773819362492,
+        "path_probability": 2.26990218124389e-06,
+        "mean_logprob": -3.248943454840623,
+        "finish_reason": "stop",
+        "weight": 0.0004312059504969559
+      }
+    ],
+    "groups": [
+      {
+        "name": "Inspect first",
+        "grammar": "root ::= \"read the failing test\\n\" | \"inspect the error log\\n\"",
+        "logprob": -5.248188520508888,
+        "weight": 0.9986614568917457
+      },
+      {
+        "name": "Change something",
+        "grammar": "root ::= \"edit the parser\\n\" | \"restart the service\\n\"",
+        "logprob": -11.863022569883245,
+        "weight": 0.001338543108254112
+      }
+    ],
+    "generated": {
+      "text": "read the failing test\n",
+      "tokens": [
+        {
+          "token": "read",
+          "logprob": -0.014773794151847283,
+          "bytes": [
+            114,
+            101,
+            97,
+            100
+          ],
+          "top_logprobs": [
+            {
+              "token": "read",
+              "logprob": -0.014773794151847283,
+              "bytes": [
+                114,
+                101,
+                97,
+                100
+              ]
+            },
+            {
+              "token": "inspect",
+              "logprob": -5.509812780357902,
+              "bytes": [
+                105,
+                110,
+                115,
+                112,
+                101,
+                99,
+                116
+              ]
+            },
+            {
+              "token": "<|im_end|>",
+              "logprob": -6.851059385277336,
+              "bytes": null
+            },
+            {
+              "token": "Read",
+              "logprob": -7.325881429649894,
+              "bytes": [
+                82,
+                101,
+                97,
+                100
+              ]
+            },
+            {
+              "token": "The",
+              "logprob": -7.363380857445304,
+              "bytes": [
+                84,
+                104,
+                101
+              ]
+            }
+          ]
+        },
+        {
+          "token": " the",
+          "logprob": -0.006931206346203982,
+          "bytes": [
+            32,
+            116,
+            104,
+            101
+          ],
+          "top_logprobs": [
+            {
+              "token": " the",
+              "logprob": -0.006931206346203982,
+              "bytes": [
+                32,
+                116,
+                104,
+                101
+              ]
+            },
+            {
+              "token": "<|im_end|>",
+              "logprob": -5.110092064500501,
+              "bytes": null
+            },
+            {
+              "token": " failing",
+              "logprob": -7.518730064988782,
+              "bytes": [
+                32,
+                102,
+                97,
+                105,
+                108,
+                105,
+                110,
+                103
+              ]
+            },
+            {
+              "token": "\n",
+              "logprob": -9.126460930467298,
+              "bytes": [
+                10
+              ]
+            },
+            {
+              "token": " test",
+              "logprob": -9.683280846238782,
+              "bytes": [
+                32,
+                116,
+                101,
+                115,
+                116
+              ]
+            }
+          ]
+        },
+        {
+          "token": " failing",
+          "logprob": -0.00042481938857517025,
+          "bytes": [
+            32,
+            102,
+            97,
+            105,
+            108,
+            105,
+            110,
+            103
+          ],
+          "top_logprobs": [
+            {
+              "token": " failing",
+              "logprob": -0.00042481938857517025,
+              "bytes": [
+                32,
+                102,
+                97,
+                105,
+                108,
+                105,
+                110,
+                103
+              ]
+            },
+            {
+              "token": " test",
+              "logprob": -8.617803054251857,
+              "bytes": [
+                32,
+                116,
+                101,
+                115,
+                116
+              ]
+            },
+            {
+              "token": "<|im_end|>",
+              "logprob": -9.050813155570216,
+              "bytes": null
+            },
+            {
+              "token": " failure",
+              "logprob": -9.533397155204005,
+              "bytes": [
+                32,
+                102,
+                97,
+                105,
+                108,
+                117,
+                114,
+                101
+              ]
+            },
+            {
+              "token": "\n",
+              "logprob": -12.08558602849502,
+              "bytes": [
+                10
+              ]
+            }
+          ]
+        },
+        {
+          "token": " test",
+          "logprob": -0.00112881486931698,
+          "bytes": [
+            32,
+            116,
+            101,
+            115,
+            116
+          ],
+          "top_logprobs": [
+            {
+              "token": " test",
+              "logprob": -0.00112881486931698,
+              "bytes": [
+                32,
+                116,
+                101,
+                115,
+                116
+              ]
+            },
+            {
+              "token": "<|im_end|>",
+              "logprob": -7.03051533525506,
+              "bytes": null
+            },
+            {
+              "token": " tests",
+              "logprob": -9.828118942432793,
+              "bytes": [
+                32,
+                116,
+                101,
+                115,
+                116,
+                115
+              ]
+            },
+            {
+              "token": "test",
+              "logprob": -10.335337303333672,
+              "bytes": [
+                116,
+                101,
+                115,
+                116
+              ]
+            },
+            {
+              "token": " tes",
+              "logprob": -10.950902603321465,
+              "bytes": [
+                32,
+                116,
+                101,
+                115
+              ]
+            }
+          ]
+        },
+        {
+          "token": "\n",
+          "logprob": -5.230186225420821,
+          "bytes": [
+            10
+          ],
+          "top_logprobs": [
+            {
+              "token": "<|im_end|>",
+              "logprob": -0.0061032786434772985,
+              "bytes": null
+            },
+            {
+              "token": "\n",
+              "logprob": -5.230186225420821,
+              "bytes": [
+                10
+              ]
+            },
+            {
+              "token": "\n\n",
+              "logprob": -7.499154807574142,
+              "bytes": [
+                10,
+                10
+              ]
+            },
+            {
+              "token": ".",
+              "logprob": -10.322641135699142,
+              "bytes": [
+                46
+              ]
+            },
+            {
+              "token": " read",
+              "logprob": -10.495612861163009,
+              "bytes": [
+                32,
+                114,
+                101,
+                97,
+                100
+              ]
+            }
+          ]
+        }
+      ],
+      "token_count": 5,
+      "logprob": -5.2534448601767645,
+      "path_probability": 0.005229472532610705,
+      "mean_logprob": -1.050688972035353,
+      "finish_reason": "stop"
+    },
+    "best_path": "read the failing test\n",
+    "semantics": "Relative mass over measured token paths including a common newline, excluding EOS. Not the total probability of arbitrary grammar languages or all tokenizations.",
+    "prompt": "STATE:\nA test failed after a parser change. The failure has not been read yet.\nQUESTION: What should the developer do next?\nChoose exactly one of these next steps:\nread the failing test\ninspect the error log\nedit the parser\nrestart the service\nOutput its exact text followed by one newline. No explanation."
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 5,
+    "summed_request_ms": 3311.8025000439957,
+    "prompt_tokens": 405,
+    "completion_tokens": 28,
+    "calls": [
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "STATE:\nA test failed after a parser change. The failure has not been read yet.\nQUESTION: What should the developer do next?\nChoose exactly one of these next steps:\nread the failing test\ninspect the error log\nedit the parser\nrestart the service\nOutput its exact text followed by one newline. No explanation."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 29,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"read the failing test\\n\""
+        },
+        "response": {
+          "id": "chatcmpl-8afcd62ca277451eb3577872",
+          "object": "chat.completion",
+          "created": 1791077957,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "read the failing test\n"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "read",
+                    "logprob": -0.014773794151847283,
+                    "bytes": [
+                      114,
+                      101,
+                      97,
+                      100
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "read",
+                        "logprob": -0.014773794151847283,
+                        "bytes": [
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "inspect",
+                        "logprob": -5.509812780357902,
+                        "bytes": [
+                          105,
+                          110,
+                          115,
+                          112,
+                          101,
+                          99,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -6.851059385277336,
+                        "bytes": null
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -7.325881429649894,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -7.363380857445304,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " the",
+                    "logprob": -0.006931206346203982,
+                    "bytes": [
+                      32,
+                      116,
+                      104,
+                      101
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " the",
+                        "logprob": -0.006931206346203982,
+                        "bytes": [
+                          32,
+                          116,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -5.110092064500501,
+                        "bytes": null
+                      },
+                      {
+                        "token": " failing",
+                        "logprob": -7.518730064988782,
+                        "bytes": [
+                          32,
+                          102,
+                          97,
+                          105,
+                          108,
+                          105,
+                          110,
+                          103
+                        ]
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -9.126460930467298,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": " test",
+                        "logprob": -9.683280846238782,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " failing",
+                    "logprob": -0.00042481938857517025,
+                    "bytes": [
+                      32,
+                      102,
+                      97,
+                      105,
+                      108,
+                      105,
+                      110,
+                      103
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " failing",
+                        "logprob": -0.00042481938857517025,
+                        "bytes": [
+                          32,
+                          102,
+                          97,
+                          105,
+                          108,
+                          105,
+                          110,
+                          103
+                        ]
+                      },
+                      {
+                        "token": " test",
+                        "logprob": -8.617803054251857,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -9.050813155570216,
+                        "bytes": null
+                      },
+                      {
+                        "token": " failure",
+                        "logprob": -9.533397155204005,
+                        "bytes": [
+                          32,
+                          102,
+                          97,
+                          105,
+                          108,
+                          117,
+                          114,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -12.08558602849502,
+                        "bytes": [
+                          10
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " test",
+                    "logprob": -0.00112881486931698,
+                    "bytes": [
+                      32,
+                      116,
+                      101,
+                      115,
+                      116
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " test",
+                        "logprob": -0.00112881486931698,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -7.03051533525506,
+                        "bytes": null
+                      },
+                      {
+                        "token": " tests",
+                        "logprob": -9.828118942432793,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116,
+                          115
+                        ]
+                      },
+                      {
+                        "token": "test",
+                        "logprob": -10.335337303333672,
+                        "bytes": [
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": " tes",
+                        "logprob": -10.950902603321465,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": "\n",
+                    "logprob": -5.230186225420821,
+                    "bytes": [
+                      10
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -0.0061032786434772985,
+                        "bytes": null
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -5.230186225420821,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": "\n\n",
+                        "logprob": -7.499154807574142,
+                        "bytes": [
+                          10,
+                          10
+                        ]
+                      },
+                      {
+                        "token": ".",
+                        "logprob": -10.322641135699142,
+                        "bytes": [
+                          46
+                        ]
+                      },
+                      {
+                        "token": " read",
+                        "logprob": -10.495612861163009,
+                        "bytes": [
+                          32,
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 81,
+            "completion_tokens": 6,
+            "total_tokens": 87,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 81,
+            "prompt_ms": 836.3,
+            "prompt_per_token_ms": 10.325,
+            "prompt_per_second": 96.9,
+            "predicted_n": 6,
+            "predicted_ms": 384.8,
+            "predicted_per_token_ms": 64.133,
+            "predicted_per_second": 15.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 1297.1517000114545,
+        "captured_at": "2026-10-04T01:39:18Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "STATE:\nA test failed after a parser change. The failure has not been read yet.\nQUESTION: What should the developer do next?\nChoose exactly one of these next steps:\nread the failing test\ninspect the error log\nedit the parser\nrestart the service\nOutput its exact text followed by one newline. No explanation."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 29,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"inspect the error log\\n\""
+        },
+        "response": {
+          "id": "chatcmpl-932e2125e3744e20b1620902",
+          "object": "chat.completion",
+          "created": 1791077958,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "inspect the error log\n"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "inspect",
+                    "logprob": -5.509812780357902,
+                    "bytes": [
+                      105,
+                      110,
+                      115,
+                      112,
+                      101,
+                      99,
+                      116
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "read",
+                        "logprob": -0.014773794151847283,
+                        "bytes": [
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "inspect",
+                        "logprob": -5.509812780357902,
+                        "bytes": [
+                          105,
+                          110,
+                          115,
+                          112,
+                          101,
+                          99,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -6.851059385277336,
+                        "bytes": null
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -7.325881429649894,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -7.363380857445304,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " the",
+                    "logprob": -0.004556592997028303,
+                    "bytes": [
+                      32,
+                      116,
+                      104,
+                      101
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " the",
+                        "logprob": -0.004556592997028303,
+                        "bytes": [
+                          32,
+                          116,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -5.745447095926716,
+                        "bytes": null
+                      },
+                      {
+                        "token": " error",
+                        "logprob": -7.311811384256794,
+                        "bytes": [
+                          32,
+                          101,
+                          114,
+                          114,
+                          111,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "_error",
+                        "logprob": -8.222139295633747,
+                        "bytes": [
+                          95,
+                          101,
+                          114,
+                          114,
+                          111,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "_the",
+                        "logprob": -8.86482804685445,
+                        "bytes": [
+                          95,
+                          116,
+                          104,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " error",
+                    "logprob": -0.0015231463404942864,
+                    "bytes": [
+                      32,
+                      101,
+                      114,
+                      114,
+                      111,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " error",
+                        "logprob": -0.0015231463404942864,
+                        "bytes": [
+                          32,
+                          101,
+                          114,
+                          114,
+                          111,
+                          114
+                        ]
+                      },
+                      {
+                        "token": " failure",
+                        "logprob": -7.8067818972560215,
+                        "bytes": [
+                          32,
+                          102,
+                          97,
+                          105,
+                          108,
+                          117,
+                          114,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -7.927029738137369,
+                        "bytes": null
+                      },
+                      {
+                        "token": " log",
+                        "logprob": -8.762200483986978,
+                        "bytes": [
+                          32,
+                          108,
+                          111,
+                          103
+                        ]
+                      },
+                      {
+                        "token": " parser",
+                        "logprob": -9.135831007668619,
+                        "bytes": [
+                          32,
+                          112,
+                          97,
+                          114,
+                          115,
+                          101,
+                          114
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " log",
+                    "logprob": -0.0013536828449673406,
+                    "bytes": [
+                      32,
+                      108,
+                      111,
+                      103
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " log",
+                        "logprob": -0.0013536828449673406,
+                        "bytes": [
+                          32,
+                          108,
+                          111,
+                          103
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -6.914559783308834,
+                        "bytes": null
+                      },
+                      {
+                        "token": "log",
+                        "logprob": -9.329953612654538,
+                        "bytes": [
+                          108,
+                          111,
+                          103
+                        ]
+                      },
+                      {
+                        "token": " logs",
+                        "logprob": -10.148077430098386,
+                        "bytes": [
+                          32,
+                          108,
+                          111,
+                          103,
+                          115
+                        ]
+                      },
+                      {
+                        "token": "_log",
+                        "logprob": -10.613452376692624,
+                        "bytes": [
+                          95,
+                          108,
+                          111,
+                          103
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": "\n",
+                    "logprob": -4.981889711691588,
+                    "bytes": [
+                      10
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -0.008005129172056945,
+                        "bytes": null
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -4.981889711691588,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": "\n\n",
+                        "logprob": -7.090496050192565,
+                        "bytes": [
+                          10,
+                          10
+                        ]
+                      },
+                      {
+                        "token": " read",
+                        "logprob": -9.944873796774596,
+                        "bytes": [
+                          32,
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "\\n",
+                        "logprob": -10.241533266379088,
+                        "bytes": [
+                          92,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 81,
+            "completion_tokens": 6,
+            "total_tokens": 87,
+            "prompt_tokens_details": {
+              "cached_tokens": 74
+            }
+          },
+          "timings": {
+            "cache_n": 74,
+            "prompt_n": 7,
+            "prompt_ms": 188.6,
+            "prompt_per_token_ms": 26.943,
+            "prompt_per_second": 37.1,
+            "predicted_n": 6,
+            "predicted_ms": 294.3,
+            "predicted_per_token_ms": 49.05,
+            "predicted_per_second": 20.4,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 503.3300000068266,
+        "captured_at": "2026-10-04T01:39:19Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "STATE:\nA test failed after a parser change. The failure has not been read yet.\nQUESTION: What should the developer do next?\nChoose exactly one of these next steps:\nread the failing test\ninspect the error log\nedit the parser\nrestart the service\nOutput its exact text followed by one newline. No explanation."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 23,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"edit the parser\\n\""
+        },
+        "response": {
+          "id": "chatcmpl-2e31c8acf6094b1b811400b9",
+          "object": "chat.completion",
+          "created": 1791077958,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "edit the parser\n"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "edit",
+                    "logprob": -7.635573812462394,
+                    "bytes": [
+                      101,
+                      100,
+                      105,
+                      116
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "read",
+                        "logprob": -0.014773794151847283,
+                        "bytes": [
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "inspect",
+                        "logprob": -5.509812780357902,
+                        "bytes": [
+                          105,
+                          110,
+                          115,
+                          112,
+                          101,
+                          99,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -6.851059385277336,
+                        "bytes": null
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -7.325881429649894,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -7.363380857445304,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " the",
+                    "logprob": -0.01011065479857072,
+                    "bytes": [
+                      32,
+                      116,
+                      104,
+                      101
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " the",
+                        "logprob": -0.01011065479857072,
+                        "bytes": [
+                          32,
+                          116,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -4.886565961805407,
+                        "bytes": null
+                      },
+                      {
+                        "token": " parser",
+                        "logprob": -6.512525358167712,
+                        "bytes": [
+                          32,
+                          112,
+                          97,
+                          114,
+                          115,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -8.235631742445054,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": "_the",
+                        "logprob": -9.06039027210814,
+                        "bytes": [
+                          95,
+                          116,
+                          104,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " parser",
+                    "logprob": -0.0012131359113490222,
+                    "bytes": [
+                      32,
+                      112,
+                      97,
+                      114,
+                      115,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " parser",
+                        "logprob": -0.0012131359113490222,
+                        "bytes": [
+                          32,
+                          112,
+                          97,
+                          114,
+                          115,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": " test",
+                        "logprob": -8.84755045433176,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -8.84937864799631,
+                        "bytes": null
+                      },
+                      {
+                        "token": " error",
+                        "logprob": -9.36020857353342,
+                        "bytes": [
+                          32,
+                          101,
+                          114,
+                          114,
+                          111,
+                          114
+                        ]
+                      },
+                      {
+                        "token": " parse",
+                        "logprob": -9.363420548631076,
+                        "bytes": [
+                          32,
+                          112,
+                          97,
+                          114,
+                          115,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": "\n",
+                    "logprob": -4.604947925993889,
+                    "bytes": [
+                      10
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -0.011485935637443148,
+                        "bytes": null
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -4.604947925993889,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": "\n\n",
+                        "logprob": -6.989815594145744,
+                        "bytes": [
+                          10,
+                          10
+                        ]
+                      },
+                      {
+                        "token": "\\n",
+                        "logprob": -9.66562736172387,
+                        "bytes": [
+                          92,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "  \n",
+                        "logprob": -9.782014728972404,
+                        "bytes": [
+                          32,
+                          32,
+                          10
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 81,
+            "completion_tokens": 5,
+            "total_tokens": 86,
+            "prompt_tokens_details": {
+              "cached_tokens": 74
+            }
+          },
+          "timings": {
+            "cache_n": 74,
+            "prompt_n": 7,
+            "prompt_ms": 183.4,
+            "prompt_per_token_ms": 26.2,
+            "prompt_per_second": 38.2,
+            "predicted_n": 5,
+            "predicted_ms": 187.8,
+            "predicted_per_token_ms": 37.56,
+            "predicted_per_second": 26.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 608.0050000164192,
+        "captured_at": "2026-10-04T01:39:19Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "STATE:\nA test failed after a parser change. The failure has not been read yet.\nQUESTION: What should the developer do next?\nChoose exactly one of these next steps:\nread the failing test\ninspect the error log\nedit the parser\nrestart the service\nOutput its exact text followed by one newline. No explanation."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 27,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"restart the service\\n\""
+        },
+        "response": {
+          "id": "chatcmpl-776b048dd3ec467c9d900b79",
+          "object": "chat.completion",
+          "created": 1791077959,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "restart the service\n"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "restart",
+                    "logprob": -8.04934258077294,
+                    "bytes": [
+                      114,
+                      101,
+                      115,
+                      116,
+                      97,
+                      114,
+                      116
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "read",
+                        "logprob": -0.014773794151847283,
+                        "bytes": [
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "inspect",
+                        "logprob": -5.509812780357902,
+                        "bytes": [
+                          105,
+                          110,
+                          115,
+                          112,
+                          101,
+                          99,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -6.851059385277336,
+                        "bytes": null
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -7.325881429649894,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -7.363380857445304,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " the",
+                    "logprob": -0.02326054762894504,
+                    "bytes": [
+                      32,
+                      116,
+                      104,
+                      101
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " the",
+                        "logprob": -0.02326054762894504,
+                        "bytes": [
+                          32,
+                          116,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -3.915766193380898,
+                        "bytes": null
+                      },
+                      {
+                        "token": " service",
+                        "logprob": -6.911396457663125,
+                        "bytes": [
+                          32,
+                          115,
+                          101,
+                          114,
+                          118,
+                          105,
+                          99,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -7.16534657668168,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": "\n\n",
+                        "logprob": -8.986203624716348,
+                        "bytes": [
+                          10,
+                          10
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " service",
+                    "logprob": -0.0021656210126136314,
+                    "bytes": [
+                      32,
+                      115,
+                      101,
+                      114,
+                      118,
+                      105,
+                      99,
+                      101
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " service",
+                        "logprob": -0.0021656210126136314,
+                        "bytes": [
+                          32,
+                          115,
+                          101,
+                          114,
+                          118,
+                          105,
+                          99,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -7.235253160685465,
+                        "bytes": null
+                      },
+                      {
+                        "token": " test",
+                        "logprob": -8.717716997355387,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "service",
+                        "logprob": -9.365632837504313,
+                        "bytes": [
+                          115,
+                          101,
+                          114,
+                          118,
+                          105,
+                          99,
+                          101
+                        ]
+                      },
+                      {
+                        "token": " servic",
+                        "logprob": -9.591128175944254,
+                        "bytes": [
+                          32,
+                          115,
+                          101,
+                          114,
+                          118,
+                          105,
+                          99
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": "\n",
+                    "logprob": -4.921005069947994,
+                    "bytes": [
+                      10
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -0.009250461793697283,
+                        "bytes": null
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -4.921005069947994,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": "\n\n",
+                        "logprob": -6.496558963990963,
+                        "bytes": [
+                          10,
+                          10
+                        ]
+                      },
+                      {
+                        "token": " read",
+                        "logprob": -10.008779346681393,
+                        "bytes": [
+                          32,
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "  \n",
+                        "logprob": -10.162605106569089,
+                        "bytes": [
+                          32,
+                          32,
+                          10
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 81,
+            "completion_tokens": 5,
+            "total_tokens": 86,
+            "prompt_tokens_details": {
+              "cached_tokens": 74
+            }
+          },
+          "timings": {
+            "cache_n": 74,
+            "prompt_n": 7,
+            "prompt_ms": 182.8,
+            "prompt_per_token_ms": 26.114,
+            "prompt_per_second": 38.3,
+            "predicted_n": 5,
+            "predicted_ms": 185.6,
+            "predicted_per_token_ms": 37.12,
+            "predicted_per_second": 26.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 470.2156000130344,
+        "captured_at": "2026-10-04T01:39:20Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "STATE:\nA test failed after a parser change. The failure has not been read yet.\nQUESTION: What should the developer do next?\nChoose exactly one of these next steps:\nread the failing test\ninspect the error log\nedit the parser\nrestart the service\nOutput its exact text followed by one newline. No explanation."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 29,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"read the failing test\\n\" | \"inspect the error log\\n\" | \"edit the parser\\n\" | \"restart the service\\n\""
+        },
+        "response": {
+          "id": "chatcmpl-e1a84f32012c4bb192776aff",
+          "object": "chat.completion",
+          "created": 1791077959,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "read the failing test\n"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "read",
+                    "logprob": -0.014773794151847283,
+                    "bytes": [
+                      114,
+                      101,
+                      97,
+                      100
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "read",
+                        "logprob": -0.014773794151847283,
+                        "bytes": [
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "inspect",
+                        "logprob": -5.509812780357902,
+                        "bytes": [
+                          105,
+                          110,
+                          115,
+                          112,
+                          101,
+                          99,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -6.851059385277336,
+                        "bytes": null
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -7.325881429649894,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -7.363380857445304,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " the",
+                    "logprob": -0.006931206346203982,
+                    "bytes": [
+                      32,
+                      116,
+                      104,
+                      101
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " the",
+                        "logprob": -0.006931206346203982,
+                        "bytes": [
+                          32,
+                          116,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -5.110092064500501,
+                        "bytes": null
+                      },
+                      {
+                        "token": " failing",
+                        "logprob": -7.518730064988782,
+                        "bytes": [
+                          32,
+                          102,
+                          97,
+                          105,
+                          108,
+                          105,
+                          110,
+                          103
+                        ]
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -9.126460930467298,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": " test",
+                        "logprob": -9.683280846238782,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " failing",
+                    "logprob": -0.00042481938857517025,
+                    "bytes": [
+                      32,
+                      102,
+                      97,
+                      105,
+                      108,
+                      105,
+                      110,
+                      103
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " failing",
+                        "logprob": -0.00042481938857517025,
+                        "bytes": [
+                          32,
+                          102,
+                          97,
+                          105,
+                          108,
+                          105,
+                          110,
+                          103
+                        ]
+                      },
+                      {
+                        "token": " test",
+                        "logprob": -8.617803054251857,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -9.050813155570216,
+                        "bytes": null
+                      },
+                      {
+                        "token": " failure",
+                        "logprob": -9.533397155204005,
+                        "bytes": [
+                          32,
+                          102,
+                          97,
+                          105,
+                          108,
+                          117,
+                          114,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -12.08558602849502,
+                        "bytes": [
+                          10
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": " test",
+                    "logprob": -0.00112881486931698,
+                    "bytes": [
+                      32,
+                      116,
+                      101,
+                      115,
+                      116
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " test",
+                        "logprob": -0.00112881486931698,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -7.03051533525506,
+                        "bytes": null
+                      },
+                      {
+                        "token": " tests",
+                        "logprob": -9.828118942432793,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115,
+                          116,
+                          115
+                        ]
+                      },
+                      {
+                        "token": "test",
+                        "logprob": -10.335337303333672,
+                        "bytes": [
+                          116,
+                          101,
+                          115,
+                          116
+                        ]
+                      },
+                      {
+                        "token": " tes",
+                        "logprob": -10.950902603321465,
+                        "bytes": [
+                          32,
+                          116,
+                          101,
+                          115
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "token": "\n",
+                    "logprob": -5.230186225420821,
+                    "bytes": [
+                      10
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -0.0061032786434772985,
+                        "bytes": null
+                      },
+                      {
+                        "token": "\n",
+                        "logprob": -5.230186225420821,
+                        "bytes": [
+                          10
+                        ]
+                      },
+                      {
+                        "token": "\n\n",
+                        "logprob": -7.499154807574142,
+                        "bytes": [
+                          10,
+                          10
+                        ]
+                      },
+                      {
+                        "token": ".",
+                        "logprob": -10.322641135699142,
+                        "bytes": [
+                          46
+                        ]
+                      },
+                      {
+                        "token": " read",
+                        "logprob": -10.495612861163009,
+                        "bytes": [
+                          32,
+                          114,
+                          101,
+                          97,
+                          100
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 81,
+            "completion_tokens": 6,
+            "total_tokens": 87,
+            "prompt_tokens_details": {
+              "cached_tokens": 74
+            }
+          },
+          "timings": {
+            "cache_n": 74,
+            "prompt_n": 7,
+            "prompt_ms": 189.1,
+            "prompt_per_token_ms": 27.014,
+            "prompt_per_second": 37.0,
+            "predicted_n": 6,
+            "predicted_ms": 215.3,
+            "predicted_per_token_ms": 35.883,
+            "predicted_per_second": 27.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 433.1001999962609,
+        "captured_at": "2026-10-04T01:39:20Z"
+      }
+    ]
+  },
+  "wall_ms": 3367.2723000054248
+}

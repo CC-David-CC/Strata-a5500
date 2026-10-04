@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Strata / Control Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2315433f'/%3E%3Cpath d='M14 24h36M14 32h28M14 40h20' stroke='%23e2f5b4' stroke-width='5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/lab.css">
+  <script type="module" src="/static/lab.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/"><span class="brand-mark">≋</span><span>STRATA<small>CONTROL LAB</small></span></a>
+  <p class="nav-caption">A small answer.<br>A useful next step.</p>
+  <nav id="nav" aria-label="Experiments"></nav>
+  <div class="sidebar-foot"><span class="status-dot"></span> Local, inspectable inference<br><small>Educational branch · built on logprobs #675</small></div>
+</aside>
+<main>
+  <header class="topbar"><span>MODEL CONTROL, MADE VISIBLE</span><label class="mode-label">Data source <select id="mode"><option value="recorded">Recorded native run</option><option value="live">Live model</option></select></label></header>
+  <section class="hero"><div class="eyebrow" id="eyebrow"></div><h1 id="title"></h1><p id="intro"></p><div id="tags" class="tags"></div></section>
+  <div class="flow" aria-label="How this experiment works"><span><b>1</b> Describe a state</span><i>→</i><span><b>2</b> Measure alternatives</span><i>→</i><span><b>3</b> Apply a rule</span><i>→</i><span><b>4</b> Inspect the result</span></div>
+  <div id="source-note" class="source-note"></div>
+  <section class="workspace">
+    <form id="controls" class="panel inputs"><div class="panel-heading"><h2>Your experiment</h2><button type="button" id="reset" class="text-button">Reset example</button></div><div id="fields"></div><div class="run-actions"><button id="run" class="primary" type="submit">Run experiment <span>↗</span></button><button id="stop" class="secondary" type="button" disabled>Stop</button></div><p class="subtle" id="run-note">A recorded run needs no model. Change to Live to try your own inputs.</p></form>
+    <section class="panel output" aria-live="polite"><div class="panel-heading"><h2>What happened</h2><span id="status" class="badge">Ready</span></div><div id="result"><div class="empty"><span class="empty-icon">∴</span><h3>Make the next step visible.</h3><p>Run the example to see the answer, its alternatives, and the rule connecting them.</p></div></div></section>
+  </section>
+  <section class="explanation panel"><div><span class="eyebrow">UNDER THE SURFACE</span><h2>The meaning of these numbers</h2><p id="detail"></p><details><summary>Equations & definitions</summary><div id="math"></div></details></div><div><span class="eyebrow">NEXT EXPERIMENT</span><h2>Where this path leads</h2><p id="next"></p><a href="/lab/performance" class="text-link" data-page="performance">Explore the measurement frontier →</a></div></section>
+  <section class="panel audit"><div class="panel-heading"><div><h2>A receipt for every step</h2><p class="subtle">Exact requests, responses, timings, and provenance. Nothing is hidden behind the chart.</p></div><button id="download" class="secondary" disabled>Download JSON</button></div><ol id="timeline"><li class="subtle">The trace will appear here.</li></ol></section>
+  <footer><span>Scores describe model preferences. Rules describe what your program permits.</span><a href="https://github.com/CC-David-CC/Strata-a5500/tree/work/logprobs-675">Built on Strata logprobs ↗</a></footer>
+</main>
+</body>
+</html>

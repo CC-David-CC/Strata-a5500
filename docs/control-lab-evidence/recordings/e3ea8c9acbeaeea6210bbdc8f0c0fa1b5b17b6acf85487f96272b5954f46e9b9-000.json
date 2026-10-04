@@ -1,0 +1,164 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Call echo with text hello, then say hello."
+      },
+      {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "call_demo",
+            "type": "function",
+            "function": {
+              "name": "echo",
+              "arguments": "{\"text\":\"hello\"}"
+            }
+          }
+        ]
+      },
+      {
+        "role": "tool",
+        "tool_call_id": "call_demo",
+        "content": "hello"
+      }
+    ],
+    "max_tokens": 32,
+    "temperature": 0,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "reasoning_effort": "none",
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "echo",
+          "description": "Return the supplied text unchanged.",
+          "strict": false,
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "text"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    ]
+  },
+  "response": {
+    "id": "chatcmpl-1643854f01d24f508a7fefa0",
+    "object": "chat.completion",
+    "created": 1791078042,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "hello"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "hello",
+              "logprob": -0.029165742972951627,
+              "bytes": [
+                104,
+                101,
+                108,
+                108,
+                111
+              ],
+              "top_logprobs": [
+                {
+                  "token": "hello",
+                  "logprob": -0.029165742972951627,
+                  "bytes": [
+                    104,
+                    101,
+                    108,
+                    108,
+                    111
+                  ]
+                },
+                {
+                  "token": "Hello",
+                  "logprob": -3.825579164603811,
+                  "bytes": [
+                    72,
+                    101,
+                    108,
+                    108,
+                    111
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -5.678482530692678,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -7.446900842765432,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "Done",
+                  "logprob": -8.514484880546194,
+                  "bytes": [
+                    68,
+                    111,
+                    110,
+                    101
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 322,
+      "completion_tokens": 2,
+      "total_tokens": 324,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 322,
+      "prompt_ms": 1789.1,
+      "prompt_per_token_ms": 5.556,
+      "prompt_per_second": 180.0,
+      "predicted_n": 2,
+      "predicted_ms": 56.5,
+      "predicted_per_token_ms": 28.25,
+      "predicted_per_second": 35.4,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 1875.5913999921177,
+  "captured_at": "2026-10-04T01:40:44Z"
+}

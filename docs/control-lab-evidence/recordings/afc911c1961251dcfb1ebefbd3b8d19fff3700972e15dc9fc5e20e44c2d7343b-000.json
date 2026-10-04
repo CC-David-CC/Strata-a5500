@@ -1,0 +1,303 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "STATE:\nA test failed after a parser change. The failure has not been read yet.\nQUESTION: What should the developer do next?\nChoose exactly one of these next steps:\nread the failing test\ninspect the error log\nedit the parser\nrestart the service\nOutput its exact text followed by one newline. No explanation."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 27,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"restart the service\\n\""
+  },
+  "response": {
+    "id": "chatcmpl-776b048dd3ec467c9d900b79",
+    "object": "chat.completion",
+    "created": 1791077959,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "restart the service\n"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "restart",
+              "logprob": -8.04934258077294,
+              "bytes": [
+                114,
+                101,
+                115,
+                116,
+                97,
+                114,
+                116
+              ],
+              "top_logprobs": [
+                {
+                  "token": "read",
+                  "logprob": -0.014773794151847283,
+                  "bytes": [
+                    114,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "inspect",
+                  "logprob": -5.509812780357902,
+                  "bytes": [
+                    105,
+                    110,
+                    115,
+                    112,
+                    101,
+                    99,
+                    116
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -6.851059385277336,
+                  "bytes": null
+                },
+                {
+                  "token": "Read",
+                  "logprob": -7.325881429649894,
+                  "bytes": [
+                    82,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -7.363380857445304,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                }
+              ]
+            },
+            {
+              "token": " the",
+              "logprob": -0.02326054762894504,
+              "bytes": [
+                32,
+                116,
+                104,
+                101
+              ],
+              "top_logprobs": [
+                {
+                  "token": " the",
+                  "logprob": -0.02326054762894504,
+                  "bytes": [
+                    32,
+                    116,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -3.915766193380898,
+                  "bytes": null
+                },
+                {
+                  "token": " service",
+                  "logprob": -6.911396457663125,
+                  "bytes": [
+                    32,
+                    115,
+                    101,
+                    114,
+                    118,
+                    105,
+                    99,
+                    101
+                  ]
+                },
+                {
+                  "token": "\n",
+                  "logprob": -7.16534657668168,
+                  "bytes": [
+                    10
+                  ]
+                },
+                {
+                  "token": "\n\n",
+                  "logprob": -8.986203624716348,
+                  "bytes": [
+                    10,
+                    10
+                  ]
+                }
+              ]
+            },
+            {
+              "token": " service",
+              "logprob": -0.0021656210126136314,
+              "bytes": [
+                32,
+                115,
+                101,
+                114,
+                118,
+                105,
+                99,
+                101
+              ],
+              "top_logprobs": [
+                {
+                  "token": " service",
+                  "logprob": -0.0021656210126136314,
+                  "bytes": [
+                    32,
+                    115,
+                    101,
+                    114,
+                    118,
+                    105,
+                    99,
+                    101
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -7.235253160685465,
+                  "bytes": null
+                },
+                {
+                  "token": " test",
+                  "logprob": -8.717716997355387,
+                  "bytes": [
+                    32,
+                    116,
+                    101,
+                    115,
+                    116
+                  ]
+                },
+                {
+                  "token": "service",
+                  "logprob": -9.365632837504313,
+                  "bytes": [
+                    115,
+                    101,
+                    114,
+                    118,
+                    105,
+                    99,
+                    101
+                  ]
+                },
+                {
+                  "token": " servic",
+                  "logprob": -9.591128175944254,
+                  "bytes": [
+                    32,
+                    115,
+                    101,
+                    114,
+                    118,
+                    105,
+                    99
+                  ]
+                }
+              ]
+            },
+            {
+              "token": "\n",
+              "logprob": -4.921005069947994,
+              "bytes": [
+                10
+              ],
+              "top_logprobs": [
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -0.009250461793697283,
+                  "bytes": null
+                },
+                {
+                  "token": "\n",
+                  "logprob": -4.921005069947994,
+                  "bytes": [
+                    10
+                  ]
+                },
+                {
+                  "token": "\n\n",
+                  "logprob": -6.496558963990963,
+                  "bytes": [
+                    10,
+                    10
+                  ]
+                },
+                {
+                  "token": " read",
+                  "logprob": -10.008779346681393,
+                  "bytes": [
+                    32,
+                    114,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "  \n",
+                  "logprob": -10.162605106569089,
+                  "bytes": [
+                    32,
+                    32,
+                    10
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 81,
+      "completion_tokens": 5,
+      "total_tokens": 86,
+      "prompt_tokens_details": {
+        "cached_tokens": 74
+      }
+    },
+    "timings": {
+      "cache_n": 74,
+      "prompt_n": 7,
+      "prompt_ms": 182.8,
+      "prompt_per_token_ms": 26.114,
+      "prompt_per_second": 38.3,
+      "predicted_n": 5,
+      "predicted_ms": 185.6,
+      "predicted_per_token_ms": 37.12,
+      "predicted_per_second": 26.9,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 470.2156000130344,
+  "captured_at": "2026-10-04T01:39:20Z"
+}

@@ -1,0 +1,110 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: unread. The file and test have not been inspected.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"A\" | \"E\""
+  },
+  "response": {
+    "id": "chatcmpl-245cc8a08e054607ab1074b1",
+    "object": "chat.completion",
+    "created": 1791077963,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.021688972488619382,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -0.021688972488619382,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -4.807066474930026,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "ANS",
+                  "logprob": -5.984048400894381,
+                  "bytes": [
+                    65,
+                    78,
+                    83
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -6.3198714599764125,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -6.76459554292319,
+                  "bytes": [
+                    68
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 140,
+      "completion_tokens": 2,
+      "total_tokens": 142,
+      "prompt_tokens_details": {
+        "cached_tokens": 133
+      }
+    },
+    "timings": {
+      "cache_n": 133,
+      "prompt_n": 7,
+      "prompt_ms": 182.9,
+      "prompt_per_token_ms": 26.129,
+      "prompt_per_second": 38.3,
+      "predicted_n": 2,
+      "predicted_ms": 51.3,
+      "predicted_per_token_ms": 25.65,
+      "predicted_per_second": 39.0,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 321.7888999788556,
+  "captured_at": "2026-10-04T01:39:24Z"
+}

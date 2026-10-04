@@ -1,0 +1,53 @@
+{
+  "server_base_commit": "2243cb1c5b1a87270731d8b8a76e4af001f96f97",
+  "platform": "Linux-7.0.0-34-generic-x86_64-with-glibc2.43",
+  "python": "3.14.4",
+  "gpu": "NVIDIA GeForce RTX 4090, 595.91.07",
+  "files": [
+    {
+      "name": "strata",
+      "bytes": 43707800,
+      "sha256": "6ea58d8eec0dafe24642eb6d9fa124ae1a31dfb5237529986231a999beb7423d"
+    },
+    {
+      "name": "server.py",
+      "bytes": 189903,
+      "sha256": "8f19b82881d8ed846e1b82bf91b3c88f4e7220dd4e043a0c04f0737904a2a668"
+    },
+    {
+      "name": "frontend.py",
+      "bytes": 29005,
+      "sha256": "a0d957564d1d75795610c2248eae98284242d0bda3a5e15cc20b37aeb6bc63a3"
+    },
+    {
+      "name": "grammar.py",
+      "bytes": 11030,
+      "sha256": "5333eb9dd45f941e6d10c6e3de2ab4158a9e2d82caf6bedc973670ac7f7b387d"
+    },
+    {
+      "name": "logprobs.py",
+      "bytes": 6758,
+      "sha256": "f24872729ff81d5de0c393c97f773b012fc021f5f90c93b78b80d5c4e5a1736c"
+    },
+    {
+      "name": "json_output.py",
+      "bytes": 9820,
+      "sha256": "b8e2d70eeb59d3d06bbac1ad7b045f828e562106bcc5fa45b75e8a4dafcc8a5f"
+    }
+  ],
+  "settings": {
+    "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M",
+    "KV": "int8",
+    "max_context": 4096,
+    "prefill": 256,
+    "configured_expert_cache": 6000,
+    "spec": 1,
+    "mtp": false,
+    "mmap_experts": true,
+    "prompt_cache": 2,
+    "conversation_cache_mib": 0,
+    "adapt_swaps": 0
+  },
+  "connection": "Windows client through SSH tunnel to loopback HTTP",
+  "engine_artifact": "Same grammar-enabled binary and model files as the base logprobs qualification"
+}

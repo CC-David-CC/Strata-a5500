@@ -1,0 +1,58 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer only OK."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 8,
+    "logprobs": false,
+    "top_logprobs": null
+  },
+  "response": {
+    "id": "chatcmpl-47b599d6f83d47b4883801f2",
+    "object": "chat.completion",
+    "created": 1791078000,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "OK"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 16,
+      "completion_tokens": 2,
+      "total_tokens": 18,
+      "prompt_tokens_details": {
+        "cached_tokens": 9
+      }
+    },
+    "timings": {
+      "cache_n": 9,
+      "prompt_n": 7,
+      "prompt_ms": 198.9,
+      "prompt_per_token_ms": 28.414,
+      "prompt_per_second": 35.2,
+      "predicted_n": 2,
+      "predicted_ms": 57.5,
+      "predicted_per_token_ms": 28.75,
+      "predicted_per_second": 34.8,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 285.5901999864727,
+  "captured_at": "2026-10-04T01:40:01Z"
+}

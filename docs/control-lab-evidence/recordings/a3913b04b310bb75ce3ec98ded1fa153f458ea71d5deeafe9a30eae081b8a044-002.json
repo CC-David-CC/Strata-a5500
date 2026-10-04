@@ -1,0 +1,235 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer only OK."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 8,
+    "logprobs": true,
+    "top_logprobs": 20
+  },
+  "response": {
+    "id": "chatcmpl-0129bc7c8ee14ccfb8e505a8",
+    "object": "chat.completion",
+    "created": 1791078007,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "OK"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "OK",
+              "logprob": -0.00787523901214979,
+              "bytes": [
+                79,
+                75
+              ],
+              "top_logprobs": [
+                {
+                  "token": "OK",
+                  "logprob": -0.00787523901214979,
+                  "bytes": [
+                    79,
+                    75
+                  ]
+                },
+                {
+                  "token": " OK",
+                  "logprob": -6.066039835569767,
+                  "bytes": [
+                    32,
+                    79,
+                    75
+                  ]
+                },
+                {
+                  "token": "Ok",
+                  "logprob": -7.331105982420353,
+                  "bytes": [
+                    79,
+                    107
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -7.649543558714298,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -7.756927286741642,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "```",
+                  "logprob": -8.201176439878848,
+                  "bytes": [
+                    96,
+                    96,
+                    96
+                  ]
+                },
+                {
+                  "token": "ok",
+                  "logprob": -9.011638437864688,
+                  "bytes": [
+                    111,
+                    107
+                  ]
+                },
+                {
+                  "token": " ",
+                  "logprob": -9.017983233091739,
+                  "bytes": [
+                    32
+                  ]
+                },
+                {
+                  "token": "Okay",
+                  "logprob": -9.298677240965274,
+                  "bytes": [
+                    79,
+                    107,
+                    97,
+                    121
+                  ]
+                },
+                {
+                  "token": "It",
+                  "logprob": -9.48183134710541,
+                  "bytes": [
+                    73,
+                    116
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -9.491764818785098,
+                  "bytes": null
+                },
+                {
+                  "token": "You",
+                  "logprob": -9.692340647337344,
+                  "bytes": [
+                    89,
+                    111,
+                    117
+                  ]
+                },
+                {
+                  "token": "<|im_start|>",
+                  "logprob": -9.842153345701602,
+                  "bytes": null
+                },
+                {
+                  "token": "O",
+                  "logprob": -9.89246538793793,
+                  "bytes": [
+                    79
+                  ]
+                },
+                {
+                  "token": "<|endoftext|>",
+                  "logprob": -9.92021540319672,
+                  "bytes": null
+                },
+                {
+                  "token": "To",
+                  "logprob": -9.925101076719669,
+                  "bytes": [
+                    84,
+                    111
+                  ]
+                },
+                {
+                  "token": "NO",
+                  "logprob": -9.961141382810977,
+                  "bytes": [
+                    78,
+                    79
+                  ]
+                },
+                {
+                  "token": "Hello",
+                  "logprob": -9.981809412596133,
+                  "bytes": [
+                    72,
+                    101,
+                    108,
+                    108,
+                    111
+                  ]
+                },
+                {
+                  "token": "好的",
+                  "logprob": -10.193921839353946,
+                  "bytes": [
+                    229,
+                    165,
+                    189,
+                    231,
+                    154,
+                    132
+                  ]
+                },
+                {
+                  "token": "我",
+                  "logprob": -10.20547751104584,
+                  "bytes": [
+                    230,
+                    136,
+                    145
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 16,
+      "completion_tokens": 2,
+      "total_tokens": 18,
+      "prompt_tokens_details": {
+        "cached_tokens": 9
+      }
+    },
+    "timings": {
+      "cache_n": 9,
+      "prompt_n": 7,
+      "prompt_ms": 197.2,
+      "prompt_per_token_ms": 28.171,
+      "prompt_per_second": 35.5,
+      "predicted_n": 2,
+      "predicted_ms": 60.7,
+      "predicted_per_token_ms": 30.35,
+      "predicted_per_second": 32.9,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 403.363299992634,
+  "captured_at": "2026-10-04T01:40:08Z"
+}

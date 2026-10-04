@@ -1,0 +1,72 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Answer only OK."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 8,
+    "logprobs": true,
+    "top_logprobs": 0
+  },
+  "response": {
+    "id": "chatcmpl-ffde109cfed642d29066af98",
+    "object": "chat.completion",
+    "created": 1791078006,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "OK"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "OK",
+              "logprob": -0.00787523901214979,
+              "bytes": [
+                79,
+                75
+              ],
+              "top_logprobs": []
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 16,
+      "completion_tokens": 2,
+      "total_tokens": 18,
+      "prompt_tokens_details": {
+        "cached_tokens": 9
+      }
+    },
+    "timings": {
+      "cache_n": 9,
+      "prompt_n": 7,
+      "prompt_ms": 199.0,
+      "prompt_per_token_ms": 28.429,
+      "prompt_per_second": 35.2,
+      "predicted_n": 2,
+      "predicted_ms": 60.2,
+      "predicted_per_token_ms": 30.1,
+      "predicted_per_second": 33.2,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 296.4233999955468,
+  "captured_at": "2026-10-04T01:40:07Z"
+}

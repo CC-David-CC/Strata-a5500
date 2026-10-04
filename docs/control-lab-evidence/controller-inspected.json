@@ -1,0 +1,2418 @@
+{
+  "page": "controller",
+  "options": {
+    "controller_state": "inspected"
+  },
+  "result": {
+    "state": "inspected",
+    "next_state": "edited",
+    "legal": [
+      "edit",
+      "ask"
+    ],
+    "action": "edit",
+    "held": false,
+    "grammar": "root ::= \"B\" | \"E\"",
+    "measure": {
+      "rows": [
+        {
+          "label": "A",
+          "description": "inspect: Read the file and its failing test",
+          "text": "A",
+          "tokens": [
+            {
+              "token": "A",
+              "logprob": -4.265289694292397,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.09478989265665515,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -3.1399540009330225,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -3.9035953583548975,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -4.265289694292397,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -5.078722387773842,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -6.6629394593070455,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "ANS",
+                  "logprob": -7.102409750444741,
+                  "bytes": [
+                    65,
+                    78,
+                    83
+                  ]
+                },
+                {
+                  "token": "answer",
+                  "logprob": -7.79400196693644,
+                  "bytes": [
+                    97,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "#",
+                  "logprob": -8.261701971514077,
+                  "bytes": [
+                    35
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -8.38533440254435,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "What",
+                  "logprob": -8.42709293983683,
+                  "bytes": [
+                    87,
+                    104,
+                    97,
+                    116
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -8.441971212847085,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -8.700280577165932,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -8.723517805559487,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -8.78686371467814,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -8.830418974382729,
+                  "bytes": [
+                    99
+                  ]
+                },
+                {
+                  "token": "###",
+                  "logprob": -8.884433180315346,
+                  "bytes": [
+                    35,
+                    35,
+                    35
+                  ]
+                },
+                {
+                  "token": "Question",
+                  "logprob": -9.18846169136271,
+                  "bytes": [
+                    81,
+                    117,
+                    101,
+                    115,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "Read",
+                  "logprob": -9.889655500871987,
+                  "bytes": [
+                    82,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "Q",
+                  "logprob": -10.021112829668374,
+                  "bytes": [
+                    81
+                  ]
+                }
+              ]
+            }
+          ],
+          "token_count": 1,
+          "logprob": -4.265289694292397,
+          "path_probability": 0.014047796976919033,
+          "mean_logprob": -4.265289694292397,
+          "finish_reason": "stop",
+          "raw_probability": 0.014047796976919033,
+          "weight": 0.014142641315769498,
+          "action": "inspect",
+          "allowed": false
+        },
+        {
+          "label": "B",
+          "description": "edit: Fix the off-by-one bug",
+          "text": "B",
+          "tokens": [
+            {
+              "token": "B",
+              "logprob": -0.09478989265665515,
+              "bytes": [
+                66
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.09478989265665515,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -3.1399540009330225,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -3.9035953583548975,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -4.265289694292397,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -5.078722387773842,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -6.6629394593070455,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "ANS",
+                  "logprob": -7.102409750444741,
+                  "bytes": [
+                    65,
+                    78,
+                    83
+                  ]
+                },
+                {
+                  "token": "answer",
+                  "logprob": -7.79400196693644,
+                  "bytes": [
+                    97,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "#",
+                  "logprob": -8.261701971514077,
+                  "bytes": [
+                    35
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -8.38533440254435,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "What",
+                  "logprob": -8.42709293983683,
+                  "bytes": [
+                    87,
+                    104,
+                    97,
+                    116
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -8.441971212847085,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -8.700280577165932,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -8.723517805559487,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -8.78686371467814,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -8.830418974382729,
+                  "bytes": [
+                    99
+                  ]
+                },
+                {
+                  "token": "###",
+                  "logprob": -8.884433180315346,
+                  "bytes": [
+                    35,
+                    35,
+                    35
+                  ]
+                },
+                {
+                  "token": "Question",
+                  "logprob": -9.18846169136271,
+                  "bytes": [
+                    81,
+                    117,
+                    101,
+                    115,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "Read",
+                  "logprob": -9.889655500871987,
+                  "bytes": [
+                    82,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "Q",
+                  "logprob": -10.021112829668374,
+                  "bytes": [
+                    81
+                  ]
+                }
+              ]
+            }
+          ],
+          "token_count": 1,
+          "logprob": -0.09478989265665515,
+          "path_probability": 0.9095640204731857,
+          "mean_logprob": -0.09478989265665515,
+          "finish_reason": "stop",
+          "raw_probability": 0.9095640204731857,
+          "weight": 0.9157049832380725,
+          "action": "edit",
+          "allowed": true
+        },
+        {
+          "label": "C",
+          "description": "test: Run the small verification suite",
+          "text": "C",
+          "tokens": [
+            {
+              "token": "C",
+              "logprob": -3.1399540009330225,
+              "bytes": [
+                67
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.09478989265665515,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -3.1399540009330225,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -3.9035953583548975,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -4.265289694292397,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -5.078722387773842,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -6.6629394593070455,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "ANS",
+                  "logprob": -7.102409750444741,
+                  "bytes": [
+                    65,
+                    78,
+                    83
+                  ]
+                },
+                {
+                  "token": "answer",
+                  "logprob": -7.79400196693644,
+                  "bytes": [
+                    97,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "#",
+                  "logprob": -8.261701971514077,
+                  "bytes": [
+                    35
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -8.38533440254435,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "What",
+                  "logprob": -8.42709293983683,
+                  "bytes": [
+                    87,
+                    104,
+                    97,
+                    116
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -8.441971212847085,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -8.700280577165932,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -8.723517805559487,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -8.78686371467814,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -8.830418974382729,
+                  "bytes": [
+                    99
+                  ]
+                },
+                {
+                  "token": "###",
+                  "logprob": -8.884433180315346,
+                  "bytes": [
+                    35,
+                    35,
+                    35
+                  ]
+                },
+                {
+                  "token": "Question",
+                  "logprob": -9.18846169136271,
+                  "bytes": [
+                    81,
+                    117,
+                    101,
+                    115,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "Read",
+                  "logprob": -9.889655500871987,
+                  "bytes": [
+                    82,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "Q",
+                  "logprob": -10.021112829668374,
+                  "bytes": [
+                    81
+                  ]
+                }
+              ]
+            }
+          ],
+          "token_count": 1,
+          "logprob": -3.1399540009330225,
+          "path_probability": 0.043284788916077614,
+          "mean_logprob": -3.1399540009330225,
+          "finish_reason": "stop",
+          "raw_probability": 0.043284788916077614,
+          "weight": 0.04357702813292937,
+          "action": "test",
+          "allowed": false
+        },
+        {
+          "label": "D",
+          "description": "finish: Mark the task complete",
+          "text": "D",
+          "tokens": [
+            {
+              "token": "D",
+              "logprob": -3.9035953583548975,
+              "bytes": [
+                68
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.09478989265665515,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -3.1399540009330225,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -3.9035953583548975,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -4.265289694292397,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -5.078722387773842,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -6.6629394593070455,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "ANS",
+                  "logprob": -7.102409750444741,
+                  "bytes": [
+                    65,
+                    78,
+                    83
+                  ]
+                },
+                {
+                  "token": "answer",
+                  "logprob": -7.79400196693644,
+                  "bytes": [
+                    97,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "#",
+                  "logprob": -8.261701971514077,
+                  "bytes": [
+                    35
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -8.38533440254435,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "What",
+                  "logprob": -8.42709293983683,
+                  "bytes": [
+                    87,
+                    104,
+                    97,
+                    116
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -8.441971212847085,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -8.700280577165932,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -8.723517805559487,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -8.78686371467814,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -8.830418974382729,
+                  "bytes": [
+                    99
+                  ]
+                },
+                {
+                  "token": "###",
+                  "logprob": -8.884433180315346,
+                  "bytes": [
+                    35,
+                    35,
+                    35
+                  ]
+                },
+                {
+                  "token": "Question",
+                  "logprob": -9.18846169136271,
+                  "bytes": [
+                    81,
+                    117,
+                    101,
+                    115,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "Read",
+                  "logprob": -9.889655500871987,
+                  "bytes": [
+                    82,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "Q",
+                  "logprob": -10.021112829668374,
+                  "bytes": [
+                    81
+                  ]
+                }
+              ]
+            }
+          ],
+          "token_count": 1,
+          "logprob": -3.9035953583548975,
+          "path_probability": 0.020169265193279853,
+          "mean_logprob": -3.9035953583548975,
+          "finish_reason": "stop",
+          "raw_probability": 0.020169265193279853,
+          "weight": 0.02030543890261658,
+          "action": "finish",
+          "allowed": false
+        },
+        {
+          "label": "E",
+          "description": "ask: Ask for missing information",
+          "text": "E",
+          "tokens": [
+            {
+              "token": "E",
+              "logprob": -5.078722387773842,
+              "bytes": [
+                69
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.09478989265665515,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -3.1399540009330225,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -3.9035953583548975,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -4.265289694292397,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -5.078722387773842,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -6.6629394593070455,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "ANS",
+                  "logprob": -7.102409750444741,
+                  "bytes": [
+                    65,
+                    78,
+                    83
+                  ]
+                },
+                {
+                  "token": "answer",
+                  "logprob": -7.79400196693644,
+                  "bytes": [
+                    97,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "#",
+                  "logprob": -8.261701971514077,
+                  "bytes": [
+                    35
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -8.38533440254435,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "What",
+                  "logprob": -8.42709293983683,
+                  "bytes": [
+                    87,
+                    104,
+                    97,
+                    116
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -8.441971212847085,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -8.700280577165932,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -8.723517805559487,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -8.78686371467814,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -8.830418974382729,
+                  "bytes": [
+                    99
+                  ]
+                },
+                {
+                  "token": "###",
+                  "logprob": -8.884433180315346,
+                  "bytes": [
+                    35,
+                    35,
+                    35
+                  ]
+                },
+                {
+                  "token": "Question",
+                  "logprob": -9.18846169136271,
+                  "bytes": [
+                    81,
+                    117,
+                    101,
+                    115,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "Read",
+                  "logprob": -9.889655500871987,
+                  "bytes": [
+                    82,
+                    101,
+                    97,
+                    100
+                  ]
+                },
+                {
+                  "token": "Q",
+                  "logprob": -10.021112829668374,
+                  "bytes": [
+                    81
+                  ]
+                }
+              ]
+            }
+          ],
+          "token_count": 1,
+          "logprob": -5.078722387773842,
+          "path_probability": 0.006227860726266467,
+          "mean_logprob": -5.078722387773842,
+          "finish_reason": "stop",
+          "raw_probability": 0.006227860726266467,
+          "weight": 0.0062699084106119934,
+          "action": "ask",
+          "allowed": true
+        }
+      ],
+      "complete": true,
+      "prompt": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: inspected. The file and failing test were read; the off-by-one cause is known.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace.",
+      "winner": "B",
+      "statistics": {
+        "top_weight": 0.9157049832380725,
+        "margin": 0.8721279551051431,
+        "peakedness": 0.8946312290475905,
+        "entropy_bits": 0.5602423259278303
+      },
+      "strategy": "one literal-constrained call per label",
+      "semantics": "Raw label probabilities renormalized across these exact labels; not calibrated truth probabilities."
+    },
+    "generated": {
+      "text": "B",
+      "tokens": [
+        {
+          "token": "B",
+          "logprob": -0.09478989265665515,
+          "bytes": [
+            66
+          ],
+          "top_logprobs": [
+            {
+              "token": "B",
+              "logprob": -0.09478989265665515,
+              "bytes": [
+                66
+              ]
+            },
+            {
+              "token": "C",
+              "logprob": -3.1399540009330225,
+              "bytes": [
+                67
+              ]
+            },
+            {
+              "token": "D",
+              "logprob": -3.9035953583548975,
+              "bytes": [
+                68
+              ]
+            },
+            {
+              "token": "A",
+              "logprob": -4.265289694292397,
+              "bytes": [
+                65
+              ]
+            },
+            {
+              "token": "E",
+              "logprob": -5.078722387773842,
+              "bytes": [
+                69
+              ]
+            }
+          ]
+        }
+      ],
+      "token_count": 1,
+      "logprob": -0.09478989265665515,
+      "path_probability": 0.9095640204731857,
+      "mean_logprob": -0.09478989265665515,
+      "finish_reason": "stop"
+    },
+    "legal_conditional_weight": 0.9931994803031999,
+    "done": false,
+    "simulation": true,
+    "observation": "assert count_items([1, 2]) == 2  # returned 1"
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 6,
+    "summed_request_ms": 2186.43780000275,
+    "prompt_tokens": 882,
+    "completion_tokens": 12,
+    "calls": [
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: inspected. The file and failing test were read; the off-by-one cause is known.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"A\""
+        },
+        "response": {
+          "id": "chatcmpl-6038129b9cec4d34ba0b36bf",
+          "object": "chat.completion",
+          "created": 1791078010,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "A"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "A",
+                    "logprob": -4.265289694292397,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -0.09478989265665515,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -3.1399540009330225,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.9035953583548975,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -4.265289694292397,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -5.078722387773842,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -6.6629394593070455,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.102409750444741,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -7.79400196693644,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -8.261701971514077,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.38533440254435,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "What",
+                        "logprob": -8.42709293983683,
+                        "bytes": [
+                          87,
+                          104,
+                          97,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -8.441971212847085,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -8.700280577165932,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": " B",
+                        "logprob": -8.723517805559487,
+                        "bytes": [
+                          32,
+                          66
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -8.78686371467814,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -8.830418974382729,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "###",
+                        "logprob": -8.884433180315346,
+                        "bytes": [
+                          35,
+                          35,
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -9.18846169136271,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -9.889655500871987,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "Q",
+                        "logprob": -10.021112829668374,
+                        "bytes": [
+                          81
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 147,
+            "completion_tokens": 2,
+            "total_tokens": 149,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 147,
+            "prompt_ms": 813.4,
+            "prompt_per_token_ms": 5.533,
+            "prompt_per_second": 180.7,
+            "predicted_n": 2,
+            "predicted_ms": 48.1,
+            "predicted_per_token_ms": 24.05,
+            "predicted_per_second": 41.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 883.6566999962088,
+        "captured_at": "2026-10-04T01:40:11Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: inspected. The file and failing test were read; the off-by-one cause is known.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"B\""
+        },
+        "response": {
+          "id": "chatcmpl-b5511a3519fe4dd9bb1441c4",
+          "object": "chat.completion",
+          "created": 1791078011,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "B"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "B",
+                    "logprob": -0.09478989265665515,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -0.09478989265665515,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -3.1399540009330225,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.9035953583548975,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -4.265289694292397,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -5.078722387773842,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -6.6629394593070455,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.102409750444741,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -7.79400196693644,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -8.261701971514077,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.38533440254435,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "What",
+                        "logprob": -8.42709293983683,
+                        "bytes": [
+                          87,
+                          104,
+                          97,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -8.441971212847085,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -8.700280577165932,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": " B",
+                        "logprob": -8.723517805559487,
+                        "bytes": [
+                          32,
+                          66
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -8.78686371467814,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -8.830418974382729,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "###",
+                        "logprob": -8.884433180315346,
+                        "bytes": [
+                          35,
+                          35,
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -9.18846169136271,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -9.889655500871987,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "Q",
+                        "logprob": -10.021112829668374,
+                        "bytes": [
+                          81
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 147,
+            "completion_tokens": 2,
+            "total_tokens": 149,
+            "prompt_tokens_details": {
+              "cached_tokens": 140
+            }
+          },
+          "timings": {
+            "cache_n": 140,
+            "prompt_n": 7,
+            "prompt_ms": 179.1,
+            "prompt_per_token_ms": 25.586,
+            "prompt_per_second": 39.1,
+            "predicted_n": 2,
+            "predicted_ms": 48.5,
+            "predicted_per_token_ms": 24.25,
+            "predicted_per_second": 41.2,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 258.312299993122,
+        "captured_at": "2026-10-04T01:40:11Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: inspected. The file and failing test were read; the off-by-one cause is known.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"C\""
+        },
+        "response": {
+          "id": "chatcmpl-b63b281006a84f22b06df7d1",
+          "object": "chat.completion",
+          "created": 1791078011,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "C"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "C",
+                    "logprob": -3.1399540009330225,
+                    "bytes": [
+                      67
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -0.09478989265665515,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -3.1399540009330225,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.9035953583548975,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -4.265289694292397,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -5.078722387773842,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -6.6629394593070455,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.102409750444741,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -7.79400196693644,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -8.261701971514077,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.38533440254435,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "What",
+                        "logprob": -8.42709293983683,
+                        "bytes": [
+                          87,
+                          104,
+                          97,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -8.441971212847085,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -8.700280577165932,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": " B",
+                        "logprob": -8.723517805559487,
+                        "bytes": [
+                          32,
+                          66
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -8.78686371467814,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -8.830418974382729,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "###",
+                        "logprob": -8.884433180315346,
+                        "bytes": [
+                          35,
+                          35,
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -9.18846169136271,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -9.889655500871987,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "Q",
+                        "logprob": -10.021112829668374,
+                        "bytes": [
+                          81
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 147,
+            "completion_tokens": 2,
+            "total_tokens": 149,
+            "prompt_tokens_details": {
+              "cached_tokens": 140
+            }
+          },
+          "timings": {
+            "cache_n": 140,
+            "prompt_n": 7,
+            "prompt_ms": 181.0,
+            "prompt_per_token_ms": 25.857,
+            "prompt_per_second": 38.7,
+            "predicted_n": 2,
+            "predicted_ms": 45.8,
+            "predicted_per_token_ms": 22.9,
+            "predicted_per_second": 43.7,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 257.03900001826696,
+        "captured_at": "2026-10-04T01:40:12Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: inspected. The file and failing test were read; the off-by-one cause is known.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"D\""
+        },
+        "response": {
+          "id": "chatcmpl-f3c68e7d78064e4b9934d929",
+          "object": "chat.completion",
+          "created": 1791078011,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "D"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "D",
+                    "logprob": -3.9035953583548975,
+                    "bytes": [
+                      68
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -0.09478989265665515,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -3.1399540009330225,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.9035953583548975,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -4.265289694292397,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -5.078722387773842,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -6.6629394593070455,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.102409750444741,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -7.79400196693644,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -8.261701971514077,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.38533440254435,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "What",
+                        "logprob": -8.42709293983683,
+                        "bytes": [
+                          87,
+                          104,
+                          97,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -8.441971212847085,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -8.700280577165932,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": " B",
+                        "logprob": -8.723517805559487,
+                        "bytes": [
+                          32,
+                          66
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -8.78686371467814,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -8.830418974382729,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "###",
+                        "logprob": -8.884433180315346,
+                        "bytes": [
+                          35,
+                          35,
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -9.18846169136271,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -9.889655500871987,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "Q",
+                        "logprob": -10.021112829668374,
+                        "bytes": [
+                          81
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 147,
+            "completion_tokens": 2,
+            "total_tokens": 149,
+            "prompt_tokens_details": {
+              "cached_tokens": 140
+            }
+          },
+          "timings": {
+            "cache_n": 140,
+            "prompt_n": 7,
+            "prompt_ms": 179.0,
+            "prompt_per_token_ms": 25.571,
+            "prompt_per_second": 39.1,
+            "predicted_n": 2,
+            "predicted_ms": 49.7,
+            "predicted_per_token_ms": 24.85,
+            "predicted_per_second": 40.2,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 249.25190000794828,
+        "captured_at": "2026-10-04T01:40:12Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: inspected. The file and failing test were read; the off-by-one cause is known.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"E\""
+        },
+        "response": {
+          "id": "chatcmpl-d3319ade505646a3ab48a5b9",
+          "object": "chat.completion",
+          "created": 1791078011,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "E"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "E",
+                    "logprob": -5.078722387773842,
+                    "bytes": [
+                      69
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -0.09478989265665515,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -3.1399540009330225,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.9035953583548975,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -4.265289694292397,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -5.078722387773842,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -6.6629394593070455,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.102409750444741,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -7.79400196693644,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -8.261701971514077,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.38533440254435,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "What",
+                        "logprob": -8.42709293983683,
+                        "bytes": [
+                          87,
+                          104,
+                          97,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -8.441971212847085,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -8.700280577165932,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": " B",
+                        "logprob": -8.723517805559487,
+                        "bytes": [
+                          32,
+                          66
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -8.78686371467814,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -8.830418974382729,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "###",
+                        "logprob": -8.884433180315346,
+                        "bytes": [
+                          35,
+                          35,
+                          35
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -9.18846169136271,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "Read",
+                        "logprob": -9.889655500871987,
+                        "bytes": [
+                          82,
+                          101,
+                          97,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "Q",
+                        "logprob": -10.021112829668374,
+                        "bytes": [
+                          81
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 147,
+            "completion_tokens": 2,
+            "total_tokens": 149,
+            "prompt_tokens_details": {
+              "cached_tokens": 140
+            }
+          },
+          "timings": {
+            "cache_n": 140,
+            "prompt_n": 7,
+            "prompt_ms": 180.0,
+            "prompt_per_token_ms": 25.714,
+            "prompt_per_second": 38.9,
+            "predicted_n": 2,
+            "predicted_ms": 50.9,
+            "predicted_per_token_ms": 25.45,
+            "predicted_per_second": 39.3,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 264.1906999924686,
+        "captured_at": "2026-10-04T01:40:12Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTask: Fix an off-by-one bug in count_items, then verify it.\nCurrent state: inspected. The file and failing test were read; the off-by-one cause is known.\nQUESTION: What is the best next action?\nANSWERS:\nA: inspect: Read the file and its failing test\nB: edit: Fix the off-by-one bug\nC: test: Run the small verification suite\nD: finish: Mark the task complete\nE: ask: Ask for missing information\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"B\" | \"E\""
+        },
+        "response": {
+          "id": "chatcmpl-21d119e976bf455ca1eecef7",
+          "object": "chat.completion",
+          "created": 1791078012,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "B"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "B",
+                    "logprob": -0.09478989265665515,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -0.09478989265665515,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -3.1399540009330225,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.9035953583548975,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -4.265289694292397,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -5.078722387773842,
+                        "bytes": [
+                          69
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 147,
+            "completion_tokens": 2,
+            "total_tokens": 149,
+            "prompt_tokens_details": {
+              "cached_tokens": 140
+            }
+          },
+          "timings": {
+            "cache_n": 140,
+            "prompt_n": 7,
+            "prompt_ms": 181.4,
+            "prompt_per_token_ms": 25.914,
+            "prompt_per_second": 38.6,
+            "predicted_n": 2,
+            "predicted_ms": 48.4,
+            "predicted_per_token_ms": 24.2,
+            "predicted_per_second": 41.3,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 273.9871999947354,
+        "captured_at": "2026-10-04T01:40:13Z"
+      }
+    ]
+  },
+  "wall_ms": 2236.73889998463
+}

@@ -1,0 +1,230 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Pick a drink for someone whose preferences you do not know. A) tea B) coffee. Answer only A or B."
+      }
+    ],
+    "max_tokens": 1,
+    "temperature": 0,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "reasoning_effort": "none"
+  },
+  "response": {
+    "id": "chatcmpl-91316284183242f7a253f854",
+    "object": "chat.completion",
+    "created": 1791078020,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "length",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.5562651933449887,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -0.5562651933449887,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -0.8921321214455746,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": " A",
+                  "logprob": -4.769743281723895,
+                  "bytes": [
+                    32,
+                    65
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -4.908060389878192,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -8.922527629258074,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -9.110302287461199,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -10.06031926286403,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": "a",
+                  "logprob": -10.148926097275652,
+                  "bytes": [
+                    97
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -10.489508944870867,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "**",
+                  "logprob": -10.78276856553737,
+                  "bytes": [
+                    42,
+                    42
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -11.251281100632585,
+                  "bytes": null
+                },
+                {
+                  "token": "To",
+                  "logprob": -11.586064654709734,
+                  "bytes": [
+                    84,
+                    111
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -11.6903746904153,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "<|endoftext|>",
+                  "logprob": -11.791211444260515,
+                  "bytes": null
+                },
+                {
+                  "token": "Option",
+                  "logprob": -11.920264560105242,
+                  "bytes": [
+                    79,
+                    112,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "There",
+                  "logprob": -11.975920039536394,
+                  "bytes": [
+                    84,
+                    104,
+                    101,
+                    114,
+                    101
+                  ]
+                },
+                {
+                  "token": "H",
+                  "logprob": -12.142938929917253,
+                  "bytes": [
+                    72
+                  ]
+                },
+                {
+                  "token": "(A",
+                  "logprob": -12.183882075669207,
+                  "bytes": [
+                    40,
+                    65
+                  ]
+                },
+                {
+                  "token": "T",
+                  "logprob": -12.219166118027605,
+                  "bytes": [
+                    84
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -12.226001101853289,
+                  "bytes": [
+                    67
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 37,
+      "completion_tokens": 1,
+      "total_tokens": 38,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 37,
+      "prompt_ms": 1370.4,
+      "prompt_per_token_ms": 37.038,
+      "prompt_per_second": 27.0,
+      "predicted_n": 1,
+      "predicted_ms": 29.2,
+      "predicted_per_token_ms": 29.2,
+      "predicted_per_second": 34.2,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 1584.2117999854963,
+  "captured_at": "2026-10-04T01:40:23Z"
+}
