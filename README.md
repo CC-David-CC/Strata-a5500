@@ -19,7 +19,9 @@ the opportunity for a device-to-device refill; it does not implement one.
 **Measured at 32K:** 23-26% of CPU-assigned expert groups already had copies in
 this sixteen-entry GPU cache. Across coding/editing, 59% of plain and 62% of MTP
 committed primary promotions also had GPU copies (18.9/25.6GB of potential
-refill payload). This is an opportunity census, **not a measured speedup**.
+refill payload). Every cached CPU group in these traces fits in the remaining
+staging slots without displacing existing GPU groups. This is an opportunity
+census, **not a measured speedup**.
 
 All four requests matched untraced tokens/work; GPU and committed-exchange
 counters validated the replay. Seven replay tests and native build/sanitizer

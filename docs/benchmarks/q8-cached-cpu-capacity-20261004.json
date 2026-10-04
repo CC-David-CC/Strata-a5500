@@ -1,0 +1,92 @@
+{
+  "traces": [
+    {
+      "log": ".fleet_work\\strata\\q8-host-critical-20261004\\cache-routing-plain-r2.log",
+      "sha256": "ffedc6ae70db61af6c39e55a4ab6d409d8a32232f94dd467f74b40cefd174ced",
+      "staging_cap": 16,
+      "actual_cache_ways": 16,
+      "device_counters_exact": true,
+      "totals": {
+        "cpu_groups": 56149,
+        "cpu_entries": 56149,
+        "cached_cpu_groups": 13285,
+        "cached_cpu_entries": 13285,
+        "eligible_groups": 13285,
+        "eligible_entries": 13285,
+        "blocked_groups": 0,
+        "blocked_entries": 0
+      },
+      "requests": [
+        {
+          "cpu_groups": 20015,
+          "cpu_entries": 20015,
+          "cached_cpu_groups": 4911,
+          "cached_cpu_entries": 4911,
+          "eligible_groups": 4911,
+          "eligible_entries": 4911,
+          "blocked_groups": 0,
+          "blocked_entries": 0,
+          "eligible_fraction_of_cpu_groups": 0.24536597551836123,
+          "eligible_fraction_of_cpu_entries": 0.24536597551836123
+        },
+        {
+          "cpu_groups": 36134,
+          "cpu_entries": 36134,
+          "cached_cpu_groups": 8374,
+          "cached_cpu_entries": 8374,
+          "eligible_groups": 8374,
+          "eligible_entries": 8374,
+          "blocked_groups": 0,
+          "blocked_entries": 0,
+          "eligible_fraction_of_cpu_groups": 0.23174849172524492,
+          "eligible_fraction_of_cpu_entries": 0.23174849172524492
+        }
+      ],
+      "interpretation": "Independent per-window opportunities on the unchanged measured cache/routing history. Existing GPU groups retain their slots; cached CPU groups use remaining slots in routing order. No CPU work was redirected. A sustained policy would change cache ages, arithmetic, routing and future work; these counts do not simulate that trajectory or predict speed."
+    },
+    {
+      "log": ".fleet_work\\strata\\q8-host-critical-20261004\\cache-routing-mtp-r2.log",
+      "sha256": "69db167d69d79af63e17ee30d79d8c9682294a89a447b1baa02ab7f783e04aed",
+      "staging_cap": 16,
+      "actual_cache_ways": 16,
+      "device_counters_exact": true,
+      "totals": {
+        "cpu_groups": 35682,
+        "cpu_entries": 40326,
+        "cached_cpu_groups": 8608,
+        "cached_cpu_entries": 10200,
+        "eligible_groups": 8608,
+        "eligible_entries": 10200,
+        "blocked_groups": 0,
+        "blocked_entries": 0
+      },
+      "requests": [
+        {
+          "cpu_groups": 13782,
+          "cpu_entries": 16565,
+          "cached_cpu_groups": 3647,
+          "cached_cpu_entries": 4614,
+          "eligible_groups": 3647,
+          "eligible_entries": 4614,
+          "blocked_groups": 0,
+          "blocked_entries": 0,
+          "eligible_fraction_of_cpu_groups": 0.26462051951821214,
+          "eligible_fraction_of_cpu_entries": 0.27853908843948083
+        },
+        {
+          "cpu_groups": 21900,
+          "cpu_entries": 23761,
+          "cached_cpu_groups": 4961,
+          "cached_cpu_entries": 5586,
+          "eligible_groups": 4961,
+          "eligible_entries": 5586,
+          "blocked_groups": 0,
+          "blocked_entries": 0,
+          "eligible_fraction_of_cpu_groups": 0.2265296803652968,
+          "eligible_fraction_of_cpu_entries": 0.23509111569378394
+        }
+      ],
+      "interpretation": "Independent per-window opportunities on the unchanged measured cache/routing history. Existing GPU groups retain their slots; cached CPU groups use remaining slots in routing order. No CPU work was redirected. A sustained policy would change cache ages, arithmetic, routing and future work; these counts do not simulate that trajectory or predict speed."
+    }
+  ]
+}

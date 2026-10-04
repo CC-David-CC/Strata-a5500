@@ -123,3 +123,37 @@ round trip. Its overhead, source lifetime and snapshot correctness still need
 component and model tests. Neither opportunity above is a measured speed gain.
 
 [Native build, full request records and validated census](benchmarks/q8-cache-routing-census-20261004.json).
+
+
+## Staging-capacity check
+
+A second, read-only replay preserves every existing GPU group before assigning
+any spare staging slots to CPU groups whose weights are already cached. In all
+four recorded requests, **every such CPU group fit** within the current sixteen
+staging slots; none would have displaced an existing GPU group.
+
+| Mode / task | Cached CPU groups that fit | Fraction of CPU groups | Fraction of CPU token/expert entries |
+|---|---:|---:|---:|
+| Plain / Coding | 4,911 | 24.54% | 24.54% |
+| Plain / Editing | 8,374 | 23.17% | 23.17% |
+| MTP / Coding | 3,647 | 26.46% | 27.85% |
+| MTP / Editing | 4,961 | 22.65% | 23.51% |
+
+This evaluates each opportunity against the unchanged measured cache history;
+it does not simulate a sustained changed policy. New GPU work would change
+replacement ages, arithmetic, routes and future work. The fractions are not
+fractions of CPU time and do not establish a speedup.
+
+Four additional local tests cover preserving later GPU assignments, full/empty
+capacity, primary hits using no staging slot, and rejecting a baseline that
+already exceeds capacity. Both full logs were checked again against the actual
+GPU/PCIe/exchange counters before applying the capacity check. No engine code
+or configuration changed for this analysis.
+
+A CPU-diversion implementation must use each layer's previous tags only before
+that layer publishes its next GPU plan. The D2D refill snapshot is invalidated
+at whole-window entry, so its general source-pointer lookup cannot simply be
+reused inside the CPU planner. That lifetime rule needs explicit handling and
+tests before redirecting work.
+
+[Capacity replay and log hashes](benchmarks/q8-cached-cpu-capacity-20261004.json).
