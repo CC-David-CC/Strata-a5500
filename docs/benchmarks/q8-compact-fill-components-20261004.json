@@ -1,0 +1,1007 @@
+{
+  "source": "12717688241b5beeaef15ad58fbde1eb301f8e9e",
+  "engine_sha256": "f767a44f6374c425d6c62dc8da96ede598c9f8ca7b0da5abf5bffa13ce8df9d8",
+  "gate": {
+    "started": 1791116883.860724,
+    "steps": [
+      {
+        "label": "fixture-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-compact-fill-12717688/include",
+          "-c",
+          "/home/dflanag3/src/q8-compact-fill-12717688/tools/readonly_miss_cache_fixture.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 1.5159704909892753
+      },
+      {
+        "label": "cache-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-compact-fill-12717688/include",
+          "-c",
+          "/home/dflanag3/src/q8-compact-fill-12717688/src/kernels/cuda/readonly_miss_cache.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/cache.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.007758158986689523
+      },
+      {
+        "label": "verify-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-compact-fill-12717688/include",
+          "-c",
+          "/home/dflanag3/src/q8-compact-fill-12717688/src/kernels/cuda/verify_kernels.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/verify.o"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.007386390992905945
+      },
+      {
+        "label": "fixture-link",
+        "command": [
+          "/usr/local/cuda/bin/nvcc",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture.o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/cache.o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/verify.o",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {},
+        "expected_exit": 0,
+        "seconds": 0.11403390098712407
+      },
+      {
+        "label": "fixture-blocks32-compact0",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "0"
+        },
+        "expected_exit": 0,
+        "seconds": 6.2714025620080065
+      },
+      {
+        "label": "fixture-blocks32-compact1",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "1"
+        },
+        "expected_exit": 0,
+        "seconds": 6.171304260002216
+      },
+      {
+        "label": "fixture-blocks384-compact0",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "384",
+          "STRATA_Q8_COMPACT_MISS_FILL": "0"
+        },
+        "expected_exit": 0,
+        "seconds": 6.221742256981088
+      },
+      {
+        "label": "fixture-blocks384-compact1",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "384",
+          "STRATA_Q8_COMPACT_MISS_FILL": "1"
+        },
+        "expected_exit": 0,
+        "seconds": 6.225485867005773
+      },
+      {
+        "label": "fixture-memcheck-compact0",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "memcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "0"
+        },
+        "expected_exit": 0,
+        "seconds": 4.82258190002176
+      },
+      {
+        "label": "fixture-initcheck-compact0",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "initcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "0"
+        },
+        "expected_exit": 0,
+        "seconds": 4.973138077009935
+      },
+      {
+        "label": "fixture-memcheck-compact1",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "memcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "1"
+        },
+        "expected_exit": 0,
+        "seconds": 4.823318451992236
+      },
+      {
+        "label": "fixture-initcheck-compact1",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "initcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "1"
+        },
+        "expected_exit": 0,
+        "seconds": 5.023382671002764
+      },
+      {
+        "label": "invalid-compact-0",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_Q8_COMPACT_MISS_FILL": ""
+        },
+        "expected_exit": 1,
+        "seconds": 0.21393062800052576
+      },
+      {
+        "label": "invalid-compact-1",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_Q8_COMPACT_MISS_FILL": "2"
+        },
+        "expected_exit": 1,
+        "seconds": 0.21422510899719782
+      },
+      {
+        "label": "invalid-compact-2",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--quick"
+        ],
+        "exit": 1,
+        "environment": {
+          "STRATA_Q8_COMPACT_MISS_FILL": "yes"
+        },
+        "expected_exit": 1,
+        "seconds": 0.264325658994494
+      },
+      {
+        "label": "fill-bench-0-compact0",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--measure-fill"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "0"
+        },
+        "expected_exit": 0,
+        "seconds": 1.0154622769914567
+      },
+      {
+        "label": "fill-bench-1-compact1",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--measure-fill"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "1"
+        },
+        "expected_exit": 0,
+        "seconds": 0.9652937230130192
+      },
+      {
+        "label": "fill-bench-2-compact1",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--measure-fill"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "1"
+        },
+        "expected_exit": 0,
+        "seconds": 0.9651962200005073
+      },
+      {
+        "label": "fill-bench-3-compact0",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture",
+          "--measure-fill"
+        ],
+        "exit": 0,
+        "environment": {
+          "STRATA_MISS_FETCH_BLOCKS": "32",
+          "STRATA_Q8_COMPACT_MISS_FILL": "0"
+        },
+        "expected_exit": 0,
+        "seconds": 0.9654675269848667
+      }
+    ],
+    "completed": true,
+    "source": "12717688241b5beeaef15ad58fbde1eb301f8e9e",
+    "fill_benchmarks": [
+      {
+        "label": "fill-bench-0-compact0",
+        "compact": 0,
+        "cases": [
+          {
+            "groups": 1,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.006169,
+            "bytes_exact": true
+          },
+          {
+            "groups": 1,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.198773995,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.018432001,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.213648006,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 2,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.395731509,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 4,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.783286512,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.067557998,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.262111992,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 8,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 1.571663976,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 16,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 3.122655392,
+            "bytes_exact": true
+          }
+        ]
+      },
+      {
+        "label": "fill-bench-1-compact1",
+        "compact": 1,
+        "cases": [
+          {
+            "groups": 1,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.0020435,
+            "bytes_exact": true
+          },
+          {
+            "groups": 1,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.198774502,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.002043,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.198752001,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 2,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.393494487,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 4,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.783286512,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.002043,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.198759004,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 8,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 1.563264012,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 16,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 3.122303963,
+            "bytes_exact": true
+          }
+        ]
+      },
+      {
+        "label": "fill-bench-2-compact1",
+        "compact": 1,
+        "cases": [
+          {
+            "groups": 1,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.0020715,
+            "bytes_exact": true
+          },
+          {
+            "groups": 1,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.198765501,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.002043,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.198832497,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 2,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.393398494,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 4,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.783350527,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.002048,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.198597997,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 8,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 1.563135982,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 16,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 3.12223959,
+            "bytes_exact": true
+          }
+        ]
+      },
+      {
+        "label": "fill-bench-3-compact0",
+        "compact": 0,
+        "cases": [
+          {
+            "groups": 1,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.006169,
+            "bytes_exact": true
+          },
+          {
+            "groups": 1,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.1985735,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.0184255,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.213615999,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 2,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.395895004,
+            "bytes_exact": true
+          },
+          {
+            "groups": 4,
+            "misses": 4,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.78331852,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 0,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.067545503,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 1,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 0.261824012,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 8,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 1.571135998,
+            "bytes_exact": true
+          },
+          {
+            "groups": 16,
+            "misses": 16,
+            "bytes_per_expert": 5222400,
+            "repetitions": 64,
+            "ms_per_fill": 3.122495413,
+            "bytes_exact": true
+          }
+        ]
+      }
+    ],
+    "engine_sha256": "f767a44f6374c425d6c62dc8da96ede598c9f8ca7b0da5abf5bffa13ce8df9d8",
+    "finished": 1791116948.402398
+  },
+  "build": {
+    "started": 1791116934.6524916,
+    "steps": [
+      {
+        "name": "worker-sanitize-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=address,undefined",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-compact-fill-12717688/include",
+          "/home/dflanag3/src/q8-compact-fill-12717688/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 1.065550307976082
+      },
+      {
+        "name": "worker-sanitize",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 0.11393363997922279
+      },
+      {
+        "name": "worker-tsan-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=thread",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-compact-fill-12717688/include",
+          "/home/dflanag3/src/q8-compact-fill-12717688/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.7647333890199661
+      },
+      {
+        "name": "worker-tsan-noaslr",
+        "command": [
+          "setarch",
+          "x86_64",
+          "-R",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.465021087002242
+      },
+      {
+        "name": "ccache-before",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.0315048240008764
+      },
+      {
+        "name": "configure",
+        "command": [
+          "cmake",
+          "-S",
+          "/home/dflanag3/src/q8-compact-fill-12717688",
+          "-B",
+          "/home/dflanag3/src/q8-compact-fill-12717688/build",
+          "-G",
+          "Ninja",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+          "-DCMAKE_CUDA_ARCHITECTURES=120",
+          "-DSTRATA_ENABLE_CUDA=ON",
+          "-DSTRATA_ENABLE_HIP=OFF",
+          "-DSTRATA_NATIVE_EXPERTS=ON",
+          "-DSTRATA_GGML_DIR=/home/dflanag3/src/Strata/third_party/llama.cpp",
+          "-DSTRATA_MMQ_KQUANTS=ON",
+          "-DSTRATA_FLEET_CUDA_TRACE=ON",
+          "-DSTRATA_BUILD_TESTS=OFF",
+          "-DIQ_FIXTURE_PYTHON=/home/dflanag3/src/Strata/.venv/bin/python",
+          "-DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-compact-fill-12717688;/usr/bin/ccache",
+          "-DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-compact-fill-12717688;/usr/bin/ccache",
+          "-DCMAKE_CUDA_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-compact-fill-12717688;/usr/bin/ccache"
+        ],
+        "exit": 0,
+        "seconds": 1.6173017380060628
+      },
+      {
+        "name": "build",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-compact-fill-12717688/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 9.28043642398552
+      },
+      {
+        "name": "ccache-replay",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-compact-fill-12717688/build",
+          "--target",
+          "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+          "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+          "-j",
+          "2"
+        ],
+        "exit": 0,
+        "seconds": 0.0317126160080079
+      },
+      {
+        "name": "relink",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-compact-fill-12717688/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 0.2642484000243712
+      },
+      {
+        "name": "ccache-after",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.0076664030202664435
+      }
+    ],
+    "source": "12717688241b5beeaef15ad58fbde1eb301f8e9e",
+    "tsan_mapping_workaround": "ASLR off for this sanitizer process only",
+    "ccache": {
+      "version": "ccache version 4.9.1",
+      "launcher": "/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-compact-fill-12717688;/usr/bin/ccache",
+      "probe": {
+        "cache_hits": 2,
+        "objects": [
+          {
+            "path": "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+            "sha256": "11e36dd2ba963b0f3c37fce75d97d93e517dbbf808a472584596f9d05e3fe729",
+            "byte_identical": true
+          },
+          {
+            "path": "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+            "sha256": "14302189a1f0503c4e0610291fc0f5dcb2f12fa89a36abc1e253e228ea9792a3",
+            "byte_identical": true
+          }
+        ]
+      }
+    },
+    "completed": true,
+    "engine_sha256": "f767a44f6374c425d6c62dc8da96ede598c9f8ca7b0da5abf5bffa13ce8df9d8",
+    "finished": 1791116948.3610592
+  },
+  "sanitizers": {
+    "fixture-memcheck-compact0.log": {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture-memcheck-compact0.log",
+      "sha256": "a7eae8e02f5832e141793d58f2a8fcce213361390d18e1fca2b398cb03d717a8",
+      "log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n"
+    },
+    "fixture-initcheck-compact0.log": {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture-initcheck-compact0.log",
+      "sha256": "a7eae8e02f5832e141793d58f2a8fcce213361390d18e1fca2b398cb03d717a8",
+      "log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n"
+    },
+    "fixture-memcheck-compact1.log": {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture-memcheck-compact1.log",
+      "sha256": "8c97a635ee05d6bae51600e6c217a7235ad5ebe8f7bd668ea13c0abc7bf8876e",
+      "log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nstrata compact miss fill: enabled; visit only upload groups, unchanged bytes and publication\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n"
+    },
+    "fixture-initcheck-compact1.log": {
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-compact-fill-20261004-r3/readonly-gates-attempt-01/fixture-initcheck-compact1.log",
+      "sha256": "8c97a635ee05d6bae51600e6c217a7235ad5ebe8f7bd668ea13c0abc7bf8876e",
+      "log": "========= COMPUTE-SANITIZER\nstrata miss fetch geometry: blocks=32 threads=256; unchanged grid-stride byte copy\nstrata compact miss fill: enabled; visit only upload groups, unchanged bytes and publication\nPASS bytes=16 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=0 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=0 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=0 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=0 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=0 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=0 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=0 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS bytes=16 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=144 ways=0 overlap=1 requests=253 hits=0 fills=253 bypasses=0 abandoned=0\nPASS bytes=16 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=144 ways=1 overlap=1 requests=234 hits=8 fills=226 bypasses=207 abandoned=2\nPASS bytes=16 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=144 ways=4 overlap=1 requests=234 hits=42 fills=192 bypasses=131 abandoned=2\nPASS bytes=16 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=144 ways=16 overlap=1 requests=234 hits=134 fills=100 bypasses=0 abandoned=2\nPASS bytes=5222400 ways=0 overlap=1 requests=179 hits=0 fills=179 bypasses=0 abandoned=0\nPASS bytes=5222400 ways=4 overlap=1 requests=160 hits=35 fills=125 bypasses=86 abandoned=2\nPASS bytes=5222400 ways=16 overlap=1 requests=160 hits=85 fills=75 bypasses=0 abandoned=2\nPASS staged/cache miss fetch: fork/join, complete bytes, independent resident outputs, source immutability, graph replay, guards, abandoned fills\n========= ERROR SUMMARY: 0 errors\n"
+    }
+  },
+  "fill_summary": [
+    {
+      "groups": 1,
+      "misses": 0,
+      "off_us": 6.169,
+      "on_us": 2.0575,
+      "time_reduction_pct": 66.64775490355001,
+      "off_samples_ms": [
+        0.006169,
+        0.006169
+      ],
+      "on_samples_ms": [
+        0.0020435,
+        0.0020715
+      ]
+    },
+    {
+      "groups": 1,
+      "misses": 1,
+      "off_us": 198.6737475,
+      "on_us": 198.7700015,
+      "time_reduction_pct": -0.04844827321739409,
+      "off_samples_ms": [
+        0.198773995,
+        0.1985735
+      ],
+      "on_samples_ms": [
+        0.198774502,
+        0.198765501
+      ]
+    },
+    {
+      "groups": 4,
+      "misses": 0,
+      "off_us": 18.4287505,
+      "on_us": 2.043,
+      "time_reduction_pct": 88.91406121104086,
+      "off_samples_ms": [
+        0.018432001,
+        0.0184255
+      ],
+      "on_samples_ms": [
+        0.002043,
+        0.002043
+      ]
+    },
+    {
+      "groups": 4,
+      "misses": 1,
+      "off_us": 213.6320025,
+      "on_us": 198.792249,
+      "time_reduction_pct": 6.946409398563769,
+      "off_samples_ms": [
+        0.213648006,
+        0.213615999
+      ],
+      "on_samples_ms": [
+        0.198752001,
+        0.198832497
+      ]
+    },
+    {
+      "groups": 4,
+      "misses": 2,
+      "off_us": 395.81325649999997,
+      "on_us": 393.44649050000004,
+      "time_reduction_pct": 0.5979501598628145,
+      "off_samples_ms": [
+        0.395731509,
+        0.395895004
+      ],
+      "on_samples_ms": [
+        0.393494487,
+        0.393398494
+      ]
+    },
+    {
+      "groups": 4,
+      "misses": 4,
+      "off_us": 783.302516,
+      "on_us": 783.3185195,
+      "time_reduction_pct": -0.00204308037738965,
+      "off_samples_ms": [
+        0.783286512,
+        0.78331852
+      ],
+      "on_samples_ms": [
+        0.783286512,
+        0.783350527
+      ]
+    },
+    {
+      "groups": 16,
+      "misses": 0,
+      "off_us": 67.55175050000001,
+      "on_us": 2.0455,
+      "time_reduction_pct": 96.97195115617322,
+      "off_samples_ms": [
+        0.067557998,
+        0.067545503
+      ],
+      "on_samples_ms": [
+        0.002043,
+        0.002048
+      ]
+    },
+    {
+      "groups": 16,
+      "misses": 1,
+      "off_us": 261.968002,
+      "on_us": 198.67850049999998,
+      "time_reduction_pct": 24.15924884597167,
+      "off_samples_ms": [
+        0.262111992,
+        0.261824012
+      ],
+      "on_samples_ms": [
+        0.198759004,
+        0.198597997
+      ]
+    },
+    {
+      "groups": 16,
+      "misses": 8,
+      "off_us": 1571.399987,
+      "on_us": 1563.199997,
+      "time_reduction_pct": 0.5218270375358047,
+      "off_samples_ms": [
+        1.571663976,
+        1.571135998
+      ],
+      "on_samples_ms": [
+        1.563264012,
+        1.563135982
+      ]
+    },
+    {
+      "groups": 16,
+      "misses": 16,
+      "off_us": 3122.5754024999997,
+      "on_us": 3122.2717764999998,
+      "time_reduction_pct": 0.009723576242770537,
+      "off_samples_ms": [
+        3.122655392,
+        3.122495413
+      ],
+      "on_samples_ms": [
+        3.122303963,
+        3.12223959
+      ]
+    }
+  ],
+  "interpretation": "Corrected fixture only reads initialized plan counts/live prefix. All four sanitizers report zero errors; 88full byte cases and invalid flags passed. Fill-only timings average two batches of64 graph replays per mode, off/on/on/off,32blocks,5,222,400bytes/expert. They exclude planning, publication and model math, and do not establish a model speedup or confidence bounds."
+}

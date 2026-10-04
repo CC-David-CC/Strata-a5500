@@ -78,3 +78,32 @@ This correction changes the fixture only. A fresh initcheck pass is still
 required to confirm the diagnosis; there is no accepted model result yet.
 The failed run and its logs remain in
 [the rejected fixture evidence](benchmarks/q8-compact-fill-rejected-fixture-20261004.json).
+
+
+## Corrected component gate completed
+
+The fixture-only correction passed all 88 complete-byte cases, memcheck and
+initcheck with compact traversal both off and on (four zero-error sanitizer
+runs), and the three malformed-flag rejections. The device plan was not
+zero-filled to hide unused-entry reads. The earlier failed run is preserved
+above. The CUDA engine built successfully with ccache; model testing follows.
+
+Fill-only microbenchmark: 32 blocks, 5,222,400 bytes/expert, off/on/on/off order.
+Each number averages two batches of 64 graph replays. No planning, publication,
+expert arithmetic or prefill is inside these times. No model speedup or
+confidence interval is established by this table.
+
+| Expert groups | Actual misses | Ordinary fill us | Compact fill us | Fill time reduction |
+|---:|---:|---:|---:|---:|
+| 1 | 0 | 6.17 | 2.06 | +66.65% |
+| 1 | 1 | 198.67 | 198.77 | -0.05% |
+| 4 | 0 | 18.43 | 2.04 | +88.91% |
+| 4 | 1 | 213.63 | 198.79 | +6.95% |
+| 4 | 2 | 395.81 | 393.45 | +0.60% |
+| 4 | 4 | 783.30 | 783.32 | -0.00% |
+| 16 | 0 | 67.55 | 2.05 | +96.97% |
+| 16 | 1 | 261.97 | 198.68 | +24.16% |
+| 16 | 8 | 1571.40 | 1563.20 | +0.52% |
+| 16 | 16 | 3122.58 | 3122.27 | +0.01% |
+
+[Complete gates, sanitizer logs, build and microbenchmark samples](benchmarks/q8-compact-fill-components-20261004.json).
