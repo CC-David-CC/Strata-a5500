@@ -10,7 +10,9 @@ struct HostPathTiming {
     bool enabled = [] { const char* v = std::getenv("STRATA_HOST_TIMING"); return v && v[0] == '1'; }();
     double rank = 0, d2h_enqueue = 0, d2h_wait = 0, h2d_enqueue = 0, adapt_total = 0;
     double admission_wait = 0, ownership_commit = 0, table_upload = 0, launch = 0, join = 0;
+    double duplex_enqueue = 0;
     uint64_t d2h_bytes = 0, h2d_bytes = 0, swaps = 0;
+    uint64_t duplex_swaps = 0;
 };
 
 // Each field has one writer at a time. The adaptive task is joined before a

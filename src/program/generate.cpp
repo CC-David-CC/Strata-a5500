@@ -56,6 +56,7 @@
 #include "strata/program/fleet_decode_capture.hpp"
 #include "strata/program/host_path_timing.hpp"
 #include "strata/core/serial_worker.hpp"
+#include "strata/core/duplex_exchange.hpp"
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/suffix_drafter.hpp"
 #include "strata/kernels/cvec.hpp"
@@ -158,8 +159,53 @@ std::unique_ptr<strata::core::SerialWorker> make_adaptive_worker() {
 template <class Swap>
 bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::ExpertCache& cache,
                           const std::vector<int32_t>& host_res, int64_t n_expert, std::vector<Swap>& swaps,
-                          cudaStream_t stream, HostPathTiming* timing = nullptr) {
+                          cudaStream_t stream, HostPathTiming* timing = nullptr,
+                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr) {
+    if (fills_queued) *fills_queued = false;
     if (!src.complement_ready() || swaps.empty()) return true;
+    // Restrict this first path to pinned resident inputs whose evictions all
+    // need exchange buffers. The existing path handles partial/file tiers and
+    // mixed cases. No blob read is counted during eligibility checks.
+    if (duplex && fills_queued && src.exchange_capacity() > 0 &&
+        std::all_of(swaps.begin(), swaps.end(), [&](const Swap& s) {
+            return src.has_resident(s.layer, s.in) && !src.has_resident(s.layer, s.out) &&
+                   src.pinned(s.layer, s.in) &&
+                   host_res[(size_t)s.layer * (size_t)n_expert + (size_t)s.out] >= 0;
+        })) {
+        if (swaps.size() > (size_t)src.exchange_capacity()) swaps.resize((size_t)src.exchange_capacity());
+        std::vector<strata::core::DuplexExchange::Copy> copies;
+        copies.reserve(swaps.size());
+        for (size_t q = 0; q < swaps.size(); ++q) {
+            const Swap& s = swaps[q];
+            const int32_t slot = host_res[(size_t)s.layer * (size_t)n_expert + (size_t)s.out];
+            const uint8_t* incoming = src.blob(s.layer, s.in); // exactly one source read, as before
+            const size_t bytes = (size_t)strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
+            if (!incoming || !src.exchange_buffer((int64_t)q)) return false;
+            copies.push_back({cache.device_slot(slot), incoming, src.exchange_buffer((int64_t)q), bytes});
+        }
+        {
+            double unused = 0;
+            HostPathTimer timer(timing ? timing->duplex_enqueue : unused, timing && timing->enabled);
+            if (duplex->enqueue(copies.data(), copies.size(), stream) != cudaSuccess) return false;
+        }
+        {
+            double unused = 0;
+            HostPathTimer timer(timing ? timing->d2h_wait : unused, timing && timing->enabled);
+            if (duplex->wait_evictions() != cudaSuccess) return false;
+        }
+        // Evicted bytes are now readable. H2D may still be in flight; the
+        // unchanged adapt_ev/admission wait guards GPU residency and ownership.
+        for (size_t q = 0; q < swaps.size(); ++q) {
+            const Swap& s = swaps[q];
+            if (!src.stage_exchange(s.layer, s.in, s.out, (int64_t)q)) return false;
+            if (timing && timing->enabled) {
+                timing->d2h_bytes += copies[q].bytes;
+                ++timing->duplex_swaps;
+            }
+        }
+        *fills_queued = true;
+        return true;
+    }
     struct Staged { int32_t layer, in, out; int64_t q; };
     std::vector<Staged> staged;
     std::vector<Swap> kept;
@@ -4820,6 +4866,20 @@ int main(int argc, char** argv) {
         // plan v0.3 P6: swaps in flight - (residency index, slot) admitted when adapt_ev has completed
         std::vector<std::pair<int32_t, int32_t>> pending;
         HostPathTiming host_timing;
+        std::unique_ptr<strata::core::DuplexExchange> duplex_exchange;
+        if (const char* flag = std::getenv("STRATA_EXCHANGE_DUPLEX"); flag && flag[0] == '1') {
+            if (!multi_gpu && !peer.valid() && src.complement_ready() && src.exchange_capacity() > 0) {
+                duplex_exchange = std::make_unique<strata::core::DuplexExchange>();
+                if (duplex_exchange->open((size_t)src.exchange_capacity()) != cudaSuccess) {
+                    std::fprintf(stderr, "strata serve: cannot initialize duplex exchange streams\n");
+                    return 1;
+                }
+                std::fprintf(stderr, "strata exchange duplex: enabled, capacity=%lld, per-slot D2H-before-H2D dependency\n",
+                             (long long)src.exchange_capacity());
+            } else {
+                std::fprintf(stderr, "strata exchange duplex: unavailable for this placement; using sequential exchanges\n");
+            }
+        }
         cudaEvent_t adapt_ev = nullptr;
         cudaEventCreateWithFlags(&adapt_ev, cudaEventDisableTiming);
         // a layer split's later stages keep a copy of the residency table on their devices, and swap on their own
@@ -4887,20 +4947,22 @@ int main(int argc, char** argv) {
                 host_timing.rank += std::chrono::duration<double, std::milli>(Clock::now() - rank0).count();
                 host_timing.swaps += swaps.size();
             }
-            if (!resident_stage_swaps(src, xcache, host_res, g.n_expert, swaps, adapt_stream, &host_timing)) return false;
+            bool fills_queued = false;
+            if (!resident_stage_swaps(src, xcache, host_res, g.n_expert, swaps, adapt_stream,
+                                      &host_timing, duplex_exchange.get(), &fills_queued)) return false;
             const auto h2d0 = host_timing.enabled ? Clock::now() : Clock::time_point{};
             bool main_live = false;
             for (const Swap& s : swaps) {
                 const size_t in = (size_t) s.layer * g.n_expert + s.in, out = (size_t) s.layer * g.n_expert + s.out;
                 const int32_t slot = host_res[out];
-                const uint8_t* b = srcp->blob(s.layer, s.in);
+                const uint8_t* b = fills_queued ? nullptr : srcp->blob(s.layer, s.in);
                 const int stn = multi_gpu ? stage_of(s.layer) : 0;   // the swap stays in the layer's own cache
                 GpuStage* gs = stn > 0 ? stages[(size_t) stn - 1].get() : nullptr;
                 const strata::core::OnDevice on(gs ? gs->dev : -1);
-                if (slot < 0 || b == nullptr ||
+                if (slot < 0 || (!fills_queued && (b == nullptr ||
                     cudaMemcpyAsync(gs ? gs->cache.device_slot(slot) : xcache.device_slot(slot), b,
                                     (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer),
-                                    cudaMemcpyHostToDevice, gs ? gs->adapt_stream : adapt_stream) != cudaSuccess)
+                                    cudaMemcpyHostToDevice, gs ? gs->adapt_stream : adapt_stream) != cudaSuccess)))
                     return false;
                 if (host_timing.enabled) host_timing.h2d_bytes += strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
                 if (gs) gs->adapt_live = true;
@@ -5911,15 +5973,17 @@ int main(int argc, char** argv) {
                 const double w = (double) dec_windows;
                 std::fprintf(stderr, "strata host critical: %lld windows, ms/window: launch %.6f join %.6f admission_wait %.6f "
                     "ownership_commit %.6f table_upload %.6f worker_total %.6f rank %.6f D2H_enqueue %.6f D2H_wait %.6f "
-                    "H2D_enqueue %.6f; D2H_bytes %llu H2D_bytes %llu swaps %llu; worker phases overlap GPU work\n",
+                    "H2D_enqueue %.6f duplex_enqueue %.6f; D2H_bytes %llu H2D_bytes %llu swaps %llu duplex_swaps %llu; worker phases overlap GPU work\n",
                     (long long) dec_windows, (host_timing.launch-ht0.launch)/w, (host_timing.join-ht0.join)/w,
                     (host_timing.admission_wait-ht0.admission_wait)/w, (host_timing.ownership_commit-ht0.ownership_commit)/w,
                     (host_timing.table_upload-ht0.table_upload)/w, (host_timing.adapt_total-ht0.adapt_total)/w,
                     (host_timing.rank-ht0.rank)/w, (host_timing.d2h_enqueue-ht0.d2h_enqueue)/w,
                     (host_timing.d2h_wait-ht0.d2h_wait)/w, (host_timing.h2d_enqueue-ht0.h2d_enqueue)/w,
+                    (host_timing.duplex_enqueue-ht0.duplex_enqueue)/w,
                     (unsigned long long) (host_timing.d2h_bytes-ht0.d2h_bytes),
                     (unsigned long long) (host_timing.h2d_bytes-ht0.h2d_bytes),
-                    (unsigned long long) (host_timing.swaps-ht0.swaps));
+                    (unsigned long long) (host_timing.swaps-ht0.swaps),
+                    (unsigned long long) (host_timing.duplex_swaps-ht0.duplex_swaps));
             }
             if (dec_timing && dec_windows > 0) {
                 const DecSnap d1 = dec_snap();
