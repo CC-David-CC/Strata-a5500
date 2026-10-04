@@ -9,8 +9,8 @@ after their own transfers finish. Keep the same selected experts, arithmetic,
 cache capacity and transfer bytes; publish each layer only after its completion
 event. Every request boundary drains pending exchanges.
 
-**RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X, 128GB RAM.
-Full Unsloth **Q8_0, FP16 KV, native RoPE**.32K or 128K input plus 1,024 output;
+**RTX PRO 6000 Blackwell Workstation Edition 96 GB**, Ryzen 7950X, 128 GB RAM.
+Full Unsloth **Q8_0, FP16 KV, native RoPE**. 32K or 128K input plus 1,024 output;
 allocated context is input + 8,192. Fixed 15,472 primary slots, four secondary slots
 per layer, PCIe fraction 0.55, copy grid 32 with overlap and locked RAM/PLE.
 
@@ -18,16 +18,16 @@ per layer, PCIe fraction 0.55, copy grid 32 with overlap and locked RAM/PLE.
 
 | Input / order | Coding: control -> per-layer tok/s | Gain | Editing: control -> per-layer tok/s | Gain |
 |---|---:|---:|---:|---:|
-|32K / first|135.01 ->144.56|+7.07%|119.00 ->124.43|+4.56%|
-|32K / reversed|136.42 ->144.43|+5.87%|119.30 ->124.36|+4.23%|
-|128K / first|137.64 ->145.06|+5.39%|113.66 ->118.45|+4.22%|
+| 32K / first | 135.01 -> 144.56 | +7.07% | 119.00 -> 124.43 | +4.56% |
+| 32K / reversed | 136.42 -> 144.43 | +5.87% | 119.30 -> 124.36 | +4.23% |
+| 128K / first | 137.64 -> 145.06 | +5.39% | 113.66 -> 118.45 | +4.22% |
 
 These MTP pairs matched all output tokens, measured work, primary transfer bytes
 and secondary-cache counters. The reversed 32K effective-throughput gain was
 2.2% for each task; 128K was 0.93% coding/0.88% editing. Effective throughput
 includes prefill. The 128K numbers have one pair and no confidence interval.
 
-All four modes completed at both input lengths. Plain gained about2.5-3.1%.
+All four modes completed at both input lengths. Plain gained about 2.5-3.1%.
 N-gram alone regressed at 32K (1.9% coding/6.0% editing); it and combined mode
 can change timing-dependent speculative work. Their full rates, effective
 throughput and first token differences are in the report. Keep configurations

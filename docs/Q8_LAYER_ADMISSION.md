@@ -180,7 +180,7 @@ not a confidence interval or a broader-workload guarantee.
 pairs in all four modes completed on the same unchanged binary, reported below.
 
 
-## Completed native128K comparison
+## Completed native 128K comparison
 
 Native **131,072 input + 1,024 output**, 139,264 allocation, full Q8_0/FP16 KV.
 Same fixed placement and unchanged binary as the 32K suite. These are first
@@ -200,9 +200,9 @@ pairs; only 32K MTP has reversed-order repetition. Startup is excluded.
 Plain/MTP matched every output token, measured work, primary D2H/H2D payload,
 swap counts and secondary-cache counters. Their speed gain therefore survives
 longer input without changing the recorded amount of model/transfer work.
-The explicit 33-request STOP/checkpoint lifecycle suite was at32K; this is not
-a claim of the same full lifecycle coverage at128K. Two run orders at32K and
-first pairs at128K do not establish a confidence interval or broad quality score.
+The explicit 33-request STOP/checkpoint lifecycle suite was at 32K; this is not
+a claim of the same full lifecycle coverage at 128K. Two run orders at 32K and
+first pairs at 128K do not establish a confidence interval or broad quality score.
 
 N-gram and combined remain separate configurations. Timing-dependent selection
 can change their speculative work and outputs; first divergence is retained.
