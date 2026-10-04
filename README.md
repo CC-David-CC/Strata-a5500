@@ -1,37 +1,46 @@
-# Experimental Q8 VRAM allocation comparison
+# Experimental Q8 GPU cache allocation results
 
 An experimental configuration branch of **[Niko1221/Strata](https://github.com/Niko1221/Strata)**.
-Credit for the engine belongs to upstream and its contributors. The license
-is retained and main is untouched.
+Credit for the engine belongs to upstream and its contributors. The upstream
+license is retained; main is untouched.
 
-Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
-128GB RAM; full Unsloth Q8_0, FP16 KV and native 32K/128K contexts.
+**RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X, 128GB RAM.
+Full Unsloth **Q8_0, FP16 KV, native 32K/128K prompts + 1,024 output tokens**.
+This compares configurations of the same measured engine; it adds no inference
+kernel change relative to this fork's copy-grid baseline.
 
-This branch compares using extra VRAM for a secondary cache of RAM experts
-against more primary resident experts. The former avoids repeated uploads;
-the latter can also reduce CPU work. It changes configuration and test
-coverage, with no inference kernel or model-weight changes.
+## Larger secondary cache
 
-**The 32K MTP capacity gain repeated:** sixteen versus four secondary entries
-improved coding +1.58% and editing +4.34% in reversed order, with exact tokens,
-recorded work and primary exchange bytes. Initial gains were +1.67%/+3.98%.
-Plain also repeated (+1.20% coding /+2.36% editing, versus +1.05%/+2.65%
-initially), with exact tokens/work. Fresh build and all 22 normal/cancel/
-checkpoint requests also passed.
+Four to sixteen entries per layer, with unchanged primary residency:
 
-The same extra weight-storage budget spent on primary experts reached
-139.16 tok/s coding /121.50 editing, versus 137.51/123.36 for the larger
-secondary cache. That placement changes output/work; details and effective
-throughput are in the report.
+| Input / mode | Coding gain | Editing gain |
+|---|---:|---:|
+| 32K / plain | +1.20% | +2.36% |
+| 32K / mtp | +1.58% | +4.34% |
+| 128K / plain | +1.05% | +1.98% |
+| 128K / mtp | +1.42% | +3.19% |
 
-**The first full native 128K MTP pair also passed:** coding 136.49 -> 138.43
-tok/s (+1.42%), editing 112.74 -> 116.35 (+3.19%), with exact tokens/work.
-Sixteen entries fit with 1,862MiB at the lowest GPU sample; the engine
-reported 1,302MiB free at startup. These are different measurement points.
-Other 128K modes and primary-placement configurations are still running.
-These pairs have no confidence intervals.
-See [memory budgets, invariants and required measurements](docs/Q8_CACHE_BUDGET.md).
+Tokens and recorded work matched exactly. The 32K gains repeated in both test
+orders; 128K has one pair per mode. All fifteen follow-up configurations and
+22 lifecycle requests passed. The report also retains initial measurements,
+n-gram/combined results, effective throughput and memory use.
 
-The fresh build matches the previously tested engine bytes. Lifecycle checks
-passed before the new throughput tests; placement-dependent output differences remain
-visible in the report. Use upstream Strata for standard installation/support.
+Spending the same spare VRAM on more primary experts is a competing path; it
+changes CPU/GPU arithmetic placement and sometimes output/work. Those results
+are qualified separately.
+
+## More primary experts at 32K
+
+The larger 16,560-primary/four-secondary MTP configuration reached **145.68
+tok/s coding and 127.46 editing**, versus 135.38/118.23 with 15,472 primary
+experts: **+7.61% / +7.80% generation**, and **+9.47% / +9.46% including
+prefill**. It uses an additional 5,418.75MiB of expert storage and had 2,000MiB
+free at the lowest GPU sample (1,440MiB in the engine startup report).
+
+This is one qualified pair: coding first differed at output token 120;
+editing output matched, but recorded work differed for both. It was tested
+at 32K only. No answer-quality equivalence or confidence interval is claimed.
+The 32K lifecycle gate does not establish 128K checkpoint coverage.
+
+See the **[complete measured matrix and limits](docs/Q8_CACHE_BUDGET.md#complete-allocation-comparison)**.
+Use upstream Strata for standard installation and support.

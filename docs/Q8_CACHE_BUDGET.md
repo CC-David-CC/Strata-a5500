@@ -4,6 +4,10 @@ Experimental configuration branch of [Niko1221/Strata](https://github.com/Niko12
 Hardware: llm-60, RTX PRO 6000 Blackwell Workstation Edition 96GB, Ryzen 7950X,
 128GB RAM. Full Unsloth Q8_0, FP16 KV, native RoPE. No inference code changes.
 
+## Current status
+
+The full fifteen-configuration follow-up is complete. See [the complete comparison](#complete-allocation-comparison) below. Earlier sections retain the measurement chronology, including what was pending at each snapshot.
+
 ## Evidence and competing explanations
 
 The first 32K capacity screen found that 16 secondary entries per layer improved
@@ -225,3 +229,115 @@ this pair. Plain, n-gram, combined and primary-placement 128K comparisons remain
 in the running suite.
 
 [Full 128K request records, copies, timing and resource evidence](benchmarks/q8-cache-budget-mtp128k-20261004.json).
+
+
+## Complete allocation comparison
+
+All fifteen follow-up configurations finished: **30 throughput requests**, plus
+the separate **22-request lifecycle gate**. Together with the initial capacity
+screen, this preserves 48 throughput requests. All requests used the frozen
+engine above, full Unsloth Q8_0, FP16 KV and native RoPE, with 1,024 committed
+output tokens. Prompt sizes were 32,768 or 131,072; allocated contexts were
+40,960 or 139,264. Model startup is excluded from throughput.
+
+### Secondary cache: four to sixteen entries per layer
+
+Primary residency stays at 15,472 experts. The secondary cache grows from
+0.934GiB to 3.735GiB. The following generation rates use the reversed 32K
+plain/MTP pairs, the initial 32K n-gram pairs and the first 128K pairs.
+
+| Input / mode | Coding four -> sixteen tok/s | Change | Editing four -> sixteen tok/s | Change | Tokens and recorded work |
+|---|---:|---:|---:|---:|---|
+| 32K / plain | 74.61 -> 75.50 | +1.20% | 63.22 -> 64.71 | +2.36% | exact in both |
+| 32K / mtp | 135.38 -> 137.51 | +1.58% | 118.23 -> 123.36 | +4.34% | exact in both |
+| 32K / ngram | 79.85 -> 78.05 | -2.25% | 110.65 -> 121.35 | +9.67% | qualified; see below |
+| 32K / mtp-ngram | 136.01 -> 136.81 | +0.59% | 120.79 -> 121.42 | +0.52% | qualified; see below |
+| 128K / plain | 75.39 -> 76.19 | +1.05% | 61.05 -> 62.26 | +1.98% | exact in both |
+| 128K / mtp | 136.49 -> 138.43 | +1.42% | 112.74 -> 116.35 | +3.19% | exact in both |
+| 128K / ngram | 75.55 -> 76.07 | +0.68% | 108.09 -> 111.15 | +2.83% | qualified; see below |
+| 128K / mtp-ngram | 136.17 -> 137.74 | +1.16% | 111.79 -> 117.81 | +5.38% | qualified; see below |
+
+Plain/MTP tokens, recorded work and primary exchange payload match. Their 32K
+gains were positive in both tested orders; the 128K observations are single
+pairs. This is a measured workload result, without population confidence
+intervals. N-gram decisions use timing-sensitive policy; a throughput change
+with different speculative work is not an equal-work kernel measurement.
+
+| Qualified comparison | Task | First differing output token (zero-based) | Recorded work matches |
+|---|---|---:|---|
+| 32K / ngram | coding | 288 | no |
+| 32K / ngram | editing | none | no |
+| 32K / mtp-ngram | coding | 311 | no |
+| 32K / mtp-ngram | editing | none | no |
+| 128K / ngram | coding | none | yes |
+| 128K / ngram | editing | none | no |
+| 128K / mtp-ngram | coding | none | yes |
+| 128K / mtp-ngram | editing | none | no |
+
+### Output throughput including prompt processing
+
+These are output tokens divided by prompt-plus-generation time. The large
+prefill cost reduces the total-time benefit for these short 1,024-token outputs.
+
+| Input / mode | Coding four -> sixteen effective tok/s | Editing four -> sixteen effective tok/s |
+|---|---:|---:|
+| 32K / plain | 47.33 -> 47.75 | 42.81 -> 43.48 |
+| 32K / mtp | 66.13 -> 66.55 | 62.35 -> 63.75 |
+| 32K / ngram | 49.44 -> 48.74 | 60.32 -> 63.30 |
+| 32K / mtp-ngram | 66.26 -> 66.45 | 63.02 -> 63.18 |
+| 128K / plain | 22.40 -> 22.49 | 20.96 -> 21.11 |
+| 128K / mtp | 25.82 -> 25.89 | 24.86 -> 25.03 |
+| 128K / ngram | 22.41 -> 22.47 | 24.70 -> 24.86 |
+| 128K / mtp-ngram | 25.79 -> 25.86 | 24.81 -> 25.10 |
+
+### Alternative: more primary experts
+
+The 16,048-primary/four-secondary configuration spends the same extra expert
+weight-storage budget as 15,472-primary/sixteen-secondary. The 16,560-primary
+case spends still more VRAM and was tested only at 32K. Both change which CPU
+or GPU implementation computes selected experts; preserve their output and
+work qualifications rather than calling them equal-work kernel gains.
+
+| Candidate / reference | Task | Generation reference -> candidate tok/s | Effective reference -> candidate tok/s | First differing token | Work matches |
+|---|---|---:|---:|---:|---|
+| 32768-mtp-primary16048-ways4 / 32768-mtp-primary15472-ways16 | coding | 137.51 -> 139.16 | 66.55 -> 68.94 | 120 | no |
+| 32768-mtp-primary16048-ways4 / 32768-mtp-primary15472-ways16 | editing | 123.36 -> 121.50 | 63.75 -> 64.88 | none | no |
+| 131072-mtp-primary16048-ways4 / 131072-mtp-primary15472-ways16 | coding | 138.43 -> 138.92 | 25.89 -> 27.03 | 32 | no |
+| 131072-mtp-primary16048-ways4 / 131072-mtp-primary15472-ways16 | editing | 116.35 -> 117.71 | 25.03 -> 26.23 | none | no |
+| 32768-mtp-primary16560-ways4 / 32768-mtp-primary15472-ways4 | coding | 135.38 -> 145.68 | 66.13 -> 72.39 | 120 | no |
+| 32768-mtp-primary16560-ways4 / 32768-mtp-primary15472-ways4 | editing | 118.23 -> 127.46 | 62.35 -> 68.24 | none | no |
+
+### Placement and resource evidence
+
+Every startup matched the requested primary capacity, full pinned RAM expert
+complement, locked PLE, FP16 KV and allocated context. Expert file reads stayed
+zero. Two-second samples observed no foreign GPU processes. GPU samples and
+the engine's startup memory report are separate observations, not global
+minimum-free-memory guarantees.
+
+| Configuration | Lowest sampled free GPU MiB | Engine startup free GPU MiB | Lowest sampled host available GiB |
+|---|---:|---:|---:|
+| 32768-mtp-primary15472-ways16 | 4542 | 3982 | 20.16 |
+| 32768-mtp-primary16048-ways4 | 4544 | 3984 | 23.02 |
+| 32768-mtp-primary15472-ways4 | 7410 | 6850 | 20.20 |
+| 32768-plain-primary15472-ways16 | 5572 | 4988 | 20.16 |
+| 32768-plain-primary15472-ways4 | 8440 | 7856 | 20.12 |
+| 131072-mtp-primary15472-ways4 | 4732 | 4172 | 20.08 |
+| 131072-mtp-primary15472-ways16 | 1862 | 1302 | 20.07 |
+| 131072-mtp-primary16048-ways4 | 1866 | 1306 | 23.09 |
+| 131072-plain-primary15472-ways4 | 5966 | 5382 | 20.12 |
+| 131072-plain-primary15472-ways16 | 3096 | 2512 | 20.13 |
+| 131072-ngram-primary15472-ways4 | 5914 | 5382 | 19.67 |
+| 131072-ngram-primary15472-ways16 | 3044 | 2512 | 20.05 |
+| 131072-mtp-ngram-primary15472-ways4 | 4700 | 4172 | 20.05 |
+| 131072-mtp-ngram-primary15472-ways16 | 1830 | 1302 | 20.01 |
+| 32768-mtp-primary16560-ways4 | 2000 | 1440 | 25.54 |
+
+Keep secondary capacity and primary residency as separate configuration paths.
+The larger secondary cache has repeated 32K plain/MTP gains with unchanged
+work. Primary residency is a qualified competitor for reducing CPU work and
+total request time. Compaction stays disabled; its earlier gain did not repeat.
+Layer-specific transfer admission and cached-CPU/refill tracing are separate
+experiments and are not included in these results.
+
+[Complete frozen suite, comparisons, exactness, copy counts and sampled resources](benchmarks/q8-cache-budget-complete-20261004.json).
