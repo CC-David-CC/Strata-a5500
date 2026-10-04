@@ -2061,6 +2061,30 @@ void expert_pool_dispatch_multi(ExpertDispatch& d, const float* x_f, const int32
             row << "]}";
             std::fprintf(stderr, "strata miss trace: %s\n", row.str().c_str());
         }
+        static const bool route_trace = [] {
+            const char* value = std::getenv("STRATA_MISS_ROUTE_TRACE");
+            return value && std::strcmp(value, "1") == 0;
+        }();
+        if (route_trace) {
+            // Diagnostic only: record the EXISTING assignment, including CPU
+            // groups that the GPU-only miss trace cannot see. No cache lookup
+            // or reassignment is introduced by this trace.
+            static thread_local uint64_t sequence = 0;
+            std::ostringstream row;
+            row << "{\"schema\":1,\"sequence\":" << sequence++ << ",\"layer\":" << d.layers
+                << ",\"layers\":" << d.usage.size() / (size_t)d.n_expert
+                << ",\"per_layer\":" << d.n_expert << ",\"bytes\":" << bb
+                << ",\"tokens\":" << n_tok << ",\"topk\":" << k << ",\"groups\":[";
+            for (int q = 0; q < nd; ++q) {
+                const int64_t i0 = distinct[q];
+                int count = 0;
+                for (int64_t i = i0; i < n; ++i) if (first_of[i] == i0) ++count;
+                if (q) row << ',';
+                row << '[' << ids[i0] << ',' << kind[i0] << ',' << count << ']';
+            }
+            row << "]}";
+            std::fprintf(stderr, "strata miss route trace: %s\n", row.str().c_str());
+        }
     } else {
         for (int64_t i = 0; i < n; ++i) {
             const int32_t e = ids[i];
