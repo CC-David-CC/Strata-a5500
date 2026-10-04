@@ -45,12 +45,15 @@ def worker(plan_path, out):
     out.mkdir(parents=True, exist_ok=False)
     state = dict(plan=plan, started=time.time(), records=[], completed=False)
     references = {}
+    reference_paths = list(plan.get('reference_statuses', []))
     if plan.get('reference_status'):
-        status = json.loads(Path(plan['reference_status']).read_text())
+        reference_paths.insert(0, plan['reference_status'])
+    for reference_path in reference_paths:
+        status = json.loads(Path(reference_path).read_text())
         if not status.get('completed'):
             raise RuntimeError('Reference suite did not complete')
         reference = json.loads(Path(status['matrix']).read_text())
-        references = {r['trial']['label']: r for r in reference['records']}
+        references.update({r['trial']['label']: r for r in reference['records']})
     target = out / 'matrix.json'
     save(target, state)
     try:
@@ -115,6 +118,8 @@ def worker(plan_path, out):
                 record['miss_overlap_active'] = 'strata miss fetch overlap: enabled;' in log
                 record['layer_admission_active'] = 'strata exchange layer admission: enabled;' in log
                 record['layer_admissions'] = sum(map(int,re.findall(r'strata layer admission: (\d+) affected-layer waits',log)))
+                record['deferred_active'] = 'strata exchange admission: deferred=1' in log
+                record['deferred_swaps'] = sum(map(int,re.findall(r'(\d+) deferred_swaps',log)))
                 record['miss_fetch_blocks'] = list(map(int,re.findall(r'strata miss fetch geometry: blocks=(\d+) threads=256;',log)))
                 record['miss_cache_reports'] = [dict(zip(('groups','hits','uploads','bypasses','avoided_upload_bytes','uploaded_bytes'),map(int,m)))
                     for m in re.findall(r'strata readonly miss cache: cumulative groups=(\d+) hits=(\d+) uploads=(\d+) bypasses=(\d+) avoided_upload_bytes=(\d+) uploaded_bytes=(\d+)',log)]
@@ -129,6 +134,10 @@ def worker(plan_path, out):
             if trial.get('env',{}).get('STRATA_EXCHANGE_LAYER_ADMISSION')=='1' and (
                     not record.get('layer_admission_active') or not record.get('layer_admissions')):
                 raise RuntimeError(label + ': per-layer admission did not activate/execute')
+            if (trial.get('env',{}).get('STRATA_EXCHANGE_DEFER_PUBLISH')=='1' and
+                    trial.get('env',{}).get('STRATA_EXCHANGE_LAYER_ADMISSION')!='1' and
+                    (not record.get('deferred_active') or not record.get('deferred_swaps'))):
+                raise RuntimeError(label + ': whole-batch deferred admission did not activate/execute')
             cache_ways = int(trial.get('env', {}).get('STRATA_Q8_MISS_CACHE_WAYS','0'))
             fetch_blocks = trial.get('env', {}).get('STRATA_MISS_FETCH_BLOCKS')
             if fetch_blocks is not None and (not record.get('miss_fetch_blocks') or
@@ -173,7 +182,7 @@ def worker(plan_path, out):
                 save(target, state)
                 if trial.get('require_exact') and any(c['first_token_difference'] is not None or
                                                      c['work_differences'] for c in comparisons):
-                    raise RuntimeError(label + ': default-off parity gate failed')
+                    raise RuntimeError(label + ': token/work parity gate failed')
             # Later arms may use a fresh, same-binary control from this matrix.
             # Retain the declared external reference for the first control.
             references[label] = record
