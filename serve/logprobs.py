@@ -45,6 +45,7 @@ class ScoredToken:
     logprob: float
     top: tuple[Probability, ...]
     channel: str = "raw"
+    sampling: dict | None = None
 
 
 def parse_score(line, index, count):
@@ -85,8 +86,14 @@ def probability_json(tokenizer, token, selected=False):
 
 
 def score_json(tokenizer, token):
-    return {**probability_json(tokenizer, token, selected=True),
-            "top_logprobs": [probability_json(tokenizer, p) for p in token.top]}
+    result = {**probability_json(tokenizer, token, selected=True),
+              "top_logprobs": [probability_json(tokenizer, p) for p in token.top]}
+    if token.sampling is not None:
+        result['strata_sampling'] = {**token.sampling, 'top': [
+            {**p, 'bytes': list(tokenizer.token_bytes(p['id'])),
+             'token': tokenizer.token_bytes(p['id']).decode('utf-8', errors='replace')}
+            for p in token.sampling['top']]}
+    return result
 
 
 @dataclass

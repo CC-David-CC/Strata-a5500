@@ -57,6 +57,7 @@
 #include "strata/program/speculative_window.hpp"
 #include "strata/core/logprobs.hpp"
 #include "strata/program/logprobs_diagnostics.hpp"
+#include "strata/program/ordered_sampler.hpp"
 #ifdef STRATA_ENABLE_GBNF
 #include "strata/core/grammar.hpp"
 #include "strata/program/grammar_diagnostics.hpp"
@@ -5058,7 +5059,7 @@ int main(int argc, char** argv) {
                         "mtp_max=%d lookup=%d vram_free_mib=%lld cvec=%s arena_mib=%lld pool_workers=%d pcie_frac=%.2f "
                         "spec_min_p=%.2f conversation_cache_mib=%lld conversation_cache_slots=%d "
                         "conversation_cache_min_free_mib=%lld decode_mode=%s requested_spec=%d requested_lookup=%d "
-                        "mtp_loaded=%d mtp_vram_mib=%.1f grammar=%s logprobs=raw-v1 engine=" STRATA_VERSION "\n",
+                        "mtp_loaded=%d mtp_vram_mib=%.1f grammar=%s logprobs=raw-v1 samplers=ordered-host-v1 engine=" STRATA_VERSION "\n",
                         (long long) o.max_context, o.kv.c_str(),
                         (long long) (g.n_qsa_layers() > 0 && ss.qsa_states[ss.qsa_primary()].kv_mode == 1
                                          ? ss.qsa_states[ss.qsa_primary()].n_slots * 4 : 0),
@@ -5188,6 +5189,8 @@ int main(int argc, char** argv) {
             int req_top_k = 20;   // the sampler's own default; the sampled path REQUIRES top_k in 1..64
             int req_logprobs = -1; // absent: no allocation, head copy or reduction
             bool bad_logprobs = false;
+            strata::program::ordered::Options ordered_sampler;
+            std::string sampler_error;
             unsigned long long req_seed = 0;
             float req_min_p = 0.0f, req_penalty_repeat = 1.0f, req_penalty_freq = 0.0f, req_penalty_present = 0.0f;
             int req_penalty_last_n = 0;
@@ -5207,7 +5210,11 @@ int main(int argc, char** argv) {
                     if (eq == std::string::npos) { endp = const_cast<char*>(start); break; }
                     const std::string key = tok.substr(0, eq);
                     const float fv = std::strtof(tok.c_str() + eq + 1, nullptr);
-                    if (key == "cvec") req_cvec = std::atoi(tok.c_str() + eq + 1);
+                    if (key.rfind("sampler_", 0) == 0) {
+                        try { ordered_sampler.key(key.substr(8), tok.substr(eq + 1)); }
+                        catch (const std::exception& e) { sampler_error = e.what(); }
+                    }
+                    else if (key == "cvec") req_cvec = std::atoi(tok.c_str() + eq + 1);
                     else if (key == "temperature") req_temperature = fv;
                     else if (key == "top_p") req_top_p = fv;
                     else if (key == "top_k") req_top_k = std::atoi(tok.c_str() + eq + 1);
@@ -5230,6 +5237,15 @@ int main(int argc, char** argv) {
                 }
             }
             std::string emb_path;
+            try {
+                ordered_sampler.validate();
+                if (!sampler_error.empty()) throw std::runtime_error(sampler_error);
+                if (ordered_sampler.enabled() && (geni || (ordered_sampler.inspect && req_logprobs < 0)))
+                    throw std::runtime_error("ordered sampler requires text; inspect requires logprobs");
+            } catch (const std::exception& error) {
+                std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
+                continue;
+            }
             if (bad_logprobs) {
                 std::printf("ERR logprobs must be one integer from 0 through 20\n");
                 continue;
@@ -5724,6 +5740,12 @@ int main(int argc, char** argv) {
             req_sp.penalty_freq = req_penalty_freq;
             req_sp.penalty_present = req_penalty_present;
             req_sp.counter = 0;
+            // The legacy GPU pick is discarded only for this explicit reference
+            // profile. Its full raw row is selected below before commit/feedback.
+            if (ordered_sampler.enabled()) {
+                req_sp.greedy = true;
+                req_sp.penalty_last_n = 0;
+            }
             ver.set_sampling(req_sp);
             if (use_mtp) mtp.set_draft_sampling(req_sp);   // sampled drafts when coupled
             drive.d.pcie_num = std::max(0, std::min(256, (int) (req_pcie_frac * 256.0 + 0.5)));
@@ -5857,10 +5879,10 @@ int main(int argc, char** argv) {
             if (cancelled) finish = "cancel";
             std::vector<float> score_row;
             strata::program::LogprobDiagnostics score_diagnostics(req_logprobs >= 0);
-            if (req_logprobs >= 0) score_row.resize((size_t)ver.vocab());
+            if (req_logprobs >= 0 || ordered_sampler.enabled()) score_row.resize((size_t)ver.vocab());
             while (!cancelled && produced_n < max_new) {
-                int T = S_mtp;
-                if (req_spec_min_p > 0.0) {
+                int T = ordered_sampler.enabled() ? 1 : S_mtp;
+                if (!ordered_sampler.enabled() && req_spec_min_p > 0.0) {
                     T = 1;
                     while (T < S_mtp && dprob[(size_t) T - 1] >= (float) req_spec_min_p) ++T;
                 }
@@ -5869,7 +5891,7 @@ int main(int argc, char** argv) {
                 // when its expected tokens per ms, from the measured acceptance and window costs, beat the MTP window's
                 bool from_sfx = false;
                 int sfx_match = 0;
-                if (sfx && !first_window) {
+                if (sfx && !first_window && !ordered_sampler.enabled()) {
                     const int k = sfx->propose(S - 1, sbuf.data());
                     sfx_match = sfx->last_match();
                     if (k > 0 && sbuf[0] == drafts[0]) {
@@ -5920,6 +5942,25 @@ int main(int argc, char** argv) {
                     std::printf("ERR %s\n", drive.d.failed && drive.d.fail ? drive.d.fail : err.c_str());
                     return 1;
                 }
+                strata::program::ordered::Decision sampling_decision;
+                double ordered_copy_ms = 0;
+                if (ordered_sampler.enabled()) {
+                    try {
+                        const auto copy_start = Clock::now();
+                        if (!ver.copy_logits(0, score_row.data())) throw std::runtime_error("ordered sampler logits copy failed");
+                        ordered_copy_ms = std::chrono::duration<double, std::milli>(Clock::now() - copy_start).count();
+                        const int32_t* mask = nullptr;
+#ifdef STRATA_ENABLE_GBNF
+                        if (matcher) mask = prefix_masks.bits.data();
+#endif
+                        sampling_decision = strata::program::ordered::select(score_row.data(), (int)ver.vocab(), mask,
+                                                                            ordered_sampler, req_sp.seed, produced_n);
+                        outv[0] = sampling_decision.id;
+                    } catch (const std::exception& error) {
+                        std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
+                        return 1;
+                    }
+                }
                 const auto retained = strata::program::retained_window(
                     window.data(), outv.data(), T, max_new - produced_n, o.eos_ids);
                 const int a = retained.count - 1;
@@ -5929,7 +5970,8 @@ int main(int argc, char** argv) {
                         const auto score_start = Clock::now();
                         const int score_rows = score_diagnostics.enabled() ? T : retained.count;
                         for (int i = 0; i < score_rows; ++i) {
-                            if (!ver.copy_logits(i, score_row.data())) throw std::runtime_error("target logits copy failed");
+                            if (!ordered_sampler.enabled() && !ver.copy_logits(i, score_row.data()))
+                                throw std::runtime_error("target logits copy failed");
                             token_scores[i] = strata::core::summarize_logits(score_row.data(), (int)ver.vocab(),
                                                                            outv[i], req_logprobs, i + 1 < T ? window[i + 1] : -1);
                             score_diagnostics.raw_row((int)rounds, i, T, retained.count, p + i, outv[i],
@@ -5940,7 +5982,7 @@ int main(int argc, char** argv) {
                                 token_scores.data(), from_sfx, dprob.data(), mtp.coupled(), mtp.draft_vocab(),
                                 (int)ver.vocab(), std::any_of(window.begin() + 1, window.begin() + T,
                                     [&](int id) { return std::find(o.eos_ids.begin(), o.eos_ids.end(), id) != o.eos_ids.end(); }),
-                                std::chrono::duration<double, std::milli>(Clock::now() - score_start).count());
+                                ordered_copy_ms + std::chrono::duration<double, std::milli>(Clock::now() - score_start).count());
                     } catch (const std::exception& error) {
                         std::printf("ERR %s\n", strata::program::protocol_error(error.what()).c_str());
                         return 1;
@@ -5981,6 +6023,7 @@ int main(int argc, char** argv) {
                 first_window = false;
                 const bool eos = retained.eos;
                 for (int i = 0; i < retained.count; ++i) {
+                    if (ordered_sampler.inspect) sampling_decision.emit(produced_n);
                     if (req_logprobs >= 0) {
                         const char* channel = "raw";
 #ifdef STRATA_ENABLE_GBNF
@@ -6010,9 +6053,9 @@ int main(int argc, char** argv) {
                 const Clock::time_point tw2 = Clock::now();
                 // coupled drafts with penalties: the next window's row-0 history (`consumed` holds this window's
                 // commit, outv[a] is its row 0) - the drafts extend it on the device as the verify rows will
-                if (use_mtp && hist_n > 0 && mtp.coupled() && !eos && produced_n < max_new)
+                if (use_mtp && !ordered_sampler.enabled() && hist_n > 0 && mtp.coupled() && !eos && produced_n < max_new)
                     mtp.set_draft_history(consumed.data(), (int64_t) consumed.size(), outv[(size_t) a]);
-                const bool drafted = !use_mtp || eos || produced_n >= max_new ||
+                const bool drafted = !use_mtp || ordered_sampler.enabled() || eos || produced_n >= max_new ||
                                      mtp.draft(retained.count, outv.data(), p, a, drafts.data(), err, dprob.data(), (float) req_spec_min_p);
                 {
                     const Clock::time_point tw3 = Clock::now();
@@ -6046,7 +6089,7 @@ int main(int argc, char** argv) {
                                  matcher->tokens().size(), matcher->complete(), matcher->terminated(),
                                  (unsigned long long) matcher->work_used(), matcher->identity().c_str());
 #endif
-                if (use_mtp && timed_round && !eos)
+                if (use_mtp && !ordered_sampler.enabled() && timed_round && !eos)
                     policy.observe(from_sfx, T, a, sfx_match,
                                    std::chrono::duration<double, std::milli>(Clock::now() - round0).count());
                 if (eos) { finish = "stop"; break; }

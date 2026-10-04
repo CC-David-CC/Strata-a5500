@@ -132,7 +132,7 @@ def validate_grammar_request(req, api):
         allowed = set("model messages stream stream_options max_tokens max_completion_tokens temperature top_p top_k "
                       "min_p seed presence_penalty frequency_penalty repetition_penalty penalty_last_n grammar "
                       "tools tool_choice parallel_tool_calls response_format reasoning reasoning_effort chat_template_kwargs "
-                      "stop n logprobs top_logprobs logit_bias user metadata strata_mcp experimental_speed_projection".split())
+                      "stop n logprobs top_logprobs logit_bias user metadata strata_mcp experimental_speed_projection strata_sampler".split())
         unknown = set(req) - allowed
         if unknown:
             raise ValueError("unsupported grammar request fields: " + ", ".join(sorted(unknown)))

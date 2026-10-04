@@ -1,5 +1,16 @@
 <h1 align="center">Strata</h1>
 
+> **This branch: control the sampler, then inspect what it changed.**
+> `work/samplers` adds explicit Min-P → Temperature, Top-N-Sigma and XTC
+> chains over the full native vocabulary. Combine them with GBNF/JSON and raw
+> logprobs. The first implementation is a measured CPU reference after the
+> existing native forward pass; ordinary requests keep the existing GPU path.
+>
+> **[Sampler guide, examples and limits](docs/SAMPLERS.md)** ·
+> [Qualification evidence](docs/sampler-evidence/RECEIPT.md)
+>
+> Dependency: `work/logprobs-675` at `2243cb1`. The Control Lab is a separate branch.
+
 > **This branch: see the alternatives your local model considered.**
 > `work/logprobs-675` adds Chat `logprobs` / `top_logprobs`, including native
 > GBNF and JSON constraints. Inspect labeled decisions, compare prompts, and
