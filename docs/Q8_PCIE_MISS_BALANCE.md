@@ -3,7 +3,7 @@
 Configuration experiment on llm-60: RTX PRO 6000 Blackwell Workstation Edition
 96GB, Ryzen 7950X, 128GB RAM, full Unsloth Q8_0, FP16 KV and native RoPE. Based
 on the measured duplex branch and its component-validated Q8 instrumentation.
-Main is unchanged. No new speedup is claimed before the model test completes.
+Main is unchanged. The all-GPU miss test completed and was slower in every mode.
 
 ## Evidence motivating the test
 
@@ -59,3 +59,35 @@ uploads the original tensor bytes and records its actual type. This branch
 corrects the log/help text for future builds; the queued configuration test
 continues using the already validated `b926ad75` binary. No head conversion or
 model replacement was performed.
+
+## Completed all-GPU miss screen
+
+Output tokens/s, coding / editing. Same frozen binary and model, 32,768 input
+tokens plus 1,024 output tokens; allocation 40,960. Reference controls used the
+automatic split; candidate used `--pcie-frac 1`. Fresh engine for each mode,
+coding followed by editing. These are first-screen results, not randomized repeats.
+
+| Mode | Automatic split | All eligible misses on GPU | Change, coding / editing |
+|---|---:|---:|---:|
+| Plain | 73.61 / 61.91 | 60.58 / 45.99 | -17.7% / -25.7% |
+| MTP | 129.04 / 111.93 | 98.30 / 78.16 | -23.8% / -30.2% |
+| N-gram | 75.03 / 105.17 | 60.81 / 75.32 | -18.9% / -28.4% |
+| MTP + n-gram | 130.29 / 111.27 | 98.09 / 74.18 | -24.7% / -33.3% |
+
+Editing output tokens matched in all four modes. Coding first diverged at
+tokens 122, 473, 173 and 311 respectively. Work counters differed, so these
+are placement comparisons, not exact-work kernel comparisons or quality scores.
+All requests completed 1,024 output tokens with zero expert file reads.
+
+In MTP, CPU expert time became approximately zero, but mean host waiting for
+GPU progress rose from 12.39 to 26.93 ms/window for coding, and from 14.54 to
+43.31 ms/window for editing. Total window time rose from 25.03 to 32.66 ms and
+34.92 to 50.01 ms respectively. Host waiting for GPU progress does not mean the
+GPU was idle. This result rejects the simple hypothesis that eliminating CPU
+expert work would improve this configuration. Separate hardware-counter
+captures are in progress to characterize the additional traffic.
+
+An all-CPU miss control (`--pcie-frac 0`) is queued next; the 15,472 resident
+GPU experts remain on GPU. This tests the opposite placement extreme.
+
+Raw measurements and comparisons: [q8-pcie-placement-20261004.json](benchmarks/q8-pcie-placement-20261004.json).
