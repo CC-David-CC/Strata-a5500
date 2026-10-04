@@ -85,6 +85,17 @@ void exercise(size_t bytes, size_t rounds) {
                     "old RAM input was not recycled with its alias");
             // Even the old incoming bytes have not changed: commit copies metadata only.
             require(!std::memcmp(storage.spare(q).host, reference[ins[q]].data(), bytes), "commit changed spare bytes");
+            // Partial per-layer admission must not recycle a still-in-flight
+            // transfer's RAM input or eviction destination in another layer.
+            for (size_t j = q + 1; j < spare_count; ++j) {
+                const auto live = storage.resident(ins[j]);
+                require(live.host == before[j].host && live.device == before[j].device,
+                        "partial commit changed an unadmitted incoming view");
+                require(storage.spare(j).host == staged[j].host && storage.spare(j).device == staged[j].device,
+                        "partial commit changed another exchange destination");
+                require(!std::memcmp(live.host, reference[ins[j]].data(), bytes),
+                        "partial commit changed an unadmitted input's bytes");
+            }
             ++exchanges;
         }
         std::set<uint8_t*> live;

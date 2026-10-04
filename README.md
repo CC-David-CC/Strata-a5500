@@ -1,52 +1,23 @@
-# Experimental Q8 miss-copy concurrency
+# Experimental Q8 admission by layer
 
-This is an experimental fork of **[Niko1221/Strata](https://github.com/Niko1221/Strata)**.
+An experimental fork of **[Niko1221/Strata](https://github.com/Niko1221/Strata)**.
 Credit for Strata and its existing kernels belongs to upstream and its contributors.
 
-This branch varies how many GPU thread blocks upload missed experts from RAM.
-`STRATA_MISS_FETCH_BLOCKS` defaults to the original 384 blocks. Copied bytes,
-expert arithmetic and explicit buffer dependencies stay fixed.
+This branch tests letting early layers run while adaptive expert transfers for
+later layers finish. It keeps the same selected experts and waits for each
+affected layer's complete transfers before publishing its CPU/GPU expert plan.
+It retains RAM ownership rotation and drains every request boundary.
 
 Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
-128GB RAM; full Unsloth Q8_0 with FP16 KV and native context.
+128GB RAM; full Unsloth **Q8_0, FP16 KV**, native context.
+`STRATA_EXCHANGE_LAYER_ADMISSION=1` is experimental and off by default.
+The initial path requires one GPU, unsplit host-planned verification, fully
+pinned resident expert exchanges and ownership rotation/duplex enabled.
 
-**Measured at 32K input + 1,024 output, with MTP:** 32 copy blocks with upload
-overlap improved editing generation by **4.26% and 4.31%** in the initial and
-reversed-order pairs versus 384 blocks without overlap. Coding improved
-**1.47% and 1.78%**. All output tokens, recorded work and logical copy counts
-matched. These are two paired observations, without population confidence
-intervals. A native **128K** MTP triple also passed with exact tokens/work:
-coding **133.72 to 136.52 tok/s (+2.09%)**, editing **107.75 to 112.38 tok/s
-(+4.30%)**. All four decoding modes have now completed 32K comparisons;
-the remaining 128K plain/n-gram/combined comparisons are running.
+**Implementation and tests prepared; no build, correctness or speed pass yet.**
+The inherited copy-grid branch's measured gains do not establish a gain here.
 
-| Reversed pair | 384 blocks, serial | 32 blocks, overlap |
-|---|---:|---:|
-| Coding generation | 132.52 tok/s | 134.88 tok/s |
-| Editing generation | 113.46 tok/s | 118.34 tok/s |
-| Coding effective, including prefill | 65.47 tok/s | 66.04 tok/s |
-| Editing effective, including prefill | 61.01 tok/s | 62.45 tok/s |
-
-Other completed **32K input + 1,024 output** pairs:
-
-| Mode | Coding: 384 serial → 32 overlap | Editing: 384 serial → 32 overlap |
-|---|---:|---:|
-| Plain | 74.21 → 74.66 tok/s | 62.38 → 63.22 tok/s |
-| N-gram* | 78.76 → 75.80 tok/s | 107.04 → 118.53 tok/s |
-| MTP + n-gram* | 131.85 → 135.90 tok/s | 111.48 → 120.21 tok/s |
-
-Plain tokens and recorded work matched. **\* N-gram comparisons are qualified:**
-editing tokens matched, but speculative work changed; coding tokens diverged
-with overlap. These are request observations, not isolated same-work kernel
-gains or proof of equivalent answer quality. Full differences and effective
-throughput are in the report below.
-
-The intervention changes upload concurrency, keeping expert placement, math,
-FP16 KV, 15,472 primary slots and four secondary slots per layer fixed.
-Complete-byte checks passed at default and 1/32/96/384 blocks; six sanitizer
-runs reported zero errors. Both serial and overlap paths remain available.
-
-See **[evidence, hypothesis, invariants and gates](docs/Q8_MISS_FETCH_GEOMETRY.md)**.
-The parent overlap and secondary-cache controls remain independent options.
-Main is untouched, and this fork preserves the upstream license. For standard
-installation and support, use **[upstream Strata](https://github.com/Niko1221/Strata)**.
+See [hypothesis, state and validation](docs/Q8_LAYER_ADMISSION.md) and
+[the measured parent](docs/Q8_MISS_FETCH_GEOMETRY.md).
+Main is untouched and the upstream license is retained. For standard
+installation and support, use [upstream Strata](https://github.com/Niko1221/Strata).

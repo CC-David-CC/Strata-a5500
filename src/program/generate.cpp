@@ -57,6 +57,7 @@
 #include "strata/program/host_path_timing.hpp"
 #include "strata/core/serial_worker.hpp"
 #include "strata/core/duplex_exchange.hpp"
+#include "strata/core/layer_exchange_events.hpp"
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/suffix_drafter.hpp"
 #include "strata/kernels/cvec.hpp"
@@ -83,6 +84,7 @@
 #include <algorithm>
 #include <iostream>
 #include <future>
+#include <functional>
 #include <thread>
 #include <atomic>
 #include <condition_variable>
@@ -149,6 +151,8 @@ std::unique_ptr<strata::core::SerialWorker> make_adaptive_worker() {
     return worker;
 }
 
+struct DeferredResidentExchange { int64_t layer, in, out, q; };
+
 // The resident RAM mode and the adaptive tier.  A swap copies `in` (held in RAM) into the slot of `out` (held only
 // by that slot).  Before the slot is overwritten, `out`'s bytes are copied back from it into an exchange buffer, so
 // the CPU computes `out` from RAM while the swap is in flight; when the swap has landed, `commit_exchanges` moves
@@ -160,7 +164,9 @@ template <class Swap>
 bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::ExpertCache& cache,
                           const std::vector<int32_t>& host_res, int64_t n_expert, std::vector<Swap>& swaps,
                           cudaStream_t stream, HostPathTiming* timing = nullptr,
-                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr) {
+                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr,
+                          std::vector<DeferredResidentExchange>* deferred = nullptr,
+                          strata::core::LayerExchangeEvents* layer_events = nullptr) {
     if (fills_queued) *fills_queued = false;
     if (!src.complement_ready() || swaps.empty()) return true;
     // Restrict this first path to pinned resident inputs whose evictions all
@@ -172,7 +178,14 @@ bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::Exp
                    src.pinned(s.layer, s.in) &&
                    host_res[(size_t)s.layer * (size_t)n_expert + (size_t)s.out] >= 0;
         })) {
+        if (deferred && !deferred->empty()) return false;
         if (swaps.size() > (size_t)src.exchange_capacity()) swaps.resize((size_t)src.exchange_capacity());
+        if (layer_events) {
+            if (!deferred) return false;
+            std::vector<int> layers;
+            for (const auto& s : swaps) layers.push_back((int)s.layer);
+            if (!layer_events->prepare(layers)) return false;
+        }
         std::vector<strata::core::DuplexExchange::Copy> copies;
         copies.reserve(swaps.size());
         for (size_t q = 0; q < swaps.size(); ++q) {
@@ -181,31 +194,39 @@ bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::Exp
             const uint8_t* incoming = src.blob(s.layer, s.in); // exactly one source read, as before
             const size_t bytes = (size_t)strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
             if (!incoming || !src.exchange_buffer((int64_t)q)) return false;
-            copies.push_back({cache.device_slot(slot), incoming, src.exchange_buffer((int64_t)q), bytes});
+            copies.push_back({cache.device_slot(slot), incoming, src.exchange_buffer((int64_t)q), bytes,
+                              layer_events ? layer_events->completion_event(q) : nullptr});
         }
         {
             double unused = 0;
             HostPathTimer timer(timing ? timing->duplex_enqueue : unused, timing && timing->enabled);
             if (duplex->enqueue(copies.data(), copies.size(), stream) != cudaSuccess) return false;
+            if (layer_events && !layer_events->arm()) return false;
         }
-        {
+        if (!deferred) {
             double unused = 0;
             HostPathTimer timer(timing ? timing->d2h_wait : unused, timing && timing->enabled);
             if (duplex->wait_evictions() != cudaSuccess) return false;
         }
-        // Evicted bytes are now readable. H2D may still be in flight; the
-        // unchanged adapt_ev/admission wait guards GPU residency and ownership.
+        // Without deferred admission, evicted bytes are readable now. The
+        // deferred path records only IDs: it must not publish a readable RAM
+        // override until adapt_ev proves both directions have completed.
         for (size_t q = 0; q < swaps.size(); ++q) {
             const Swap& s = swaps[q];
-            if (!src.stage_exchange(s.layer, s.in, s.out, (int64_t)q)) return false;
+            if (deferred) deferred->push_back({s.layer, s.in, s.out, (int64_t)q});
+            else if (!src.stage_exchange(s.layer, s.in, s.out, (int64_t)q)) return false;
             if (timing && timing->enabled) {
                 timing->d2h_bytes += copies[q].bytes;
                 ++timing->duplex_swaps;
+                if (deferred) ++timing->deferred_swaps;
             }
         }
         *fills_queued = true;
         return true;
     }
+    // Per-layer publication is only defined for the complete pinned duplex
+    // path. Never silently fall back to a transfer with no readiness event.
+    if (layer_events) return false;
     struct Staged { int32_t layer, in, out; int64_t q; };
     std::vector<Staged> staged;
     std::vector<Swap> kept;
@@ -711,6 +732,8 @@ bool parse_i64_list(const char* s, std::vector<int64_t>& out, std::string& err) 
 /// The pool's adapter plus the wall-clock it spent, so the report can say how much of the token was the CPU.
 struct Drive {
     strata::core::ExpertDispatch d;
+    std::function<bool(int64_t)> before_layer;
+    int64_t admission_width = 0;
     double cpu_ms = 0;
     int64_t calls = 0;
     /// THE ROUTING TRACE, which is P0.S8 and a stated prerequisite of Phase 3.  `drive_pool` is called once
@@ -754,6 +777,19 @@ void drive_pool_multi(void* user, const float* x_f, const int32_t* ids, int64_t 
                       int64_t layer) {
     Drive* t = (Drive*) user;
     t->d.layers = layer;
+    if (t->before_layer && (t->d.failed || !t->before_layer(layer))) {
+        if (!t->d.failed) {
+            t->d.failed = true;
+            t->d.fail = "per-layer expert admission failed";
+            t->d.fail_layer = layer;
+            std::fprintf(stderr, "strata layer admission: failed at layer %lld; draining without commit\n", (long long)layer);
+        }
+        // Verifier::run publishes an empty GPU plan when the pool returns
+        // without one. Supply initialized zero CPU rows so it can drain; the
+        // caller rejects the entire window before committing/emitting tokens.
+        std::fill_n(out, (size_t)n_tok * (size_t)k * (size_t)t->admission_width, 0.0f);
+        return;
+    }
     const Clock::time_point a = Clock::now();
     strata::core::expert_pool_dispatch_multi(t->d, x_f, ids, n_tok, k, out);
     t->cpu_ms += std::chrono::duration<double, std::milli>(Clock::now() - a).count();
@@ -4883,6 +4919,53 @@ int main(int argc, char** argv) {
         }
         cudaEvent_t adapt_ev = nullptr;
         cudaEventCreateWithFlags(&adapt_ev, cudaEventDisableTiming);
+        const bool layer_admission = [] {
+            const char* v = std::getenv("STRATA_EXCHANGE_LAYER_ADMISSION");
+            if (!v || std::strcmp(v, "0") == 0) return false;
+            if (std::strcmp(v, "1") != 0) {
+                std::fprintf(stderr, "STRATA_EXCHANGE_LAYER_ADMISSION must be 0 or 1\n");
+                std::exit(1);
+            }
+            return true;
+        }();
+        const bool deferred_admission = layer_admission || [] {
+            const char* v = std::getenv("STRATA_EXCHANGE_DEFER_PUBLISH"); return v && v[0] == '1';
+        }();
+        const bool inline_adapt = [] {
+            const char* v = std::getenv("STRATA_ADAPT_INLINE"); return v && v[0] == '1';
+        }();
+        if (deferred_admission && (!duplex_exchange || adapt_nowait() || !src.exchange_rotation())) {
+            std::fprintf(stderr, "strata serve: deferred admission requires active duplex exchanges, ownership rotation, and STRATA_ADAPT_NOWAIT=0\n");
+            return 1;
+        }
+        if (inline_adapt && !deferred_admission) {
+            std::fprintf(stderr, "strata serve: inline adaptation requires deferred admission\n");
+            return 1;
+        }
+        if (layer_admission && (srcp != &src || multi_gpu || peer.valid() || drive.d.remote_count ||
+                o.spec_split || ver.device_plan_enabled() || drive.d.lookahead || drive.d.usage.empty())) {
+            std::fprintf(stderr, "strata serve: layer admission requires one GPU, unsplit host-planned verification, "
+                                 "adaptive exchanges, and no peer/remote/router-lookahead consumers\n");
+            return 1;
+        }
+        std::vector<DeferredResidentExchange> deferred_exchanges;
+        strata::core::LayerExchangeEvents layer_events;
+        if (layer_admission && layer_events.open((size_t)g.n_layers) != cudaSuccess) {
+            std::fprintf(stderr, "strata serve: cannot create per-layer exchange events\n");
+            return 1;
+        }
+        // On any early return, queued H2D waits for every D2H dependency before
+        // source buffers and the duplex stream are destroyed. Normal request
+        // completion also publishes pending ownership before exposing state.
+        struct TransferDrain {
+            cudaStream_t stream;
+            ~TransferDrain() { if (stream) cudaStreamSynchronize(stream); }
+        } transfer_drain{deferred_admission ? adapt_stream : nullptr};
+        if (layer_admission)
+            std::fprintf(stderr, "strata exchange layer admission: enabled; same selected pairs, layer-ordered copies, "
+                                 "wait before host expert planning; final drain included\n");
+        else if (deferred_admission)
+            std::fprintf(stderr, "strata exchange admission: deferred=1 inline=%d; publish only after all fills, drain every request\n", inline_adapt ? 1 : 0);
         // a layer split's later stages keep a copy of the residency table on their devices, and swap on their own
         auto res_upload = [&]() {
             HostPathTimer timer(host_timing.table_upload, host_timing.enabled);
@@ -4893,27 +4976,79 @@ int main(int argc, char** argv) {
                 cudaMemcpy(st->d_res, host_res.data(), host_res.size() * sizeof(int32_t), cudaMemcpyHostToDevice);
             }
         };
-        auto apply_pending = [&](bool wait) {
+        auto apply_layer = [&](int64_t layer) -> bool {
+            if (layer < 0 || layer >= g.n_layers) return false;
+            const auto* range = layer_events.pending((size_t)layer);
+            if (!range) return true;
+            {
+                HostPathTimer timer(host_timing.admission_wait, host_timing.enabled);
+                if (layer_events.wait((size_t)layer) != cudaSuccess) return false;
+            }
+            if (range->end > deferred_exchanges.size() || range->end > pending.size()) return false;
+            {
+                HostPathTimer timer(host_timing.deferred_publish, host_timing.enabled);
+                for (size_t q = range->begin; q < range->end; ++q) {
+                    const auto& x = deferred_exchanges[q];
+                    if (x.layer != layer || x.q != (int64_t)q ||
+                        !src.stage_exchange(x.layer, x.in, x.out, x.q)) return false;
+                }
+            }
+            {
+                HostPathTimer timer(host_timing.ownership_commit, host_timing.enabled);
+                if (src.commit_exchanges() != (int64_t)(range->end - range->begin)) return false;
+            }
+            for (size_t q = range->begin; q < range->end; ++q) {
+                const auto& [index, slot] = pending[q];
+                host_res[(size_t)index] = slot;
+            }
+            if (!layer_events.admit((size_t)layer)) return false;
+            if (host_timing.enabled) ++host_timing.layer_admissions;
+            return true;
+        };
+        if (layer_admission) {
+            drive.admission_width = g.n_embd;
+            drive.before_layer = apply_layer;
+        }
+        auto apply_pending = [&](bool wait) -> bool {
             if (peer.valid()) peer.apply_pending(wait);
-            if (pending.empty()) return;
+            if (pending.empty()) return true;
             if (wait) {
                 HostPathTimer timer(host_timing.admission_wait, host_timing.enabled);
-                cudaEventSynchronize(adapt_ev);
+                const cudaError_t ready = cudaEventSynchronize(adapt_ev);
+                if (deferred_admission && ready != cudaSuccess) {
+                    std::fprintf(stderr, "deferred exchange admission: copy completion failed\n");
+                    return false;
+                }
             }
-            else if (cudaEventQuery(adapt_ev) != cudaSuccess) return;
+            else if (cudaEventQuery(adapt_ev) != cudaSuccess) return true;
             for (auto& st : stages)
                 if (st->adapt_live) {
                     if (wait) cudaEventSynchronize(st->adapt_ev);
-                    else if (cudaEventQuery(st->adapt_ev) != cudaSuccess) return;
+                    else if (cudaEventQuery(st->adapt_ev) != cudaSuccess) return true;
                 }
             for (auto& st : stages) st->adapt_live = false;
+            if (layer_admission) {
+                for (int64_t layer = 0; layer < g.n_layers; ++layer)
+                    if (!apply_layer(layer)) return false;
+                if (!layer_events.finish()) return false;
+                deferred_exchanges.clear();
+            } else if (!deferred_exchanges.empty()) {
+                HostPathTimer timer(host_timing.deferred_publish, host_timing.enabled);
+                for (const auto& x : deferred_exchanges)
+                    if (!src.stage_exchange(x.layer, x.in, x.out, x.q)) {
+                        std::fprintf(stderr, "deferred exchange admission: invalid ownership staging\n");
+                        return false;
+                    }
+                deferred_exchanges.clear();
+            }
             {
                 HostPathTimer timer(host_timing.ownership_commit, host_timing.enabled);
-                src.commit_exchanges();
+                if (!layer_admission) src.commit_exchanges();
             }
             for (const auto& [i, slot] : pending) host_res[(size_t) i] = slot;
             pending.clear();
             res_upload();
+            return true;
         };
         // the VRAM tier follows the conversation (the same rule as the speculative loop below)
         auto adapt = [&]() -> bool {
@@ -4948,9 +5083,19 @@ int main(int argc, char** argv) {
                 host_timing.rank += std::chrono::duration<double, std::milli>(Clock::now() - rank0).count();
                 host_timing.swaps += swaps.size();
             }
+            if (layer_admission) {
+                // Apply the original rank/capacity cut BEFORE reordering, so
+                // the selected experts stay identical even at the batch cap.
+                if (swaps.size() > (size_t)src.exchange_capacity()) swaps.resize((size_t)src.exchange_capacity());
+                std::stable_sort(swaps.begin(), swaps.end(), [](const Swap& a, const Swap& b) {
+                    return a.layer < b.layer;
+                });
+            }
             bool fills_queued = false;
             if (!resident_stage_swaps(src, xcache, host_res, g.n_expert, swaps, adapt_stream,
-                                      &host_timing, duplex_exchange.get(), &fills_queued)) return false;
+                                      &host_timing, duplex_exchange.get(), &fills_queued,
+                                      deferred_admission ? &deferred_exchanges : nullptr,
+                                      layer_admission ? &layer_events : nullptr)) return false;
             const auto h2d0 = host_timing.enabled ? Clock::now() : Clock::time_point{};
             bool main_live = false;
             for (const Swap& s : swaps) {
@@ -4972,7 +5117,10 @@ int main(int argc, char** argv) {
                 pending.emplace_back((int32_t) in, slot);      // resident once the copy has landed
             }
             if (host_timing.enabled) host_timing.h2d_enqueue += std::chrono::duration<double, std::milli>(Clock::now() - h2d0).count();
-            if (!swaps.empty()) cudaEventRecord(adapt_ev, adapt_stream);
+            if (!swaps.empty()) {
+                const cudaError_t recorded = cudaEventRecord(adapt_ev, adapt_stream);
+                if (deferred_admission && recorded != cudaSuccess) return false;
+            }
             (void) main_live;
             for (auto& st : stages)
                 if (st->adapt_live) {
@@ -4996,7 +5144,7 @@ int main(int argc, char** argv) {
             for (float& v : drive.d.usage) v *= o.adapt_decay;
             return true;
         };
-        auto adaptive_worker = make_adaptive_worker();
+        auto adaptive_worker = inline_adapt ? nullptr : make_adaptive_worker();
         // #477: write the learned profile (between requests and at QUIT: a prompt's lent slots are back by then).
         // A swap still in flight counts as done - its expert is resident once the copy lands.  `why`: for the log.
         auto save_profile = [&](const char* why) {
@@ -5700,7 +5848,7 @@ int main(int argc, char** argv) {
                 }
                 return true;
             };
-            apply_pending(true);
+            if (!apply_pending(true)) return 1;
             // per-request sampling for the verify window's head (greedy when temperature is absent)
             strata::kernels::SamplerParams req_sp;
             req_sp.greedy = req_temperature <= 0.0f;
@@ -5879,7 +6027,10 @@ int main(int argc, char** argv) {
                 // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
                 // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
                 // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-                fleet_capture.phase("adaptive admission and wait", [&] { apply_pending(!adapt_nowait()); });
+                if (!layer_admission && !fleet_capture.phase("adaptive admission and wait", [&] { return apply_pending(!adapt_nowait()); })) {
+                    std::printf("ERR adaptive admission failed\n");
+                    return 1;
+                }
                 if (hist_n > 0) {
                     // the tails the penalties count over, ONE PER ROW: the tokens the state has consumed, the
                     // fed-back head `x` (it joins `consumed` only after this window commits), then the drafts
@@ -5897,6 +6048,13 @@ int main(int argc, char** argv) {
                     std::printf("ERR %s\n", drive.d.failed && drive.d.fail ? drive.d.fail : err.c_str());
                     return 1;
                 }
+                // All affected layers have now admitted their own completed
+                // copies. Retire the batch and upload the coherent device map
+                // outside the captured graph, before another adaptation starts.
+                if (layer_admission && !apply_pending(true)) {
+                    std::printf("ERR layer exchange finalization failed\n");
+                    return 1;
+                }
                 int a = 0;
                 while (a < T - 1 && window[(size_t) a + 1] == outv[(size_t) a]) ++a;
                 for (int i = 0; i <= a; ++i)
@@ -5909,7 +6067,10 @@ int main(int argc, char** argv) {
                 bool adapt_ok = true;
                 if (!drive.d.usage.empty() && ((rounds + 1) % o.adapt_every) == 0) {
                     HostPathTimer timer(host_timing.launch, host_timing.enabled);
-                    adapt_thr.start([&] { adapt_ok = fleet_capture.phase("adaptive ranking and copies", [&] { return adapt(); }); });
+                    if (inline_adapt)
+                        adapt_ok = fleet_capture.phase("adaptive ranking and enqueue", [&] { return adapt(); });
+                    else
+                        adapt_thr.start([&] { adapt_ok = fleet_capture.phase("adaptive ranking and copies", [&] { return adapt(); }); });
                 }
                 if (!fleet_capture.phase("commit", [&] { return ver.commit(a + 1, err); })) {
                     if (adapt_thr.joinable()) adapt_thr.join();
@@ -5964,6 +6125,10 @@ int main(int argc, char** argv) {
                 x = outv[(size_t) a];
                 p += a + 1;
             }
+            // STOP, EOS and the output limit all end here. Include the final
+            // admission in measured decode time; no deferred work escapes into
+            // checkpointing, a later request, QUIT or resource destruction.
+            if (deferred_admission && !apply_pending(true)) return 1;
             const double decode_ms = std::chrono::duration<double, std::milli>(Clock::now() - d0).count();
             // the last commit (set_commit_async): the session is complete before anything reads or copies it
             if (!ver.wait_commit(err)) {
@@ -5985,6 +6150,13 @@ int main(int argc, char** argv) {
                     (unsigned long long) (host_timing.h2d_bytes-ht0.h2d_bytes),
                     (unsigned long long) (host_timing.swaps-ht0.swaps),
                     (unsigned long long) (host_timing.duplex_swaps-ht0.duplex_swaps));
+                if (deferred_admission)
+                    std::fprintf(stderr, "strata deferred admission: %llu deferred_swaps, publish %.6f ms/window; final drain included\n",
+                        (unsigned long long)(host_timing.deferred_swaps-ht0.deferred_swaps),
+                        (host_timing.deferred_publish-ht0.deferred_publish)/w);
+                if (layer_admission)
+                    std::fprintf(stderr, "strata layer admission: %llu affected-layer waits; all request exchanges drained\n",
+                        (unsigned long long)(host_timing.layer_admissions-ht0.layer_admissions));
             }
             if (dec_timing && dec_windows > 0) {
                 const DecSnap d1 = dec_snap();

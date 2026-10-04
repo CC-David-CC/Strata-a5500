@@ -15,6 +15,7 @@ from configure_rtxpro import configure
 from bench_mtp_modes import set_option
 from conversation_cache_parity import state_hashes, load_tokenizer, require
 from serve.server import StrataEngine, child_env
+from benchmark_startup import start_checked_engine
 
 
 def main():
@@ -58,6 +59,7 @@ def main():
                 STRATA_HOST_TIMING='1',STRATA_DECODE_TIMING='1',STRATA_STATE_HASH='1',
                 STRATA_Q8_EXPERT_REUSE='0',STRATA_Q8_MISS_CACHE_WAYS=str(ways),
                 STRATA_Q8_MISS_FETCH_OVERLAP=str(overlap))
+            cfg['env'].update(variant.get('env',{}))
             label=mode+'-'+variant['label'];log=opt.output/(label+'.log')
             arm=dict(label=label,mode=mode,ways=ways,overlap=overlap,config=cfg,requests=[])
             result['arms'].append(arm);save()
@@ -66,7 +68,12 @@ def main():
                 tokenizer=load_tokenizer(Path(cfg['tokenizer']))
                 suffix=tokenizer.encode('<|im_end|>\n<|im_start|>user\nContinue the implementation.<|im_end|>\n'
                     '<|im_start|>assistant\n<think>\n\n</think>\n\n',parse_special=True)
-                engine=StrataEngine(cfg['exe'],cfg['args'],cfg['cwd'],str(log),child_env(cfg))
+                factory=lambda:StrataEngine(cfg['exe'],cfg['args'],cfg['cwd'],str(log),child_env(cfg))
+                if plan.get('expected_engine_info'):
+                    engine=start_checked_engine(factory,plan['expected_engine_info'],log,
+                        plan.get('required_startup_patterns',[]),arm)
+                else:
+                    engine=factory()
                 require(engine.can_stop,'Engine does not advertise STOP')
                 arm['engine_info']=dict(engine.info)
                 require(engine.info['expert_slots']==15472 and engine.info['kv']=='fp16','Placement/KV changed')
@@ -100,6 +107,10 @@ def main():
                 run('cancel',prompts['coding'],1024,cancel_at=16)
                 run('after-cancel',prompts['editing'],128)
                 text=log.read_text(errors='replace');hashes=state_hashes(text)
+                if variant.get('env',{}).get('STRATA_EXCHANGE_LAYER_ADMISSION')=='1':
+                    require('strata exchange layer admission: enabled;' in text,'Layer admission did not activate')
+                    arm['layer_admissions']=sum(map(int,re.findall(r'strata layer admission: (\d+) affected-layer waits',text)))
+                    require(arm['layer_admissions']>0,'No per-layer exchanges were admitted')
                 require(len(hashes)==len(arm['requests']),'Missing request state fingerprints')
                 for req,state in zip(arm['requests'],hashes):req['state']=state
                 if overlap:require('strata miss fetch overlap: enabled;' in text,'Overlap did not activate')

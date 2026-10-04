@@ -12,7 +12,10 @@ namespace strata::core {
 // slot's eviction, while opposite-direction copies of other slots can overlap.
 class DuplexExchange {
 public:
-    struct Copy { void* slot; const void* incoming; void* outgoing; size_t bytes; };
+    struct Copy {
+        void* slot; const void* incoming; void* outgoing; size_t bytes;
+        cudaEvent_t filled = nullptr; // optional completion after this H2D, never before it
+    };
     DuplexExchange() = default;
     DuplexExchange(const DuplexExchange&) = delete;
     DuplexExchange& operator=(const DuplexExchange&) = delete;
@@ -46,6 +49,10 @@ public:
             if (e != cudaSuccess) return e;
             e = cudaMemcpyAsync(c.slot, c.incoming, c.bytes, cudaMemcpyHostToDevice, fill);
             if (e != cudaSuccess) return e;
+            if (c.filled) {
+                e = cudaEventRecord(c.filled, fill);
+                if (e != cudaSuccess) return e;
+            }
         }
         return cudaSuccess;
     }
