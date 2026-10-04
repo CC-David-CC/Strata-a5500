@@ -54,6 +54,8 @@
 #include "strata/program/logits_selection.hpp"
 #include "strata/program/conv_cache.hpp"
 #include "strata/program/fleet_decode_capture.hpp"
+#include "strata/program/host_path_timing.hpp"
+#include "strata/core/serial_worker.hpp"
 #include "strata/spec/draft_policy.hpp"
 #include "strata/spec/suffix_drafter.hpp"
 #include "strata/kernels/cvec.hpp"
@@ -121,6 +123,30 @@ bool refill_blocking() {
 }
 
 using Clock = std::chrono::steady_clock;
+using HostPathTiming = strata::program::HostPathTiming;
+using HostPathTimer = strata::program::HostPathTimer;
+
+std::unique_ptr<strata::core::SerialWorker> make_adaptive_worker() {
+    const char* reuse = std::getenv("STRATA_ADAPT_WORKER");
+    if (!reuse || reuse[0] != '1') return nullptr;
+    int device = 0;
+    if (cudaGetDevice(&device) != cudaSuccess) throw std::runtime_error("adaptive worker: cannot read CUDA device");
+    int cpu = -1;
+    if (const char* value = std::getenv("STRATA_ADAPT_WORKER_CPU")) {
+        char* end = nullptr;
+        const long parsed = std::strtol(value, &end, 10);
+        if (!end || *end || parsed < 0 || parsed >= 64)
+            throw std::runtime_error("adaptive worker CPU must be an integer in [0, 63]");
+        cpu = (int) parsed;
+    }
+    auto worker = std::make_unique<strata::core::SerialWorker>([device, cpu] {
+        if (cudaSetDevice(device) != cudaSuccess) throw std::runtime_error("adaptive worker: cannot select CUDA device");
+        if (cpu >= 0 && strata::kernels::cpu::pin_current_thread(cpu) == -1)
+            throw std::runtime_error("adaptive worker: cannot pin requested CPU");
+    });
+    std::fprintf(stderr, "strata adaptive worker: persistent=1 device=%d cpu=%d (-1 inherits host affinity)\n", device, cpu);
+    return worker;
+}
 
 // The resident RAM mode and the adaptive tier.  A swap copies `in` (held in RAM) into the slot of `out` (held only
 // by that slot).  Before the slot is overwritten, `out`'s bytes are copied back from it into an exchange buffer, so
@@ -132,7 +158,7 @@ using Clock = std::chrono::steady_clock;
 template <class Swap>
 bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::ExpertCache& cache,
                           const std::vector<int32_t>& host_res, int64_t n_expert, std::vector<Swap>& swaps,
-                          cudaStream_t stream) {
+                          cudaStream_t stream, HostPathTiming* timing = nullptr) {
     if (!src.complement_ready() || swaps.empty()) return true;
     struct Staged { int32_t layer, in, out; int64_t q; };
     std::vector<Staged> staged;
@@ -144,15 +170,24 @@ bool resident_stage_swaps(strata::core::FileExpertSource& src, strata::core::Exp
         if (q >= src.exchange_capacity()) continue;
         const int32_t slot = host_res[(size_t) s.layer * (size_t) n_expert + (size_t) s.out];
         if (slot < 0) continue;
+        const auto enqueue0 = timing && timing->enabled ? Clock::now() : Clock::time_point{};
         if (cudaMemcpyAsync(src.exchange_buffer(q), cache.device_slot(slot),
                             (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer), cudaMemcpyDeviceToHost,
                             stream) != cudaSuccess)
             return false;
+        if (timing && timing->enabled) {
+            timing->d2h_enqueue += std::chrono::duration<double, std::milli>(Clock::now() - enqueue0).count();
+            timing->d2h_bytes += strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
+        }
         staged.push_back({s.layer, s.in, s.out, q});
         kept.push_back(s);
     }
     if (!staged.empty()) {
-        if (cudaStreamSynchronize(stream) != cudaSuccess) return false;
+        {
+            double unused = 0;
+            HostPathTimer timer(timing ? timing->d2h_wait : unused, timing && timing->enabled);
+            if (cudaStreamSynchronize(stream) != cudaSuccess) return false;
+        }
         for (const Staged& x : staged)
             if (!src.stage_exchange(x.layer, x.in, x.out, x.q)) return false;
     }
@@ -4784,10 +4819,12 @@ int main(int argc, char** argv) {
         }
         // plan v0.3 P6: swaps in flight - (residency index, slot) admitted when adapt_ev has completed
         std::vector<std::pair<int32_t, int32_t>> pending;
+        HostPathTiming host_timing;
         cudaEvent_t adapt_ev = nullptr;
         cudaEventCreateWithFlags(&adapt_ev, cudaEventDisableTiming);
         // a layer split's later stages keep a copy of the residency table on their devices, and swap on their own
         auto res_upload = [&]() {
+            HostPathTimer timer(host_timing.table_upload, host_timing.enabled);
             if (d_res != nullptr)
                 cudaMemcpy(d_res, host_res.data(), host_res.size() * sizeof(int32_t), cudaMemcpyHostToDevice);
             for (auto& st : stages) {
@@ -4798,7 +4835,10 @@ int main(int argc, char** argv) {
         auto apply_pending = [&](bool wait) {
             if (peer.valid()) peer.apply_pending(wait);
             if (pending.empty()) return;
-            if (wait) cudaEventSynchronize(adapt_ev);
+            if (wait) {
+                HostPathTimer timer(host_timing.admission_wait, host_timing.enabled);
+                cudaEventSynchronize(adapt_ev);
+            }
             else if (cudaEventQuery(adapt_ev) != cudaSuccess) return;
             for (auto& st : stages)
                 if (st->adapt_live) {
@@ -4806,13 +4846,18 @@ int main(int argc, char** argv) {
                     else if (cudaEventQuery(st->adapt_ev) != cudaSuccess) return;
                 }
             for (auto& st : stages) st->adapt_live = false;
-            src.commit_exchanges();   // the resident RAM mode: the evicted experts take their places in RAM
+            {
+                HostPathTimer timer(host_timing.ownership_commit, host_timing.enabled);
+                src.commit_exchanges();
+            }
             for (const auto& [i, slot] : pending) host_res[(size_t) i] = slot;
             pending.clear();
             res_upload();
         };
         // the VRAM tier follows the conversation (the same rule as the speculative loop below)
         auto adapt = [&]() -> bool {
+            HostPathTimer total_timer(host_timing.adapt_total, host_timing.enabled);
+            const auto rank0 = host_timing.enabled ? Clock::now() : Clock::time_point{};
             if (!pending.empty()) return true;   // the previous swaps are still in flight
             struct Swap { float gain; int32_t layer, in, out; };
             std::vector<Swap> swaps;
@@ -4838,7 +4883,12 @@ int main(int argc, char** argv) {
             }
             std::sort(swaps.begin(), swaps.end(), [](const Swap& a, const Swap& b) { return a.gain > b.gain; });
             if ((int) swaps.size() > o.adapt_swaps) swaps.resize((size_t) o.adapt_swaps);
-            if (!resident_stage_swaps(src, xcache, host_res, g.n_expert, swaps, adapt_stream)) return false;
+            if (host_timing.enabled) {
+                host_timing.rank += std::chrono::duration<double, std::milli>(Clock::now() - rank0).count();
+                host_timing.swaps += swaps.size();
+            }
+            if (!resident_stage_swaps(src, xcache, host_res, g.n_expert, swaps, adapt_stream, &host_timing)) return false;
+            const auto h2d0 = host_timing.enabled ? Clock::now() : Clock::time_point{};
             bool main_live = false;
             for (const Swap& s : swaps) {
                 const size_t in = (size_t) s.layer * g.n_expert + s.in, out = (size_t) s.layer * g.n_expert + s.out;
@@ -4852,11 +4902,13 @@ int main(int argc, char** argv) {
                                     (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer),
                                     cudaMemcpyHostToDevice, gs ? gs->adapt_stream : adapt_stream) != cudaSuccess)
                     return false;
+                if (host_timing.enabled) host_timing.h2d_bytes += strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
                 if (gs) gs->adapt_live = true;
                 else main_live = true;
                 host_res[out] = strata::core::kNotResident;   // evicted now: the CPU computes it meanwhile
                 pending.emplace_back((int32_t) in, slot);      // resident once the copy has landed
             }
+            if (host_timing.enabled) host_timing.h2d_enqueue += std::chrono::duration<double, std::milli>(Clock::now() - h2d0).count();
             if (!swaps.empty()) cudaEventRecord(adapt_ev, adapt_stream);
             (void) main_live;
             for (auto& st : stages)
@@ -4881,6 +4933,7 @@ int main(int argc, char** argv) {
             for (float& v : drive.d.usage) v *= o.adapt_decay;
             return true;
         };
+        auto adaptive_worker = make_adaptive_worker();
         // #477: write the learned profile (between requests and at QUIT: a prompt's lent slots are back by then).
         // A swap still in flight counts as done - its expert is resident once the copy lands.  `why`: for the log.
         auto save_profile = [&](const char* why) {
@@ -5719,6 +5772,7 @@ int main(int argc, char** argv) {
                                drive.d.pcie_experts};
             };
             const DecSnap ds0 = dec_snap();
+            const HostPathTiming ht0 = host_timing;
             double dt_run = 0, dt_commit = 0, dt_draft = 0;
             int64_t dec_windows = 0, dec_T = 0;
             const int64_t decode_hits0 = drive.d.cache_hits;
@@ -5788,10 +5842,12 @@ int main(int argc, char** argv) {
                     }
                 if (from_sfx) { ++sfx_windows; sfx_drafts += T - 1; sfx_ok += a; }
                 const Clock::time_point tw1 = Clock::now();
-                std::thread adapt_thr;   // the adaptive tier beside the commit and the draft (as in generate)
+                strata::core::HostTask adapt_thr(adaptive_worker.get()); // same completion boundary; optional reusable worker
                 bool adapt_ok = true;
-                if (!drive.d.usage.empty() && ((rounds + 1) % o.adapt_every) == 0)
-                    adapt_thr = std::thread([&] { adapt_ok = fleet_capture.phase("adaptive ranking and copies", [&] { return adapt(); }); });
+                if (!drive.d.usage.empty() && ((rounds + 1) % o.adapt_every) == 0) {
+                    HostPathTimer timer(host_timing.launch, host_timing.enabled);
+                    adapt_thr.start([&] { adapt_ok = fleet_capture.phase("adaptive ranking and copies", [&] { return adapt(); }); });
+                }
                 if (!fleet_capture.phase("commit", [&] { return ver.commit(a + 1, err); })) {
                     if (adapt_thr.joinable()) adapt_thr.join();
                     std::printf("ERR %s\n", err.c_str());
@@ -5825,7 +5881,10 @@ int main(int argc, char** argv) {
                     dt_run += msd(tw0, tw1); dt_commit += msd(tw1, tw2); dt_draft += msd(tw2, tw3);
                     ++dec_windows; dec_T += T;
                 }
-                if (adapt_thr.joinable()) fleet_capture.phase("adaptive host join", [&] { adapt_thr.join(); });
+                if (adapt_thr.joinable()) {
+                    HostPathTimer timer(host_timing.join, host_timing.enabled);
+                    fleet_capture.phase("adaptive host join", [&] { adapt_thr.join(); });
+                }
                 if (!adapt_ok) {
                     std::printf("ERR an adaptive refill failed\n");
                     return 1;
@@ -5847,6 +5906,20 @@ int main(int argc, char** argv) {
             if (!ver.wait_commit(err)) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
+            }
+            if (host_timing.enabled && dec_windows > 0) {
+                const double w = (double) dec_windows;
+                std::fprintf(stderr, "strata host critical: %lld windows, ms/window: launch %.6f join %.6f admission_wait %.6f "
+                    "ownership_commit %.6f table_upload %.6f worker_total %.6f rank %.6f D2H_enqueue %.6f D2H_wait %.6f "
+                    "H2D_enqueue %.6f; D2H_bytes %llu H2D_bytes %llu swaps %llu; worker phases overlap GPU work\n",
+                    (long long) dec_windows, (host_timing.launch-ht0.launch)/w, (host_timing.join-ht0.join)/w,
+                    (host_timing.admission_wait-ht0.admission_wait)/w, (host_timing.ownership_commit-ht0.ownership_commit)/w,
+                    (host_timing.table_upload-ht0.table_upload)/w, (host_timing.adapt_total-ht0.adapt_total)/w,
+                    (host_timing.rank-ht0.rank)/w, (host_timing.d2h_enqueue-ht0.d2h_enqueue)/w,
+                    (host_timing.d2h_wait-ht0.d2h_wait)/w, (host_timing.h2d_enqueue-ht0.h2d_enqueue)/w,
+                    (unsigned long long) (host_timing.d2h_bytes-ht0.d2h_bytes),
+                    (unsigned long long) (host_timing.h2d_bytes-ht0.h2d_bytes),
+                    (unsigned long long) (host_timing.swaps-ht0.swaps));
             }
             if (dec_timing && dec_windows > 0) {
                 const DecSnap d1 = dec_snap();
@@ -6563,6 +6636,7 @@ int main(int argc, char** argv) {
             ms_adapt += std::chrono::duration<double, std::milli>(Clock::now() - ta).count();
             return true;
         };
+        auto adaptive_worker = make_adaptive_worker();
         int64_t p = spec_pos;
         int32_t x = (int32_t) tok;
         std::vector<int32_t> drafts((size_t) o.spec, 0);
@@ -6664,10 +6738,10 @@ int main(int argc, char** argv) {
             }
             // plan v0.3 P6: the adaptive tier's host work (ranking, copy submission) runs on its own thread while the
             // GPU commits and drafts; it touches only the residency tables, which nothing reads until the next window
-            std::thread adapt_thr;
+            strata::core::HostTask adapt_thr(adaptive_worker.get());
             bool adapt_ok = true;
             if (!drive.d.usage.empty() && ((rounds + 1) % o.adapt_every) == 0)
-                adapt_thr = std::thread([&] { adapt_ok = adapt(); });
+                adapt_thr.start([&] { adapt_ok = adapt(); });
             if (!ver.commit(a + 1, err)) {
                 if (adapt_thr.joinable()) adapt_thr.join();
                 std::fprintf(stderr, "strata generate: %s\n", err.c_str());
