@@ -177,5 +177,26 @@ slots, FP16 KV and a locked lookup table before sending any prompt. A mismatch
 closes the engine and records the observed configuration and resource limits;
 it does not retry a failed output comparison or change memory policy. This is
 a harness check. The engine under comparison remains the tested `7db4414`
-binary. Remaining plain/n-gram/combined tests at 32K and 128K need fresh valid
-controls; their results are not implied by the MTP measurements.
+binary. Remaining n-gram/combined tests at 32K and all three modes at 128K
+need valid controls; their results are not implied by the MTP measurements.
+
+## Guarded 32K plain-decoding comparison completed
+
+All three fresh arms passed the startup guard with the full 44.28GiB RAM
+complement and a locked lookup table. Each generated 1,024 coding and 1,024
+editing tokens. All tokens, recorded work, primary-exchange payload and
+secondary-cache counts matched; expert file reads were zero. This supplies a
+valid comparison for the setting rejected above, without discarding that record.
+
+| Setting | Coding output tok/s | Editing output tok/s | Coding effective tok/s | Editing effective tok/s |
+|---|---:|---:|---:|---:|
+| 384 blocks, serial | 74.21 | 62.38 | 47.24 | 42.42 |
+| 32 blocks, serial | 74.47 | 62.81 | 47.32 | 42.62 |
+| 32 blocks, overlap | 74.66 | 63.22 | 47.40 | 42.84 |
+
+The combined change gained **0.61% coding / 1.34% editing** on generation in
+this first valid triple. Prefill-inclusive gains were **0.35% / 1.00%**. Plain
+decoding's gain is smaller than the separately measured MTP gain. This is one
+fresh triple; it does not establish a confidence interval or a 128K result.
+
+[Full startup checks, requests and paired analysis](benchmarks/q8-miss-geometry-plain-guarded-20261004.json).
