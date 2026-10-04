@@ -2,5 +2,7 @@ Branch: work/control-lab
 Logprobs base: 2243cb1c5b1a87270731d8b8a76e4af001f96f97
 Sampler dependency: 450285f3c90748057a02648345e6c3973519a710
 Dependency merge: 11db33b05f860e345723981d0a2d1e13e7427734
+Implementation commit: bb28ac8b6bfcfc78dcd01ca55a0d8f178599ee02
 Implementation identity: research-source-manifest.json pins the tested source files.
-The full implementation commit will be added in the immediately following receipt commit.
+Validation: 83 Python tests; 59 headless browser checks; 230 canonical native recordings.
+The following receipt commit records this checkpoint without changing runtime code.

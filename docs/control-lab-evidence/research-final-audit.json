@@ -1,0 +1,11 @@
+{
+  "implementation_commit": "bb28ac8b6bfcfc78dcd01ca55a0d8f178599ee02",
+  "recording_blobs_verified": 230,
+  "source_blobs_verified": 31,
+  "local_gallery": {
+    "port": 8876,
+    "pages": 25,
+    "recordings": 230,
+    "status": "ready"
+  }
+}

@@ -3,6 +3,10 @@
 Branch: **`work/control-lab`**. Worktree:
 `C:/Users/dflanag3/Documents/fleet/strata-control-lab`.
 The exact implementation checkpoint is in [RESEARCH_CHECKPOINT.txt](RESEARCH_CHECKPOINT.txt).
+Implementation: **`bb28ac8b6bfcfc78dcd01ca55a0d8f178599ee02`**.
+The [source manifest](research-source-manifest.json) pins the tested lab files.
+The [final artifact audit](research-final-audit.json) verifies all 230 recording
+hashes and 31 source hashes against committed Git blobs and checks the local gallery.
 
 Logprobs base: `2243cb1c5b1a87270731d8b8a76e4af001f96f97`.
 Sampler dependency: **`450285f3c90748057a02648345e6c3973519a710`**, merged with
@@ -60,7 +64,7 @@ independent FP64 arithmetic on the same native tensor, within the `1e-9` toleran
 
 There are **230 canonical native request recordings**: 101 foundation requests
 and 129 research requests. The [manifest](research-recordings-manifest.json)
-pins each file's bytes and capture time. Successful preliminary duplicate captures
+pins each file's LF-normalized Git bytes and capture time. Successful preliminary duplicate captures
 were archived outside the public replay set, so the replay files agree with the
 completed scenario receipts. The original foundation records were preserved.
 
