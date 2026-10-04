@@ -1,0 +1,17 @@
+{
+  "binary_sha256": "99890d1dd54a53ac8b1af3b3a9c4dde06282a88bdfdc472efff6f13a381c37d6",
+  "base": "2243cb1c5b1a87270731d8b8a76e4af001f96f97",
+  "gpu": "RTX 4090",
+  "cuda": "13.3.73",
+  "model": "Qwen3.8-Flash-Next-GSQ-RCO-IQ1_M",
+  "kv": "int8",
+  "context": 4096,
+  "spec": 1,
+  "sources": {
+    "src/program/generate.cpp": "22bca6449238ba4b05377c8fe3af7a7ee4206f6feae5c5ed95ec9f53df7528ae",
+    "include/strata/program/ordered_sampler.hpp": "cdf7afa26dbd54171f614df563bade22f3ae199c2b69db495b6d92f3e33e4cb0",
+    "serve/server.py": "c8738b2b5af93b7b7845a8cd84e0242b846fc7127c23c4bc7c77b8f6f59121c6",
+    "serve/sampling.py": "6f7eb4ca97b51088eeb93034c7701d7a86a222763e9171efa0848f8187c3709d"
+  },
+  "implementation_commit": "dbdfda4aafe306c6c7da47eac8106d6bcd45636c"
+}

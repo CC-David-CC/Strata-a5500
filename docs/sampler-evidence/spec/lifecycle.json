@@ -1,0 +1,295 @@
+{
+  "provenance": "native-strata",
+  "cancelled_request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Write a long explanation of a mechanical clock."
+      }
+    ],
+    "max_tokens": 300,
+    "reasoning_effort": "none",
+    "logprobs": true,
+    "top_logprobs": 5,
+    "seed": 675,
+    "stream": true,
+    "strata_sampler": {
+      "chain": [
+        "min_p",
+        "temperature"
+      ],
+      "min_p": 0.05,
+      "temperature": 1.5,
+      "inspect": true
+    }
+  },
+  "chunks_before_disconnect": [
+    {
+      "id": "chatcmpl-bf0e8da267634a8f8c66c1a6",
+      "object": "chat.completion.chunk",
+      "created": 1791080988,
+      "model": "qwen3.8-flash-next",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "role": "assistant",
+            "content": ""
+          },
+          "finish_reason": null,
+          "logprobs": {
+            "content": [],
+            "refusal": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "chatcmpl-bf0e8da267634a8f8c66c1a6",
+      "object": "chat.completion.chunk",
+      "created": 1791080988,
+      "model": "qwen3.8-flash-next",
+      "choices": [
+        {
+          "index": 0,
+          "delta": {
+            "content": "To"
+          },
+          "finish_reason": null,
+          "logprobs": {
+            "content": [
+              {
+                "token": "To",
+                "logprob": -1.6688448240011184,
+                "bytes": [
+                  84,
+                  111
+                ],
+                "top_logprobs": [
+                  {
+                    "token": "A",
+                    "logprob": -0.38557303445033725,
+                    "bytes": [
+                      65
+                    ]
+                  },
+                  {
+                    "token": "To",
+                    "logprob": -1.6688448240011184,
+                    "bytes": [
+                      84,
+                      111
+                    ]
+                  },
+                  {
+                    "token": "The",
+                    "logprob": -2.92054808633022,
+                    "bytes": [
+                      84,
+                      104,
+                      101
+                    ]
+                  },
+                  {
+                    "token": "#",
+                    "logprob": -3.0137659360616653,
+                    "bytes": [
+                      35
+                    ]
+                  },
+                  {
+                    "token": "Mech",
+                    "logprob": -4.752256994411275,
+                    "bytes": [
+                      77,
+                      101,
+                      99,
+                      104
+                    ]
+                  }
+                ],
+                "strata_sampling": {
+                  "index": 0,
+                  "id": 1206,
+                  "probability": 0.23839958683166457,
+                  "support": 4,
+                  "entropy": 1.1275468840055105,
+                  "selection_ms": 21.541031,
+                  "stages": [
+                    {
+                      "operator": "grammar",
+                      "support": 248320,
+                      "entropy": 1.0588502455175592
+                    },
+                    {
+                      "operator": "min_p",
+                      "support": 4,
+                      "entropy": 0.879124583337276
+                    },
+                    {
+                      "operator": "temperature",
+                      "support": 4,
+                      "entropy": 1.1275468840055105
+                    }
+                  ],
+                  "top": [
+                    {
+                      "id": 32,
+                      "probability": 0.56085518136767,
+                      "bytes": [
+                        65
+                      ],
+                      "token": "A"
+                    },
+                    {
+                      "id": 1206,
+                      "probability": 0.23839958683166457,
+                      "bytes": [
+                        84,
+                        111
+                      ],
+                      "token": "To"
+                    },
+                    {
+                      "id": 760,
+                      "probability": 0.10349045234214081,
+                      "bytes": [
+                        84,
+                        104,
+                        101
+                      ],
+                      "token": "The"
+                    },
+                    {
+                      "id": 2,
+                      "probability": 0.0972547794585246,
+                      "bytes": [
+                        35
+                      ],
+                      "token": "#"
+                    }
+                  ]
+                }
+              }
+            ],
+            "refusal": null
+          }
+        }
+      ]
+    }
+  ],
+  "seconds_to_disconnect": 1.7641138999606483,
+  "next_request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Say exactly OK."
+      }
+    ],
+    "max_tokens": 16,
+    "reasoning_effort": "none",
+    "logprobs": true,
+    "top_logprobs": 5,
+    "seed": 675,
+    "temperature": 0
+  },
+  "next_response": {
+    "id": "chatcmpl-7e6d567d28c8452f84da94f8",
+    "object": "chat.completion",
+    "created": 1791080989,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "OK"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "OK",
+              "logprob": -0.006799480813737428,
+              "bytes": [
+                79,
+                75
+              ],
+              "top_logprobs": [
+                {
+                  "token": "OK",
+                  "logprob": -0.006799480813737428,
+                  "bytes": [
+                    79,
+                    75
+                  ]
+                },
+                {
+                  "token": "Say",
+                  "logprob": -6.148438236612077,
+                  "bytes": [
+                    83,
+                    97,
+                    121
+                  ]
+                },
+                {
+                  "token": " OK",
+                  "logprob": -6.221215031045671,
+                  "bytes": [
+                    32,
+                    79,
+                    75
+                  ]
+                },
+                {
+                  "token": "Ok",
+                  "logprob": -7.808388492959733,
+                  "bytes": [
+                    79,
+                    107
+                  ]
+                },
+                {
+                  "token": "```",
+                  "logprob": -7.8201568340241865,
+                  "bytes": [
+                    96,
+                    96,
+                    96
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 16,
+      "completion_tokens": 2,
+      "total_tokens": 18,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 16,
+      "prompt_ms": 492.2,
+      "prompt_per_token_ms": 30.762,
+      "prompt_per_second": 32.5,
+      "predicted_n": 2,
+      "predicted_ms": 351.2,
+      "predicted_per_token_ms": 175.6,
+      "predicted_per_second": 5.7,
+      "draft_n": 3,
+      "draft_n_accepted": 0
+    }
+  },
+  "total_seconds": 3.013617299962789,
+  "invalid_profile_status": 400
+}
