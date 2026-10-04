@@ -84,11 +84,11 @@ GPU progress rose from 12.39 to 26.93 ms/window for coding, and from 14.54 to
 43.31 ms/window for editing. Total window time rose from 25.03 to 32.66 ms and
 34.92 to 50.01 ms respectively. Host waiting for GPU progress does not mean the
 GPU was idle. This result rejects the simple hypothesis that eliminating CPU
-expert work would improve this configuration. Separate hardware-counter
-captures are in progress to characterize the additional traffic.
+expert work would improve this configuration. Separate automatic-split captures recorded DRAM and PCIe traffic; an
+all-GPU-miss hardware-counter comparison has not been collected.
 
-An all-CPU miss control (`--pcie-frac 0`) is queued next; the 15,472 resident
-GPU experts remain on GPU. This tests the opposite placement extreme.
+The completed all-CPU miss control (`--pcie-frac 0`) is below; the 15,472 resident
+GPU experts remain on GPU. It tests the opposite placement extreme.
 
 Raw measurements and comparisons: [q8-pcie-placement-20261004.json](benchmarks/q8-pcie-placement-20261004.json).
 
@@ -108,7 +108,8 @@ editing. This is one screen against the earlier same-binary controls.
 Editing tokens matched in all modes. Coding first differed at tokens 120, 120,
 32 and 120 respectively; work counters changed. Effective output throughput
 gained 2.8% / 1.9% for MTP and 2.0% / 4.3% for n-gram. These placement changes
-are not exact-work kernel gains, and the measurements need fresh paired repeats.
+are not exact-work kernel gains. The initial measurements motivated the fresh
+paired repeats reported below.
 
 MTP coding GPU-reach wait fell from 12.39 to 10.26 ms/window while CPU expert
 work rose from 6.98 to 7.75. Editing wait fell from 14.54 to 9.28 while CPU work
@@ -116,7 +117,94 @@ rose from 13.89 to 18.12. The CPU remains useful even when more work is assigned
 to it; eliminating the missed-expert GPU transfers reduced the measured total
 window time. Hardware/timeline profiling is needed to separate the costs.
 
-Next: reversed-order 32K MTP/n-gram repeats and fresh paired controls at native
-128K in all four modes. Keep this configuration independent of retained copies.
+Reversed-order 32K MTP/n-gram repeats and fresh native-128K pairs in all four
+modes are complete below. This configuration is independent of retained copies.
 
 Evidence: [q8-pcie-cpu-only-20261004.json](benchmarks/q8-pcie-cpu-only-20261004.json).
+
+## Fresh paired repeats and native 128K
+
+Completed 12 arms / 24 requests. Same frozen binary, fixed 15,472 GPU slots,
+FP16 KV, native RoPE, actual 32,768 or 131,072 input tokens, allocation input
+plus 8,192, and 1,024 output tokens. A fresh engine per arm ran coding then
+editing, so adaptation from coding carries into editing. At 32K the CPU arm
+ran first and the automatic arm second; at 128K the order was automatic then
+CPU. These are paired measurements, not confidence intervals or a quality score.
+
+The baseline already includes ownership rotation and duplex copies. These
+gains are additional configuration effects measured against that baseline;
+do not multiply them by historical gains from unmatched requests.
+
+### 32K reversed repeats: output tokens/s
+
+| Mode | Automatic split, code / edit | CPU-only misses, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| MTP | 130.29 / 111.98 | 135.64 / 114.50 | +4.11% / +2.25% |
+| N-gram | 74.50 / 100.67 | 75.98 / 110.51 | +1.98% / +9.77% |
+
+### 128K fresh pairs: output tokens/s
+
+| Mode | Automatic split, code / edit | CPU-only misses, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| Plain | 74.83 / 59.85 | 74.94 / 60.38 | +0.14% / +0.88% |
+| MTP | 131.82 / 106.25 | 137.16 / 110.44 | +4.05% / +3.95% |
+| N-gram | 74.41 / 102.50 | 74.75 / 104.34 | +0.47% / +1.80% |
+| MTP + n-gram | 131.76 / 102.86 | 134.82 / 110.13 | +2.32% / +7.07% |
+
+### Prefill-inclusive effective output tokens/s
+
+Effective throughput is output tokens divided by complete request wall time.
+Engine startup/loading is excluded. This is not total input-plus-output token throughput.
+
+32K:
+
+| Mode | Automatic split, code / edit | CPU-only misses, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| MTP | 64.80 / 60.55 | 66.27 / 61.26 | +2.26% / +1.17% |
+| N-gram | 47.25 / 57.20 | 47.95 / 60.23 | +1.49% / +5.29% |
+
+128K:
+
+| Mode | Automatic split, code / edit | CPU-only misses, code / edit | Change, code / edit |
+|---|---:|---:|---:|
+| Plain | 22.35 / 20.82 | 22.36 / 20.92 | +0.04% / +0.48% |
+| MTP | 25.66 / 24.53 | 25.82 / 24.79 | +0.64% / +1.06% |
+| N-gram | 22.32 / 24.38 | 22.33 / 24.53 | +0.06% / +0.63% |
+| MTP + n-gram | 25.64 / 24.36 | 25.74 / 24.75 | +0.38% / +1.59% |
+
+### Output and work qualifications
+
+| Input / mode | First different token, code / edit (zero-based) | Recorded work identical, code / edit |
+|---|---|---|
+| 32,768 / MTP | 120 / match | no / no |
+| 32,768 / N-gram | 32 / match | no / no |
+| 131,072 / Plain | 221 / match | no / no |
+| 131,072 / MTP | 221 / match | no / no |
+| 131,072 / N-gram | 308 / match | no / no |
+| 131,072 / MTP + n-gram | 221 / match | no / no |
+
+CPU/GPU placement changes floating-point execution. Matching output does not
+make these exact-work kernel comparisons: expert-tier and speculative counters
+may differ. N-gram scheduling also varied between repeats. The CPU-only MTP
+32K repeat matched the earlier CPU-only run's tokens and recorded work exactly,
+but the automatic-versus-CPU comparisons have the differences above. No task
+quality evaluation was performed. Every request reached its output budget with
+zero decode expert file reads; no OOM or failed request was observed.
+
+### Reproduce the intervention
+
+Starting from the measured Q8 command, use `--pcie-frac 0` for CPU-only misses,
+or `--pcie-frac 0.55` for the matched automatic split. The primary GPU cache
+remains 15,472 experts. Keep `--pcie-mode auto`, FP16 KV, native context,
+`STRATA_EXCHANGE_ROTATE=1`, `STRATA_EXCHANGE_DUPLEX=1`,
+`STRATA_ADAPT_NOWAIT=0`, `STRATA_ADAPT_WORKER=0` and
+`STRATA_Q8_EXPERT_REUSE=0`. The recorded matrix includes all launch commands,
+per-arm options, prompt hashes, token IDs and work counters. This branch does
+not change the default miss fraction or configure a public service.
+
+The CPU-only setting is retained as a separate performance configuration.
+The next experiment is an independently gated, read-only secondary GPU miss
+cache, which aims to retain GPU execution while avoiding repeated uploads.
+No speed result for that new cache is claimed here.
+
+Evidence: [completed repeat matrix](benchmarks/q8-pcie-repeat-128k-20261004.json).
