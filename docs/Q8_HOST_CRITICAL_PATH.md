@@ -1,6 +1,7 @@
 # Q8 CPU and PCIe experiments on llm-60
 
-Work in progress. These are private experiments; no new public release is implied.
+These are research measurements on an experimental branch. Optimization flags
+remain off by default; this is not an upstream release.
 The frozen controls and every intervention are retained even when throughput is
 similar. Equivalent speed can leave a different resource available for the next
 experiment.
@@ -126,7 +127,7 @@ these candidate arms is duplex exchange; persistent-worker reuse is disabled.
 | 128K | MTP + n-gram / coding | 124.49 | 131.43 | +5.58% | Yes |
 | 128K | MTP + n-gram / editing | 99.16 | 103.93 | +4.80% | Tokens match; work differs |
 
-These are first pairs, with reversed-order confirmation queued. N-gram work
+These are the initial pairs; reversed-order results appear below. N-gram work
 differences mean those rows do not isolate copy speed. Its output divergences
 have not been classified as acceptable numerical error. Matching tokens and
 recorded counters is also narrower than proving identical internal states.
@@ -160,7 +161,7 @@ The 17.1% result is the smaller measured 64K coding gain, not a universal floor.
 | Path | Evidence now | Next discriminating measurement |
 |---|---|---|
 | Ownership rotation | Repeated 64K gain, already published | Retain as an established base |
-| Duplex PCIe copies | About 6% additional MTP decode gain in first 32K/128K pairs | Repeat candidate before control on the same binary |
+| Duplex PCIe copies | Repeated MTP and plain gains at 32K/128K | Combine with separately tested host configurations |
 | Persistent worker | Throughput effectively tied when sharing the main CPU | Move only the worker to another CPU; compare matched work |
 | Smaller CPU pool | MTP tied while freeing physical cores; 128K plain regressed | Put the adaptive worker on a freed physical core |
 | Combined configuration | Not measured | Combine an independently measured placement winner with duplex |
@@ -173,6 +174,69 @@ recorded phase budget; it is **not** a directly measured dispatch timestamp.
 The worker shares the main thread's CPU in these controls. Affinity experiments
 are intended to test that explanation, not assume it is correct.
 
+## Reversed-order confirmation
+
+The follow-up suite completed with all token and recorded work comparisons
+passing. Every pair below ran duplex **on before off**, with fresh engines,
+the same source `a259773e8ff868ad142302b64a8173e3ae244098` and binary SHA256
+`6c690e1d71cac554e649c4f196b1b533f8633a4c240d173df0a780280d850223`.
+The source's later HIP error-name aliases do not enter this CUDA build.
+
+| Input / mode / task | Duplex off tok/s | Duplex on tok/s | Paired gain |
+|---|---:|---:|---:|
+| 32K / MTP / coding | 121.77 | 130.51 | +7.18% |
+| 32K / MTP / editing | 105.53 | 112.21 | +6.33% |
+| 128K / MTP / coding | 124.95 | 131.93 | +5.58% |
+| 128K / MTP / editing | 100.30 | 106.12 | +5.80% |
+| 32K / plain / coding | 71.71 | 73.80 | +2.91% |
+| 32K / plain / editing | 60.52 | 61.99 | +2.44% |
+| 128K / plain / coding | 73.13 | 74.88 | +2.39% |
+| 128K / plain / editing | 58.28 | 59.62 | +2.30% |
+
+MTP effective output rates, including prefill and request wall time, were
+62.56 to 64.80 and 58.63 to 60.63 tok/s for 32K coding/editing; 25.36 to 25.64
+and 24.21 to 24.55 for 128K. These smaller gains follow from prefill's share of
+the request. Model startup is excluded. All 16 requests reached 1,024 output
+tokens and had zero file-backed expert reads. This is two observations per
+context/task/arm, not a large-sample confidence interval.
+
+## Worker placement screening
+
+All six arms completed with exact tokens and work at 32K MTP. The adjacent
+control used the same CPU pool size and persistent worker pinned to CPU 0.
+
+| Worker placement | Coding tok/s, candidate / control | Editing tok/s, candidate / control |
+|---|---:|---:|
+| CPU 16, pool 15 | 123.05 / 122.09 (+0.78%) | 106.04 / 105.82 (+0.21%) |
+| CPU 24, pool 15 | 122.86 / 122.21 (+0.52%) | 106.06 / 105.89 (+0.16%) |
+| CPU 8, pool 7 | 123.25 / 122.75 (+0.41%) | 106.31 / 105.72 (+0.56%) |
+
+CPU 16 is the main core's SMT sibling; CPU 24 is a sibling on another physical
+core; CPU 8 is a free physical core with the seven-worker pool. Moving the worker
+made launch itself cheaper, but other waits grew. These sub-1% differences do
+not establish a large dispatch bottleneck or justify a default affinity change.
+The CPU16/pool15 and CPU8/pool7 combinations with duplex are being screened
+separately. Neither combination result is part of the gain claims above.
+
+## Repeated work still present
+
+- Ownership rotation eliminated the extra RAM-to-RAM payload copy at commit.
+  Eviction and promotion still move the expert bytes across PCIe in opposite
+  directions because RAM holds the GPU cache's complement, not every expert.
+- In the 32K MTP coding request, adaptation moved 19.71 decimal GB each way;
+  editing moved 21.69 GB each way. Duplex changes overlap, not byte counts.
+- The residency upload still copies the whole 24,576-entry int32 table after a
+  batch, even when few entries changed. Its measured host interval is only
+  about 3-6 microseconds per window in these runs.
+- Q8 grouped GPU kernels in this host branch still call the row dot once per
+  matching token. The earlier `perf/q8-expert-reuse` alternative reuses weight
+  fragments, but its old fixed-placement MTP screen gained less than 0.5%.
+  Repeated load instructions are not proof of repeated DRAM transactions.
+- Duplex still waits for D2H on the adaptive task and H2D at admission. A new,
+  separate deferred-publication experiment keeps the per-slot dependencies but
+  postpones metadata publication until the final event. It is not included in
+  this branch or any reported speedup.
+
 ## Evidence and remaining work
 
 Local plans, source/archive hashes, live matrices, tokens, work comparisons and
@@ -182,9 +246,10 @@ Remote runs are under `~/fleet-downloads/rtxpro-q8-host-*` and
 `~/fleet-downloads/rtxpro-q8-duplex-*`. `collect.py` refreshes the local evidence;
 `analyze.py` derives the comparison table without discarding mismatches.
 
-As of 02:20 UTC, the initial matrix is complete. Worker placement is starting;
-the same-binary reversed-order suite is queued after it. Still required: inspect
-placement results, complete reversed-order repeats, and measure useful
-combinations. The queued repeat covers plain and MTP at both contexts; n-gram
-policy comparisons remain separately qualified. Main is unchanged; these new
-experimental branches have not been pushed.
+The initial matrix, worker placement screen and reversed-order plain/MTP suite
+are complete. [Exported measurements](benchmarks/q8-host-path-20261004.json)
+include source/binary hashes, prompt/token hashes, per-request timings and every
+comparison, including mismatches. `tools/summarize_q8_host_evidence.py` generates
+that export from the local collector output. N-gram policy comparisons remain
+separately qualified. Follow-up combination and deferred-admission experiments
+are separate from this published snapshot. Main remains unchanged.
