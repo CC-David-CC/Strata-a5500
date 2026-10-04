@@ -13,9 +13,12 @@ Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
 128GB RAM; full Unsloth **Q8_0, FP16 KV**, native context. Enable with
 `STRATA_Q8_COMPACT_MISS_FILL=1`; it is off by default.
 
-**Implementation prepared; no build, correctness or speed result claimed yet.**
-The inherited smaller-copy-grid branch has measured gains; those do not
-establish that this new compaction helps.
+**Component validation found a fixture read of unused sparse-plan entries.**
+Complete-byte cases and memcheck passed, but initcheck rejected that read;
+the model benchmark did not run. The fixture now inspects only the initialized
+counts and active entries. Sanitizer validation is pending again; the engine
+and kernels are unchanged by this fixture correction. No model speed gain is
+claimed. The inherited copy-grid gains do not establish that compaction helps.
 
 See [invariants and required tests](docs/Q8_COMPACT_MISS_FILLS.md), and the
 [inherited copy-grid measurements](docs/Q8_MISS_FETCH_GEOMETRY.md).

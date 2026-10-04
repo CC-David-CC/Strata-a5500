@@ -141,11 +141,20 @@ void exercise(size_t bytes, int ways, int iterations, bool overlap=false) {
         CU(cudaStreamSynchronize(stream));
         if (ways && std::getenv("STRATA_Q8_COMPACT_MISS_FILL") &&
             std::strcmp(std::getenv("STRATA_Q8_COMPACT_MISS_FILL"), "1") == 0) {
-            ReadonlyMissCachePlan got_plan;
-            CU(cudaMemcpy(&got_plan,plan.p,sizeof(got_plan),cudaMemcpyDeviceToHost));
-            REQUIRE(got_plan.count==n && got_plan.fill_count==(int)expected_fills.size());
+            // The plan is sparse scratch: inactive array entries are deliberately
+            // unwritten. Read only the initialized counts and live fill prefix.
+            // Do not memset the device plan, which could hide a kernel reading
+            // an entry outside that prefix from Compute Sanitizer initcheck.
+            int32_t got_count = -1, got_fill_count = -1;
+            CU(cudaMemcpy(&got_count,&plan.p->count,sizeof(got_count),cudaMemcpyDeviceToHost));
+            CU(cudaMemcpy(&got_fill_count,&plan.p->fill_count,sizeof(got_fill_count),cudaMemcpyDeviceToHost));
+            REQUIRE(got_count==n && got_fill_count==(int)expected_fills.size());
+            std::vector<int32_t> got_fills((size_t)got_fill_count);
+            if (got_fill_count)
+                CU(cudaMemcpy(got_fills.data(),plan.p->fill_groups,
+                              got_fills.size()*sizeof(int32_t),cudaMemcpyDeviceToHost));
             for (size_t q=0;q<expected_fills.size();++q)
-                REQUIRE(got_plan.fill_groups[q]==expected_fills[q]);
+                REQUIRE(got_fills[q]==expected_fills[q]);
         }
         uint32_t resident[256];
         CU(cudaMemcpy(resident,resident_out.p,sizeof(resident),cudaMemcpyDeviceToHost));

@@ -60,4 +60,21 @@ Check default-off against the earlier binary as well. Exact plain/MTP tokens
 and recorded work are required; timing-sensitive n-gram changes remain visible.
 Extend useful paths to native 128K and repeat before a speed claim or push.
 
-Status: implementation prepared. No component/model result yet.
+## First component gate and fixture correction
+
+Source `2762f5a` compiled the fixture and kernels. All four ordinary byte-test
+runs (compact off/on at 32/384 blocks) passed, as did memcheck off/on and
+initcheck off. Initcheck on failed with 17,740 reported host API access
+errors. The runner stopped before microbenchmarks, engine build or model tests.
+
+The fixture copied all 1,544 bytes of `ReadonlyMissCachePlan` to the host even
+though only its counts and active fill-index prefix were inspected. Unused
+array entries are deliberately unwritten scratch, so the copy itself reads
+uninitialized bytes. The corrected fixture copies only the initialized counts
+and active prefix. Device scratch remains uninitialized: zeroing the whole
+plan would hide accidental kernel reads beyond the valid prefix.
+
+This correction changes the fixture only. A fresh initcheck pass is still
+required to confirm the diagnosis; there is no accepted model result yet.
+The failed run and its logs remain in
+[the rejected fixture evidence](benchmarks/q8-compact-fill-rejected-fixture-20261004.json).
