@@ -13,11 +13,13 @@ Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
 128GB RAM; full Unsloth **Q8_0, FP16 KV**, native context. Enable with
 `STRATA_Q8_COMPACT_MISS_FILL=1`; it is off by default.
 
-**Corrected component gates and the CUDA build passed.** All 88 complete-byte
-cases and four sanitizer runs passed. The earlier fixture read of unused plan
-entries was corrected and its failed run remains documented. Fill-only timings
-are in the report; model comparisons are starting. No model speed gain is
-claimed yet. The inherited copy-grid gains do not establish that compaction helps.
+**The first four-mode 32K model screen completed.** All eight arms reached
+1,024 output tokens with full RAM residency and zero expert file reads.
+Plain/MTP tokens and recorded work matched; n-gram qualifications and the
+speed table are in the report. These are single pairs, with repeats and 128K
+validation still pending. All 88 byte cases and four sanitizer runs passed;
+the corrected fixture failure remains documented. Ordinary traversal stays
+the default. No universal or repeated model speedup is claimed.
 
 See [invariants and required tests](docs/Q8_COMPACT_MISS_FILLS.md), and the
 [inherited copy-grid measurements](docs/Q8_MISS_FETCH_GEOMETRY.md).

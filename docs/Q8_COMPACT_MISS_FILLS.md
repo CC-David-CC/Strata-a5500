@@ -74,8 +74,8 @@ uninitialized bytes. The corrected fixture copies only the initialized counts
 and active prefix. Device scratch remains uninitialized: zeroing the whole
 plan would hide accidental kernel reads beyond the valid prefix.
 
-This correction changes the fixture only. A fresh initcheck pass is still
-required to confirm the diagnosis; there is no accepted model result yet.
+This correction changes the fixture only. The corrected gate below confirms
+the initcheck diagnosis; the failed run did not reach model testing.
 The failed run and its logs remain in
 [the rejected fixture evidence](benchmarks/q8-compact-fill-rejected-fixture-20261004.json).
 
@@ -107,3 +107,48 @@ confidence interval is established by this table.
 | 16 | 16 | 3122.58 | 3122.27 | +0.01% |
 
 [Complete gates, sanitizer logs, build and microbenchmark samples](benchmarks/q8-compact-fill-components-20261004.json).
+
+
+## First full-model screen: all four modes
+
+All eight arms (16 requests) completed: full Unsloth Q8_0, FP16 KV, native
+32,768 input tokens + 1,024 committed output tokens, with 40,960 allocated.
+Primary capacity was 15,472 experts; the full 45,342MiB RAM arena and locked
+lookup table passed the startup guard. No expert file reads occurred.
+Secondary capacity was four slots per layer, with 32-block overlapped fills,
+PCIe fraction 0.55, ownership rotation and duplex transfers unchanged.
+
+The existing approximately two-second monitor observed minimum free VRAM of
+7,378MiB and available host RAM of about 19.85GiB, with no foreign GPU
+process recorded. These are sampled minima, not bounds on unsampled transients.
+
+These are one ordinary/compact pair per mode in the same binary, not repeated
+gains or confidence intervals. Plain and MTP tokens, recorded work, primary
+exchange bytes and secondary upload counts matched exactly. Their default-off
+arms also matched the earlier binary's tokens and recorded work. N-gram uses
+timing-sensitive policy; its request/work qualifications are shown separately.
+
+| Mode | Coding ordinary -> compact tok/s | Change | Editing ordinary -> compact tok/s | Change |
+|---|---:|---:|---:|---:|
+| MTP | 133.52 -> 135.39 | +1.40% | 118.33 -> 118.15 | -0.15% |
+| Plain | 74.60 -> 74.70 | +0.13% | 63.09 -> 63.12 | +0.04% |
+| N-gram* | 78.82 -> 79.63 | +1.03% | 111.33 -> 113.03 | +1.52% |
+| MTP + n-gram* | 134.36 -> 136.05 | +1.26% | 116.69 -> 116.78 | +0.08% |
+
+*N-gram comparisons are not automatically equal-work kernel measurements:
+
+| Mode / task | First differing output token (zero-based) | Recorded work matches | Logical copy payload/counts match |
+|---|---:|---|---|
+| N-gram / coding | none | no | no |
+| N-gram / editing | none | no | no |
+| MTP + n-gram / coding | 311 | no | no |
+| MTP + n-gram / editing | none | no | no |
+
+Effective throughput, all prompt/output tokens, exact-work checks, per-window
+host timings and copy counts are retained in the evidence below. The isolated
+fill timings establish that hit traversal can be cheaper; this model screen
+alone does not establish that it caused a small end-to-end timing change.
+Reverse ordering and native 128K validation remain pending before a broader
+performance claim. Keep ordinary traversal as the default and an alternative.
+
+[Full model records and qualified comparisons](benchmarks/q8-compact-fill-model-32k-20261004.json).
