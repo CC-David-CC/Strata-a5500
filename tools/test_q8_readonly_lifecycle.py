@@ -35,7 +35,7 @@ def main():
     require(all(len(p)==32768 for p in prompts.values()),'Wrong prompt size')
     opt.output.mkdir(parents=True,exist_ok=False)
     result=dict(source=source,harness_source=(ROOT/'source-commit.txt').read_text().strip(),engine_sha256=sha,
-        scope='Q8_0 FP16 native32K,40960 allocation,15472primaryslots. Plain and MTP. Matched normal/checkpoint request tokens and main-model states; STOP after16 delivered tokens. STOP work may differ with timing; any unequal-work post-cancel comparison is qualified, not claimed exact.',
+        scope='Q8_0 FP16 native32K,40960 allocation,15472primaryslots. Plain and MTP normal/STOP/request-boundary gates; checkpoint restoration with MTP only (engine forbids conversation caching without MTP). Matched normal/checkpoint tokens and main-model states; STOP after16 delivered tokens. Unequal-work post-cancel comparisons are qualified, not claimed exact.',
         arms=[],completed=False,started=time.time())
     def save():
         tmp=opt.output/'result.tmp';tmp.write_text(json.dumps(result,indent=2)+'\n');tmp.replace(opt.output/'result.json')
@@ -44,7 +44,7 @@ def main():
     try:
         for mode,ways in [('off',0),('off',plan['ways']),('on',0),('on',plan['ways'])]:
             cfg=configure({'weights':'Q8_0','kv':'fp16','load_projection':False},engine_root,Path.home(),40960)
-            for key,value in [('--expert-cache',15472),('--prompt-cache',6),('--conversation-cache-mib',4096),
+            for key,value in [('--expert-cache',15472),('--prompt-cache',6),('--conversation-cache-mib',4096 if mode=='on' else 0),
                               ('--suffix-draft',0),('--spec',8),('--mtp-max-t',4),('--pcie-frac',0.55)]:
                 set_option(cfg['args'],key,value)
             if mode=='off':set_option(cfg['args'],'--mtp',None)
@@ -82,14 +82,15 @@ def main():
                         require(bool(tokens) and engine.last['finish'] in ('stop','length'),name+': no normal output')
                     return tokens
                 run('normal',prompts['coding'],256)
-                head=run('checkpoint-A',prompts['coding'],1)
-                run('checkpoint-B',prompts['editing'],1)
-                continuation=prompts['coding']+head+suffix
-                run('checkpoint-A+',continuation,128,require_length=False)
-                require(engine.last['reused']>=len(prompts['coding']),'Conversation A was not restored after B')
-                run('checkpoint-B-again',prompts['editing'],1)
-                run('checkpoint-A+-again',continuation,128,require_length=False)
-                require(engine.last['reused']>0,'Parked checkpoint was not restored')
+                if mode=='on':
+                    head=run('checkpoint-A',prompts['coding'],1)
+                    run('checkpoint-B',prompts['editing'],1)
+                    continuation=prompts['coding']+head+suffix
+                    run('checkpoint-A+',continuation,128,require_length=False)
+                    require(engine.last['reused']>=len(prompts['coding']),'Conversation A was not restored after B')
+                    run('checkpoint-B-again',prompts['editing'],1)
+                    run('checkpoint-A+-again',continuation,128,require_length=False)
+                    require(engine.last['reused']>0,'Parked checkpoint was not restored')
                 run('cancel',prompts['coding'],1024,cancel_at=16)
                 run('after-cancel',prompts['editing'],128)
                 text=log.read_text(errors='replace');hashes=state_hashes(text)

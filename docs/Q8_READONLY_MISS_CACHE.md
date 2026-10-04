@@ -54,10 +54,16 @@ These are payload counts, not PCIe hardware counters. Cache hit rate alone does
 not prove a throughput gain; extra launches and memory traffic can outweigh it.
 
 `test_q8_readonly_lifecycle.py` prepares paired plain/MTP gates against the
-component-tested binary: a normal 32K request, A/B/A conversation and checkpoint
-restoration, STOP after 16 delivered tokens, then another request. It requires
+component-tested binary: a normal 32K request, STOP after 16 delivered tokens,
+then another request. MTP additionally tests A/B/A conversation and checkpoint
+restoration; this engine rejects conversation caching with MTP off. It requires
 matching main-model state fingerprints and tokens on the normal/checkpoint
 requests. If asynchronous STOP performs different work between arms, the
 post-cancel state comparison is reported as unequal-work, not claimed exact.
 This harness is prepared, not yet passed. Performance runs follow only after
 its successful completion. The serving path remains private.
+
+The first lifecycle attempt stopped before readiness because its plain-mode
+control requested a nonzero conversation-cache budget, an unsupported engine
+configuration. The revised harness uses zero for plain mode. Its logs are kept;
+this was a harness configuration failure before any candidate inference.
