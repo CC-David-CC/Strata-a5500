@@ -18,6 +18,18 @@ from serve.server import StrataEngine, child_env
 from benchmark_startup import start_checked_engine
 
 
+def select_lifecycle_variants(plan):
+    if 'lifecycle_variants' in plan:
+        variants = plan['lifecycle_variants']
+    else:
+        ways = plan['ways']
+        variants = [dict(label='ways0', ways=0, overlap=0),
+                    dict(label='ways'+str(ways), ways=ways, overlap=0, reference='ways0')]
+    if not isinstance(variants, list) or not variants:
+        raise ValueError('Lifecycle plan must specify at least one variant')
+    return variants
+
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--plan',type=Path,required=True)
@@ -43,9 +55,7 @@ def main():
     work_keys=('generated','drafts_accepted','drafts_offered','hits','lookups','ram_blobs','file_blobs','prompt_read')
     controls={}
     try:
-        variants=plan.get('lifecycle_variants',[
-            dict(label='ways0',ways=0,overlap=0),
-            dict(label='ways'+str(plan['ways']),ways=plan['ways'],overlap=0,reference='ways0')])
+        variants=select_lifecycle_variants(plan)
         arms=[(mode,variant) for mode in ('off','on') for variant in variants]
         for mode,variant in arms:
             ways=variant['ways'];overlap=variant.get('overlap',0)

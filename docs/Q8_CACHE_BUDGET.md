@@ -72,3 +72,14 @@ per-layer admission: those remain independently measured candidates.
 Status: preparation only. No result for the new configurations, lifecycle gate
 or fresh build is claimed. Both the duplicate-cache and primary-cache designs
 remain alternatives; a smaller upload count alone is not a speedup.
+
+
+## Lifecycle harness correction before execution
+
+The first budget queue was stopped while waiting for the GPU, before any
+attempt or engine started. A separate per-layer run exposed an eager Python
+`dict.get` default accessing the legacy `ways` field despite an explicit
+variant list. The same helper is corrected here before requeueing. Explicit
+and legacy plans plus empty/null/object rejection were checked locally; no
+engine source changed. The fresh queue must still pass byte-identical build,
+normal/STOP/checkpoint checks and the planned throughput comparisons.
