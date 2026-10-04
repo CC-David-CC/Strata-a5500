@@ -157,8 +157,8 @@ comparisons are not isolated identical-work scheduling gains. No single
 configuration is declared best for every mode.
 
 [Complete first 32K evidence](benchmarks/q8-layer-complete-32k-20261004.json).
-Reverse-order MTP and native 128K pairs in all four modes use the same already
-built binary; they are queued, not reported as passed here.
+The reversed-order MTP pair below and native 128K pairs in all four modes use
+the same already-built binary. Reverse MTP completed; 128K is still running.
 
 
 ## Reversed-order 32K MTP repeat

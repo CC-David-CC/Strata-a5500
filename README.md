@@ -17,14 +17,14 @@ pinned resident expert exchanges and ownership rotation/duplex enabled.
 **First native 32K-input/1K-output MTP comparison:** coding **135.0 ? 144.6 tok/s
 (+7.1%)**, editing **119.0 ? 124.4 (+4.6%)**, with identical tokens, measured work
 and transfer payloads. Effective throughput improved **3.4% / 2.3%**.
-This is one pair; repeatability and 128K results are pending.
+The reversed-order MTP repeat below also gained speed. Native 128K is running.
 
 All **33 lifecycle requests** and component/sanitizer/build checks passed.
 The earlier test-harness failure and its correction remain in the report.
 All four 32K modes finished: plain gained 3.1%/2.7%; n-gram alone lost 1.9%/6.0%,
 and combined gained 5.0%/1.7% with changed work. Preserve the earlier n-gram
-configuration. Reverse-order MTP and 128K tests are queued. This branch has not
-yet been published.
+configuration. The reversed-order MTP repeat passed; native 128K tests are
+running. This branch has not yet been published.
 
 See [hypothesis, state and validation](docs/Q8_LAYER_ADMISSION.md) and
 [the measured parent](docs/Q8_MISS_FETCH_GEOMETRY.md).
