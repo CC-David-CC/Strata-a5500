@@ -43,6 +43,13 @@ def worker(plan_path, out):
     assert hashlib.sha256((FROZEN / 'build/strata').read_bytes()).hexdigest() == FROZEN_SHA
     out.mkdir(parents=True, exist_ok=False)
     state = dict(plan=plan, started=time.time(), records=[], completed=False)
+    references = {}
+    if plan.get('reference_status'):
+        status = json.loads(Path(plan['reference_status']).read_text())
+        if not status.get('completed'):
+            raise RuntimeError('Reference suite did not complete')
+        reference = json.loads(Path(status['matrix']).read_text())
+        references = {r['trial']['label']: r for r in reference['records']}
     target = out / 'matrix.json'
     save(target, state)
     try:
@@ -104,6 +111,31 @@ def worker(plan_path, out):
                                 not c['output_tokens'] or c['timings']['file_blobs'] != 0
                                 for c in cases):
                 raise RuntimeError(label + ': missing output or unexpected file expert reads')
+            if trial.get('reference_label'):
+                ref = references[trial['reference_label']]
+                if ref['prompt_sha256'] != record['prompt_sha256']:
+                    raise RuntimeError(label + ': reference prompt differs')
+                old_cases = {(c['task'], c['repetition']): c for v in ref['runs'] for c in v['cases']}
+                comparisons = []
+                for case in cases:
+                    old = old_cases[(case['task'], case['repetition'])]
+                    a, b = old['token_ids'], case['token_ids']
+                    first = next((i for i, (x, y) in enumerate(zip(a, b)) if x != y),
+                                 None if len(a) == len(b) else min(len(a), len(b)))
+                    keys = ('generated', 'drafts_accepted', 'drafts_offered', 'hits', 'lookups',
+                            'ram_blobs', 'file_blobs', 'file_mb', 'prompt_read')
+                    work = {k: [old['timings'].get(k), case['timings'].get(k)]
+                            for k in keys if old['timings'].get(k) != case['timings'].get(k)}
+                    comparisons.append({'task': case['task'], 'reference_label': trial['reference_label'],
+                        'first_token_difference': first, 'work_differences': work,
+                        'reference_tps': old['decode_tps'], 'candidate_tps': case['decode_tps'],
+                        'decode_gain_pct': 100 * (case['decode_tps'] / old['decode_tps'] - 1),
+                        'effective_gain_pct': 100 * (case['effective_output_tps'] / old['effective_output_tps'] - 1)})
+                record['comparisons'] = comparisons
+                save(target, state)
+                if trial.get('require_exact') and any(c['first_token_difference'] is not None or
+                                                     c['work_differences'] for c in comparisons):
+                    raise RuntimeError(label + ': default-off parity gate failed')
         state['completed'] = True
     except BaseException as error:
         state['error'] = repr(error)
