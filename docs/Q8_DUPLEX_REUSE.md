@@ -3,7 +3,7 @@
 Experimental branch `perf/q8-duplex-expert-reuse`, based on the measured
 `perf/q8-duplex-exchanges` branch. Target: llm-60, RTX PRO 6000 Blackwell
 Workstation Edition 96 GB, Ryzen 7950X, 128 GB RAM, full Unsloth Q8_0 and FP16 KV.
-Main is unchanged. No new throughput result is claimed yet.
+Main is unchanged. Component results below are not model-throughput claims.
 
 The earlier Q8 reuse experiment (`6ef9268`) used fixed placement, int8 KV, and
 `--pcie-frac 0`; almost all missed-expert time was CPU computation. This branch
@@ -40,3 +40,35 @@ the logical minimum weight payload when all layers have equal-sized blobs.
 That estimate is distinct from hardware PCIe/DRAM transactions, and does not
 include adaptive-cache exchanges or repeated direct reads. A heterogeneous
 blob layout reports zero for the unsupported byte estimate.
+
+## Component result, 2026-10-04
+
+Runtime source `b926ad75`, CUDA 13.2, SM120. All four matrix shapes were bitwise
+equal to the old kernels. Mapped placement and changed-weight/activation graph
+replay passed; Compute Sanitizer memcheck reported zero errors.
+
+Median time for 16 experts across four order-reversed samples (microseconds):
+
+| Tokens sharing an expert | VRAM old / reuse | Mapped RAM old / reuse |
+|---|---:|---:|
+| 1 | 60.06 / 62.38 | 3854.50 / 4823.98 |
+| 2 | 66.49 / 65.14 | 4623.19 / 4793.00 |
+| 3 | 75.62 / 69.10 | 5211.78 / 4689.98 |
+| 4 | 83.88 / 73.12 | 5699.33 / 4670.80 |
+| 8 | 131.35 / 105.88 | 7683.54 / 6714.45 |
+
+Reuse improves shared-expert groups but slows singleton groups. Direct mapped
+reads remain dominated by PCIe in this component. This does not measure the
+copy-into-VRAM staging path, so it cannot establish whether direct or staged
+reads win in the model. Test the full request before selecting either.
+
+The build took 9.28 seconds with ccache, including the component executable.
+The earlier cold build took 54.96 seconds on different sources; this is build
+turnaround evidence, not a controlled speedup comparison. Both C++ and CUDA
+cache restores were byte-identical.
+
+An earlier attempt exited during GCC ThreadSanitizer startup with signal 11
+and an empty log, before GPU compilation. A diagnostic rerun reported its
+known shadow-memory mapping conflict. Running the same fixture under
+`setarch x86_64 -R` passed; the new runner uses that process-local setting from
+the start. Original failures remain in the fleet evidence.

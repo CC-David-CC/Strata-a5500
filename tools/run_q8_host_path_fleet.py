@@ -142,6 +142,9 @@ def worker(plan_path, out):
                 if trial.get('require_exact') and any(c['first_token_difference'] is not None or
                                                      c['work_differences'] for c in comparisons):
                     raise RuntimeError(label + ': default-off parity gate failed')
+            # Later arms may use a fresh, same-binary control from this matrix.
+            # Retain the declared external reference for the first control.
+            references[label] = record
         state['completed'] = True
     except BaseException as error:
         state['error'] = repr(error)
