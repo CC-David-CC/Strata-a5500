@@ -1,21 +1,21 @@
-# Experimental Q8 secondary GPU cache capacity
+# Experimental Q8 VRAM allocation comparison
 
-This is an experimental configuration branch of
-**[Niko1221/Strata](https://github.com/Niko1221/Strata)**. Credit for Strata and
-its existing engine belongs to upstream and its contributors. The license is
-preserved. Main is untouched.
+An experimental configuration branch of **[Niko1221/Strata](https://github.com/Niko1221/Strata)**.
+Credit for the engine belongs to upstream and its contributors. The license
+is retained and main is untouched.
 
 Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
-128GB RAM; full Unsloth Q8_0 with FP16 KV. Compare 4, 8 and 16 duplicate GPU
-cache entries per layer while retaining canonical RAM copies. The goal is to
-avoid repeated uploads without adding secondary-cache eviction writebacks.
+128GB RAM; full Unsloth Q8_0, FP16 KV and native 32K/128K contexts.
 
-**Component gates passed; model comparisons are running.** All 24 byte-test
-cases and both GPU sanitizer runs passed. The built engine is byte-identical
-to the measured copy-grid engine. No capacity speed gain is claimed yet.
-This branch changes test coverage and configuration, with no new inference
-kernel or cache policy.
+This branch compares using extra VRAM for a secondary cache of RAM experts
+against more primary resident experts. The former avoids repeated uploads;
+the latter can also reduce CPU work. It changes configuration and test
+coverage, with no inference kernel or model-weight changes.
 
-See **[the experiment, memory budget and required gates](docs/Q8_MISS_CACHE_CAPACITY.md)**.
-Earlier copy-grid results remain in the inherited
-[report](docs/Q8_MISS_FETCH_GEOMETRY.md); they are not capacity results.
+**Tests are pending.** The initial sixteen-entry capacity result motivates
+this comparison; it is not a result for the new primary configurations.
+See [memory budgets, invariants and required measurements](docs/Q8_CACHE_BUDGET.md).
+
+The fresh build must match the previously tested engine bytes. Lifecycle checks
+precede new throughput tests; placement-dependent output differences remain
+visible in the report. Use upstream Strata for standard installation/support.

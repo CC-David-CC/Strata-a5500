@@ -15,6 +15,7 @@ from configure_rtxpro import configure
 from bench_mtp_modes import set_option
 from conversation_cache_parity import state_hashes, load_tokenizer, require
 from serve.server import StrataEngine, child_env
+from benchmark_startup import start_checked_engine
 
 
 def main():
@@ -58,6 +59,7 @@ def main():
                 STRATA_HOST_TIMING='1',STRATA_DECODE_TIMING='1',STRATA_STATE_HASH='1',
                 STRATA_Q8_EXPERT_REUSE='0',STRATA_Q8_MISS_CACHE_WAYS=str(ways),
                 STRATA_Q8_MISS_FETCH_OVERLAP=str(overlap))
+            cfg['env'].update(variant.get('env',{}))
             label=mode+'-'+variant['label'];log=opt.output/(label+'.log')
             arm=dict(label=label,mode=mode,ways=ways,overlap=overlap,config=cfg,requests=[])
             result['arms'].append(arm);save()
@@ -66,7 +68,12 @@ def main():
                 tokenizer=load_tokenizer(Path(cfg['tokenizer']))
                 suffix=tokenizer.encode('<|im_end|>\n<|im_start|>user\nContinue the implementation.<|im_end|>\n'
                     '<|im_start|>assistant\n<think>\n\n</think>\n\n',parse_special=True)
-                engine=StrataEngine(cfg['exe'],cfg['args'],cfg['cwd'],str(log),child_env(cfg))
+                factory=lambda:StrataEngine(cfg['exe'],cfg['args'],cfg['cwd'],str(log),child_env(cfg))
+                if plan.get('expected_engine_info'):
+                    engine=start_checked_engine(factory,plan['expected_engine_info'],log,
+                        plan.get('required_startup_patterns',[]),arm)
+                else:
+                    engine=factory()
                 require(engine.can_stop,'Engine does not advertise STOP')
                 arm['engine_info']=dict(engine.info)
                 require(engine.info['expert_slots']==15472 and engine.info['kv']=='fp16','Placement/KV changed')
