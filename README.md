@@ -14,7 +14,10 @@ Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
 The initial path requires one GPU, unsplit host-planned verification, fully
 pinned resident expert exchanges and ownership rotation/duplex enabled.
 
-**Implementation and tests prepared; no build, correctness or speed pass yet.**
+**Component, sanitizer and build gates passed; model validation is pending.**
+The first lifecycle attempt stopped before loading a model because of a
+test-harness configuration bug. The harness is corrected; no inference code
+changed in that correction, and no model correctness or speed pass is claimed.
 The inherited copy-grid branch's measured gains do not establish a gain here.
 
 See [hypothesis, state and validation](docs/Q8_LAYER_ADMISSION.md) and

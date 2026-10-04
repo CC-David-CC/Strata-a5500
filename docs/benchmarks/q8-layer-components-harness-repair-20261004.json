@@ -1,0 +1,331 @@
+{
+  "collected_utc": "2026-10-04T13:17:55.117041+00:00",
+  "component_gate": {
+    "started": 1791119772.5973132,
+    "source": "523a8809a3456080c1a538140062118cf4e1b631",
+    "steps": [
+      {
+        "label": "ownership-asan-compile",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fno-omit-frame-pointer",
+          "-fsanitize=address,undefined",
+          "-I/home/dflanag3/src/q8-layer-admission-523a8809/include",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/tests/core/exchange_storage_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/ownership-asan"
+        ],
+        "exit": 0,
+        "seconds": 1.9168076859787107
+      },
+      {
+        "label": "ownership-asan",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/ownership-asan"
+        ],
+        "exit": 0,
+        "seconds": 1.01513150302344
+      },
+      {
+        "label": "ownership-tsan-compile",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fno-omit-frame-pointer",
+          "-fsanitize=thread",
+          "-I/home/dflanag3/src/q8-layer-admission-523a8809/include",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/tests/core/exchange_storage_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/ownership-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.8650802639895119
+      },
+      {
+        "label": "ownership-tsan",
+        "command": [
+          "setarch",
+          "x86_64",
+          "-R",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/ownership-tsan"
+        ],
+        "exit": 0,
+        "seconds": 4.72245220298646
+      },
+      {
+        "label": "layer-fixture-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-lineinfo",
+          "-arch=sm_120",
+          "-Xcompiler=-pthread",
+          "-I/home/dflanag3/src/q8-layer-admission-523a8809/include",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/tools/layer_exchange_fixture.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/layer-fixture"
+        ],
+        "exit": 0,
+        "seconds": 1.6665238729910925
+      },
+      {
+        "label": "layer-fixture",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/layer-fixture"
+        ],
+        "exit": 0,
+        "seconds": 0.6152215850015637
+      },
+      {
+        "label": "layer-memcheck",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "memcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/layer-fixture"
+        ],
+        "exit": 0,
+        "seconds": 0.6650502209959086
+      },
+      {
+        "label": "layer-initcheck",
+        "command": [
+          "/usr/local/cuda/bin/compute-sanitizer",
+          "--tool",
+          "initcheck",
+          "--error-exitcode",
+          "42",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/layer-fixture"
+        ],
+        "exit": 0,
+        "seconds": 0.715299119008705
+      },
+      {
+        "label": "duplex-fixture-compile",
+        "command": [
+          "ccache",
+          "/usr/local/cuda/bin/nvcc",
+          "-std=c++17",
+          "-O2",
+          "-arch=sm_120",
+          "-I/home/dflanag3/src/q8-layer-admission-523a8809/include",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/tools/duplex_exchange_fixture.cu",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/duplex-fixture"
+        ],
+        "exit": 0,
+        "seconds": 0.9155228899908252
+      },
+      {
+        "label": "duplex-fixture",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/duplex-fixture",
+          "--quick"
+        ],
+        "exit": 0,
+        "seconds": 0.5152617630083114
+      }
+    ],
+    "completed": true,
+    "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+    "finished": 1791119800.2056372
+  },
+  "build": {
+    "started": 1791119786.2145061,
+    "steps": [
+      {
+        "name": "worker-sanitize-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=address,undefined",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-layer-admission-523a8809/include",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 1.015193008002825
+      },
+      {
+        "name": "worker-sanitize",
+        "command": [
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/engine-build/worker-sanitize"
+        ],
+        "exit": 0,
+        "seconds": 0.1136358689982444
+      },
+      {
+        "name": "worker-tsan-build",
+        "command": [
+          "g++",
+          "-std=c++20",
+          "-pthread",
+          "-O1",
+          "-g",
+          "-fsanitize=thread",
+          "-fno-omit-frame-pointer",
+          "-I/home/dflanag3/src/q8-layer-admission-523a8809/include",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/tests/core/serial_worker_test.cpp",
+          "-o",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.7649219040176831
+      },
+      {
+        "name": "worker-tsan-noaslr",
+        "command": [
+          "setarch",
+          "x86_64",
+          "-R",
+          "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004/layer-gates-attempt-01/engine-build/worker-tsan"
+        ],
+        "exit": 0,
+        "seconds": 0.4646821140195243
+      },
+      {
+        "name": "ccache-before",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.031639569002436474
+      },
+      {
+        "name": "configure",
+        "command": [
+          "cmake",
+          "-S",
+          "/home/dflanag3/src/q8-layer-admission-523a8809",
+          "-B",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/build",
+          "-G",
+          "Ninja",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+          "-DCMAKE_CUDA_ARCHITECTURES=120",
+          "-DSTRATA_ENABLE_CUDA=ON",
+          "-DSTRATA_ENABLE_HIP=OFF",
+          "-DSTRATA_NATIVE_EXPERTS=ON",
+          "-DSTRATA_GGML_DIR=/home/dflanag3/src/Strata/third_party/llama.cpp",
+          "-DSTRATA_MMQ_KQUANTS=ON",
+          "-DSTRATA_FLEET_CUDA_TRACE=ON",
+          "-DSTRATA_BUILD_TESTS=OFF",
+          "-DIQ_FIXTURE_PYTHON=/home/dflanag3/src/Strata/.venv/bin/python",
+          "-DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-layer-admission-523a8809;/usr/bin/ccache",
+          "-DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-layer-admission-523a8809;/usr/bin/ccache",
+          "-DCMAKE_CUDA_COMPILER_LAUNCHER=/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-layer-admission-523a8809;/usr/bin/ccache"
+        ],
+        "exit": 0,
+        "seconds": 1.566541676002089
+      },
+      {
+        "name": "build",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 9.626111407997087
+      },
+      {
+        "name": "ccache-replay",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/build",
+          "--target",
+          "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+          "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+          "-j",
+          "2"
+        ],
+        "exit": 0,
+        "seconds": 0.0316735630040057
+      },
+      {
+        "name": "relink",
+        "command": [
+          "cmake",
+          "--build",
+          "/home/dflanag3/src/q8-layer-admission-523a8809/build",
+          "--target",
+          "strata",
+          "-j",
+          "8"
+        ],
+        "exit": 0,
+        "seconds": 0.2642597369849682
+      },
+      {
+        "name": "ccache-after",
+        "command": [
+          "/usr/bin/ccache",
+          "--show-stats",
+          "--verbose"
+        ],
+        "exit": 0,
+        "seconds": 0.00773566699353978
+      }
+    ],
+    "source": "523a8809a3456080c1a538140062118cf4e1b631",
+    "tsan_mapping_workaround": "ASLR off for this sanitizer process only",
+    "ccache": {
+      "version": "ccache version 4.9.1",
+      "launcher": "/usr/bin/cmake;-E;env;CCACHE_BASEDIR=/home/dflanag3/src/q8-layer-admission-523a8809;/usr/bin/ccache",
+      "probe": {
+        "cache_hits": 2,
+        "objects": [
+          {
+            "path": "CMakeFiles/strata.dir/src/program/generate.cpp.o",
+            "sha256": "d6242272bd49386ed1b17accfa344ba318defdf745c66faee3c630f7f04baec7",
+            "byte_identical": true
+          },
+          {
+            "path": "CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o",
+            "sha256": "14302189a1f0503c4e0610291fc0f5dcb2f12fa89a36abc1e253e228ea9792a3",
+            "byte_identical": true
+          }
+        ]
+      }
+    },
+    "completed": true,
+    "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+    "finished": 1791119800.164708
+  },
+  "rejected_lifecycle": {
+    "source": "523a8809a3456080c1a538140062118cf4e1b631",
+    "harness_source": "523a8809a3456080c1a538140062118cf4e1b631",
+    "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+    "scope": "Q8_0 FP16 native32K,40960 allocation,15472primaryslots. Plain and MTP normal/STOP/request-boundary gates; checkpoint restoration with MTP only (engine forbids conversation caching without MTP). Matched normal/checkpoint tokens and main-model states; STOP after16 delivered tokens. Unequal-work post-cancel comparisons are qualified, not claimed exact.",
+    "arms": [],
+    "completed": false,
+    "started": 1791119862.4300697,
+    "error": "KeyError('ways')",
+    "finished": 1791119862.4300752
+  },
+  "interpretation": "Engine component/sanitizer/build gates passed. Lifecycle plan evaluation failed before any engine or request started. Python eagerly evaluated dict.get default arguments, accessing absent legacy plan[ways] even though explicit lifecycle_variants existed. The correction selects the custom list before evaluating the legacy fallback; no inference code changes. Fresh frozen runs are required."
+}

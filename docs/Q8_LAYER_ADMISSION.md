@@ -77,6 +77,25 @@ no HIP result is claimed.
   logical D2H/H2D payload, wait/ownership/worker timing and effective throughput.
 - Repeat useful gains and extend to native 128K before a performance claim.
 
-Status: code and gates prepared. No validation pass or model speed claim yet.
+Status: component/sanitizer/build gates passed; lifecycle and model results pending.
 The raw schedule analysis is included in
 [the supporting trace analysis](benchmarks/q8-layer-readiness-projection-20261004.json).
+
+
+## First gate run and harness correction
+
+The frozen `523a8809` engine passed ownership ASan/UBSan and TSan, the real
+CUDA per-layer transfer fixture, Compute Sanitizer memcheck/initcheck, the
+original duplex fixture, worker sanitizers and the ccache build/relink check.
+Its engine SHA256 was
+`95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9`.
+
+The following lifecycle attempt failed before starting any model or request:
+Python evaluated `dict.get`'s legacy default eagerly, causing `KeyError('ways')`
+even with an explicit variant list. The corrected helper selects explicit
+variants first, retains the legacy plan, and rejects empty or malformed lists.
+Local checks exercised both actual explicit plans, legacy fallback, and
+empty/null/object rejection. This correction changes no engine code. A fresh
+frozen run retains all lifecycle and model gates. There is no speed result yet.
+
+[Passed gates and rejected harness attempt](benchmarks/q8-layer-components-harness-repair-20261004.json).
