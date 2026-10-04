@@ -8,7 +8,10 @@ Workstation Edition 96GB**, with 128GB RAM, full Unsloth Q8_0 and FP16 KV.
 Control, metadata-only and GPU-refill runs matched tokens, measured work and
 main-model state checks, including STOP and MTP checkpoint restoration.
 Actual GPU-to-GPU copies occurred; primary victim writebacks stayed unchanged.
-Throughput tests are running; no speedup is claimed yet.
+First 32K-input/1K-output MTP pair: **+1.64% coding / +1.50% editing**
+generation throughput, with matching tokens and measured work. Primary refill
+RAM uploads fell 61.85%; primary victim writebacks remained. This is a first
+pair, not a repeated or 128K claim. Other modes are still running.
 
 The change copies cache tags at an existing synchronization point, then substitutes
 GPU-to-GPU copies for eligible repeated RAM-to-GPU uploads. Primary victim writebacks

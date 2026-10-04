@@ -7,7 +7,8 @@ full Unsloth Q8_0, FP16 KV, native RoPE. This is not the upstream default.
 ## Status
 
 Native build, component/sanitizer checks and all 33 lifecycle requests passed.
-Throughput measurements are running. No performance gain is claimed yet.
+The first same-binary 32K MTP pair gained 1.64% coding and 1.50% editing.
+Other modes are running; repeats and 128K remain untested on this branch.
 The source starts at cache-budget commit `65a01b4d19de78c4b5d1284f7f7fddef3c50e601`.
 
 ## Why try it
@@ -86,3 +87,34 @@ results or the previous census workload's payload totals.
 
 [Raw gates, lifecycle comparisons and log hashes/counters](benchmarks/q8-gpu-refill-lifecycle-20261004.json).
 No 128K or throughput claim follows from this gate.
+
+
+## First 32K MTP throughput pair
+
+These are generation rates for 32,768 input + 1,024 output tokens (40,960
+allocated), with the fixed setup above. Effective rates include prefill and
+generation. Every arm uses the same native binary; no source rebuild separates
+the control, tag-snapshot-only and refill settings.
+
+| Setting | Coding output tok/s | Editing output tok/s | Coding effective tok/s | Editing effective tok/s |
+|---|---:|---:|---:|---:|
+| Control | 138.315 | 124.461 | 66.796 | 64.044 |
+| Tag snapshot only | 138.609 | 124.656 | 66.839 | 64.025 |
+| GPU refills | 140.584 | 126.322 | 67.360 | 64.521 |
+
+Refills gained **1.64% coding / 1.50% editing** generation throughput and
+**0.84% / 0.74%** effective throughput over the same-binary control. The tag-only
+arm moved by +0.21% / +0.16%, within the variation of a single pair. All three
+arms matched output tokens, measured work, primary swap/victim counts and
+secondary-cache counters. These are preliminary observations, not a repeated
+performance claim or gains to multiply by another branch's results.
+
+Across these two requests, primary refill H2D payload fell from **41.4084GB
+to 15.7978GB**: **25.6106GB (61.85%)** was copied within the GPU instead.
+Primary victim D2H stayed at 41.4084GB. This is primary adaptive-refill traffic,
+not the total PCIe traffic: verification staging uploads still occur. Fewer
+uploads produced a modest timing gain, so upload byte count alone does not
+explain the remaining end-to-end bottleneck.
+
+[Raw first-pair records and byte checks](benchmarks/q8-gpu-refill-first-mtp-20261004.json).
+Plain, n-gram and combined runs continue. Repeats and 128K are still pending.
