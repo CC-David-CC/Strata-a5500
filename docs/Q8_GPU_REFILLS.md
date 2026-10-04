@@ -8,7 +8,7 @@ full Unsloth Q8_0, FP16 KV, native RoPE. This is not the upstream default.
 
 Native build, component/sanitizer checks and all 33 lifecycle requests passed.
 The first same-binary 32K MTP pair gained 1.64% coding and 1.50% editing.
-Other modes are running; repeats and 128K remain untested on this branch.
+All four 32K modes completed; reverse-order repeats and 128K are queued.
 The source starts at cache-budget commit `65a01b4d19de78c4b5d1284f7f7fddef3c50e601`.
 
 ## Why try it
@@ -47,7 +47,7 @@ ccache-enabled native build. The fixture checks cold/mixed/warm/replaced tags, l
 bounds, pending observations, close/reopen, both transfer types, unchanged secondary
 sources, and every byte of the evicted and incoming experts.
 
-Next are plain/MTP lifecycle requests with control, snapshot-only and refill settings,
+The completed plain/MTP lifecycle requests used control, snapshot-only and refill settings,
 including STOP, following requests and MTP checkpoint restoration. Only after those
 pass do fresh-engine 32K-input/1K-output coding and editing requests run: plain, MTP,
 n-gram and MTP+n-gram. Plain and MTP require exact output and measured work. N-gram
@@ -117,4 +117,30 @@ uploads produced a modest timing gain, so upload byte count alone does not
 explain the remaining end-to-end bottleneck.
 
 [Raw first-pair records and byte checks](benchmarks/q8-gpu-refill-first-mtp-20261004.json).
-Plain, n-gram and combined runs continue. Repeats and 128K are still pending.
+The complete four-mode matrix is below. Repeats and 128K are still pending.
+
+
+## Complete first 32K matrix
+
+All 20 throughput requests completed; each generated 1,024 tokens from 32,768 input.
+Same fixed setup and binary as above. Each row compares its own same-binary control.
+
+| Mode / task | Control output tok/s | GPU refills tok/s | Gain | Control effective tok/s | GPU refills effective tok/s | Qualification |
+|---|---:|---:|---:|---:|---:|---|
+| plain / coding | 76.215 | 76.781 | +0.74% | 48.033 | 48.151 | Exact tokens and measured work |
+| plain / editing | 65.851 | 66.185 | +0.51% | 44.007 | 44.145 | Exact tokens and measured work |
+| mtp / coding | 138.315 | 140.584 | +1.64% | 66.796 | 67.360 | Exact tokens and measured work |
+| mtp / editing | 124.461 | 126.322 | +1.50% | 64.044 | 64.521 | Exact tokens and measured work |
+| ngram / coding | 80.883 | 79.308 | -1.95% | 49.907 | 49.259 | First token difference 288, changed work |
+| ngram / editing | 121.568 | 121.467 | -0.08% | 63.369 | 63.363 | Matching tokens, changed work |
+| mtp-ngram / coding | 137.853 | 139.669 | +1.32% | 66.786 | 67.110 | Exact tokens and measured work |
+| mtp-ngram / editing | 121.963 | 123.800 | +1.51% | 63.330 | 63.812 | Exact tokens and measured work |
+
+Plain, MTP and combined also matched primary swap/victim counts and secondary
+cache counters. N-gram alone regressed 1.95% coding and was essentially flat
+(-0.08%) editing, with changed speculative work. Keep its earlier configuration
+as an alternative; this is not a universal default. Reversed-order 32K plain/MTP
+pairs and native 128K pairs in all four modes are queued on the same binary.
+No scheduling/refill combination has been tested.
+
+[Complete 32K records](benchmarks/q8-gpu-refill-complete-32k-20261004.json).
