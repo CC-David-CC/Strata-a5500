@@ -10,8 +10,8 @@ main-model state checks, including STOP and MTP checkpoint restoration.
 Actual GPU-to-GPU copies occurred; primary victim writebacks stayed unchanged.
 First 32K-input/1K-output MTP pair: **+1.64% coding / +1.50% editing**
 generation throughput, with matching tokens and measured work. Primary refill
-RAM uploads fell 61.85%; primary victim writebacks remained. This is a first
-pair, not a repeated or 128K claim. All four 32K modes completed: plain gained
+RAM uploads fell 61.85%; primary victim writebacks remained. The initial
+pair is reported above; repeats are below. All four 32K modes completed: plain gained
 0.74%/0.51%, combined MTP+n-gram gained 1.32%/1.51%, with matching tokens/work.
 N-gram alone changed work and lost 1.95% coding / 0.08% editing.
 Reverse-order 32K plain/MTP pairs completed; native 128K was interrupted at the user-requested pause, before a candidate result.
