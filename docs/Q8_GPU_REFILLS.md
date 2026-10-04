@@ -8,7 +8,7 @@ full Unsloth Q8_0, FP16 KV, native RoPE. This is not the upstream default.
 
 Native build, component/sanitizer checks and all 33 lifecycle requests passed.
 The first same-binary 32K MTP pair gained 1.64% coding and 1.50% editing.
-All four 32K modes completed; reverse-order repeats and 128K are queued.
+All four 32K modes and reversed-order plain/MTP pairs completed. Native 128K was interrupted at the user-requested pause; no 128K result is claimed.
 The source starts at cache-budget commit `65a01b4d19de78c4b5d1284f7f7fddef3c50e601`.
 
 ## Why try it
@@ -117,7 +117,7 @@ uploads produced a modest timing gain, so upload byte count alone does not
 explain the remaining end-to-end bottleneck.
 
 [Raw first-pair records and byte checks](benchmarks/q8-gpu-refill-first-mtp-20261004.json).
-The complete four-mode matrix is below. Repeats and 128K are still pending.
+The complete four-mode matrix and completed reversed-order 32K pairs are below. The 128K follow-up is paused.
 
 
 ## Complete first 32K matrix
@@ -140,7 +140,28 @@ Plain, MTP and combined also matched primary swap/victim counts and secondary
 cache counters. N-gram alone regressed 1.95% coding and was essentially flat
 (-0.08%) editing, with changed speculative work. Keep its earlier configuration
 as an alternative; this is not a universal default. Reversed-order 32K plain/MTP
-pairs and native 128K pairs in all four modes are queued on the same binary.
+pairs completed on the same binary. The 128K follow-up was interrupted at the user-requested pause, before a candidate result.
 No scheduling/refill combination has been tested.
 
 [Complete 32K records](benchmarks/q8-gpu-refill-complete-32k-20261004.json).
+
+
+## Reversed-order 32K plain and MTP pairs
+
+Candidate ran first, followed by a fresh control from the same binary. Each
+request used 32,768 input + 1,024 output, 40,960 allocation and the unchanged
+fixed configuration above. The table uses the fresh control in this repeat.
+
+| Mode / task | Control output tok/s | GPU refills tok/s | Gain | Control effective tok/s | GPU refills effective tok/s | Qualification |
+|---|---:|---:|---:|---:|---:|---|
+| plain / coding | 76.322 | 76.826 | +0.66% | 48.066 | 48.319 | Exact tokens and measured work |
+| plain / editing | 65.816 | 66.340 | +0.80% | 43.979 | 44.217 | Exact tokens and measured work |
+| mtp / coding | 138.738 | 140.690 | +1.41% | 66.943 | 67.391 | Exact tokens and measured work |
+| mtp / editing | 124.556 | 126.273 | +1.38% | 64.067 | 64.530 | Exact tokens and measured work |
+
+Every pair matched output tokens, measured work, primary victim/swap counts
+and secondary-cache counters. MTP's refill-upload reduction remained 61.85%;
+primary writebacks were unchanged. Two run orders do not establish a confidence
+interval. These small gains should remain qualified to the tested workloads.
+
+[Raw observations and independent counter checks](benchmarks/q8-gpu-refill-reverse-32k-20261004.json).

@@ -14,7 +14,9 @@ RAM uploads fell 61.85%; primary victim writebacks remained. This is a first
 pair, not a repeated or 128K claim. All four 32K modes completed: plain gained
 0.74%/0.51%, combined MTP+n-gram gained 1.32%/1.51%, with matching tokens/work.
 N-gram alone changed work and lost 1.95% coding / 0.08% editing.
-Reverse-order repeats and native 128K pairs are queued.
+Reverse-order 32K plain/MTP pairs completed; native 128K was interrupted at the user-requested pause, before a candidate result.
+MTP repeated **+1.41% coding / +1.38% editing**, exact tokens/work and
+unchanged primary victim/swap and secondary-cache counts.
 
 The change copies cache tags at an existing synchronization point, then substitutes
 GPU-to-GPU copies for eligible repeated RAM-to-GPU uploads. Primary victim writebacks
