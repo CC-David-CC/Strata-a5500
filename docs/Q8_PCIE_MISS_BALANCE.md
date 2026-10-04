@@ -91,3 +91,32 @@ An all-CPU miss control (`--pcie-frac 0`) is queued next; the 15,472 resident
 GPU experts remain on GPU. This tests the opposite placement extreme.
 
 Raw measurements and comparisons: [q8-pcie-placement-20261004.json](benchmarks/q8-pcie-placement-20261004.json).
+
+## Completed CPU-only miss screen
+
+The resident GPU cache remains enabled. Only missing experts move to the CPU
+(`--pcie-frac 0`). Same frozen binary, 32K input plus 1,024 output, coding then
+editing. This is one screen against the earlier same-binary controls.
+
+| Mode | Automatic split, coding / editing | CPU-only misses, coding / editing | Change |
+|---|---:|---:|---:|
+| Plain | 73.61 / 61.91 | 73.91 / 62.67 | +0.4% / +1.2% |
+| MTP | 129.04 / 111.93 | 138.05 / 115.99 | +7.0% / +3.6% |
+| N-gram | 75.03 / 105.17 | 77.39 / 113.80 | +3.1% / +8.2% |
+| MTP + n-gram | 130.29 / 111.27 | 134.12 / 112.22 | +2.9% / +0.9% |
+
+Editing tokens matched in all modes. Coding first differed at tokens 120, 120,
+32 and 120 respectively; work counters changed. Effective output throughput
+gained 2.8% / 1.9% for MTP and 2.0% / 4.3% for n-gram. These placement changes
+are not exact-work kernel gains, and the measurements need fresh paired repeats.
+
+MTP coding GPU-reach wait fell from 12.39 to 10.26 ms/window while CPU expert
+work rose from 6.98 to 7.75. Editing wait fell from 14.54 to 9.28 while CPU work
+rose from 13.89 to 18.12. The CPU remains useful even when more work is assigned
+to it; eliminating the missed-expert GPU transfers reduced the measured total
+window time. Hardware/timeline profiling is needed to separate the costs.
+
+Next: reversed-order 32K MTP/n-gram repeats and fresh paired controls at native
+128K in all four modes. Keep this configuration independent of retained copies.
+
+Evidence: [q8-pcie-cpu-only-20261004.json](benchmarks/q8-pcie-cpu-only-20261004.json).
