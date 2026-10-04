@@ -2,7 +2,7 @@
 
 > **This branch: Strata Control Lab — learn by controlling a local model.**
 > `work/control-lab` builds an educational web interface on the tested
-> `work/logprobs-675` branch. Ask a small question, inspect its answer distribution,
+> `work/logprobs-675` and `work/samplers` branches. Ask a small question, inspect its answer distribution,
 > compare multi-token grammar branches, and step a state-controlled application.
 >
 > **[Launch the Control Lab: Windows / Linux](docs/CONTROL_LAB.md)** ·
@@ -11,7 +11,8 @@
 > [Next experiments](docs/CONTROL_LAB_ROADMAP.md)
 >
 > Recorded native runs work without a model. Live mode uses your existing Strata
-> server. The lab adds no inference engine and changes no native serving code.
+> server. The lab adds no inference engine. Its separately qualified
+> [sampler dependency](docs/SAMPLERS.md) extends native selection explicitly.
 >
 > The underlying [logprobs contribution](docs/LOGPROBS.md) addresses
 > [#675](https://github.com/Niko1221/Strata/issues/675). This educational aside is a

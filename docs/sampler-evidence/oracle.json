@@ -1,0 +1,72 @@
+{
+  "provenance": "independent FP64 oracle over native captured FP32 rows",
+  "cases": [
+    {
+      "case": "temperature",
+      "vocabulary": 248320,
+      "support": 248320,
+      "selected": 3002,
+      "raw_logprob_error": 1.7763568394002505e-14,
+      "selected_probability_error": 3.7269449679189215e-19,
+      "top_probability_error": 3.0531133177191805e-15,
+      "maximum_entropy_error": 6.661338147750939e-14,
+      "selection_ms": 28.342537
+    },
+    {
+      "case": "minp-hot",
+      "vocabulary": 248320,
+      "support": 3,
+      "selected": 38617,
+      "raw_logprob_error": 1.7319479184152442e-14,
+      "selected_probability_error": 0.0,
+      "top_probability_error": 0.0,
+      "maximum_entropy_error": 2.4868995751603507e-14,
+      "selection_ms": 22.00785
+    },
+    {
+      "case": "hot-minp",
+      "vocabulary": 248320,
+      "support": 6,
+      "selected": 54,
+      "raw_logprob_error": 1.7319479184152442e-14,
+      "selected_probability_error": 1.3877787807814457e-17,
+      "top_probability_error": 1.1102230246251565e-16,
+      "maximum_entropy_error": 6.661338147750939e-14,
+      "selection_ms": 23.337988
+    },
+    {
+      "case": "sigma-hot",
+      "vocabulary": 248320,
+      "support": 4,
+      "selected": 38617,
+      "raw_logprob_error": 1.7319479184152442e-14,
+      "selected_probability_error": 0.0,
+      "top_probability_error": 0.0,
+      "maximum_entropy_error": 2.4868995751603507e-14,
+      "selection_ms": 20.738998
+    },
+    {
+      "case": "xtc-hot",
+      "vocabulary": 248320,
+      "support": 4,
+      "selected": 38617,
+      "raw_logprob_error": 1.7319479184152442e-14,
+      "selected_probability_error": 0.0,
+      "top_probability_error": 0.0,
+      "maximum_entropy_error": 2.4868995751603507e-14,
+      "selection_ms": 19.683363
+    },
+    {
+      "case": "hot-xtc",
+      "vocabulary": 248320,
+      "support": 4,
+      "selected": 38617,
+      "raw_logprob_error": 1.7319479184152442e-14,
+      "selected_probability_error": 0.0,
+      "top_probability_error": 0.0,
+      "maximum_entropy_error": 2.4868995751603507e-14,
+      "selection_ms": 19.695956
+    }
+  ],
+  "tolerance": 1e-09
+}

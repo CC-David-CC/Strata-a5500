@@ -1,0 +1,32 @@
+Branch: work/samplers
+Worktree: C:/Users/dflanag3/Documents/fleet/strata-samplers
+Resolved base: 2243cb1c5b1a87270731d8b8a76e4af001f96f97 (work/logprobs-675)
+Remote: git@github.com:CC-David-CC/Strata-a5500.git
+Parent author remote: https://github.com/Niko1221/Strata.git
+Created after inspecting the existing worktree inventory; no fetch/reset/stash/rebase.
+The original work/control-lab checkout remains intact while this dependency is qualified.
+
+Audit: existing sampled GPU chain is penalties -> top_k -> top_p -> min_p ->
+temperature. Its candidate capacity is 64, even with top_k:0. No native
+Top-N-Sigma/XTC/DRY/DynaTemp/Mirostat implementations were present at this base.
+
+Gate S1: full-vocabulary ordered CPU selector after the existing target head.
+Support the user's priority three recipes plus composable top-k/top-p.
+Grammmar mask first. One target row per step. Preserve existing commit, cache,
+cancellation, drain and engine ownership. No unrelated kernel/hardware changes.
+
+Gate S2: strict HTTP capability/profile checks before successful stream headers;
+typed per-token inspection paired with raw logprobs. Do not silently downgrade
+unsupported sampler guarantees. Reject unknown operators and unused settings.
+
+Gate S3: analytical numerical fixtures, legacy GPU regression suite, native
+llm-49 HTTP/JSON/SSE/grammar runs, same-tensor independent oracle, cancellation.
+Record implementation commit, evidence receipt, commands and costs; push branch.
+
+Gate S4: merge the tested dependency into work/control-lab. Expand offline
+recordings, advanced closed-loop pages and motion design. Browser-test and inspect.
+
+Later optimization gate: compact GPU full-vocabulary selection and reductions,
+followed by speculation with explicit target/draft distribution semantics. These
+are not claimed by S1. DRY/DynaTemp/Mirostat remain labeled teaching simulations
+unless separately implemented, qualified and advertised by the native engine.

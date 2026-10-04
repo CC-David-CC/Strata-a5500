@@ -57,6 +57,9 @@ from serve.grammar import (ANSWER_PREFIX, THINK_PREFIX, CAPABILITY, GrammarConst
                            validate_grammar_request, validate_sampling, vocabulary_identity)
 from serve.winjob import contain  # noqa: E402
 from serve.structured import StructuredOutputError, prepare_format, validated_json  # noqa: E402
+from serve.sampling import (CAPABILITY as SAMPLER_CAPABILITY, LEGACY as SAMPLER_LEGACY,
+                            validate_sampler, sampler_keys, parse_sampling)
+from dataclasses import replace
 from serve.logprobs import (CAPABILITY as LOGPROBS_CAPABILITY, ContentScores, ScoredToken,
                             parse_score, validate_logprobs)
 from serve.json_output import prepare_chat_json, json_chunks
@@ -432,6 +435,7 @@ class StrataEngine:
         info = dict(self.info)
         info.pop("grammar", None)
         info.pop("logprobs", None)
+        info.pop("samplers", None)
         # #344: not alive until READY - __init__ sets max_context to 0 and blocks until the engine says READY, and a
         # request that saw alive() in that window skipped load() and failed with "context (0)".  __init__ clears
         # `ended` itself once READY (before its pump thread can set it again).
@@ -497,7 +501,7 @@ class StrataEngine:
                 v = tune.get(k)
                 if isinstance(v, (int, float)) and not isinstance(v, bool) and 0.0 <= float(v) <= 1.0:
                     keys += f" {k}={float(v)!r}"
-        return keys + StrataEngine.projection_key(sampling)
+        return keys + StrataEngine.projection_key(sampling) + sampler_keys(sampling)
 
     @staticmethod
     def projection_key(sampling: dict) -> str:
@@ -552,6 +556,11 @@ class StrataEngine:
         if score_count is not None and self.info.get("logprobs") != LOGPROBS_CAPABILITY:
             raise ValueError("logprobs requires a native engine advertising raw-v1")
         score_index = 0
+        sampler = validate_sampler(sampling or {}, check_conflicts=False)
+        if sampler is not None and (self.info.get('samplers') != SAMPLER_CAPABILITY or embeddings):
+            raise ValueError('strata_sampler requires an ordered-host-v1 native text engine')
+        inspect_sampler = sampler is not None and sampler.get('inspect', False)
+        sampling_receipt = None
         if score_count is not None:
             head += f" logprobs={score_count}"
         command = f"{head} {','.join(str(int(t)) for t in ids)}"
@@ -595,11 +604,20 @@ class StrataEngine:
                     done = True
                     raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})")
                 heard = time.monotonic()                  # any line is output: T, PP, RESUME, INFO ...
-                if line.startswith("LP "):
+                if line.startswith('SP '):
+                    if not inspect_sampler or sampling_receipt is not None:
+                        raise ValueError('unexpected native ordered sampler receipt')
+                    sampling_receipt = parse_sampling(line, score_index)
+                elif line.startswith("LP "):
                     if score_count is None:
                         raise ValueError("unexpected native logprobs record")
                     allow = silence
                     token = parse_score(line, score_index, score_count)
+                    if inspect_sampler:
+                        if sampling_receipt is None or sampling_receipt['id'] != token.id:
+                            raise ValueError('missing or mismatched native sampler receipt')
+                        token = replace(token, sampling=sampling_receipt)
+                        sampling_receipt = None
                     if constraint is None and token.channel != "raw" or constraint is not None and token.channel == "raw":
                         raise ValueError("native logprobs channel does not match the request")
                     score_index += 1
@@ -645,6 +663,8 @@ class StrataEngine:
                 elif line.startswith("DONE"):
                     self._parse_done(line)
                     done = True
+                    if sampling_receipt is not None:
+                        raise ValueError('native sampler receipt has no token')
                     if score_count is not None and self.last.get("generated") != score_index:
                         raise ValueError("native DONE count differs from logprobs records")
                     return
@@ -1524,7 +1544,10 @@ class Service:
 
     def prepare_constraint(self, constraint, sampling):
         """Same native compiler, before headers, using existing serialized admission."""
-        validate_sampling({**self.sampling_defaults, **self.shared, **sampling})
+        effective = {**self.sampling_defaults, **self.shared, **sampling}
+        if 'strata_sampler' in sampling:
+            effective = {k: v for k, v in effective.items() if k not in SAMPLER_LEGACY}
+        validate_sampling(effective)
         if constraint.thinking and self.reasoning_budget(sampling) and constraint.reasoning_tokens != min(self.reasoning_budget(sampling), 8192):
             raise ValueError("grammar does not support injected reasoning-budget wrap-up; disable reasoning_budget_tokens")
         with self.fifo:
@@ -1548,6 +1571,9 @@ class Service:
         if defaults:                   # the request's own fields win (explicit 0 stays greedy)
             req_values = {k: v for k, v in (sampling or {}).items() if v is not None}
             sampling = {**defaults, **req_values}
+        if 'strata_sampler' in (sampling or {}):
+            sampling = {k: v for k, v in sampling.items() if k not in SAMPLER_LEGACY}
+            validate_sampler(sampling)
         scores = ContentScores(self.tok) if (sampling or {}).get("logprobs") is True else None
         if scores is not None and budget and constraint is None:
             raise ValueError("logprobs cannot score injected reasoning-budget wrap-up; disable reasoning_budget_tokens")
@@ -2492,6 +2518,8 @@ def make_handler(svc: Service):
                      "total_slots": 1, "model_alias": svc.model, "chat_template": svc.template.source,
                      "modalities": {"vision": svc.vision is not None}, "models_autoload": hasattr(svc.engine, "restart"),
                      "is_sleeping": not svc.loaded()}
+            props['strata_capabilities'] = {k: getattr(svc.engine, 'info', {}).get(k)
+                                           for k in ('logprobs', 'grammar', 'samplers')}
             if getattr(svc.engine, "model_path", None):
                 props["model_path"] = svc.engine.model_path
             version = getattr(svc.engine, "info", {}).get("version")
@@ -2575,10 +2603,13 @@ def make_handler(svc: Service):
                 items.close()
 
         def _openai(self, req):
+            sampler = validate_sampler(req)
             req = svc.with_shared(req, "openai")
+            if sampler is not None:
+                req = {k: v for k, v in req.items() if k not in SAMPLER_LEGACY}
             score_count = validate_logprobs(req)
             constraint = validate_grammar_request(req, "chat")
-            json_output = prepare_chat_json(req.get("response_format")) if score_count is not None else None
+            json_output = prepare_chat_json(req.get("response_format")) if score_count is not None or sampler is not None else None
             messages, tools, kw = openai_to_messages(req)
             if json_output is None:
                 messages, validator = prepare_format(req.get("response_format"), messages)
@@ -2595,6 +2626,11 @@ def make_handler(svc: Service):
             if validator is not None and (tools or req.get("strata_mcp")):
                 raise ValueError("structured response_format with tools/MCP is not supported")
             svc.load()
+            if sampler is not None:
+                if getattr(svc.engine, 'info', {}).get('samplers') != SAMPLER_CAPABILITY:
+                    raise ValueError('strata_sampler requires a native engine advertising ordered-host-v1')
+                if images_of(messages) or req.get('reasoning_budget_tokens'):
+                    raise ValueError('strata_sampler requires text inputs and no injected reasoning wrap-up')
             if score_count is not None:
                 if getattr(svc.engine, "info", {}).get("logprobs") != LOGPROBS_CAPABILITY:
                     raise ValueError("logprobs requires a native engine advertising raw-v1")
@@ -2671,6 +2707,8 @@ def make_handler(svc: Service):
             self._json(200, {"input_tokens": len(svc.tok.encode(prompt, parse_special=True))})
 
         def _anthropic(self, req):
+            if 'strata_sampler' in req:
+                raise ValueError('strata_sampler currently supports /v1/chat/completions only')
             svc.load()
             req = svc.with_shared(req, "anthropic")
             messages, tools, kw = anthropic_to_messages(req, svc.anthropic_think_unasked)
