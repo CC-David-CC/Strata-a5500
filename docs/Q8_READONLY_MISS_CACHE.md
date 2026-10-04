@@ -52,3 +52,12 @@ Per-request logs report cumulative completed groups, hits, uploads, bypasses
 and logical bytes saved/uploaded. Difference adjacent reports for a request.
 These are payload counts, not PCIe hardware counters. Cache hit rate alone does
 not prove a throughput gain; extra launches and memory traffic can outweigh it.
+
+`test_q8_readonly_lifecycle.py` prepares paired plain/MTP gates against the
+component-tested binary: a normal 32K request, A/B/A conversation and checkpoint
+restoration, STOP after 16 delivered tokens, then another request. It requires
+matching main-model state fingerprints and tokens on the normal/checkpoint
+requests. If asynchronous STOP performs different work between arms, the
+post-cancel state comparison is reported as unequal-work, not claimed exact.
+This harness is prepared, not yet passed. Performance runs follow only after
+its successful completion. The serving path remains private.
