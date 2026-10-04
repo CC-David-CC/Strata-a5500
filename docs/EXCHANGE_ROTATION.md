@@ -36,6 +36,31 @@ Serving diagnostics report the cumulative rotated block count and avoided
 `memcpy` payload bytes. This counts the copied payload once, not read plus write
 traffic, and does not include the GPU transfers, which still occur.
 
+## Experimental Q8 PLE tables
+
+Q8 expert weights and the model's Q8 PLE lookup table are separate formats. The
+Q8 PLE reader is an additional experiment, off by default. For a full Q8 model,
+set `STRATA_EXPERIMENTAL_Q8_PLE=1` and use `--ple-io mmap` or `--ple-io ram`.
+Without the exact value `1`, opening a Q8 PLE table fails with an explicit opt-in
+message. Direct I/O for Q8 PLE is unsupported and is rejected.
+
+This switch is independent of `STRATA_EXCHANGE_ROTATE`: keep Q8 PLE enabled in
+both arms when comparing rotation on a Q8 model. The reader preserves the stored
+Q8 scales and signed values. It uses the existing scalar dequantizer and mapped
+reader; other PLE formats retain their existing paths.
+
+With `STRATA_NATIVE_EXPERTS=ON`, `STRATA_BUILD_TESTS=ON` and CUDA configured:
+
+```bash
+cmake --build build --target ple_q8_parity
+ctest --test-dir build -R '^ple_q8_selftest$' --output-on-failure
+STRATA_EXPERIMENTAL_Q8_PLE=1 ./build/ple_q8_parity /path/to/shard-containing-Q8-PLE.gguf
+```
+
+The self-test needs no model or GPU. It compares decoded rows and batches with
+ggml, including signed values, scales, page boundaries, malformed files,
+close/reopen, mapped/RAM modes, and the opt-in gate.
+
 ## Ownership and synchronization
 
 The original allocations own their memory until `FileExpertSource::close()`.
