@@ -22,12 +22,13 @@ def save(p, data):
 def build(out):
     out.mkdir(parents=True, exist_ok=False)
     result = {'started': time.time(), 'steps': [], 'source': (R/'source-commit.txt').read_text().strip()}
-    def run(name, cmd):
+    def run(name, cmd, required=True):
         with (out/(name+'.log')).open('w') as log:
             r = subprocess.run(list(map(str, cmd)), stdout=log, stderr=subprocess.STDOUT, timeout=1800)
         result['steps'].append({'name':name, 'command':list(map(str,cmd)), 'exit':r.returncode})
         save(out/'result.json', result)
-        if r.returncode: raise RuntimeError(name+' failed; see log')
+        if r.returncode and required: raise RuntimeError(name+' failed; see log')
+        return r.returncode
     try:
         run('worker-sanitize-build', ['g++','-std=c++20','-pthread','-O1','-g','-fsanitize=address,undefined',
             '-fno-omit-frame-pointer','-I'+str(R/'include'),R/'tests/core/serial_worker_test.cpp',
@@ -36,7 +37,14 @@ def build(out):
         run('worker-tsan-build', ['g++','-std=c++20','-pthread','-O1','-g','-fsanitize=thread',
             '-fno-omit-frame-pointer','-I'+str(R/'include'),R/'tests/core/serial_worker_test.cpp',
             '-o',out/'worker-tsan'])
-        run('worker-tsan', [out/'worker-tsan'])
+        if run('worker-tsan', [out/'worker-tsan'], required=False):
+            text = (out/'worker-tsan.log').read_text()
+            if 'FATAL: ThreadSanitizer: unexpected memory mapping' not in text:
+                raise RuntimeError('Worker ThreadSanitizer reported a failure')
+            # Newer kernels can map DSOs into GCC TSan's shadow address range.
+            # Change only this fixture process, never the system ASLR setting.
+            run('worker-tsan-noaslr', ['setarch', os.uname().machine, '-R', out/'worker-tsan'])
+            result['tsan_mapping_workaround'] = 'ASLR off for this sanitizer process only'
         run('configure', ['cmake','-S',R,'-B',R/'build','-G','Ninja','-DCMAKE_BUILD_TYPE=Release',
             '-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc','-DCMAKE_CUDA_ARCHITECTURES=120',
             '-DSTRATA_ENABLE_CUDA=ON','-DSTRATA_ENABLE_HIP=OFF','-DSTRATA_NATIVE_EXPERTS=ON',
