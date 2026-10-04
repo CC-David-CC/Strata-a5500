@@ -1,36 +1,48 @@
-# Experimental Q8 admission by layer
+# Experimental Q8: admit completed expert transfers by layer
 
-An experimental fork of **[Niko1221/Strata](https://github.com/Niko1221/Strata)**.
-Credit for Strata and its existing kernels belongs to upstream and its contributors.
+A small experimental fork of [Niko1221/Strata](https://github.com/Niko1221/Strata).
+Credit for Strata, its kernels and serving engine belongs to upstream and its
+contributors. The upstream license is retained.
 
-This branch tests letting early layers run while adaptive expert transfers for
-later layers finish. It keeps the same selected experts and waits for each
-affected layer's complete transfers before publishing its CPU/GPU expert plan.
-It retains RAM ownership rotation and drains every request boundary.
+Instead of waiting for all adaptive expert transfers, let early layers execute
+after their own transfers finish. Keep the same selected experts, arithmetic,
+cache capacity and transfer bytes; publish each layer only after its completion
+event. Every request boundary drains pending exchanges.
 
-Target: **RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X,
-128GB RAM; full Unsloth **Q8_0, FP16 KV**, native context.
-`STRATA_EXCHANGE_LAYER_ADMISSION=1` is experimental and off by default.
-The initial path requires one GPU, unsplit host-planned verification, fully
-pinned resident expert exchanges and ownership rotation/duplex enabled.
+**RTX PRO 6000 Blackwell Workstation Edition 96GB**, Ryzen 7950X, 128GB RAM.
+Full Unsloth **Q8_0, FP16 KV, native RoPE**.32K or 128K input plus 1,024 output;
+allocated context is input + 8,192. Fixed 15,472 primary slots, four secondary slots
+per layer, PCIe fraction 0.55, copy grid 32 with overlap and locked RAM/PLE.
 
-**First native 32K-input/1K-output MTP comparison:** coding **135.0 ? 144.6 tok/s
-(+7.1%)**, editing **119.0 ? 124.4 (+4.6%)**, with identical tokens, measured work
-and transfer payloads. Effective throughput improved **3.4% / 2.3%**.
-The reversed-order MTP repeat below also gained speed. Native 128K is running.
+## Measured MTP gains
 
-All **33 lifecycle requests** and component/sanitizer/build checks passed.
-The earlier test-harness failure and its correction remain in the report.
-All four 32K modes finished: plain gained 3.1%/2.7%; n-gram alone lost 1.9%/6.0%,
-and combined gained 5.0%/1.7% with changed work. Preserve the earlier n-gram
-configuration. The reversed-order MTP repeat passed; native 128K tests are
-running. This branch has not yet been published.
+| Input / order | Coding: control -> per-layer tok/s | Gain | Editing: control -> per-layer tok/s | Gain |
+|---|---:|---:|---:|---:|
+|32K / first|135.01 ->144.56|+7.07%|119.00 ->124.43|+4.56%|
+|32K / reversed|136.42 ->144.43|+5.87%|119.30 ->124.36|+4.23%|
+|128K / first|137.64 ->145.06|+5.39%|113.66 ->118.45|+4.22%|
 
-See [hypothesis, state and validation](docs/Q8_LAYER_ADMISSION.md) and
-[the measured parent](docs/Q8_MISS_FETCH_GEOMETRY.md).
-Main is untouched and the upstream license is retained. For standard
-installation and support, use [upstream Strata](https://github.com/Niko1221/Strata).
+These MTP pairs matched all output tokens, measured work, primary transfer bytes
+and secondary-cache counters. The reversed 32K effective-throughput gain was
+2.2% for each task; 128K was 0.93% coding/0.88% editing. Effective throughput
+includes prefill. The 128K numbers have one pair and no confidence interval.
 
-The reversed-order 32K MTP repeat also matched tokens/work/counters: coding
-136.42 -> 144.43 tok/s (+5.87%), editing 119.30 -> 124.36 (+4.23%).
-Native 128K tests are running; no 128K result is claimed yet.
+All four modes completed at both input lengths. Plain gained about2.5-3.1%.
+N-gram alone regressed at 32K (1.9% coding/6.0% editing); it and combined mode
+can change timing-dependent speculative work. Their full rates, effective
+throughput and first token differences are in the report. Keep configurations
+separate; this branch is not a universal default.
+
+All component byte/ownership checks, ASan/UBSan, TSan, CUDA memcheck/initcheck,
+native build and 33 lifecycle requests passed. The lifecycle suite covers 32K
+normal/STOP/following requests and MTP checkpoint restoration; 128K coverage
+here is the full-mode throughput/token/work comparison.
+
+**Opt-in, off by default:** `STRATA_EXCHANGE_LAYER_ADMISSION=1`, with ownership
+rotation, duplex exchange and completion waits enabled. Initially restricted
+to one GPU, unsplit host-planned verification and pinned resident experts;
+peer/remote consumers, device planning and router lookahead are rejected.
+
+[Full results, source identity, invariants and reproduction](docs/Q8_LAYER_ADMISSION.md).
+The engine source is `ac398f5e`; later commits add documentation and evidence.
+For standard installation, use [upstream Strata](https://github.com/Niko1221/Strata).

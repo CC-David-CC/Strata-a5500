@@ -77,7 +77,7 @@ no HIP result is claimed.
   logical D2H/H2D payload, wait/ownership/worker timing and effective throughput.
 - Repeat useful gains and extend to native 128K before a performance claim.
 
-Status: component/sanitizer/build gates and all 33 lifecycle requests passed. All nine 32K configurations (18 throughput requests) completed. Reverse-order 32K MTP completed with positive exact gains; native 128K is running.
+Status: component/sanitizer/build gates and all 33 lifecycle requests passed. All nine 32K configurations (18 throughput requests) completed. Reverse-order 32K MTP and all native128K pairs completed. The complete follow-up is below.
 The raw schedule analysis is included in
 [the supporting trace analysis](benchmarks/q8-layer-readiness-projection-20261004.json).
 
@@ -126,9 +126,9 @@ All six lifecycle arms passed: plain/MTP times parent, deferred and per-layer
 schedules, **33 requests**, including STOP/following requests and MTP checkpoint
 switching/restoration. Those checks are not throughput measurements.
 
-**This is a first pair, without a confidence interval or 128K result.** Remaining
-plain/n-gram/combined cases and reverse-order repetitions are still needed.
-N-gram's timing-dependent policy will be qualified separately.
+This was the first MTP pair. The complete four-mode 32K matrix, reversed-order
+MTP pair and native128K results follow below. No confidence interval is claimed.
+N-gram's timing-dependent policy is qualified separately.
 
 [Raw lifecycle, build and first MTP evidence](benchmarks/q8-layer-first-mtp-20261004.json).
 
@@ -158,7 +158,7 @@ configuration is declared best for every mode.
 
 [Complete first 32K evidence](benchmarks/q8-layer-complete-32k-20261004.json).
 The reversed-order MTP pair below and native 128K pairs in all four modes use
-the same already-built binary. Reverse MTP completed; 128K is still running.
+the same already-built binary. Reverse MTP and native128K completed; see below.
 
 
 ## Reversed-order 32K MTP repeat
@@ -177,4 +177,37 @@ secondary-cache counters. The gain survived both run orders; two pairs are
 not a confidence interval or a broader-workload guarantee.
 
 [Raw reverse pair](benchmarks/q8-layer-reverse-32k-20261004.json). Native 128K
-pairs in all four modes are running on the same unchanged binary.
+pairs in all four modes completed on the same unchanged binary, reported below.
+
+
+## Completed native128K comparison
+
+Native **131,072 input + 1,024 output**, 139,264 allocation, full Q8_0/FP16 KV.
+Same fixed placement and unchanged binary as the 32K suite. These are first
+pairs; only 32K MTP has reversed-order repetition. Startup is excluded.
+
+| Mode / task | Control output tok/s | Per-layer output tok/s | Gain | Control effective tok/s | Per-layer effective tok/s | Qualification |
+|---|---:|---:|---:|---:|---:|---|
+| plain / coding | 76.328 | 78.210 | +2.47% | 22.485 | 22.658 | Exact tokens and measured work |
+| plain / editing | 61.912 | 63.463 | +2.51% | 21.084 | 21.250 | Exact tokens and measured work |
+| mtp / coding | 137.642 | 145.057 | +5.39% | 25.862 | 26.102 | Exact tokens and measured work |
+| mtp / editing | 113.658 | 118.453 | +4.22% | 24.919 | 25.138 | Exact tokens and measured work |
+| ngram / coding | 76.892 | 78.195 | +1.70% | 22.534 | 22.655 | First token difference 221; work differs |
+| ngram / editing | 110.771 | 113.527 | +2.49% | 24.856 | 24.936 | Matching tokens; work differs |
+| mtp-ngram / coding | 136.926 | 144.296 | +5.38% | 25.822 | 26.082 | Exact tokens and measured work |
+| mtp-ngram / editing | 111.396 | 118.612 | +6.48% | 24.813 | 25.162 | Matching tokens; work differs |
+
+Plain/MTP matched every output token, measured work, primary D2H/H2D payload,
+swap counts and secondary-cache counters. Their speed gain therefore survives
+longer input without changing the recorded amount of model/transfer work.
+The explicit 33-request STOP/checkpoint lifecycle suite was at32K; this is not
+a claim of the same full lifecycle coverage at128K. Two run orders at32K and
+first pairs at128K do not establish a confidence interval or broad quality score.
+
+N-gram and combined remain separate configurations. Timing-dependent selection
+can change their speculative work and outputs; first divergence is retained.
+The 32K n-gram-only regression remains in the report and its faster parent
+configuration remains available. Do not add this branch's percentages to the
+independent GPU-refill results; the combined path has its own pending tests.
+
+[Complete follow-up records and raw observations](benchmarks/q8-layer-followup-complete-20261004.json).
