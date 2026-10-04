@@ -1,0 +1,113 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nPossible faults: ['power loss', 'blocked cooling', 'sensor fault']. Prior=[0.4, 0.35, 0.25]. Test=check supply voltage. The selected test reported its positive fault signal. Bayesian posterior=[0.8636363636363636, 0.07954545454545453, 0.05681818181818182].\nQUESTION: What should be inspected next?\nANSWERS:\nA: check power supply\nB: clear cooling obstruction\nC: validate or replace the faulty sensor\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"A\" | \"B\" | \"C\""
+  },
+  "response": {
+    "id": "chatcmpl-a6839ede52bd4aca9a9b71f0",
+    "object": "chat.completion",
+    "created": 1791082330,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.025425176257470986,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -0.025425176257470986,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -4.277111272448877,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -4.693130712146143,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "check",
+                  "logprob": -7.566391210193018,
+                  "bytes": [
+                    99,
+                    104,
+                    101,
+                    99,
+                    107
+                  ]
+                },
+                {
+                  "token": " A",
+                  "logprob": -8.028581838244776,
+                  "bytes": [
+                    32,
+                    65
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 190,
+      "completion_tokens": 2,
+      "total_tokens": 192,
+      "prompt_tokens_details": {
+        "cached_tokens": 183
+      }
+    },
+    "timings": {
+      "cache_n": 183,
+      "prompt_n": 7,
+      "prompt_ms": 221.7,
+      "prompt_per_token_ms": 31.671,
+      "prompt_per_second": 31.6,
+      "predicted_n": 2,
+      "predicted_ms": 67.5,
+      "predicted_per_token_ms": 33.75,
+      "predicted_per_second": 29.6,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 312.10849998751655,
+  "captured_at": "2026-10-04T02:52:11Z"
+}

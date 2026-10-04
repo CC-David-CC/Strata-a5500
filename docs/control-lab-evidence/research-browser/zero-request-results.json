@@ -1,0 +1,24 @@
+{
+  "checks": [
+    {
+      "case": "sampler-sandbox-zero-request-receipt",
+      "status": "passed"
+    },
+    {
+      "case": "frontier-zero-request-receipt",
+      "status": "passed"
+    },
+    {
+      "case": "research-map-zero-request-receipt",
+      "status": "passed"
+    },
+    {
+      "case": "speculation-zero-request-receipt",
+      "status": "passed"
+    },
+    {
+      "case": "controller-zero-request-receipt",
+      "status": "passed"
+    }
+  ]
+}

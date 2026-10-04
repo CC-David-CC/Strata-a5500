@@ -1,0 +1,254 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nCURRENT SENSOR, 09:01: door=closed; keep the arm stopped.\nQUESTION: What action is permitted now?\nANSWERS:\nA: move the arm now\nB: wait with the arm stopped\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "grammar": "root ::= \"B\""
+  },
+  "response": {
+    "id": "chatcmpl-d8070275b11b4182ad1fbef4",
+    "object": "chat.completion",
+    "created": 1791082305,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "B"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "B",
+              "logprob": -0.006863244823712768,
+              "bytes": [
+                66
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.006863244823712768,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -5.152424463085431,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -7.985332139782209,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -8.390535005382795,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -10.046881326488752,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "Current",
+                  "logprob": -10.529820092968244,
+                  "bytes": [
+                    67,
+                    117,
+                    114,
+                    114,
+                    101,
+                    110,
+                    116
+                  ]
+                },
+                {
+                  "token": "\"B",
+                  "logprob": -10.663780816845197,
+                  "bytes": [
+                    34,
+                    66
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -10.730232843212384,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "Wait",
+                  "logprob": -10.813772805980939,
+                  "bytes": [
+                    87,
+                    97,
+                    105,
+                    116
+                  ]
+                },
+                {
+                  "token": "wait",
+                  "logprob": -11.159073480419416,
+                  "bytes": [
+                    119,
+                    97,
+                    105,
+                    116
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -11.237098344616193,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "Question",
+                  "logprob": -11.274608262829084,
+                  "bytes": [
+                    81,
+                    117,
+                    101,
+                    115,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -11.591848024181623,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "[B",
+                  "logprob": -11.616741784862775,
+                  "bytes": [
+                    91,
+                    66
+                  ]
+                },
+                {
+                  "token": "current",
+                  "logprob": -11.620984681896466,
+                  "bytes": [
+                    99,
+                    117,
+                    114,
+                    114,
+                    101,
+                    110,
+                    116
+                  ]
+                },
+                {
+                  "token": "**",
+                  "logprob": -11.916543611339826,
+                  "bytes": [
+                    42,
+                    42
+                  ]
+                },
+                {
+                  "token": "Option",
+                  "logprob": -11.937475808910627,
+                  "bytes": [
+                    79,
+                    112,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                },
+                {
+                  "token": "[",
+                  "logprob": -11.94476188068797,
+                  "bytes": [
+                    91
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -12.00547850971629,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "<|endoftext|>",
+                  "logprob": -12.023634561352033,
+                  "bytes": null
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 91,
+      "completion_tokens": 2,
+      "total_tokens": 93,
+      "prompt_tokens_details": {
+        "cached_tokens": 84
+      }
+    },
+    "timings": {
+      "cache_n": 84,
+      "prompt_n": 7,
+      "prompt_ms": 217.8,
+      "prompt_per_token_ms": 31.114,
+      "prompt_per_second": 32.1,
+      "predicted_n": 2,
+      "predicted_ms": 72.0,
+      "predicted_per_token_ms": 36.0,
+      "predicted_per_second": 27.8,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 313.8822000473738,
+  "captured_at": "2026-10-04T02:51:46Z"
+}

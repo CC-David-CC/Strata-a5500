@@ -1,0 +1,235 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nThe request timed out. The connection closed. No successful result was returned.\nQUESTION: Is verification missing or unknown?\nANSWERS:\nA: Yes, the statement is supported by the state\nB: No, the statement is false or not established by the state\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "grammar": "root ::= \"A\""
+  },
+  "response": {
+    "id": "chatcmpl-c48bca785ccf41ce971306f7",
+    "object": "chat.completion",
+    "created": 1791082310,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.7831351734611951,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.6178901173088513,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -0.7831351734611951,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -7.5133788563225234,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": " A",
+                  "logprob": -7.695231197020766,
+                  "bytes": [
+                    32,
+                    65
+                  ]
+                },
+                {
+                  "token": "Yes",
+                  "logprob": -8.166902301451918,
+                  "bytes": [
+                    89,
+                    101,
+                    115
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -8.516173122069594,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -8.746756312987563,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -8.848210094115492,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -9.155091045043227,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": "YES",
+                  "logprob": -9.664495227477309,
+                  "bytes": [
+                    89,
+                    69,
+                    83
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -10.062144992491957,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "Based",
+                  "logprob": -10.130414722106215,
+                  "bytes": [
+                    66,
+                    97,
+                    115,
+                    101,
+                    100
+                  ]
+                },
+                {
+                  "token": "a",
+                  "logprob": -10.176644084594008,
+                  "bytes": [
+                    97
+                  ]
+                },
+                {
+                  "token": "ANS",
+                  "logprob": -10.186129329344984,
+                  "bytes": [
+                    65,
+                    78,
+                    83
+                  ]
+                },
+                {
+                  "token": "**",
+                  "logprob": -10.193773982665297,
+                  "bytes": [
+                    42,
+                    42
+                  ]
+                },
+                {
+                  "token": "\"",
+                  "logprob": -10.209724185607191,
+                  "bytes": [
+                    34
+                  ]
+                },
+                {
+                  "token": "No",
+                  "logprob": -10.25495695843434,
+                  "bytes": [
+                    78,
+                    111
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -10.26111864819264,
+                  "bytes": null
+                },
+                {
+                  "token": "#",
+                  "logprob": -10.297484157225844,
+                  "bytes": [
+                    35
+                  ]
+                },
+                {
+                  "token": "\"A",
+                  "logprob": -10.341414210936781,
+                  "bytes": [
+                    34,
+                    65
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 99,
+      "completion_tokens": 2,
+      "total_tokens": 101,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 99,
+      "prompt_ms": 767.4,
+      "prompt_per_token_ms": 7.752,
+      "prompt_per_second": 129.0,
+      "predicted_n": 2,
+      "predicted_ms": 71.1,
+      "predicted_per_token_ms": 35.55,
+      "predicted_per_second": 28.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 854.5202999957837,
+  "captured_at": "2026-10-04T02:51:51Z"
+}

@@ -1,0 +1,218 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTick 0. Temperature=70.0 C; load=45. Fan choices=0,30,60. Target=60 C; hard maximum=85 C. Next temperature=T+0.22*load-0.32*fan-0.04*(T-25).\nQUESTION: Choose a fan setting to approach 60 C without crossing 85 C.\nANSWERS:\nA: fan 0\nB: fan 30\nC: fan 60\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "grammar": "root ::= \"A\""
+  },
+  "response": {
+    "id": "chatcmpl-f0b4b639f3ff468998a7ab66",
+    "object": "chat.completion",
+    "created": 1791082281,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -2.550341077125383,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.7512764408949142,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -0.8179077580335861,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -2.550341077125383,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "T",
+                  "logprob": -6.248403973853899,
+                  "bytes": [
+                    84
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -6.69522327927382,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "0",
+                  "logprob": -6.907292790687395,
+                  "bytes": [
+                    48
+                  ]
+                },
+                {
+                  "token": "6",
+                  "logprob": -8.273274846351457,
+                  "bytes": [
+                    54
+                  ]
+                },
+                {
+                  "token": "[",
+                  "logprob": -8.621528096473527,
+                  "bytes": [
+                    91
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -8.717767186439348,
+                  "bytes": null
+                },
+                {
+                  "token": ".",
+                  "logprob": -8.820643849647356,
+                  "bytes": [
+                    46
+                  ]
+                },
+                {
+                  "token": "3",
+                  "logprob": -8.88039631394179,
+                  "bytes": [
+                    51
+                  ]
+                },
+                {
+                  "token": "let",
+                  "logprob": -8.97051853684218,
+                  "bytes": [
+                    108,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "To",
+                  "logprob": -9.077261395728899,
+                  "bytes": [
+                    84,
+                    111
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -9.102740712440324,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": " B",
+                  "logprob": -9.12904781845839,
+                  "bytes": [
+                    32,
+                    66
+                  ]
+                },
+                {
+                  "token": "<",
+                  "logprob": -9.271607823646379,
+                  "bytes": [
+                    60
+                  ]
+                },
+                {
+                  "token": " C",
+                  "logprob": -9.370233006751848,
+                  "bytes": [
+                    32,
+                    67
+                  ]
+                },
+                {
+                  "token": "1",
+                  "logprob": -9.423066563880754,
+                  "bytes": [
+                    49
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -9.619741864478899,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -9.657709546363664,
+                  "bytes": [
+                    99
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 157,
+      "completion_tokens": 2,
+      "total_tokens": 159,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 157,
+      "prompt_ms": 1733.9,
+      "prompt_per_token_ms": 11.044,
+      "prompt_per_second": 90.5,
+      "predicted_n": 2,
+      "predicted_ms": 62.3,
+      "predicted_per_token_ms": 31.15,
+      "predicted_per_second": 32.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 1824.0522000123747,
+  "captured_at": "2026-10-04T02:51:24Z"
+}

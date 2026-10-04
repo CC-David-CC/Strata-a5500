@@ -1,0 +1,236 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTime 2. Completed ['inspect']. Jobs: [{\"id\": \"patch\", \"duration\": 4, \"deadline\": 8, \"after\": [\"inspect\"], \"meaning\": \"repair the known bug\"}, {\"id\": \"verify\", \"duration\": 3, \"deadline\": 12, \"after\": [\"patch\"], \"meaning\": \"run verification\"}, {\"id\": \"docs\", \"duration\": 2, \"deadline\": 5, \"after\": [], \"meaning\": \"update release notes\"}]\nQUESTION: Which job should run next to reduce lateness while respecting dependencies?\nANSWERS:\nA: patch: repair the known bug\nB: verify: run verification\nC: docs: update release notes\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "grammar": "root ::= \"A\""
+  },
+  "response": {
+    "id": "chatcmpl-e026a2f9b42e4433ba7c824c",
+    "object": "chat.completion",
+    "created": 1791082298,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -1.0106270059504938,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "C",
+                  "logprob": -0.47424433077959527,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -1.0106270059504938,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -4.571471427337213,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "patch",
+                  "logprob": -6.803628180877252,
+                  "bytes": [
+                    112,
+                    97,
+                    116,
+                    99,
+                    104
+                  ]
+                },
+                {
+                  "token": "docs",
+                  "logprob": -7.556223128692193,
+                  "bytes": [
+                    100,
+                    111,
+                    99,
+                    115
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -8.667445395843071,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "[",
+                  "logprob": -9.307862494842094,
+                  "bytes": [
+                    91
+                  ]
+                },
+                {
+                  "token": "T",
+                  "logprob": -9.437150214568657,
+                  "bytes": [
+                    84
+                  ]
+                },
+                {
+                  "token": "Time",
+                  "logprob": -9.503974173919243,
+                  "bytes": [
+                    84,
+                    105,
+                    109,
+                    101
+                  ]
+                },
+                {
+                  "token": "[\"",
+                  "logprob": -9.627133582488579,
+                  "bytes": [
+                    91,
+                    34
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -9.885117743865532,
+                  "bytes": [
+                    99
+                  ]
+                },
+                {
+                  "token": " C",
+                  "logprob": -9.915138457671684,
+                  "bytes": [
+                    32,
+                    67
+                  ]
+                },
+                {
+                  "token": "{\"",
+                  "logprob": -10.082152579680962,
+                  "bytes": [
+                    123,
+                    34
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -10.310497496978325,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": " A",
+                  "logprob": -10.397865508452934,
+                  "bytes": [
+                    32,
+                    65
+                  ]
+                },
+                {
+                  "token": "P",
+                  "logprob": -10.530118201629204,
+                  "bytes": [
+                    80
+                  ]
+                },
+                {
+                  "token": "['",
+                  "logprob": -10.71582529391436,
+                  "bytes": [
+                    91,
+                    39
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -10.727680419341606,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "patches",
+                  "logprob": -10.728648398772759,
+                  "bytes": [
+                    112,
+                    97,
+                    116,
+                    99,
+                    104,
+                    101,
+                    115
+                  ]
+                },
+                {
+                  "token": "V",
+                  "logprob": -10.780871604339165,
+                  "bytes": [
+                    86
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 194,
+      "completion_tokens": 2,
+      "total_tokens": 196,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 194,
+      "prompt_ms": 1224.1,
+      "prompt_per_token_ms": 6.31,
+      "prompt_per_second": 158.5,
+      "predicted_n": 2,
+      "predicted_ms": 66.4,
+      "predicted_per_token_ms": 33.2,
+      "predicted_per_second": 30.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 1306.6708000260405,
+  "captured_at": "2026-10-04T02:51:40Z"
+}

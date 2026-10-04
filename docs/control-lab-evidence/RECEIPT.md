@@ -1,4 +1,6 @@
-# Control Lab qualification receipt
+# Initial eleven-page Control Lab qualification receipt
+
+This is the historical first checkpoint. See [the research expansion receipt](RESEARCH_RECEIPT.md) for the current 25-page gallery and sampler dependency.
 
 Branch: **`work/control-lab`**. Worktree:
 `C:\Users\dflanag3\Documents\fleet\strata-control-lab`.
@@ -29,7 +31,7 @@ are separate from the normal Strata requirements.
 
 ## Native evidence
 
-The [capture report](capture-results.json) contains **101 completed native HTTP
+The [initial capture report](initial-capture-results.json) contains **101 completed native HTTP
 requests** across 25 experiment configurations: ten live-capable pages, all
 four controller states, the ten original wire examples, and three fast probes.
 The eleventh page replays the original native speculation diagnostics.

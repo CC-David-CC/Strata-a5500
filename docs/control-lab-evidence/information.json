@@ -1,0 +1,1631 @@
+{
+  "page": "information",
+  "options": {},
+  "result": {
+    "kind": "information",
+    "faults": [
+      "power loss",
+      "blocked cooling",
+      "sensor fault"
+    ],
+    "prior": [
+      0.4,
+      0.35,
+      0.25
+    ],
+    "tests": [
+      {
+        "name": "check supply voltage",
+        "likelihood": [
+          0.95,
+          0.1,
+          0.1
+        ],
+        "cost": 1,
+        "p_yes": 0.44,
+        "yes": [
+          0.8636363636363636,
+          0.07954545454545453,
+          0.05681818181818182
+        ],
+        "no": [
+          0.03571428571428574,
+          0.5625,
+          0.40178571428571425
+        ],
+        "gain_bits": 0.5936313822221041
+      },
+      {
+        "name": "inspect airflow",
+        "likelihood": [
+          0.15,
+          0.9,
+          0.15
+        ],
+        "cost": 1.5,
+        "p_yes": 0.4125,
+        "yes": [
+          0.14545454545454545,
+          0.7636363636363637,
+          0.09090909090909091
+        ],
+        "no": [
+          0.5787234042553192,
+          0.059574468085106365,
+          0.36170212765957444
+        ],
+        "gain_bits": 0.41724991446947945
+      },
+      {
+        "name": "compare independent sensor",
+        "likelihood": [
+          0.1,
+          0.15,
+          0.85
+        ],
+        "cost": 0.8,
+        "p_yes": 0.305,
+        "yes": [
+          0.1311475409836066,
+          0.1721311475409836,
+          0.6967213114754098
+        ],
+        "no": [
+          0.5179856115107914,
+          0.4280575539568345,
+          0.053956834532374105
+        ],
+        "gain_bits": 0.33381483600965367
+      }
+    ],
+    "chosen": {
+      "name": "check supply voltage",
+      "likelihood": [
+        0.95,
+        0.1,
+        0.1
+      ],
+      "cost": 1,
+      "p_yes": 0.44,
+      "yes": [
+        0.8636363636363636,
+        0.07954545454545453,
+        0.05681818181818182
+      ],
+      "no": [
+        0.03571428571428574,
+        0.5625,
+        0.40178571428571425
+      ],
+      "gain_bits": 0.5936313822221041
+    },
+    "observation": "The selected test reported its positive fault signal.",
+    "posterior": [
+      0.8636363636363636,
+      0.07954545454545453,
+      0.05681818181818182
+    ],
+    "decision": {
+      "measure": {
+        "rows": [
+          {
+            "label": "A",
+            "description": "check power supply",
+            "text": "A",
+            "tokens": [
+              {
+                "token": "A",
+                "logprob": -0.025425176257470986,
+                "bytes": [
+                  65
+                ],
+                "top_logprobs": [
+                  {
+                    "token": "A",
+                    "logprob": -0.025425176257470986,
+                    "bytes": [
+                      65
+                    ]
+                  },
+                  {
+                    "token": "C",
+                    "logprob": -4.277111272448877,
+                    "bytes": [
+                      67
+                    ]
+                  },
+                  {
+                    "token": "B",
+                    "logprob": -4.693130712146143,
+                    "bytes": [
+                      66
+                    ]
+                  },
+                  {
+                    "token": "check",
+                    "logprob": -7.566391210193018,
+                    "bytes": [
+                      99,
+                      104,
+                      101,
+                      99,
+                      107
+                    ]
+                  },
+                  {
+                    "token": " A",
+                    "logprob": -8.028581838244776,
+                    "bytes": [
+                      32,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "#",
+                    "logprob": -9.50435755693374,
+                    "bytes": [
+                      35
+                    ]
+                  },
+                  {
+                    "token": "\"",
+                    "logprob": -9.529085378283838,
+                    "bytes": [
+                      34
+                    ]
+                  },
+                  {
+                    "token": "\"A",
+                    "logprob": -10.100836972827295,
+                    "bytes": [
+                      34,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "power",
+                    "logprob": -10.266840200061182,
+                    "bytes": [
+                      112,
+                      111,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "The",
+                    "logprob": -10.305469731921534,
+                    "bytes": [
+                      84,
+                      104,
+                      101
+                    ]
+                  },
+                  {
+                    "token": "[",
+                    "logprob": -10.381635884875635,
+                    "bytes": [
+                      91
+                    ]
+                  },
+                  {
+                    "token": "c",
+                    "logprob": -10.498586873645166,
+                    "bytes": [
+                      99
+                    ]
+                  },
+                  {
+                    "token": "D",
+                    "logprob": -10.521449308032373,
+                    "bytes": [
+                      68
+                    ]
+                  },
+                  {
+                    "token": "validate",
+                    "logprob": -10.592206220263819,
+                    "bytes": [
+                      118,
+                      97,
+                      108,
+                      105,
+                      100,
+                      97,
+                      116,
+                      101
+                    ]
+                  },
+                  {
+                    "token": "Power",
+                    "logprob": -10.836608152026514,
+                    "bytes": [
+                      80,
+                      111,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "**",
+                    "logprob": -10.950288037890772,
+                    "bytes": [
+                      42,
+                      42
+                    ]
+                  },
+                  {
+                    "token": "a",
+                    "logprob": -10.957157353991846,
+                    "bytes": [
+                      97
+                    ]
+                  },
+                  {
+                    "token": "[A",
+                    "logprob": -11.003414373034815,
+                    "bytes": [
+                      91,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "answer",
+                    "logprob": -11.133451680774073,
+                    "bytes": [
+                      97,
+                      110,
+                      115,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "CC",
+                    "logprob": -11.174464444751123,
+                    "bytes": [
+                      67,
+                      67
+                    ]
+                  }
+                ]
+              }
+            ],
+            "token_count": 1,
+            "logprob": -0.025425176257470986,
+            "path_probability": 0.974895321553321,
+            "mean_logprob": -0.025425176257470986,
+            "finish_reason": "stop",
+            "raw_probability": 0.974895321553321,
+            "weight": 0.9769116678297524
+          },
+          {
+            "label": "B",
+            "description": "clear cooling obstruction",
+            "text": "B",
+            "tokens": [
+              {
+                "token": "B",
+                "logprob": -4.693130712146143,
+                "bytes": [
+                  66
+                ],
+                "top_logprobs": [
+                  {
+                    "token": "A",
+                    "logprob": -0.025425176257470986,
+                    "bytes": [
+                      65
+                    ]
+                  },
+                  {
+                    "token": "C",
+                    "logprob": -4.277111272448877,
+                    "bytes": [
+                      67
+                    ]
+                  },
+                  {
+                    "token": "B",
+                    "logprob": -4.693130712146143,
+                    "bytes": [
+                      66
+                    ]
+                  },
+                  {
+                    "token": "check",
+                    "logprob": -7.566391210193018,
+                    "bytes": [
+                      99,
+                      104,
+                      101,
+                      99,
+                      107
+                    ]
+                  },
+                  {
+                    "token": " A",
+                    "logprob": -8.028581838244776,
+                    "bytes": [
+                      32,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "#",
+                    "logprob": -9.50435755693374,
+                    "bytes": [
+                      35
+                    ]
+                  },
+                  {
+                    "token": "\"",
+                    "logprob": -9.529085378283838,
+                    "bytes": [
+                      34
+                    ]
+                  },
+                  {
+                    "token": "\"A",
+                    "logprob": -10.100836972827295,
+                    "bytes": [
+                      34,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "power",
+                    "logprob": -10.266840200061182,
+                    "bytes": [
+                      112,
+                      111,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "The",
+                    "logprob": -10.305469731921534,
+                    "bytes": [
+                      84,
+                      104,
+                      101
+                    ]
+                  },
+                  {
+                    "token": "[",
+                    "logprob": -10.381635884875635,
+                    "bytes": [
+                      91
+                    ]
+                  },
+                  {
+                    "token": "c",
+                    "logprob": -10.498586873645166,
+                    "bytes": [
+                      99
+                    ]
+                  },
+                  {
+                    "token": "D",
+                    "logprob": -10.521449308032373,
+                    "bytes": [
+                      68
+                    ]
+                  },
+                  {
+                    "token": "validate",
+                    "logprob": -10.592206220263819,
+                    "bytes": [
+                      118,
+                      97,
+                      108,
+                      105,
+                      100,
+                      97,
+                      116,
+                      101
+                    ]
+                  },
+                  {
+                    "token": "Power",
+                    "logprob": -10.836608152026514,
+                    "bytes": [
+                      80,
+                      111,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "**",
+                    "logprob": -10.950288037890772,
+                    "bytes": [
+                      42,
+                      42
+                    ]
+                  },
+                  {
+                    "token": "a",
+                    "logprob": -10.957157353991846,
+                    "bytes": [
+                      97
+                    ]
+                  },
+                  {
+                    "token": "[A",
+                    "logprob": -11.003414373034815,
+                    "bytes": [
+                      91,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "answer",
+                    "logprob": -11.133451680774073,
+                    "bytes": [
+                      97,
+                      110,
+                      115,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "CC",
+                    "logprob": -11.174464444751123,
+                    "bytes": [
+                      67,
+                      67
+                    ]
+                  }
+                ]
+              }
+            ],
+            "token_count": 1,
+            "logprob": -4.693130712146143,
+            "path_probability": 0.009157970260369073,
+            "mean_logprob": -4.693130712146143,
+            "finish_reason": "stop",
+            "raw_probability": 0.009157970260369073,
+            "weight": 0.009176911411101796
+          },
+          {
+            "label": "C",
+            "description": "validate or replace the faulty sensor",
+            "text": "C",
+            "tokens": [
+              {
+                "token": "C",
+                "logprob": -4.277111272448877,
+                "bytes": [
+                  67
+                ],
+                "top_logprobs": [
+                  {
+                    "token": "A",
+                    "logprob": -0.025425176257470986,
+                    "bytes": [
+                      65
+                    ]
+                  },
+                  {
+                    "token": "C",
+                    "logprob": -4.277111272448877,
+                    "bytes": [
+                      67
+                    ]
+                  },
+                  {
+                    "token": "B",
+                    "logprob": -4.693130712146143,
+                    "bytes": [
+                      66
+                    ]
+                  },
+                  {
+                    "token": "check",
+                    "logprob": -7.566391210193018,
+                    "bytes": [
+                      99,
+                      104,
+                      101,
+                      99,
+                      107
+                    ]
+                  },
+                  {
+                    "token": " A",
+                    "logprob": -8.028581838244776,
+                    "bytes": [
+                      32,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "#",
+                    "logprob": -9.50435755693374,
+                    "bytes": [
+                      35
+                    ]
+                  },
+                  {
+                    "token": "\"",
+                    "logprob": -9.529085378283838,
+                    "bytes": [
+                      34
+                    ]
+                  },
+                  {
+                    "token": "\"A",
+                    "logprob": -10.100836972827295,
+                    "bytes": [
+                      34,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "power",
+                    "logprob": -10.266840200061182,
+                    "bytes": [
+                      112,
+                      111,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "The",
+                    "logprob": -10.305469731921534,
+                    "bytes": [
+                      84,
+                      104,
+                      101
+                    ]
+                  },
+                  {
+                    "token": "[",
+                    "logprob": -10.381635884875635,
+                    "bytes": [
+                      91
+                    ]
+                  },
+                  {
+                    "token": "c",
+                    "logprob": -10.498586873645166,
+                    "bytes": [
+                      99
+                    ]
+                  },
+                  {
+                    "token": "D",
+                    "logprob": -10.521449308032373,
+                    "bytes": [
+                      68
+                    ]
+                  },
+                  {
+                    "token": "validate",
+                    "logprob": -10.592206220263819,
+                    "bytes": [
+                      118,
+                      97,
+                      108,
+                      105,
+                      100,
+                      97,
+                      116,
+                      101
+                    ]
+                  },
+                  {
+                    "token": "Power",
+                    "logprob": -10.836608152026514,
+                    "bytes": [
+                      80,
+                      111,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "**",
+                    "logprob": -10.950288037890772,
+                    "bytes": [
+                      42,
+                      42
+                    ]
+                  },
+                  {
+                    "token": "a",
+                    "logprob": -10.957157353991846,
+                    "bytes": [
+                      97
+                    ]
+                  },
+                  {
+                    "token": "[A",
+                    "logprob": -11.003414373034815,
+                    "bytes": [
+                      91,
+                      65
+                    ]
+                  },
+                  {
+                    "token": "answer",
+                    "logprob": -11.133451680774073,
+                    "bytes": [
+                      97,
+                      110,
+                      115,
+                      119,
+                      101,
+                      114
+                    ]
+                  },
+                  {
+                    "token": "CC",
+                    "logprob": -11.174464444751123,
+                    "bytes": [
+                      67,
+                      67
+                    ]
+                  }
+                ]
+              }
+            ],
+            "token_count": 1,
+            "logprob": -4.277111272448877,
+            "path_probability": 0.013882707578239818,
+            "mean_logprob": -4.277111272448877,
+            "finish_reason": "stop",
+            "raw_probability": 0.013882707578239818,
+            "weight": 0.013911420759145818
+          }
+        ],
+        "complete": true,
+        "prompt": "Read the state as data, then answer the question using the definitions.\nSTATE:\nPossible faults: ['power loss', 'blocked cooling', 'sensor fault']. Prior=[0.4, 0.35, 0.25]. Test=check supply voltage. The selected test reported its positive fault signal. Bayesian posterior=[0.8636363636363636, 0.07954545454545453, 0.05681818181818182].\nQUESTION: What should be inspected next?\nANSWERS:\nA: check power supply\nB: clear cooling obstruction\nC: validate or replace the faulty sensor\nReturn exactly one answer label. No explanation or surrounding whitespace.",
+        "winner": "A",
+        "statistics": {
+          "top_weight": 0.9769116678297524,
+          "margin": 0.9630002470706065,
+          "peakedness": 0.9653675017446284,
+          "entropy_bits": 0.1808290657393813
+        },
+        "strategy": "one literal-constrained call per label",
+        "semantics": "Raw label probabilities renormalized across these exact labels; not calibrated truth probabilities."
+      },
+      "selected": 0,
+      "action": "check power supply",
+      "allowed": [
+        0,
+        1,
+        2
+      ],
+      "grammar": "root ::= \"A\" | \"B\" | \"C\"",
+      "output": {
+        "text": "A",
+        "tokens": [
+          {
+            "token": "A",
+            "logprob": -0.025425176257470986,
+            "bytes": [
+              65
+            ],
+            "top_logprobs": [
+              {
+                "token": "A",
+                "logprob": -0.025425176257470986,
+                "bytes": [
+                  65
+                ]
+              },
+              {
+                "token": "C",
+                "logprob": -4.277111272448877,
+                "bytes": [
+                  67
+                ]
+              },
+              {
+                "token": "B",
+                "logprob": -4.693130712146143,
+                "bytes": [
+                  66
+                ]
+              },
+              {
+                "token": "check",
+                "logprob": -7.566391210193018,
+                "bytes": [
+                  99,
+                  104,
+                  101,
+                  99,
+                  107
+                ]
+              },
+              {
+                "token": " A",
+                "logprob": -8.028581838244776,
+                "bytes": [
+                  32,
+                  65
+                ]
+              }
+            ]
+          }
+        ],
+        "token_count": 1,
+        "logprob": -0.025425176257470986,
+        "path_probability": 0.974895321553321,
+        "mean_logprob": -0.025425176257470986,
+        "finish_reason": "stop"
+      }
+    },
+    "semantics": "Priors, observation likelihoods and the observed test outcome are synthetic disclosed fixtures. The model action is a native answer; sensor probabilities are code-owned inputs."
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 4,
+    "summed_request_ms": 2366.7271000449546,
+    "prompt_tokens": 760,
+    "completion_tokens": 8,
+    "calls": [
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nPossible faults: ['power loss', 'blocked cooling', 'sensor fault']. Prior=[0.4, 0.35, 0.25]. Test=check supply voltage. The selected test reported its positive fault signal. Bayesian posterior=[0.8636363636363636, 0.07954545454545453, 0.05681818181818182].\nQUESTION: What should be inspected next?\nANSWERS:\nA: check power supply\nB: clear cooling obstruction\nC: validate or replace the faulty sensor\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"A\""
+        },
+        "response": {
+          "id": "chatcmpl-18ceac9de41249208a3f852e",
+          "object": "chat.completion",
+          "created": 1791082328,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "A"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "A",
+                    "logprob": -0.025425176257470986,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -0.025425176257470986,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -4.277111272448877,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -4.693130712146143,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "check",
+                        "logprob": -7.566391210193018,
+                        "bytes": [
+                          99,
+                          104,
+                          101,
+                          99,
+                          107
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -8.028581838244776,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -9.50435755693374,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "\"",
+                        "logprob": -9.529085378283838,
+                        "bytes": [
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\"A",
+                        "logprob": -10.100836972827295,
+                        "bytes": [
+                          34,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "power",
+                        "logprob": -10.266840200061182,
+                        "bytes": [
+                          112,
+                          111,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -10.305469731921534,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -10.381635884875635,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -10.498586873645166,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -10.521449308032373,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "validate",
+                        "logprob": -10.592206220263819,
+                        "bytes": [
+                          118,
+                          97,
+                          108,
+                          105,
+                          100,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Power",
+                        "logprob": -10.836608152026514,
+                        "bytes": [
+                          80,
+                          111,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "**",
+                        "logprob": -10.950288037890772,
+                        "bytes": [
+                          42,
+                          42
+                        ]
+                      },
+                      {
+                        "token": "a",
+                        "logprob": -10.957157353991846,
+                        "bytes": [
+                          97
+                        ]
+                      },
+                      {
+                        "token": "[A",
+                        "logprob": -11.003414373034815,
+                        "bytes": [
+                          91,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -11.133451680774073,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "CC",
+                        "logprob": -11.174464444751123,
+                        "bytes": [
+                          67,
+                          67
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 190,
+            "completion_tokens": 2,
+            "total_tokens": 192,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 190,
+            "prompt_ms": 1332.9,
+            "prompt_per_token_ms": 7.015,
+            "prompt_per_second": 142.5,
+            "predicted_n": 2,
+            "predicted_ms": 70.3,
+            "predicted_per_token_ms": 35.15,
+            "predicted_per_second": 28.4,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 1434.6295000286773,
+        "captured_at": "2026-10-04T02:52:10Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nPossible faults: ['power loss', 'blocked cooling', 'sensor fault']. Prior=[0.4, 0.35, 0.25]. Test=check supply voltage. The selected test reported its positive fault signal. Bayesian posterior=[0.8636363636363636, 0.07954545454545453, 0.05681818181818182].\nQUESTION: What should be inspected next?\nANSWERS:\nA: check power supply\nB: clear cooling obstruction\nC: validate or replace the faulty sensor\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"B\""
+        },
+        "response": {
+          "id": "chatcmpl-64e693f5fbc44026a88025d0",
+          "object": "chat.completion",
+          "created": 1791082330,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "B"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "B",
+                    "logprob": -4.693130712146143,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -0.025425176257470986,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -4.277111272448877,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -4.693130712146143,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "check",
+                        "logprob": -7.566391210193018,
+                        "bytes": [
+                          99,
+                          104,
+                          101,
+                          99,
+                          107
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -8.028581838244776,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -9.50435755693374,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "\"",
+                        "logprob": -9.529085378283838,
+                        "bytes": [
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\"A",
+                        "logprob": -10.100836972827295,
+                        "bytes": [
+                          34,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "power",
+                        "logprob": -10.266840200061182,
+                        "bytes": [
+                          112,
+                          111,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -10.305469731921534,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -10.381635884875635,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -10.498586873645166,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -10.521449308032373,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "validate",
+                        "logprob": -10.592206220263819,
+                        "bytes": [
+                          118,
+                          97,
+                          108,
+                          105,
+                          100,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Power",
+                        "logprob": -10.836608152026514,
+                        "bytes": [
+                          80,
+                          111,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "**",
+                        "logprob": -10.950288037890772,
+                        "bytes": [
+                          42,
+                          42
+                        ]
+                      },
+                      {
+                        "token": "a",
+                        "logprob": -10.957157353991846,
+                        "bytes": [
+                          97
+                        ]
+                      },
+                      {
+                        "token": "[A",
+                        "logprob": -11.003414373034815,
+                        "bytes": [
+                          91,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -11.133451680774073,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "CC",
+                        "logprob": -11.174464444751123,
+                        "bytes": [
+                          67,
+                          67
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 190,
+            "completion_tokens": 2,
+            "total_tokens": 192,
+            "prompt_tokens_details": {
+              "cached_tokens": 183
+            }
+          },
+          "timings": {
+            "cache_n": 183,
+            "prompt_n": 7,
+            "prompt_ms": 221.7,
+            "prompt_per_token_ms": 31.671,
+            "prompt_per_second": 31.6,
+            "predicted_n": 2,
+            "predicted_ms": 66.7,
+            "predicted_per_token_ms": 33.35,
+            "predicted_per_second": 30.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 313.04480001563206,
+        "captured_at": "2026-10-04T02:52:11Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nPossible faults: ['power loss', 'blocked cooling', 'sensor fault']. Prior=[0.4, 0.35, 0.25]. Test=check supply voltage. The selected test reported its positive fault signal. Bayesian posterior=[0.8636363636363636, 0.07954545454545453, 0.05681818181818182].\nQUESTION: What should be inspected next?\nANSWERS:\nA: check power supply\nB: clear cooling obstruction\nC: validate or replace the faulty sensor\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"C\""
+        },
+        "response": {
+          "id": "chatcmpl-5d6e7dc74fce4ce9b82d8a8b",
+          "object": "chat.completion",
+          "created": 1791082330,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "C"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "C",
+                    "logprob": -4.277111272448877,
+                    "bytes": [
+                      67
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -0.025425176257470986,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -4.277111272448877,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -4.693130712146143,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "check",
+                        "logprob": -7.566391210193018,
+                        "bytes": [
+                          99,
+                          104,
+                          101,
+                          99,
+                          107
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -8.028581838244776,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "#",
+                        "logprob": -9.50435755693374,
+                        "bytes": [
+                          35
+                        ]
+                      },
+                      {
+                        "token": "\"",
+                        "logprob": -9.529085378283838,
+                        "bytes": [
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\"A",
+                        "logprob": -10.100836972827295,
+                        "bytes": [
+                          34,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "power",
+                        "logprob": -10.266840200061182,
+                        "bytes": [
+                          112,
+                          111,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "The",
+                        "logprob": -10.305469731921534,
+                        "bytes": [
+                          84,
+                          104,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -10.381635884875635,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "c",
+                        "logprob": -10.498586873645166,
+                        "bytes": [
+                          99
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -10.521449308032373,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "validate",
+                        "logprob": -10.592206220263819,
+                        "bytes": [
+                          118,
+                          97,
+                          108,
+                          105,
+                          100,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Power",
+                        "logprob": -10.836608152026514,
+                        "bytes": [
+                          80,
+                          111,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "**",
+                        "logprob": -10.950288037890772,
+                        "bytes": [
+                          42,
+                          42
+                        ]
+                      },
+                      {
+                        "token": "a",
+                        "logprob": -10.957157353991846,
+                        "bytes": [
+                          97
+                        ]
+                      },
+                      {
+                        "token": "[A",
+                        "logprob": -11.003414373034815,
+                        "bytes": [
+                          91,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -11.133451680774073,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "CC",
+                        "logprob": -11.174464444751123,
+                        "bytes": [
+                          67,
+                          67
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 190,
+            "completion_tokens": 2,
+            "total_tokens": 192,
+            "prompt_tokens_details": {
+              "cached_tokens": 183
+            }
+          },
+          "timings": {
+            "cache_n": 183,
+            "prompt_n": 7,
+            "prompt_ms": 219.1,
+            "prompt_per_token_ms": 31.3,
+            "prompt_per_second": 31.9,
+            "predicted_n": 2,
+            "predicted_ms": 68.4,
+            "predicted_per_token_ms": 34.2,
+            "predicted_per_second": 29.2,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 306.94430001312867,
+        "captured_at": "2026-10-04T02:52:11Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nPossible faults: ['power loss', 'blocked cooling', 'sensor fault']. Prior=[0.4, 0.35, 0.25]. Test=check supply voltage. The selected test reported its positive fault signal. Bayesian posterior=[0.8636363636363636, 0.07954545454545453, 0.05681818181818182].\nQUESTION: What should be inspected next?\nANSWERS:\nA: check power supply\nB: clear cooling obstruction\nC: validate or replace the faulty sensor\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"A\" | \"B\" | \"C\""
+        },
+        "response": {
+          "id": "chatcmpl-a6839ede52bd4aca9a9b71f0",
+          "object": "chat.completion",
+          "created": 1791082330,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "A"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "A",
+                    "logprob": -0.025425176257470986,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -0.025425176257470986,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -4.277111272448877,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -4.693130712146143,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "check",
+                        "logprob": -7.566391210193018,
+                        "bytes": [
+                          99,
+                          104,
+                          101,
+                          99,
+                          107
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -8.028581838244776,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 190,
+            "completion_tokens": 2,
+            "total_tokens": 192,
+            "prompt_tokens_details": {
+              "cached_tokens": 183
+            }
+          },
+          "timings": {
+            "cache_n": 183,
+            "prompt_n": 7,
+            "prompt_ms": 221.7,
+            "prompt_per_token_ms": 31.671,
+            "prompt_per_second": 31.6,
+            "predicted_n": 2,
+            "predicted_ms": 67.5,
+            "predicted_per_token_ms": 33.75,
+            "predicted_per_second": 29.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 312.10849998751655,
+        "captured_at": "2026-10-04T02:52:11Z"
+      }
+    ]
+  },
+  "wall_ms": 2423.3241000329144
+}

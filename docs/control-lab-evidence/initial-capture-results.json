@@ -1,0 +1,182 @@
+[
+  {
+    "page": "choice",
+    "options": {},
+    "requests": 3,
+    "wall_ms": 7991.7040999862365
+  },
+  {
+    "page": "boolean",
+    "options": {},
+    "requests": 2,
+    "wall_ms": 2457.0804000250064
+  },
+  {
+    "page": "score",
+    "options": {},
+    "requests": 3,
+    "wall_ms": 2232.061499991687
+  },
+  {
+    "page": "candidates",
+    "options": {},
+    "requests": 5,
+    "wall_ms": 3367.2723000054248
+  },
+  {
+    "page": "controller",
+    "options": {},
+    "requests": 6,
+    "wall_ms": 2739.5069999911357
+  },
+  {
+    "page": "rerank",
+    "options": {},
+    "requests": 9,
+    "wall_ms": 6354.826900002081
+  },
+  {
+    "page": "graph",
+    "options": {},
+    "requests": 10,
+    "wall_ms": 7090.238099975977
+  },
+  {
+    "page": "scene",
+    "options": {},
+    "requests": 13,
+    "wall_ms": 15420.174500002759
+  },
+  {
+    "page": "wire",
+    "options": {},
+    "requests": 1,
+    "wall_ms": 1435.7679999957327
+  },
+  {
+    "page": "performance",
+    "options": {},
+    "requests": 19,
+    "wall_ms": 9317.217400006484
+  },
+  {
+    "page": "controller",
+    "options": {
+      "controller_state": "inspected"
+    },
+    "requests": 6,
+    "wall_ms": 2236.73889998463
+  },
+  {
+    "page": "controller",
+    "options": {
+      "controller_state": "edited"
+    },
+    "requests": 6,
+    "wall_ms": 2746.314700023504
+  },
+  {
+    "page": "controller",
+    "options": {
+      "controller_state": "verified"
+    },
+    "requests": 6,
+    "wall_ms": 2402.586300013354
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "ambiguity"
+    },
+    "requests": 1,
+    "wall_ms": 1611.3873999856878
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "decision"
+    },
+    "requests": 1,
+    "wall_ms": 1196.3044000149239
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "grammar"
+    },
+    "requests": 1,
+    "wall_ms": 375.8720000041649
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "json-schema"
+    },
+    "requests": 1,
+    "wall_ms": 1329.3338000075892
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "reasoning-json"
+    },
+    "requests": 1,
+    "wall_ms": 2297.6857000030577
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "router"
+    },
+    "requests": 1,
+    "wall_ms": 1327.658900001552
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "selected-only"
+    },
+    "requests": 1,
+    "wall_ms": 1151.210700016236
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "tool-call"
+    },
+    "requests": 1,
+    "wall_ms": 3489.0990999992937
+  },
+  {
+    "page": "wire",
+    "options": {
+      "case": "tool-result"
+    },
+    "requests": 1,
+    "wall_ms": 1912.2013000014704
+  },
+  {
+    "page": "choice",
+    "options": {
+      "strategy": "fast"
+    },
+    "requests": 1,
+    "wall_ms": 962.0899000146892
+  },
+  {
+    "page": "boolean",
+    "options": {
+      "strategy": "fast"
+    },
+    "requests": 1,
+    "wall_ms": 922.7317999757361
+  },
+  {
+    "page": "score",
+    "options": {
+      "strategy": "fast"
+    },
+    "requests": 1,
+    "wall_ms": 934.5701000129338
+  }
+]

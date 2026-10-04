@@ -1,0 +1,17 @@
+{
+  "checks": [
+    {
+      "case": "edited-live-prompt-nine-native-profiles-including-gbnf-json",
+      "status": "passed"
+    },
+    {
+      "case": "stop-active-native-workflow",
+      "status": "passed"
+    },
+    {
+      "case": "next-ordinary-native-request-after-stop",
+      "status": "passed"
+    }
+  ],
+  "console_errors": []
+}

@@ -1,3 +1,4 @@
+import {renderResearch,stopResearch} from './research.js';
 const $ = (id) => document.getElementById(id);
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const json = (value) => `<pre>${esc(JSON.stringify(value, null, 2))}</pre>`;
@@ -22,6 +23,7 @@ function bar(label, weight, annotation, muted=false) {
 function details(label, value) { return `<details><summary>${esc(label)}</summary>${json(value)}</details>`; }
 
 function navigate(name, replace=false) {
+  stopResearch();
   if (!catalog.pages.some(p => p.id === name)) name = 'choice';
   generation++;
   aborter?.abort();
@@ -30,8 +32,10 @@ function navigate(name, replace=false) {
   steps = [];
   tokenEntries = [];
   if (replace) history.replaceState({}, '', `/lab/${name}`); else history.pushState({}, '', `/lab/${name}`);
-  document.title = `${names[name]} / Strata Control Lab`;
-  $('nav').innerHTML = catalog.pages.map((p,i) => `<a href="/lab/${p.id}" data-page="${p.id}" class="${p.id===name?'active':''}" ${p.id===name?'aria-current="page"':''}><span>${String(i+1).padStart(2,'0')}</span>${names[p.id]}</a>`).join('');
+  document.title = `${page.name||names[name]} / Strata Control Lab`;
+  $('nav').innerHTML = catalog.pages.map((p,i) => `${i===0||i===11?`<div class="nav-section">${i===0?'Foundations':'Research instruments'}</div>`:''}<a href="/lab/${p.id}" data-page="${p.id}" class="${p.id===name?'active':''}" ${p.id===name?'aria-current="page"':''}><span>${String(i+1).padStart(2,'0')}</span>${p.name||names[p.id]}</a>`).join('');
+  $('nav').querySelector('.active')?.scrollIntoView({block:'nearest'});
+  document.body.classList.toggle('research-page',page.section==='research');
   $('eyebrow').textContent = page.eyebrow;
   $('title').textContent = page.title;
   $('intro').textContent = page.simple;
@@ -51,6 +55,7 @@ function navigate(name, replace=false) {
 function renderFields() {
   const d = page.defaults;
   let html = '';
+  if(page.section==='research'&&!Object.keys(d).length)html+='<div class="instrument-intro"><span>01 / RUN</span><h3>Open the experiment.</h3><p>Load the complete trajectory, then use its controls to step, compare and inspect.</p><div class="mini-loop" aria-hidden="true"><i>state</i><b>→</b><i>rules</i><b>→</b><i>action</i></div><p>The built-in run is reproducible offline. Every model call appears in the receipt.</p></div>';
   if (d.state !== undefined) html += textField('state', page.id==='scene'?'Describe the scene':'State · what is happening?', d.state);
   if (d.question !== undefined) html += textField('question', 'Ask one clear question', d.question, 2);
   if (d.choices) {
@@ -81,11 +86,12 @@ function values() {
 }
 
 function sourceNote() {
+  if(page.data_kind==='analytic'){$('source-note').textContent='ANALYTICAL INSTRUMENT / disclosed synthetic inputs or measured receipts with user-controlled assumptions. No model inference.';$('run-note').textContent='The dials recompute the stated formulas locally. Live mode does not add a model call to this instrument.';return;}
   $('source-note').textContent = page.id==='speculation' ? 'NATIVE EVIDENCE / original target, draft, and replay paths, labeled separately.' : $('mode').value==='recorded' ? 'RECORDED NATIVE RUN / exact built-in inputs; measured model results replayed without running inference.' : 'LIVE MODEL / requests go to the Strata address configured on this lab server.';
   $('run-note').textContent = $('mode').value==='recorded' ? 'A recorded run needs no model. Change to Live to try your own inputs.' : 'Stop closes the current request. Strata owns cancellation and engine-output draining.';
 }
 function status(text, cls='') { $('status').textContent=text; $('status').className='badge '+cls; }
-function busy(value) { $('run').disabled=value; $('stop').disabled=!value; $('reset').disabled=value; $('mode').disabled=value; }
+function busy(value) { $('run').disabled=value; $('stop').disabled=!value; $('reset').disabled=value; $('mode').disabled=value;document.body.classList.toggle('is-running',value); }
 
 function addStep(data) {
   let li=$('step-'+data.id);
@@ -169,12 +175,14 @@ function performance(data) {
 }
 
 function render(data) {
+  if(page.section==='research'){renderResearch(page,data,$('result'));return;}
   const functions={choice:distribution,boolean:distribution,score:distribution,candidates,controller,rerank,graph,scene,wire,speculation,performance};
   functions[page.id](data);
 }
 
 async function run(event) {
   event?.preventDefault();
+  stopResearch();
   const runId=++generation;
   aborter=new AbortController(); last=null;steps=[];
   $('download').disabled=true;
@@ -191,7 +199,16 @@ async function run(event) {
         if(data.type==='step')addStep(data);
         if(data.type==='token'){const deltas=(data.chunk.choices||[]).map(c=>c.delta?.content||'').join('');if(deltas){let stream=$('live-text');if(!stream){stream=document.createElement('pre');stream.id='live-text';$('result').append(stream);}stream.append(document.createTextNode(deltas));}}
         if(data.type==='error'){sawTerminal=true;throw new Error(data.message);}
-        if(data.type==='result'){last={experiment:page.id,...data};render(data.result);status('Completed','completed');$('download').disabled=false;sawTerminal=true;const li=document.createElement('li');li.textContent=`${data.receipt.requests} model requests · ${data.receipt.mode==='recorded'?'replayed native measurements':'live execution'} · ${data.receipt.completion_tokens} generated tokens`; $('timeline').append(li);}
+        if(data.type==='result'){
+          last={experiment:page.id,...data};render(data.result);status('Completed','completed');
+          $('download').disabled=false;sawTerminal=true;
+          if(!steps.length)$('timeline').innerHTML='';
+          const li=document.createElement('li');
+          li.textContent=data.receipt.requests
+            ? `${data.receipt.requests} model requests · ${data.receipt.mode==='recorded'?'replayed native measurements':'live execution'} · ${data.receipt.completion_tokens} generated tokens`
+            : 'No model requests in this run. Inspect the displayed inputs and calculations; the JSON download preserves this result.';
+          $('timeline').append(li);
+        }
       }
       if(done)break;
     }

@@ -1,0 +1,121 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Current state: the door is closed. Return WAIT."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 8,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"WAIT\""
+  },
+  "response": {
+    "id": "chatcmpl-ec029a7afb05497db304a116",
+    "object": "chat.completion",
+    "created": 1791082308,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "WAIT"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "WAIT",
+              "logprob": -0.04640742670118751,
+              "bytes": [
+                87,
+                65,
+                73,
+                84
+              ],
+              "top_logprobs": [
+                {
+                  "token": "WAIT",
+                  "logprob": -0.04640742670118751,
+                  "bytes": [
+                    87,
+                    65,
+                    73,
+                    84
+                  ]
+                },
+                {
+                  "token": "```",
+                  "logprob": -3.741664613590836,
+                  "bytes": [
+                    96,
+                    96,
+                    96
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -4.847744668827652,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "Wait",
+                  "logprob": -5.736189569340348,
+                  "bytes": [
+                    87,
+                    97,
+                    105,
+                    116
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -7.046246255741715,
+                  "bytes": [
+                    73
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 23,
+      "completion_tokens": 2,
+      "total_tokens": 25,
+      "prompt_tokens_details": {
+        "cached_tokens": 16
+      }
+    },
+    "timings": {
+      "cache_n": 16,
+      "prompt_n": 7,
+      "prompt_ms": 228.7,
+      "prompt_per_token_ms": 32.671,
+      "prompt_per_second": 30.6,
+      "predicted_n": 2,
+      "predicted_ms": 56.4,
+      "predicted_per_token_ms": 28.2,
+      "predicted_per_second": 35.5,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 298.43150003580377,
+  "captured_at": "2026-10-04T02:51:49Z"
+}

@@ -1,0 +1,115 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nToy one-card poker. You hold Q. Opponent has either remaining J,Q,K card with equal probability. Both ante 1. Check: showdown for net +1 or -1. Bet: opponent folds for your +1, or calls for showdown +2 or -2. Opponent call probabilities by card: J=.1, Q=.5, K=.9.\nQUESTION: Which action has the greatest expected chip gain?\nANSWERS:\nA: check\nB: bet\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"A\" | \"B\""
+  },
+  "response": {
+    "id": "chatcmpl-ffc39926499e44e789a008dc",
+    "object": "chat.completion",
+    "created": 1791082279,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "B"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "B",
+              "logprob": -0.8406434821264073,
+              "bytes": [
+                66
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.8406434821264073,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -1.2600713538305088,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "**",
+                  "logprob": -2.5660310553685948,
+                  "bytes": [
+                    42,
+                    42
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -2.6255555915014073,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "Check",
+                  "logprob": -3.67920740119379,
+                  "bytes": [
+                    67,
+                    104,
+                    101,
+                    99,
+                    107
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 144,
+      "completion_tokens": 2,
+      "total_tokens": 146,
+      "prompt_tokens_details": {
+        "cached_tokens": 137
+      }
+    },
+    "timings": {
+      "cache_n": 137,
+      "prompt_n": 7,
+      "prompt_ms": 238.5,
+      "prompt_per_token_ms": 34.071,
+      "prompt_per_second": 29.4,
+      "predicted_n": 2,
+      "predicted_ms": 58.7,
+      "predicted_per_token_ms": 29.35,
+      "predicted_per_second": 34.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 308.27989999670535,
+  "captured_at": "2026-10-04T02:51:20Z"
+}

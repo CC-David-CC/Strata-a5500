@@ -1,0 +1,5470 @@
+{
+  "page": "tictactoe",
+  "options": {},
+  "result": {
+    "kind": "tictactoe",
+    "frames": [
+      {
+        "step": 0,
+        "before": "X...O....",
+        "after": "XX..O....",
+        "square": 1,
+        "decision": {
+          "measure": {
+            "rows": [
+              {
+                "label": "A",
+                "description": "place X in square 2",
+                "text": "A",
+                "tokens": [
+                  {
+                    "token": "A",
+                    "logprob": -1.0902289736197737,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -1.0902289736197737,
+                "path_probability": 0.33613951781220264,
+                "mean_logprob": -1.0902289736197737,
+                "finish_reason": "stop",
+                "raw_probability": 0.33613951781220264,
+                "weight": 0.3399766054320883
+              },
+              {
+                "label": "B",
+                "description": "place X in square 3",
+                "text": "B",
+                "tokens": [
+                  {
+                    "token": "B",
+                    "logprob": -1.5475463259146955,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -1.5475463259146955,
+                "path_probability": 0.21276940062388502,
+                "mean_logprob": -1.5475463259146955,
+                "finish_reason": "stop",
+                "raw_probability": 0.21276940062388502,
+                "weight": 0.21519819816110447
+              },
+              {
+                "label": "C",
+                "description": "place X in square 4",
+                "text": "C",
+                "tokens": [
+                  {
+                    "token": "C",
+                    "logprob": -1.9965323793814924,
+                    "bytes": [
+                      67
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -1.9965323793814924,
+                "path_probability": 0.1358053892587817,
+                "mean_logprob": -1.9965323793814924,
+                "finish_reason": "stop",
+                "raw_probability": 0.1358053892587817,
+                "weight": 0.1373556300077131
+              },
+              {
+                "label": "D",
+                "description": "place X in square 6",
+                "text": "D",
+                "tokens": [
+                  {
+                    "token": "D",
+                    "logprob": -2.8585128176139145,
+                    "bytes": [
+                      68
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -2.8585128176139145,
+                "path_probability": 0.05735399271940008,
+                "mean_logprob": -2.8585128176139145,
+                "finish_reason": "stop",
+                "raw_probability": 0.05735399271940008,
+                "weight": 0.05800869793480287
+              },
+              {
+                "label": "E",
+                "description": "place X in square 7",
+                "text": "E",
+                "tokens": [
+                  {
+                    "token": "E",
+                    "logprob": -2.3656653749869614,
+                    "bytes": [
+                      69
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -2.3656653749869614,
+                "path_probability": 0.09388680964615878,
+                "mean_logprob": -2.3656653749869614,
+                "finish_reason": "stop",
+                "raw_probability": 0.09388680964615878,
+                "weight": 0.0949585429469875
+              },
+              {
+                "label": "F",
+                "description": "place X in square 8",
+                "text": "F",
+                "tokens": [
+                  {
+                    "token": "F",
+                    "logprob": -2.6532935488150864,
+                    "bytes": [
+                      70
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -2.6532935488150864,
+                "path_probability": 0.07041890261426556,
+                "mean_logprob": -2.6532935488150864,
+                "finish_reason": "stop",
+                "raw_probability": 0.07041890261426556,
+                "weight": 0.07122274591476706
+              },
+              {
+                "label": "G",
+                "description": "place X in square 9",
+                "text": "G",
+                "tokens": [
+                  {
+                    "token": "G",
+                    "logprob": -2.4969024050162583,
+                    "bytes": [
+                      71
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -2.4969024050162583,
+                "path_probability": 0.0823396589174765,
+                "mean_logprob": -2.4969024050162583,
+                "finish_reason": "stop",
+                "raw_probability": 0.0823396589174765,
+                "weight": 0.08327957960253675
+              }
+            ],
+            "complete": true,
+            "prompt": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace.",
+            "winner": "A",
+            "statistics": {
+              "top_weight": 0.3399766054320883,
+              "margin": 0.12477840727098383,
+              "peakedness": 0.22997270633743633,
+              "entropy_bits": 2.530401355899877
+            },
+            "strategy": "one literal-constrained call per label",
+            "semantics": "Raw label probabilities renormalized across these exact labels; not calibrated truth probabilities."
+          },
+          "selected": 0,
+          "action": "place X in square 2",
+          "allowed": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "grammar": "root ::= \"A\" | \"B\" | \"C\" | \"D\" | \"E\" | \"F\" | \"G\"",
+          "output": {
+            "text": "A",
+            "tokens": [
+              {
+                "token": "A",
+                "logprob": -1.0902289736197737,
+                "bytes": [
+                  65
+                ],
+                "top_logprobs": [
+                  {
+                    "token": "A",
+                    "logprob": -1.0902289736197737,
+                    "bytes": [
+                      65
+                    ]
+                  },
+                  {
+                    "token": "B",
+                    "logprob": -1.5475463259146955,
+                    "bytes": [
+                      66
+                    ]
+                  },
+                  {
+                    "token": "C",
+                    "logprob": -1.9965323793814924,
+                    "bytes": [
+                      67
+                    ]
+                  },
+                  {
+                    "token": "E",
+                    "logprob": -2.3656653749869614,
+                    "bytes": [
+                      69
+                    ]
+                  },
+                  {
+                    "token": "G",
+                    "logprob": -2.4969024050162583,
+                    "bytes": [
+                      71
+                    ]
+                  }
+                ]
+              }
+            ],
+            "token_count": 1,
+            "logprob": -1.0902289736197737,
+            "path_probability": 0.33613951781220264,
+            "mean_logprob": -1.0902289736197737,
+            "finish_reason": "stop"
+          }
+        },
+        "oracle": {
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 0
+        },
+        "regret": 0,
+        "opponent_square": 2,
+        "after_opponent": "XXO.O....",
+        "outcome": null
+      },
+      {
+        "step": 1,
+        "before": "XXO.O....",
+        "after": "XXO.OX...",
+        "square": 5,
+        "decision": {
+          "measure": {
+            "rows": [
+              {
+                "label": "A",
+                "description": "place X in square 4",
+                "text": "A",
+                "tokens": [
+                  {
+                    "token": "A",
+                    "logprob": -1.0761627453753155,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -1.0761627453753155,
+                "path_probability": 0.34090114353834244,
+                "mean_logprob": -1.0761627453753155,
+                "finish_reason": "stop",
+                "raw_probability": 0.34090114353834244,
+                "weight": 0.3574797291054415
+              },
+              {
+                "label": "B",
+                "description": "place X in square 6",
+                "text": "B",
+                "tokens": [
+                  {
+                    "token": "B",
+                    "logprob": -1.0656685131975812,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -1.0656685131975812,
+                "path_probability": 0.3444974766607166,
+                "mean_logprob": -1.0656685131975812,
+                "finish_reason": "stop",
+                "raw_probability": 0.3444974766607166,
+                "weight": 0.36125095784646405
+              },
+              {
+                "label": "C",
+                "description": "place X in square 7",
+                "text": "C",
+                "tokens": [
+                  {
+                    "token": "C",
+                    "logprob": -1.9660286206194562,
+                    "bytes": [
+                      67
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -1.9660286206194562,
+                "path_probability": 0.140011793502183,
+                "mean_logprob": -1.9660286206194562,
+                "finish_reason": "stop",
+                "raw_probability": 0.140011793502183,
+                "weight": 0.146820798232664
+              },
+              {
+                "label": "D",
+                "description": "place X in square 8",
+                "text": "D",
+                "tokens": [
+                  {
+                    "token": "D",
+                    "logprob": -3.0011810559221903,
+                    "bytes": [
+                      68
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -3.0011810559221903,
+                "path_probability": 0.049728301766072215,
+                "mean_logprob": -3.0011810559221903,
+                "finish_reason": "stop",
+                "raw_probability": 0.049728301766072215,
+                "weight": 0.05214667120120619
+              },
+              {
+                "label": "E",
+                "description": "place X in square 9",
+                "text": "E",
+                "tokens": [
+                  {
+                    "token": "E",
+                    "logprob": -2.5448478955217997,
+                    "bytes": [
+                      69
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "token_count": 1,
+                "logprob": -2.5448478955217997,
+                "path_probability": 0.0784849889911584,
+                "mean_logprob": -2.5448478955217997,
+                "finish_reason": "stop",
+                "raw_probability": 0.0784849889911584,
+                "weight": 0.0823018436142242
+              }
+            ],
+            "complete": true,
+            "prompt": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX X O\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 4\nB: place X in square 6\nC: place X in square 7\nD: place X in square 8\nE: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace.",
+            "winner": "B",
+            "statistics": {
+              "top_weight": 0.36125095784646405,
+              "margin": 0.0037712287410225365,
+              "peakedness": 0.20156369730808005,
+              "entropy_bits": 1.9862955776376214
+            },
+            "strategy": "one literal-constrained call per label",
+            "semantics": "Raw label probabilities renormalized across these exact labels; not calibrated truth probabilities."
+          },
+          "selected": 1,
+          "action": "place X in square 6",
+          "allowed": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "grammar": "root ::= \"A\" | \"B\" | \"C\" | \"D\" | \"E\"",
+          "output": {
+            "text": "B",
+            "tokens": [
+              {
+                "token": "B",
+                "logprob": -1.0656685131975812,
+                "bytes": [
+                  66
+                ],
+                "top_logprobs": [
+                  {
+                    "token": "B",
+                    "logprob": -1.0656685131975812,
+                    "bytes": [
+                      66
+                    ]
+                  },
+                  {
+                    "token": "A",
+                    "logprob": -1.0761627453753155,
+                    "bytes": [
+                      65
+                    ]
+                  },
+                  {
+                    "token": "C",
+                    "logprob": -1.9660286206194562,
+                    "bytes": [
+                      67
+                    ]
+                  },
+                  {
+                    "token": "E",
+                    "logprob": -2.5448478955217997,
+                    "bytes": [
+                      69
+                    ]
+                  },
+                  {
+                    "token": "D",
+                    "logprob": -3.0011810559221903,
+                    "bytes": [
+                      68
+                    ]
+                  }
+                ]
+              }
+            ],
+            "token_count": 1,
+            "logprob": -1.0656685131975812,
+            "path_probability": 0.3444974766607166,
+            "mean_logprob": -1.0656685131975812,
+            "finish_reason": "stop"
+          }
+        },
+        "oracle": {
+          "3": -1,
+          "5": -1,
+          "6": 0,
+          "7": -1,
+          "8": -1
+        },
+        "regret": 1,
+        "opponent_square": 6,
+        "after_opponent": "XXO.OXO..",
+        "outcome": "O"
+      }
+    ],
+    "final": "XXO.OXO..",
+    "outcome": "O",
+    "semantics": "Native grammar permits empty squares. Minimax is an independent exact code oracle; the opponent uses it. No model score is treated as a win probability."
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 14,
+    "summed_request_ms": 11735.47380004311,
+    "prompt_tokens": 2148,
+    "completion_tokens": 28,
+    "calls": [
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"A\""
+        },
+        "response": {
+          "id": "chatcmpl-7c0a3b8c0ea24e219533177b",
+          "object": "chat.completion",
+          "created": 1791081852,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "A"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "A",
+                    "logprob": -1.0902289736197737,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 162,
+            "prompt_ms": 5627.5,
+            "prompt_per_token_ms": 34.738,
+            "prompt_per_second": 28.8,
+            "predicted_n": 2,
+            "predicted_ms": 87.1,
+            "predicted_per_token_ms": 43.55,
+            "predicted_per_second": 23.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 6702.872800000478,
+        "captured_at": "2026-10-04T02:44:18Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"B\""
+        },
+        "response": {
+          "id": "chatcmpl-0e15d7100c5845008c1551e6",
+          "object": "chat.completion",
+          "created": 1791081858,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "B"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "B",
+                    "logprob": -1.5475463259146955,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 155
+            }
+          },
+          "timings": {
+            "cache_n": 155,
+            "prompt_n": 7,
+            "prompt_ms": 224.6,
+            "prompt_per_token_ms": 32.086,
+            "prompt_per_second": 31.2,
+            "predicted_n": 2,
+            "predicted_ms": 76.3,
+            "predicted_per_token_ms": 38.15,
+            "predicted_per_second": 26.2,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 328.1040000147186,
+        "captured_at": "2026-10-04T02:44:19Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"C\""
+        },
+        "response": {
+          "id": "chatcmpl-bfd0f6d6152d4cd69d681a1f",
+          "object": "chat.completion",
+          "created": 1791081858,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "C"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "C",
+                    "logprob": -1.9965323793814924,
+                    "bytes": [
+                      67
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 155
+            }
+          },
+          "timings": {
+            "cache_n": 155,
+            "prompt_n": 7,
+            "prompt_ms": 220.8,
+            "prompt_per_token_ms": 31.543,
+            "prompt_per_second": 31.7,
+            "predicted_n": 2,
+            "predicted_ms": 76.3,
+            "predicted_per_token_ms": 38.15,
+            "predicted_per_second": 26.2,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 319.37609997112304,
+        "captured_at": "2026-10-04T02:44:19Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"D\""
+        },
+        "response": {
+          "id": "chatcmpl-458fb210044b442498cf183c",
+          "object": "chat.completion",
+          "created": 1791081858,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "D"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "D",
+                    "logprob": -2.8585128176139145,
+                    "bytes": [
+                      68
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 155
+            }
+          },
+          "timings": {
+            "cache_n": 155,
+            "prompt_n": 7,
+            "prompt_ms": 225.9,
+            "prompt_per_token_ms": 32.271,
+            "prompt_per_second": 31.0,
+            "predicted_n": 2,
+            "predicted_ms": 71.4,
+            "predicted_per_token_ms": 35.7,
+            "predicted_per_second": 28.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 309.3319999752566,
+        "captured_at": "2026-10-04T02:44:19Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"E\""
+        },
+        "response": {
+          "id": "chatcmpl-2ef83e92e97f4f67be807b43",
+          "object": "chat.completion",
+          "created": 1791081859,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "E"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "E",
+                    "logprob": -2.3656653749869614,
+                    "bytes": [
+                      69
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 155
+            }
+          },
+          "timings": {
+            "cache_n": 155,
+            "prompt_n": 7,
+            "prompt_ms": 222.1,
+            "prompt_per_token_ms": 31.729,
+            "prompt_per_second": 31.5,
+            "predicted_n": 2,
+            "predicted_ms": 76.8,
+            "predicted_per_token_ms": 38.4,
+            "predicted_per_second": 26.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 320.60390000697225,
+        "captured_at": "2026-10-04T02:44:20Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"F\""
+        },
+        "response": {
+          "id": "chatcmpl-9ceeba0dddb24adaae6dd9af",
+          "object": "chat.completion",
+          "created": 1791081859,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "F"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "F",
+                    "logprob": -2.6532935488150864,
+                    "bytes": [
+                      70
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 155
+            }
+          },
+          "timings": {
+            "cache_n": 155,
+            "prompt_n": 7,
+            "prompt_ms": 220.6,
+            "prompt_per_token_ms": 31.514,
+            "prompt_per_second": 31.7,
+            "predicted_n": 2,
+            "predicted_ms": 72.7,
+            "predicted_per_token_ms": 36.35,
+            "predicted_per_second": 27.5,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 309.6901000244543,
+        "captured_at": "2026-10-04T02:44:20Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"G\""
+        },
+        "response": {
+          "id": "chatcmpl-6b6ef8fa0f2741f0978bdedf",
+          "object": "chat.completion",
+          "created": 1791081859,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "G"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "G",
+                    "logprob": -2.4969024050162583,
+                    "bytes": [
+                      71
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      },
+                      {
+                        "token": "F",
+                        "logprob": -2.6532935488150864,
+                        "bytes": [
+                          70
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -2.8585128176139145,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.767505584947899,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -8.130204139940574,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -8.917417465441062,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.533304153673484,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "x",
+                        "logprob": -9.678758560411765,
+                        "bytes": [
+                          120
+                        ]
+                      },
+                      {
+                        "token": "H",
+                        "logprob": -9.714017807237937,
+                        "bytes": [
+                          72
+                        ]
+                      },
+                      {
+                        "token": "I",
+                        "logprob": -9.731210647814109,
+                        "bytes": [
+                          73
+                        ]
+                      },
+                      {
+                        "token": "b",
+                        "logprob": -9.921102462999656,
+                        "bytes": [
+                          98
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.94932359337075,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "V",
+                        "logprob": -9.983454643480613,
+                        "bytes": [
+                          86
+                        ]
+                      },
+                      {
+                        "token": " A",
+                        "logprob": -9.996961532823875,
+                        "bytes": [
+                          32,
+                          65
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -10.112029014818503,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "Question",
+                        "logprob": -10.113424240343406,
+                        "bytes": [
+                          81,
+                          117,
+                          101,
+                          115,
+                          116,
+                          105,
+                          111,
+                          110
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 155
+            }
+          },
+          "timings": {
+            "cache_n": 155,
+            "prompt_n": 7,
+            "prompt_ms": 223.7,
+            "prompt_per_token_ms": 31.957,
+            "prompt_per_second": 31.3,
+            "predicted_n": 2,
+            "predicted_ms": 74.2,
+            "predicted_per_token_ms": 37.1,
+            "predicted_per_second": 27.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 310.29559997841716,
+        "captured_at": "2026-10-04T02:44:20Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"A\" | \"B\" | \"C\" | \"D\" | \"E\" | \"F\" | \"G\""
+        },
+        "response": {
+          "id": "chatcmpl-40e05dfce8124dcca88f91c7",
+          "object": "chat.completion",
+          "created": 1791081860,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "A"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "A",
+                    "logprob": -1.0902289736197737,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "A",
+                        "logprob": -1.0902289736197737,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "B",
+                        "logprob": -1.5475463259146955,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9965323793814924,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.3656653749869614,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "G",
+                        "logprob": -2.4969024050162583,
+                        "bytes": [
+                          71
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 162,
+            "completion_tokens": 2,
+            "total_tokens": 164,
+            "prompt_tokens_details": {
+              "cached_tokens": 155
+            }
+          },
+          "timings": {
+            "cache_n": 155,
+            "prompt_n": 7,
+            "prompt_ms": 219.6,
+            "prompt_per_token_ms": 31.371,
+            "prompt_per_second": 31.9,
+            "predicted_n": 2,
+            "predicted_ms": 64.8,
+            "predicted_per_token_ms": 32.4,
+            "predicted_per_second": 30.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 295.58060003910214,
+        "captured_at": "2026-10-04T02:44:21Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX X O\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 4\nB: place X in square 6\nC: place X in square 7\nD: place X in square 8\nE: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"A\""
+        },
+        "response": {
+          "id": "chatcmpl-b1d44fb2530942cb823a702c",
+          "object": "chat.completion",
+          "created": 1791081860,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "A"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "A",
+                    "logprob": -1.0761627453753155,
+                    "bytes": [
+                      65
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 142,
+            "completion_tokens": 2,
+            "total_tokens": 144,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 142,
+            "prompt_ms": 1186.8,
+            "prompt_per_token_ms": 8.358,
+            "prompt_per_second": 119.6,
+            "predicted_n": 2,
+            "predicted_ms": 67.7,
+            "predicted_per_token_ms": 33.85,
+            "predicted_per_second": 29.5,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 1268.503699975554,
+        "captured_at": "2026-10-04T02:44:22Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX X O\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 4\nB: place X in square 6\nC: place X in square 7\nD: place X in square 8\nE: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"B\""
+        },
+        "response": {
+          "id": "chatcmpl-28defd73aeb749c7a409b897",
+          "object": "chat.completion",
+          "created": 1791081861,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "B"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "B",
+                    "logprob": -1.0656685131975812,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 142,
+            "completion_tokens": 2,
+            "total_tokens": 144,
+            "prompt_tokens_details": {
+              "cached_tokens": 135
+            }
+          },
+          "timings": {
+            "cache_n": 135,
+            "prompt_n": 7,
+            "prompt_ms": 224.6,
+            "prompt_per_token_ms": 32.086,
+            "prompt_per_second": 31.2,
+            "predicted_n": 2,
+            "predicted_ms": 66.3,
+            "predicted_per_token_ms": 33.15,
+            "predicted_per_second": 30.2,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 313.73019999591634,
+        "captured_at": "2026-10-04T02:44:22Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX X O\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 4\nB: place X in square 6\nC: place X in square 7\nD: place X in square 8\nE: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"C\""
+        },
+        "response": {
+          "id": "chatcmpl-d47c3a37576a4bf19c4bcb51",
+          "object": "chat.completion",
+          "created": 1791081862,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "C"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "C",
+                    "logprob": -1.9660286206194562,
+                    "bytes": [
+                      67
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 142,
+            "completion_tokens": 2,
+            "total_tokens": 144,
+            "prompt_tokens_details": {
+              "cached_tokens": 135
+            }
+          },
+          "timings": {
+            "cache_n": 135,
+            "prompt_n": 7,
+            "prompt_ms": 226.2,
+            "prompt_per_token_ms": 32.314,
+            "prompt_per_second": 30.9,
+            "predicted_n": 2,
+            "predicted_ms": 66.6,
+            "predicted_per_token_ms": 33.3,
+            "predicted_per_second": 30.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 308.0752000096254,
+        "captured_at": "2026-10-04T02:44:22Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX X O\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 4\nB: place X in square 6\nC: place X in square 7\nD: place X in square 8\nE: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"D\""
+        },
+        "response": {
+          "id": "chatcmpl-1cee6182600542b7a5cdca50",
+          "object": "chat.completion",
+          "created": 1791081862,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "D"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "D",
+                    "logprob": -3.0011810559221903,
+                    "bytes": [
+                      68
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 142,
+            "completion_tokens": 2,
+            "total_tokens": 144,
+            "prompt_tokens_details": {
+              "cached_tokens": 135
+            }
+          },
+          "timings": {
+            "cache_n": 135,
+            "prompt_n": 7,
+            "prompt_ms": 222.2,
+            "prompt_per_token_ms": 31.743,
+            "prompt_per_second": 31.5,
+            "predicted_n": 2,
+            "predicted_ms": 66.7,
+            "predicted_per_token_ms": 33.35,
+            "predicted_per_second": 30.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 311.4733000402339,
+        "captured_at": "2026-10-04T02:44:23Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX X O\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 4\nB: place X in square 6\nC: place X in square 7\nD: place X in square 8\nE: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 20,
+          "grammar": "root ::= \"E\""
+        },
+        "response": {
+          "id": "chatcmpl-6128720a3e324195895fbf3d",
+          "object": "chat.completion",
+          "created": 1791081862,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "E"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "E",
+                    "logprob": -2.5448478955217997,
+                    "bytes": [
+                      69
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      },
+                      {
+                        "token": "4",
+                        "logprob": -4.240686823744456,
+                        "bytes": [
+                          52
+                        ]
+                      },
+                      {
+                        "token": "X",
+                        "logprob": -4.259581019301097,
+                        "bytes": [
+                          88
+                        ]
+                      },
+                      {
+                        "token": "O",
+                        "logprob": -4.7685741681048075,
+                        "bytes": [
+                          79
+                        ]
+                      },
+                      {
+                        "token": "Let",
+                        "logprob": -6.300774027723948,
+                        "bytes": [
+                          76,
+                          101,
+                          116
+                        ]
+                      },
+                      {
+                        "token": "State",
+                        "logprob": -6.598825861830393,
+                        "bytes": [
+                          83,
+                          116,
+                          97,
+                          116,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "ANS",
+                        "logprob": -7.48692553224055,
+                        "bytes": [
+                          65,
+                          78,
+                          83
+                        ]
+                      },
+                      {
+                        "token": "Answer",
+                        "logprob": -7.833416392225901,
+                        "bytes": [
+                          65,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Board",
+                        "logprob": -8.129751612562815,
+                        "bytes": [
+                          66,
+                          111,
+                          97,
+                          114,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "(",
+                        "logprob": -8.301884104628245,
+                        "bytes": [
+                          40
+                        ]
+                      },
+                      {
+                        "token": "STATE",
+                        "logprob": -8.692798067946116,
+                        "bytes": [
+                          83,
+                          84,
+                          65,
+                          84,
+                          69
+                        ]
+                      },
+                      {
+                        "token": "Row",
+                        "logprob": -8.748784472365061,
+                        "bytes": [
+                          82,
+                          111,
+                          119
+                        ]
+                      },
+                      {
+                        "token": "[",
+                        "logprob": -9.015430857557932,
+                        "bytes": [
+                          91
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -9.023168970961253,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": "To",
+                        "logprob": -9.262542178053538,
+                        "bytes": [
+                          84,
+                          111
+                        ]
+                      },
+                      {
+                        "token": "1",
+                        "logprob": -9.336493899244944,
+                        "bytes": [
+                          49
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 142,
+            "completion_tokens": 2,
+            "total_tokens": 144,
+            "prompt_tokens_details": {
+              "cached_tokens": 135
+            }
+          },
+          "timings": {
+            "cache_n": 135,
+            "prompt_n": 7,
+            "prompt_ms": 223.9,
+            "prompt_per_token_ms": 31.986,
+            "prompt_per_second": 31.3,
+            "predicted_n": 2,
+            "predicted_ms": 73.5,
+            "predicted_per_token_ms": 36.75,
+            "predicted_per_second": 27.2,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 309.67549997149035,
+        "captured_at": "2026-10-04T02:44:23Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX X O\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 4\nB: place X in square 6\nC: place X in square 7\nD: place X in square 8\nE: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+            }
+          ],
+          "temperature": 0,
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 4,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"A\" | \"B\" | \"C\" | \"D\" | \"E\""
+        },
+        "response": {
+          "id": "chatcmpl-0e23abc558cb4a1eb6ed8e32",
+          "object": "chat.completion",
+          "created": 1791081863,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "B"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "B",
+                    "logprob": -1.0656685131975812,
+                    "bytes": [
+                      66
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "B",
+                        "logprob": -1.0656685131975812,
+                        "bytes": [
+                          66
+                        ]
+                      },
+                      {
+                        "token": "A",
+                        "logprob": -1.0761627453753155,
+                        "bytes": [
+                          65
+                        ]
+                      },
+                      {
+                        "token": "C",
+                        "logprob": -1.9660286206194562,
+                        "bytes": [
+                          67
+                        ]
+                      },
+                      {
+                        "token": "E",
+                        "logprob": -2.5448478955217997,
+                        "bytes": [
+                          69
+                        ]
+                      },
+                      {
+                        "token": "D",
+                        "logprob": -3.0011810559221903,
+                        "bytes": [
+                          68
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 142,
+            "completion_tokens": 2,
+            "total_tokens": 144,
+            "prompt_tokens_details": {
+              "cached_tokens": 135
+            }
+          },
+          "timings": {
+            "cache_n": 135,
+            "prompt_n": 7,
+            "prompt_ms": 249.5,
+            "prompt_per_token_ms": 35.643,
+            "prompt_per_second": 28.1,
+            "predicted_n": 2,
+            "predicted_ms": 66.4,
+            "predicted_per_token_ms": 33.2,
+            "predicted_per_second": 30.1,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 328.1608000397682,
+        "captured_at": "2026-10-04T02:44:23Z"
+      }
+    ]
+  },
+  "wall_ms": 11795.085099991411
+}

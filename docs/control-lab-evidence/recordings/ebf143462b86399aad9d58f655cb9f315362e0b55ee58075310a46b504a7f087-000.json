@@ -1,0 +1,114 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTime 0. Completed []. Jobs: [{\"id\": \"inspect\", \"duration\": 2, \"deadline\": 3, \"after\": [], \"meaning\": \"read the failing test\"}, {\"id\": \"patch\", \"duration\": 4, \"deadline\": 8, \"after\": [\"inspect\"], \"meaning\": \"repair the known bug\"}, {\"id\": \"verify\", \"duration\": 3, \"deadline\": 12, \"after\": [\"patch\"], \"meaning\": \"run verification\"}, {\"id\": \"docs\", \"duration\": 2, \"deadline\": 5, \"after\": [], \"meaning\": \"update release notes\"}]\nQUESTION: Which job should run next to reduce lateness while respecting dependencies?\nANSWERS:\nA: inspect: read the failing test\nB: patch: repair the known bug\nC: verify: run verification\nD: docs: update release notes\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"A\" | \"D\""
+  },
+  "response": {
+    "id": "chatcmpl-39f8657d78f64bd89956de4e",
+    "object": "chat.completion",
+    "created": 1791082298,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.2800562255554847,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -0.2800562255554847,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -1.5734827392273596,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -3.777763592498844,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -5.1132891051941565,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "inspect",
+                  "logprob": -5.3810598724060705,
+                  "bytes": [
+                    105,
+                    110,
+                    115,
+                    112,
+                    101,
+                    99,
+                    116
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 232,
+      "completion_tokens": 2,
+      "total_tokens": 234,
+      "prompt_tokens_details": {
+        "cached_tokens": 225
+      }
+    },
+    "timings": {
+      "cache_n": 225,
+      "prompt_n": 7,
+      "prompt_ms": 203.9,
+      "prompt_per_token_ms": 29.129,
+      "prompt_per_second": 34.3,
+      "predicted_n": 2,
+      "predicted_ms": 54.4,
+      "predicted_per_token_ms": 27.2,
+      "predicted_per_second": 36.8,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 273.53130001574755,
+  "captured_at": "2026-10-04T02:51:39Z"
+}

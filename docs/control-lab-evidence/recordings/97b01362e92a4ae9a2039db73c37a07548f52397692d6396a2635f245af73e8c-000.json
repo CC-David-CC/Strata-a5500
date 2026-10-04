@@ -1,0 +1,319 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Name one useful workshop tool. Answer with one word."
+      }
+    ],
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 6,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "strata_sampler": {
+      "chain": [
+        "temperature",
+        "min_p"
+      ],
+      "min_p": 0.05,
+      "temperature": 1.5,
+      "inspect": true
+    }
+  },
+  "response": {
+    "id": "chatcmpl-c4b681359f544ec0bb61def4",
+    "object": "chat.completion",
+    "created": 1791083761,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Wrench"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "W",
+              "logprob": -3.0199745662397635,
+              "bytes": [
+                87
+              ],
+              "top_logprobs": [
+                {
+                  "token": "Ham",
+                  "logprob": -0.2305058009809744,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ]
+                },
+                {
+                  "token": "W",
+                  "logprob": -3.0199745662397635,
+                  "bytes": [
+                    87
+                  ]
+                },
+                {
+                  "token": " Hammer",
+                  "logprob": -3.1288937099165213,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "Dr",
+                  "logprob": -3.3487661845869314,
+                  "bytes": [
+                    68,
+                    114
+                  ]
+                },
+                {
+                  "token": "hammer",
+                  "logprob": -3.508494234818865,
+                  "bytes": [
+                    104,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ]
+                }
+              ],
+              "strata_sampling": {
+                "index": 0,
+                "id": 54,
+                "probability": 0.09758894600388959,
+                "support": 6,
+                "entropy": 1.2442372262575794,
+                "selection_ms": 23.271066,
+                "stages": [
+                  {
+                    "operator": "grammar",
+                    "support": 248320,
+                    "entropy": 1.0456722695674654
+                  },
+                  {
+                    "operator": "temperature",
+                    "support": 248320,
+                    "entropy": 6.5285225042667046
+                  },
+                  {
+                    "operator": "min_p",
+                    "support": 6,
+                    "entropy": 1.2442372262575794
+                  }
+                ],
+                "top": [
+                  {
+                    "id": 38617,
+                    "probability": 0.6266637245976295,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "token": "Ham"
+                  },
+                  {
+                    "id": 54,
+                    "probability": 0.09758894600388959,
+                    "bytes": [
+                      87
+                    ],
+                    "token": "W"
+                  },
+                  {
+                    "id": 35671,
+                    "probability": 0.09075390172147922,
+                    "bytes": [
+                      32,
+                      72,
+                      97,
+                      109,
+                      109,
+                      101,
+                      114
+                    ],
+                    "token": " Hammer"
+                  },
+                  {
+                    "id": 8580,
+                    "probability": 0.07838008024901671,
+                    "bytes": [
+                      68,
+                      114
+                    ],
+                    "token": "Dr"
+                  },
+                  {
+                    "id": 43823,
+                    "probability": 0.07046276750346628,
+                    "bytes": [
+                      104,
+                      97,
+                      109,
+                      109,
+                      101,
+                      114
+                    ],
+                    "token": "hammer"
+                  },
+                  {
+                    "id": 50,
+                    "probability": 0.03615057992451852,
+                    "bytes": [
+                      83
+                    ],
+                    "token": "S"
+                  }
+                ]
+              }
+            },
+            {
+              "token": "rench",
+              "logprob": -0.0003738266002566631,
+              "bytes": [
+                114,
+                101,
+                110,
+                99,
+                104
+              ],
+              "top_logprobs": [
+                {
+                  "token": "rench",
+                  "logprob": -0.0003738266002566631,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ]
+                },
+                {
+                  "token": "REN",
+                  "logprob": -8.052328096009436,
+                  "bytes": [
+                    82,
+                    69,
+                    78
+                  ]
+                },
+                {
+                  "token": "ench",
+                  "logprob": -11.119985566712561,
+                  "bytes": [
+                    101,
+                    110,
+                    99,
+                    104
+                  ]
+                },
+                {
+                  "token": "ren",
+                  "logprob": -11.315185533143225,
+                  "bytes": [
+                    114,
+                    101,
+                    110
+                  ]
+                },
+                {
+                  "token": "rist",
+                  "logprob": -12.610091195679846,
+                  "bytes": [
+                    114,
+                    105,
+                    115,
+                    116
+                  ]
+                }
+              ],
+              "strata_sampling": {
+                "index": 1,
+                "id": 6446,
+                "probability": 1,
+                "support": 1,
+                "entropy": 0,
+                "selection_ms": 23.265435,
+                "stages": [
+                  {
+                    "operator": "grammar",
+                    "support": 248320,
+                    "entropy": 0.0037015710218421026
+                  },
+                  {
+                    "operator": "temperature",
+                    "support": 248320,
+                    "entropy": 0.3387286224444237
+                  },
+                  {
+                    "operator": "min_p",
+                    "support": 1,
+                    "entropy": 0
+                  }
+                ],
+                "top": [
+                  {
+                    "id": 6446,
+                    "probability": 1,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "token": "rench"
+                  }
+                ]
+              }
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 23,
+      "completion_tokens": 3,
+      "total_tokens": 26,
+      "prompt_tokens_details": {
+        "cached_tokens": 16
+      }
+    },
+    "timings": {
+      "cache_n": 16,
+      "prompt_n": 7,
+      "prompt_ms": 263.4,
+      "prompt_per_token_ms": 37.629,
+      "prompt_per_second": 26.6,
+      "predicted_n": 3,
+      "predicted_ms": 240.3,
+      "predicted_per_token_ms": 80.1,
+      "predicted_per_second": 12.5,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 518.0564999463968,
+  "captured_at": "2026-10-04T03:16:02Z"
+}

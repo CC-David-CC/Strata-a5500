@@ -252,6 +252,9 @@ async def run_performance(ctx, opt):
 
 async def run_page(ctx, name, overrides):
     opt = {**copy.deepcopy(BY_ID[name]['defaults']), **overrides}
+    if BY_ID[name].get('section') == 'research':
+        from .research import run_research
+        return await run_research(ctx,name,opt)
     if name in ('choice', 'score'):
         return await semantic(ctx, opt['state'], opt['question'], opt['choices'], opt['strategy'])
     if name == 'boolean':

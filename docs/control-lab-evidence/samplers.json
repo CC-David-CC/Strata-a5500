@@ -1,0 +1,5936 @@
+{
+  "page": "samplers",
+  "options": {},
+  "result": {
+    "kind": "samplers",
+    "runs": [
+      {
+        "name": "Min-P → Temperature",
+        "profile": {
+          "chain": [
+            "min_p",
+            "temperature"
+          ],
+          "min_p": 0.05,
+          "temperature": 1.5
+        },
+        "text": "Hammer",
+        "tokens": [
+          {
+            "token": "Ham",
+            "logprob": -0.2305058009809744,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 38617,
+              "probability": 0.7689063449040189,
+              "support": 3,
+              "entropy": 0.7006241514602591,
+              "selection_ms": 21.484569,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.0456722695674654
+                },
+                {
+                  "operator": "min_p",
+                  "support": 3,
+                  "entropy": 0.4068453230795882
+                },
+                {
+                  "operator": "temperature",
+                  "support": 3,
+                  "entropy": 0.7006241514602591
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.7689063449040189,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.11974007243369045,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 35671,
+                  "probability": 0.11135358266229073,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": " Hammer"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -5.929782734064179e-05,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -5.929782734064179e-05,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.18558233096943,
+                "bytes": null
+              },
+              {
+                "token": " mer",
+                "logprob": -12.720571687964059,
+                "bytes": [
+                  32,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -12.899488619116402,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              },
+              {
+                "token": "ster",
+                "logprob": -13.366207292822457,
+                "bytes": [
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 1134,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.752203,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0007780113013029854
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 1,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 1223.9476999966428,
+        "constraint": {}
+      },
+      {
+        "name": "Temperature → Min-P",
+        "profile": {
+          "chain": [
+            "temperature",
+            "min_p"
+          ],
+          "min_p": 0.05,
+          "temperature": 1.5
+        },
+        "text": "Wrench",
+        "tokens": [
+          {
+            "token": "W",
+            "logprob": -3.0199745662397635,
+            "bytes": [
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 54,
+              "probability": 0.09758894600388959,
+              "support": 6,
+              "entropy": 1.2442372262575794,
+              "selection_ms": 23.271066,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.0456722695674654
+                },
+                {
+                  "operator": "temperature",
+                  "support": 248320,
+                  "entropy": 6.5285225042667046
+                },
+                {
+                  "operator": "min_p",
+                  "support": 6,
+                  "entropy": 1.2442372262575794
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.6266637245976295,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.09758894600388959,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 35671,
+                  "probability": 0.09075390172147922,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": " Hammer"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.07838008024901671,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                },
+                {
+                  "id": 43823,
+                  "probability": 0.07046276750346628,
+                  "bytes": [
+                    104,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "hammer"
+                },
+                {
+                  "id": 50,
+                  "probability": 0.03615057992451852,
+                  "bytes": [
+                    83
+                  ],
+                  "token": "S"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.0003738266002566631,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.0003738266002566631,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -8.052328096009436,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "ench",
+                "logprob": -11.119985566712561,
+                "bytes": [
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -11.315185533143225,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "rist",
+                "logprob": -12.610091195679846,
+                "bytes": [
+                  114,
+                  105,
+                  115,
+                  116
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 23.265435,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0037015710218421026
+                },
+                {
+                  "operator": "temperature",
+                  "support": 248320,
+                  "entropy": 0.3387286224444237
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 518.0564999463968,
+        "constraint": {}
+      },
+      {
+        "name": "Top-N-Sigma → Temperature",
+        "profile": {
+          "chain": [
+            "top_n_sigma",
+            "temperature"
+          ],
+          "top_n_sigma": 2,
+          "temperature": 1.5
+        },
+        "text": "Hammer",
+        "tokens": [
+          {
+            "token": "Ham",
+            "logprob": -0.2305058009809744,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 38617,
+              "probability": 0.701447377564346,
+              "support": 4,
+              "entropy": 0.9364185716567496,
+              "selection_ms": 20.69582,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.0456722695674654
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 4,
+                  "entropy": 0.5532210414374376
+                },
+                {
+                  "operator": "temperature",
+                  "support": 4,
+                  "entropy": 0.9364185716567496
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.701447377564346,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.10923483770765541,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 35671,
+                  "probability": 0.10158412537304348,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": " Hammer"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.087733659354955,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -5.929782734064179e-05,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -5.929782734064179e-05,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.18558233096943,
+                "bytes": null
+              },
+              {
+                "token": " mer",
+                "logprob": -12.720571687964059,
+                "bytes": [
+                  32,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -12.899488619116402,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              },
+              {
+                "token": "ster",
+                "logprob": -13.366207292822457,
+                "bytes": [
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 1134,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 20.780738,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0007780113013029854
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 1,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 504.76999999955297,
+        "constraint": {}
+      },
+      {
+        "name": "XTC → Temperature",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 0.12,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": "Hammer",
+        "tokens": [
+          {
+            "token": "Ham",
+            "logprob": -0.2305058009809744,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 38617,
+              "probability": 0.8958205695787115,
+              "support": 4,
+              "entropy": 0.4474769575803137,
+              "selection_ms": 19.664069,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.0456722695674654
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.8638918122609672
+                },
+                {
+                  "operator": "min_p",
+                  "support": 4,
+                  "entropy": 0.5532210414374376
+                },
+                {
+                  "operator": "xtc",
+                  "support": 4,
+                  "entropy": 0.5532210414374376
+                },
+                {
+                  "operator": "temperature",
+                  "support": 4,
+                  "entropy": 0.4474769575803137
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.8958205695787115,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.04037982974588423,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 35671,
+                  "probability": 0.03577713942268008,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": " Hammer"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.02802246125272433,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -5.929782734064179e-05,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -5.929782734064179e-05,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.18558233096943,
+                "bytes": null
+              },
+              {
+                "token": " mer",
+                "logprob": -12.720571687964059,
+                "bytes": [
+                  32,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -12.899488619116402,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              },
+              {
+                "token": "ster",
+                "logprob": -13.366207292822457,
+                "bytes": [
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 1134,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.71331,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0007780113013029854
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.0006316630293374455
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 1,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 495.5570999882184,
+        "constraint": {}
+      },
+      {
+        "name": "Temperature → XTC",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "temperature",
+            "xtc"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 0.12,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": "Hammer",
+        "tokens": [
+          {
+            "token": "Ham",
+            "logprob": -0.2305058009809744,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 38617,
+              "probability": 0.8958205695787115,
+              "support": 4,
+              "entropy": 0.4474769575803137,
+              "selection_ms": 19.652257,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.0456722695674654
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.8638918122609672
+                },
+                {
+                  "operator": "min_p",
+                  "support": 4,
+                  "entropy": 0.5532210414374376
+                },
+                {
+                  "operator": "temperature",
+                  "support": 4,
+                  "entropy": 0.4474769575803137
+                },
+                {
+                  "operator": "xtc",
+                  "support": 4,
+                  "entropy": 0.4474769575803137
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.8958205695787115,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.04037982974588423,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 35671,
+                  "probability": 0.03577713942268008,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": " Hammer"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.02802246125272433,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -5.929782734064179e-05,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -5.929782734064179e-05,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.18558233096943,
+                "bytes": null
+              },
+              {
+                "token": " mer",
+                "logprob": -12.720571687964059,
+                "bytes": [
+                  32,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -12.899488619116402,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              },
+              {
+                "token": "ster",
+                "logprob": -13.366207292822457,
+                "bytes": [
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 1134,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.698964,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0007780113013029854
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.0006316630293374455
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 1,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 493.7707999488339,
+        "constraint": {}
+      },
+      {
+        "name": "XTC gate forced on",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 1,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": "Hammer",
+        "tokens": [
+          {
+            "token": "Ham",
+            "logprob": -0.2305058009809744,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 38617,
+              "probability": 0.8958205695787115,
+              "support": 4,
+              "entropy": 0.4474769575803137,
+              "selection_ms": 19.681782,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.0456722695674654
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.8638918122609672
+                },
+                {
+                  "operator": "min_p",
+                  "support": 4,
+                  "entropy": 0.5532210414374376
+                },
+                {
+                  "operator": "xtc",
+                  "support": 4,
+                  "entropy": 0.5532210414374376
+                },
+                {
+                  "operator": "temperature",
+                  "support": 4,
+                  "entropy": 0.4474769575803137
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.8958205695787115,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.04037982974588423,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 35671,
+                  "probability": 0.03577713942268008,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": " Hammer"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.02802246125272433,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -5.929782734064179e-05,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -5.929782734064179e-05,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.18558233096943,
+                "bytes": null
+              },
+              {
+                "token": " mer",
+                "logprob": -12.720571687964059,
+                "bytes": [
+                  32,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -12.899488619116402,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              },
+              {
+                "token": "ster",
+                "logprob": -13.366207292822457,
+                "bytes": [
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 1134,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.714743,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0007780113013029854
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.0006316630293374455
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 1,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 512.3918000026606,
+        "constraint": {}
+      },
+      {
+        "name": "GBNF + Min-P → Temperature",
+        "profile": {
+          "chain": [
+            "min_p",
+            "temperature"
+          ],
+          "min_p": 0.05,
+          "temperature": 1.5
+        },
+        "text": "Hammer",
+        "tokens": [
+          {
+            "token": "Ham",
+            "logprob": -0.2305058009809744,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 38617,
+              "probability": 0.8652556628851111,
+              "support": 2,
+              "entropy": 0.3953069981433256,
+              "selection_ms": 0.119924,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 7,
+                  "entropy": 0.38796523685802703
+                },
+                {
+                  "operator": "min_p",
+                  "support": 2,
+                  "entropy": 0.22113839857578127
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.3953069981433256
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.8652556628851111,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.13474433711488878,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -5.929782734064179e-05,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -5.929782734064179e-05,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.18558233096943,
+                "bytes": null
+              },
+              {
+                "token": " mer",
+                "logprob": -12.720571687964059,
+                "bytes": [
+                  32,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -12.899488619116402,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              },
+              {
+                "token": "ster",
+                "logprob": -13.366207292822457,
+                "bytes": [
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 1134,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.113681,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 3,
+                  "entropy": 1.2279938470540171e-05
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 1,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 436.35360000189394,
+        "constraint": {
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\""
+        }
+      },
+      {
+        "name": "GBNF + XTC gate on",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 1,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": "Hammer",
+        "tokens": [
+          {
+            "token": "Ham",
+            "logprob": -0.2305058009809744,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.2305058009809744,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -3.0199745662397635,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -3.1288937099165213,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -3.3487661845869314,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -3.508494234818865,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 38617,
+              "probability": 0.9290596668101675,
+              "support": 3,
+              "entropy": 0.3040726035978527,
+              "selection_ms": 0.117649,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 7,
+                  "entropy": 0.38796523685802703
+                },
+                {
+                  "operator": "top_k",
+                  "support": 7,
+                  "entropy": 0.38796523685802703
+                },
+                {
+                  "operator": "min_p",
+                  "support": 3,
+                  "entropy": 0.38025448810015205
+                },
+                {
+                  "operator": "xtc",
+                  "support": 3,
+                  "entropy": 0.38025448810015205
+                },
+                {
+                  "operator": "temperature",
+                  "support": 3,
+                  "entropy": 0.3040726035978527
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.9290596668101675,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.04187810867884543,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.02906222451098715,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -5.929782734064179e-05,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -5.929782734064179e-05,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.18558233096943,
+                "bytes": null
+              },
+              {
+                "token": " mer",
+                "logprob": -12.720571687964059,
+                "bytes": [
+                  32,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -12.899488619116402,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              },
+              {
+                "token": "ster",
+                "logprob": -13.366207292822457,
+                "bytes": [
+                  115,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 1134,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.116167,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 3,
+                  "entropy": 1.2279938470540171e-05
+                },
+                {
+                  "operator": "top_k",
+                  "support": 3,
+                  "entropy": 1.2279938470540171e-05
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 1,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 438.23089997749776,
+        "constraint": {
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\""
+        }
+      },
+      {
+        "name": "Strict JSON + Top-N-Sigma",
+        "profile": {
+          "chain": [
+            "top_n_sigma",
+            "temperature"
+          ],
+          "top_n_sigma": 2,
+          "temperature": 1.5
+        },
+        "text": "{\"tool\": \"Hammer\"}",
+        "tokens": [
+          {
+            "token": "{\"",
+            "logprob": -0.11650226268663469,
+            "bytes": [
+              123,
+              34
+            ],
+            "top_logprobs": [
+              {
+                "token": "{\"",
+                "logprob": -0.11650226268663469,
+                "bytes": [
+                  123,
+                  34
+                ]
+              },
+              {
+                "token": "{",
+                "logprob": -2.4869284406651504,
+                "bytes": [
+                  123
+                ]
+              },
+              {
+                "token": " {\"",
+                "logprob": -4.447524525259877,
+                "bytes": [
+                  32,
+                  123,
+                  34
+                ]
+              },
+              {
+                "token": "Ham",
+                "logprob": -5.969585873221303,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -6.20404384288683,
+                "bytes": [
+                  68,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 4754,
+              "probability": 0.8292447523436108,
+              "support": 2,
+              "entropy": 0.45708173541876457,
+              "selection_ms": 0.131716,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 2,
+                  "entropy": 0.2918962367501198
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.2918962367501198
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.45708173541876457
+                }
+              ],
+              "top": [
+                {
+                  "id": 4754,
+                  "probability": 0.8292447523436108,
+                  "bytes": [
+                    123,
+                    34
+                  ],
+                  "token": "{\""
+                },
+                {
+                  "id": 90,
+                  "probability": 0.1707552476563892,
+                  "bytes": [
+                    123
+                  ],
+                  "token": "{"
+                }
+              ]
+            }
+          },
+          {
+            "token": "tool",
+            "logprob": -0.000986119465473623,
+            "bytes": [
+              116,
+              111,
+              111,
+              108
+            ],
+            "top_logprobs": [
+              {
+                "token": "tool",
+                "logprob": -0.000986119465473623,
+                "bytes": [
+                  116,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "token": "answer",
+                "logprob": -8.819503804401997,
+                "bytes": [
+                  97,
+                  110,
+                  115,
+                  119,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "dr",
+                "logprob": -8.900831242756489,
+                "bytes": [
+                  100,
+                  114
+                ]
+              },
+              {
+                "token": "type",
+                "logprob": -9.106487294392231,
+                "bytes": [
+                  116,
+                  121,
+                  112,
+                  101
+                ]
+              },
+              {
+                "token": "text",
+                "logprob": -9.724390050129536,
+                "bytes": [
+                  116,
+                  101,
+                  120,
+                  116
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 13766,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.113661,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 4,
+                  "entropy": 1.724585946591409e-05
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 13766,
+                  "probability": 1,
+                  "bytes": [
+                    116,
+                    111,
+                    111,
+                    108
+                  ],
+                  "token": "tool"
+                }
+              ]
+            }
+          },
+          {
+            "token": "\":",
+            "logprob": -0.024827453651434076,
+            "bytes": [
+              34,
+              58
+            ],
+            "top_logprobs": [
+              {
+                "token": "\":",
+                "logprob": -0.024827453651434076,
+                "bytes": [
+                  34,
+                  58
+                ]
+              },
+              {
+                "token": "\":\"",
+                "logprob": -3.75394389347077,
+                "bytes": [
+                  34,
+                  58,
+                  34
+                ]
+              },
+              {
+                "token": "\"",
+                "logprob": -7.008729431190496,
+                "bytes": [
+                  34
+                ]
+              },
+              {
+                "token": "_name",
+                "logprob": -10.022747489967353,
+                "bytes": [
+                  95,
+                  110,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "token": "\":{\"",
+                "logprob": -10.284298393287665,
+                "bytes": [
+                  34,
+                  58,
+                  123,
+                  34
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 2,
+              "id": 763,
+              "probability": 0.9231600281747513,
+              "support": 2,
+              "entropy": 0.27098281598258644,
+              "selection_ms": 0.114974,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 3,
+                  "entropy": 0.11832118593273983
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.11118135424304203
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.27098281598258644
+                }
+              ],
+              "top": [
+                {
+                  "id": 763,
+                  "probability": 0.9231600281747513,
+                  "bytes": [
+                    34,
+                    58
+                  ],
+                  "token": "\":"
+                },
+                {
+                  "id": 3147,
+                  "probability": 0.07683997182524871,
+                  "bytes": [
+                    34,
+                    58,
+                    34
+                  ],
+                  "token": "\":\""
+                }
+              ]
+            }
+          },
+          {
+            "token": " \"",
+            "logprob": -0.0011083301152317122,
+            "bytes": [
+              32,
+              34
+            ],
+            "top_logprobs": [
+              {
+                "token": " \"",
+                "logprob": -0.0011083301152317122,
+                "bytes": [
+                  32,
+                  34
+                ]
+              },
+              {
+                "token": " ",
+                "logprob": -7.946208160742673,
+                "bytes": [
+                  32
+                ]
+              },
+              {
+                "token": " [\"",
+                "logprob": -8.586567085608396,
+                "bytes": [
+                  32,
+                  91,
+                  34
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -9.618736427649411,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": " Hammer",
+                "logprob": -9.713847320898923,
+                "bytes": [
+                  32,
+                  72,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 3,
+              "id": 328,
+              "probability": 0.9950170273555249,
+              "support": 2,
+              "entropy": 0.03138890579226995,
+              "selection_ms": 0.115956,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 17,
+                  "entropy": 0.003335278921934443
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.003169033972490097
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.03138890579226995
+                }
+              ],
+              "top": [
+                {
+                  "id": 328,
+                  "probability": 0.9950170273555249,
+                  "bytes": [
+                    32,
+                    34
+                  ],
+                  "token": " \""
+                },
+                {
+                  "id": 220,
+                  "probability": 0.004982972644475095,
+                  "bytes": [
+                    32
+                  ],
+                  "token": " "
+                }
+              ]
+            }
+          },
+          {
+            "token": "Ham",
+            "logprob": -0.27072401623124864,
+            "bytes": [
+              72,
+              97,
+              109
+            ],
+            "top_logprobs": [
+              {
+                "token": "Ham",
+                "logprob": -0.27072401623124864,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -2.0747859058796863,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "W",
+                "logprob": -2.3706290302693347,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": "hammer",
+                "logprob": -4.535628038448046,
+                "bytes": [
+                  104,
+                  97,
+                  109,
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "dr",
+                "logprob": -6.020693498653124,
+                "bytes": [
+                  100,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 4,
+              "id": 38617,
+              "probability": 0.6452154928604038,
+              "support": 4,
+              "entropy": 0.9048855133923593,
+              "selection_ms": 0.114914,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 7,
+                  "entropy": 0.6846699914151274
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 4,
+                  "entropy": 0.6840694387596925
+                },
+                {
+                  "operator": "temperature",
+                  "support": 4,
+                  "entropy": 0.9048855133923593
+                }
+              ],
+              "top": [
+                {
+                  "id": 38617,
+                  "probability": 0.6452154928604038,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.19380963841109164,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                },
+                {
+                  "id": 54,
+                  "probability": 0.15911825730892912,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 39,
+                  "probability": 0.0018566114195754692,
+                  "bytes": [
+                    72
+                  ],
+                  "token": "H"
+                }
+              ]
+            }
+          },
+          {
+            "token": "mer",
+            "logprob": -8.580967181427442e-06,
+            "bytes": [
+              109,
+              101,
+              114
+            ],
+            "top_logprobs": [
+              {
+                "token": "mer",
+                "logprob": -8.580967181427442e-06,
+                "bytes": [
+                  109,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "mar",
+                "logprob": -12.929574010654681,
+                "bytes": [
+                  109,
+                  97,
+                  114
+                ]
+              },
+              {
+                "token": "\"}",
+                "logprob": -13.214753148838275,
+                "bytes": [
+                  34,
+                  125
+                ]
+              },
+              {
+                "token": "me",
+                "logprob": -13.780879018589252,
+                "bytes": [
+                  109,
+                  101
+                ]
+              },
+              {
+                "token": "MER",
+                "logprob": -14.567156789585345,
+                "bytes": [
+                  77,
+                  69,
+                  82
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 5,
+              "id": 1134,
+              "probability": 0.9998976742585306,
+              "support": 2,
+              "entropy": 0.0010424228341883157,
+              "selection_ms": 0.114333,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 3,
+                  "entropy": 1.538010787839123e-05
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 1.5301837616536557e-05
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.0010424228341883157
+                }
+              ],
+              "top": [
+                {
+                  "id": 1134,
+                  "probability": 0.9998976742585306,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ],
+                  "token": "mer"
+                },
+                {
+                  "id": 2573,
+                  "probability": 0.00010232574146948636,
+                  "bytes": [
+                    109,
+                    101
+                  ],
+                  "token": "me"
+                }
+              ]
+            }
+          },
+          {
+            "token": "\"}",
+            "logprob": -0.0027642151159940334,
+            "bytes": [
+              34,
+              125
+            ],
+            "top_logprobs": [
+              {
+                "token": "\"}",
+                "logprob": -0.0027642151159940334,
+                "bytes": [
+                  34,
+                  125
+                ]
+              },
+              {
+                "token": "\",",
+                "logprob": -6.164452066068143,
+                "bytes": [
+                  34,
+                  44
+                ]
+              },
+              {
+                "token": "\"",
+                "logprob": -7.7301087280554475,
+                "bytes": [
+                  34
+                ]
+              },
+              {
+                "token": "\"},",
+                "logprob": -9.497713555936306,
+                "bytes": [
+                  34,
+                  125,
+                  44
+                ]
+              },
+              {
+                "token": "}",
+                "logprob": -10.316269387845486,
+                "bytes": [
+                  125
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 6,
+              "id": 8934,
+              "probability": 0.994242987812406,
+              "support": 2,
+              "entropy": 0.035431258685881595,
+              "selection_ms": 0.114353,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 2,
+                  "entropy": 0.0038437814465374807
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.0038437814465374807
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.035431258685881595
+                }
+              ],
+              "top": [
+                {
+                  "id": 8934,
+                  "probability": 0.994242987812406,
+                  "bytes": [
+                    34,
+                    125
+                  ],
+                  "token": "\"}"
+                },
+                {
+                  "id": 1,
+                  "probability": 0.005757012187593991,
+                  "bytes": [
+                    34
+                  ],
+                  "token": "\""
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 1589.8589999997057,
+        "constraint": {
+          "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+              "name": "workshop_tool",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tool": {
+                    "enum": [
+                      "Hammer",
+                      "Wrench",
+                      "Drill"
+                    ]
+                  }
+                },
+                "required": [
+                  "tool"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    ],
+    "semantics": "Each run is a new generation. The six unconstrained recipes share the initial prompt. GBNF and strict JSON remove invalid continuations before sampling. Structured-output instructions can change the prompt; later tokens always depend on their own generated prefix."
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 9,
+    "summed_request_ms": 6212.937399861403,
+    "prompt_tokens": 289,
+    "completion_tokens": 32,
+    "calls": [
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "min_p",
+              "temperature"
+            ],
+            "min_p": 0.05,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-711ef79f75284509a44f48d3",
+          "object": "chat.completion",
+          "created": 1791083760,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hammer"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "Ham",
+                    "logprob": -0.2305058009809744,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 38617,
+                      "probability": 0.7689063449040189,
+                      "support": 3,
+                      "entropy": 0.7006241514602591,
+                      "selection_ms": 21.484569,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.0456722695674654
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 3,
+                          "entropy": 0.4068453230795882
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 3,
+                          "entropy": 0.7006241514602591
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.7689063449040189,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.11974007243369045,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 35671,
+                          "probability": 0.11135358266229073,
+                          "bytes": [
+                            32,
+                            72,
+                            97,
+                            109,
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": " Hammer"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -5.929782734064179e-05,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -5.929782734064179e-05,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.18558233096943,
+                        "bytes": null
+                      },
+                      {
+                        "token": " mer",
+                        "logprob": -12.720571687964059,
+                        "bytes": [
+                          32,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -12.899488619116402,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      },
+                      {
+                        "token": "ster",
+                        "logprob": -13.366207292822457,
+                        "bytes": [
+                          115,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 1134,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.752203,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0007780113013029854
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 1,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 23,
+            "prompt_ms": 905.5,
+            "prompt_per_token_ms": 39.37,
+            "prompt_per_second": 25.4,
+            "predicted_n": 3,
+            "predicted_ms": 221.6,
+            "predicted_per_token_ms": 73.867,
+            "predicted_per_second": 13.5,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 1223.9476999966428,
+        "captured_at": "2026-10-04T03:16:02Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "temperature",
+              "min_p"
+            ],
+            "min_p": 0.05,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-c4b681359f544ec0bb61def4",
+          "object": "chat.completion",
+          "created": 1791083761,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "W",
+                    "logprob": -3.0199745662397635,
+                    "bytes": [
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 54,
+                      "probability": 0.09758894600388959,
+                      "support": 6,
+                      "entropy": 1.2442372262575794,
+                      "selection_ms": 23.271066,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.0456722695674654
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 248320,
+                          "entropy": 6.5285225042667046
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 6,
+                          "entropy": 1.2442372262575794
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.6266637245976295,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.09758894600388959,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 35671,
+                          "probability": 0.09075390172147922,
+                          "bytes": [
+                            32,
+                            72,
+                            97,
+                            109,
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": " Hammer"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.07838008024901671,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        },
+                        {
+                          "id": 43823,
+                          "probability": 0.07046276750346628,
+                          "bytes": [
+                            104,
+                            97,
+                            109,
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "hammer"
+                        },
+                        {
+                          "id": 50,
+                          "probability": 0.03615057992451852,
+                          "bytes": [
+                            83
+                          ],
+                          "token": "S"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.0003738266002566631,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.0003738266002566631,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -8.052328096009436,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "ench",
+                        "logprob": -11.119985566712561,
+                        "bytes": [
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -11.315185533143225,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "rist",
+                        "logprob": -12.610091195679846,
+                        "bytes": [
+                          114,
+                          105,
+                          115,
+                          116
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 23.265435,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0037015710218421026
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 248320,
+                          "entropy": 0.3387286224444237
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 16
+            }
+          },
+          "timings": {
+            "cache_n": 16,
+            "prompt_n": 7,
+            "prompt_ms": 263.4,
+            "prompt_per_token_ms": 37.629,
+            "prompt_per_second": 26.6,
+            "predicted_n": 3,
+            "predicted_ms": 240.3,
+            "predicted_per_token_ms": 80.1,
+            "predicted_per_second": 12.5,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 518.0564999463968,
+        "captured_at": "2026-10-04T03:16:02Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_n_sigma",
+              "temperature"
+            ],
+            "top_n_sigma": 2,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-cd84ab94f74942e793143644",
+          "object": "chat.completion",
+          "created": 1791083762,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hammer"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "Ham",
+                    "logprob": -0.2305058009809744,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 38617,
+                      "probability": 0.701447377564346,
+                      "support": 4,
+                      "entropy": 0.9364185716567496,
+                      "selection_ms": 20.69582,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.0456722695674654
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 4,
+                          "entropy": 0.5532210414374376
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 4,
+                          "entropy": 0.9364185716567496
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.701447377564346,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.10923483770765541,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 35671,
+                          "probability": 0.10158412537304348,
+                          "bytes": [
+                            32,
+                            72,
+                            97,
+                            109,
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": " Hammer"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.087733659354955,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -5.929782734064179e-05,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -5.929782734064179e-05,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.18558233096943,
+                        "bytes": null
+                      },
+                      {
+                        "token": " mer",
+                        "logprob": -12.720571687964059,
+                        "bytes": [
+                          32,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -12.899488619116402,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      },
+                      {
+                        "token": "ster",
+                        "logprob": -13.366207292822457,
+                        "bytes": [
+                          115,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 1134,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 20.780738,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0007780113013029854
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 1,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 16
+            }
+          },
+          "timings": {
+            "cache_n": 16,
+            "prompt_n": 7,
+            "prompt_ms": 263.2,
+            "prompt_per_token_ms": 37.6,
+            "prompt_per_second": 26.6,
+            "predicted_n": 3,
+            "predicted_ms": 217.1,
+            "predicted_per_token_ms": 72.367,
+            "predicted_per_second": 13.8,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 504.76999999955297,
+        "captured_at": "2026-10-04T03:16:03Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "xtc",
+              "temperature"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 0.12,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-75bbc80b15d34390a043162b",
+          "object": "chat.completion",
+          "created": 1791083762,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hammer"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "Ham",
+                    "logprob": -0.2305058009809744,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 38617,
+                      "probability": 0.8958205695787115,
+                      "support": 4,
+                      "entropy": 0.4474769575803137,
+                      "selection_ms": 19.664069,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.0456722695674654
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.8638918122609672
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 4,
+                          "entropy": 0.5532210414374376
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 4,
+                          "entropy": 0.5532210414374376
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 4,
+                          "entropy": 0.4474769575803137
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.8958205695787115,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.04037982974588423,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 35671,
+                          "probability": 0.03577713942268008,
+                          "bytes": [
+                            32,
+                            72,
+                            97,
+                            109,
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": " Hammer"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.02802246125272433,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -5.929782734064179e-05,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -5.929782734064179e-05,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.18558233096943,
+                        "bytes": null
+                      },
+                      {
+                        "token": " mer",
+                        "logprob": -12.720571687964059,
+                        "bytes": [
+                          32,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -12.899488619116402,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      },
+                      {
+                        "token": "ster",
+                        "logprob": -13.366207292822457,
+                        "bytes": [
+                          115,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 1134,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.71331,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0007780113013029854
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.0006316630293374455
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 1,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 16
+            }
+          },
+          "timings": {
+            "cache_n": 16,
+            "prompt_n": 7,
+            "prompt_ms": 263.8,
+            "prompt_per_token_ms": 37.686,
+            "prompt_per_second": 26.5,
+            "predicted_n": 3,
+            "predicted_ms": 214.6,
+            "predicted_per_token_ms": 71.533,
+            "predicted_per_second": 14.0,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 495.5570999882184,
+        "captured_at": "2026-10-04T03:16:03Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "temperature",
+              "xtc"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 0.12,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-60593f537da04d3d99de9587",
+          "object": "chat.completion",
+          "created": 1791083763,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hammer"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "Ham",
+                    "logprob": -0.2305058009809744,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 38617,
+                      "probability": 0.8958205695787115,
+                      "support": 4,
+                      "entropy": 0.4474769575803137,
+                      "selection_ms": 19.652257,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.0456722695674654
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.8638918122609672
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 4,
+                          "entropy": 0.5532210414374376
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 4,
+                          "entropy": 0.4474769575803137
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 4,
+                          "entropy": 0.4474769575803137
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.8958205695787115,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.04037982974588423,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 35671,
+                          "probability": 0.03577713942268008,
+                          "bytes": [
+                            32,
+                            72,
+                            97,
+                            109,
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": " Hammer"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.02802246125272433,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -5.929782734064179e-05,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -5.929782734064179e-05,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.18558233096943,
+                        "bytes": null
+                      },
+                      {
+                        "token": " mer",
+                        "logprob": -12.720571687964059,
+                        "bytes": [
+                          32,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -12.899488619116402,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      },
+                      {
+                        "token": "ster",
+                        "logprob": -13.366207292822457,
+                        "bytes": [
+                          115,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 1134,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.698964,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0007780113013029854
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.0006316630293374455
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 1,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 16
+            }
+          },
+          "timings": {
+            "cache_n": 16,
+            "prompt_n": 7,
+            "prompt_ms": 264.1,
+            "prompt_per_token_ms": 37.729,
+            "prompt_per_second": 26.5,
+            "predicted_n": 3,
+            "predicted_ms": 215.3,
+            "predicted_per_token_ms": 71.767,
+            "predicted_per_second": 13.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 493.7707999488339,
+        "captured_at": "2026-10-04T03:16:04Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "xtc",
+              "temperature"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 1,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-7db4cd362d5f4ceaa69ebd95",
+          "object": "chat.completion",
+          "created": 1791083763,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hammer"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "Ham",
+                    "logprob": -0.2305058009809744,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 38617,
+                      "probability": 0.8958205695787115,
+                      "support": 4,
+                      "entropy": 0.4474769575803137,
+                      "selection_ms": 19.681782,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.0456722695674654
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.8638918122609672
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 4,
+                          "entropy": 0.5532210414374376
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 4,
+                          "entropy": 0.5532210414374376
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 4,
+                          "entropy": 0.4474769575803137
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.8958205695787115,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.04037982974588423,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 35671,
+                          "probability": 0.03577713942268008,
+                          "bytes": [
+                            32,
+                            72,
+                            97,
+                            109,
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": " Hammer"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.02802246125272433,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -5.929782734064179e-05,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -5.929782734064179e-05,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.18558233096943,
+                        "bytes": null
+                      },
+                      {
+                        "token": " mer",
+                        "logprob": -12.720571687964059,
+                        "bytes": [
+                          32,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -12.899488619116402,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      },
+                      {
+                        "token": "ster",
+                        "logprob": -13.366207292822457,
+                        "bytes": [
+                          115,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 1134,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.714743,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0007780113013029854
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.0006316630293374455
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 1,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 16
+            }
+          },
+          "timings": {
+            "cache_n": 16,
+            "prompt_n": 7,
+            "prompt_ms": 264.9,
+            "prompt_per_token_ms": 37.843,
+            "prompt_per_second": 26.4,
+            "predicted_n": 3,
+            "predicted_ms": 215.2,
+            "predicted_per_token_ms": 71.733,
+            "predicted_per_second": 13.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 512.3918000026606,
+        "captured_at": "2026-10-04T03:16:04Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 64,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\"",
+          "strata_sampler": {
+            "chain": [
+              "min_p",
+              "temperature"
+            ],
+            "min_p": 0.05,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-a01c22b5dc844c71b6486e32",
+          "object": "chat.completion",
+          "created": 1791083764,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hammer"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "Ham",
+                    "logprob": -0.2305058009809744,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 38617,
+                      "probability": 0.8652556628851111,
+                      "support": 2,
+                      "entropy": 0.3953069981433256,
+                      "selection_ms": 0.119924,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 7,
+                          "entropy": 0.38796523685802703
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 2,
+                          "entropy": 0.22113839857578127
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.3953069981433256
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.8652556628851111,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.13474433711488878,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -5.929782734064179e-05,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -5.929782734064179e-05,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.18558233096943,
+                        "bytes": null
+                      },
+                      {
+                        "token": " mer",
+                        "logprob": -12.720571687964059,
+                        "bytes": [
+                          32,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -12.899488619116402,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      },
+                      {
+                        "token": "ster",
+                        "logprob": -13.366207292822457,
+                        "bytes": [
+                          115,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 1134,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.113681,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 3,
+                          "entropy": 1.2279938470540171e-05
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 1,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 16
+            }
+          },
+          "timings": {
+            "cache_n": 16,
+            "prompt_n": 7,
+            "prompt_ms": 264.6,
+            "prompt_per_token_ms": 37.8,
+            "prompt_per_second": 26.5,
+            "predicted_n": 3,
+            "predicted_ms": 156.7,
+            "predicted_per_token_ms": 52.233,
+            "predicted_per_second": 19.1,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 436.35360000189394,
+        "captured_at": "2026-10-04T03:16:05Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 64,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\"",
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "xtc",
+              "temperature"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 1,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-15003b2a69c1494ab87a4b88",
+          "object": "chat.completion",
+          "created": 1791083764,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Hammer"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "Ham",
+                    "logprob": -0.2305058009809744,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.2305058009809744,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -3.0199745662397635,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -3.1288937099165213,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -3.3487661845869314,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -3.508494234818865,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 38617,
+                      "probability": 0.9290596668101675,
+                      "support": 3,
+                      "entropy": 0.3040726035978527,
+                      "selection_ms": 0.117649,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 7,
+                          "entropy": 0.38796523685802703
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 7,
+                          "entropy": 0.38796523685802703
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 3,
+                          "entropy": 0.38025448810015205
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 3,
+                          "entropy": 0.38025448810015205
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 3,
+                          "entropy": 0.3040726035978527
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.9290596668101675,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.04187810867884543,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.02906222451098715,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -5.929782734064179e-05,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -5.929782734064179e-05,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.18558233096943,
+                        "bytes": null
+                      },
+                      {
+                        "token": " mer",
+                        "logprob": -12.720571687964059,
+                        "bytes": [
+                          32,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -12.899488619116402,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      },
+                      {
+                        "token": "ster",
+                        "logprob": -13.366207292822457,
+                        "bytes": [
+                          115,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 1134,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.116167,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 3,
+                          "entropy": 1.2279938470540171e-05
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 3,
+                          "entropy": 1.2279938470540171e-05
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 1,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 3,
+            "total_tokens": 26,
+            "prompt_tokens_details": {
+              "cached_tokens": 16
+            }
+          },
+          "timings": {
+            "cache_n": 16,
+            "prompt_n": 7,
+            "prompt_ms": 263.7,
+            "prompt_per_token_ms": 37.671,
+            "prompt_per_second": 26.5,
+            "predicted_n": 3,
+            "predicted_ms": 156.9,
+            "predicted_per_token_ms": 52.3,
+            "predicted_per_second": 19.1,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 438.23089997749776,
+        "captured_at": "2026-10-04T03:16:05Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Name one useful workshop tool. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 64,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+              "name": "workshop_tool",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tool": {
+                    "enum": [
+                      "Hammer",
+                      "Wrench",
+                      "Drill"
+                    ]
+                  }
+                },
+                "required": [
+                  "tool"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "strata_sampler": {
+            "chain": [
+              "top_n_sigma",
+              "temperature"
+            ],
+            "top_n_sigma": 2,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-46128cf87b074b35816e8eb4",
+          "object": "chat.completion",
+          "created": 1791083765,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "{\"tool\": \"Hammer\"}"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "{\"",
+                    "logprob": -0.11650226268663469,
+                    "bytes": [
+                      123,
+                      34
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "{\"",
+                        "logprob": -0.11650226268663469,
+                        "bytes": [
+                          123,
+                          34
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -2.4869284406651504,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": " {\"",
+                        "logprob": -4.447524525259877,
+                        "bytes": [
+                          32,
+                          123,
+                          34
+                        ]
+                      },
+                      {
+                        "token": "Ham",
+                        "logprob": -5.969585873221303,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -6.20404384288683,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 4754,
+                      "probability": 0.8292447523436108,
+                      "support": 2,
+                      "entropy": 0.45708173541876457,
+                      "selection_ms": 0.131716,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 2,
+                          "entropy": 0.2918962367501198
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.2918962367501198
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.45708173541876457
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 4754,
+                          "probability": 0.8292447523436108,
+                          "bytes": [
+                            123,
+                            34
+                          ],
+                          "token": "{\""
+                        },
+                        {
+                          "id": 90,
+                          "probability": 0.1707552476563892,
+                          "bytes": [
+                            123
+                          ],
+                          "token": "{"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "tool",
+                    "logprob": -0.000986119465473623,
+                    "bytes": [
+                      116,
+                      111,
+                      111,
+                      108
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "tool",
+                        "logprob": -0.000986119465473623,
+                        "bytes": [
+                          116,
+                          111,
+                          111,
+                          108
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -8.819503804401997,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "dr",
+                        "logprob": -8.900831242756489,
+                        "bytes": [
+                          100,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "type",
+                        "logprob": -9.106487294392231,
+                        "bytes": [
+                          116,
+                          121,
+                          112,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "text",
+                        "logprob": -9.724390050129536,
+                        "bytes": [
+                          116,
+                          101,
+                          120,
+                          116
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 13766,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.113661,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 4,
+                          "entropy": 1.724585946591409e-05
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 13766,
+                          "probability": 1,
+                          "bytes": [
+                            116,
+                            111,
+                            111,
+                            108
+                          ],
+                          "token": "tool"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "\":",
+                    "logprob": -0.024827453651434076,
+                    "bytes": [
+                      34,
+                      58
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "\":",
+                        "logprob": -0.024827453651434076,
+                        "bytes": [
+                          34,
+                          58
+                        ]
+                      },
+                      {
+                        "token": "\":\"",
+                        "logprob": -3.75394389347077,
+                        "bytes": [
+                          34,
+                          58,
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\"",
+                        "logprob": -7.008729431190496,
+                        "bytes": [
+                          34
+                        ]
+                      },
+                      {
+                        "token": "_name",
+                        "logprob": -10.022747489967353,
+                        "bytes": [
+                          95,
+                          110,
+                          97,
+                          109,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "\":{\"",
+                        "logprob": -10.284298393287665,
+                        "bytes": [
+                          34,
+                          58,
+                          123,
+                          34
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 2,
+                      "id": 763,
+                      "probability": 0.9231600281747513,
+                      "support": 2,
+                      "entropy": 0.27098281598258644,
+                      "selection_ms": 0.114974,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 3,
+                          "entropy": 0.11832118593273983
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.11118135424304203
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.27098281598258644
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 763,
+                          "probability": 0.9231600281747513,
+                          "bytes": [
+                            34,
+                            58
+                          ],
+                          "token": "\":"
+                        },
+                        {
+                          "id": 3147,
+                          "probability": 0.07683997182524871,
+                          "bytes": [
+                            34,
+                            58,
+                            34
+                          ],
+                          "token": "\":\""
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": " \"",
+                    "logprob": -0.0011083301152317122,
+                    "bytes": [
+                      32,
+                      34
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " \"",
+                        "logprob": -0.0011083301152317122,
+                        "bytes": [
+                          32,
+                          34
+                        ]
+                      },
+                      {
+                        "token": " ",
+                        "logprob": -7.946208160742673,
+                        "bytes": [
+                          32
+                        ]
+                      },
+                      {
+                        "token": " [\"",
+                        "logprob": -8.586567085608396,
+                        "bytes": [
+                          32,
+                          91,
+                          34
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -9.618736427649411,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": " Hammer",
+                        "logprob": -9.713847320898923,
+                        "bytes": [
+                          32,
+                          72,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 3,
+                      "id": 328,
+                      "probability": 0.9950170273555249,
+                      "support": 2,
+                      "entropy": 0.03138890579226995,
+                      "selection_ms": 0.115956,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 17,
+                          "entropy": 0.003335278921934443
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.003169033972490097
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.03138890579226995
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 328,
+                          "probability": 0.9950170273555249,
+                          "bytes": [
+                            32,
+                            34
+                          ],
+                          "token": " \""
+                        },
+                        {
+                          "id": 220,
+                          "probability": 0.004982972644475095,
+                          "bytes": [
+                            32
+                          ],
+                          "token": " "
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "Ham",
+                    "logprob": -0.27072401623124864,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "Ham",
+                        "logprob": -0.27072401623124864,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -2.0747859058796863,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "W",
+                        "logprob": -2.3706290302693347,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": "hammer",
+                        "logprob": -4.535628038448046,
+                        "bytes": [
+                          104,
+                          97,
+                          109,
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "dr",
+                        "logprob": -6.020693498653124,
+                        "bytes": [
+                          100,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 4,
+                      "id": 38617,
+                      "probability": 0.6452154928604038,
+                      "support": 4,
+                      "entropy": 0.9048855133923593,
+                      "selection_ms": 0.114914,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 7,
+                          "entropy": 0.6846699914151274
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 4,
+                          "entropy": 0.6840694387596925
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 4,
+                          "entropy": 0.9048855133923593
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 38617,
+                          "probability": 0.6452154928604038,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.19380963841109164,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        },
+                        {
+                          "id": 54,
+                          "probability": 0.15911825730892912,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 39,
+                          "probability": 0.0018566114195754692,
+                          "bytes": [
+                            72
+                          ],
+                          "token": "H"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "mer",
+                    "logprob": -8.580967181427442e-06,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "mer",
+                        "logprob": -8.580967181427442e-06,
+                        "bytes": [
+                          109,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "mar",
+                        "logprob": -12.929574010654681,
+                        "bytes": [
+                          109,
+                          97,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "\"}",
+                        "logprob": -13.214753148838275,
+                        "bytes": [
+                          34,
+                          125
+                        ]
+                      },
+                      {
+                        "token": "me",
+                        "logprob": -13.780879018589252,
+                        "bytes": [
+                          109,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "MER",
+                        "logprob": -14.567156789585345,
+                        "bytes": [
+                          77,
+                          69,
+                          82
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 5,
+                      "id": 1134,
+                      "probability": 0.9998976742585306,
+                      "support": 2,
+                      "entropy": 0.0010424228341883157,
+                      "selection_ms": 0.114333,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 3,
+                          "entropy": 1.538010787839123e-05
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 1.5301837616536557e-05
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.0010424228341883157
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 1134,
+                          "probability": 0.9998976742585306,
+                          "bytes": [
+                            109,
+                            101,
+                            114
+                          ],
+                          "token": "mer"
+                        },
+                        {
+                          "id": 2573,
+                          "probability": 0.00010232574146948636,
+                          "bytes": [
+                            109,
+                            101
+                          ],
+                          "token": "me"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "\"}",
+                    "logprob": -0.0027642151159940334,
+                    "bytes": [
+                      34,
+                      125
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "\"}",
+                        "logprob": -0.0027642151159940334,
+                        "bytes": [
+                          34,
+                          125
+                        ]
+                      },
+                      {
+                        "token": "\",",
+                        "logprob": -6.164452066068143,
+                        "bytes": [
+                          34,
+                          44
+                        ]
+                      },
+                      {
+                        "token": "\"",
+                        "logprob": -7.7301087280554475,
+                        "bytes": [
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\"},",
+                        "logprob": -9.497713555936306,
+                        "bytes": [
+                          34,
+                          125,
+                          44
+                        ]
+                      },
+                      {
+                        "token": "}",
+                        "logprob": -10.316269387845486,
+                        "bytes": [
+                          125
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 6,
+                      "id": 8934,
+                      "probability": 0.994242987812406,
+                      "support": 2,
+                      "entropy": 0.035431258685881595,
+                      "selection_ms": 0.114353,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 2,
+                          "entropy": 0.0038437814465374807
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.0038437814465374807
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.035431258685881595
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 8934,
+                          "probability": 0.994242987812406,
+                          "bytes": [
+                            34,
+                            125
+                          ],
+                          "token": "\"}"
+                        },
+                        {
+                          "id": 1,
+                          "probability": 0.005757012187593991,
+                          "bytes": [
+                            34
+                          ],
+                          "token": "\""
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 105,
+            "completion_tokens": 8,
+            "total_tokens": 113,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 105,
+            "prompt_ms": 1028.9,
+            "prompt_per_token_ms": 9.799,
+            "prompt_per_second": 102.1,
+            "predicted_n": 8,
+            "predicted_ms": 446.5,
+            "predicted_per_token_ms": 55.812,
+            "predicted_per_second": 17.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 1589.8589999997057,
+        "captured_at": "2026-10-04T03:16:07Z"
+      }
+    ]
+  },
+  "wall_ms": 6261.211299977731
+}

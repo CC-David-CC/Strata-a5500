@@ -178,5 +178,89 @@
     },
     "requests": 1,
     "wall_ms": 934.5701000129338
+  },
+  {
+    "page": "samplers",
+    "options": {},
+    "requests": 9,
+    "wall_ms": 6261.211299977731
+  },
+  {
+    "page": "sampler-sandbox",
+    "options": {},
+    "requests": 0,
+    "wall_ms": 0.037699996028095484
+  },
+  {
+    "page": "tictactoe",
+    "options": {},
+    "requests": 14,
+    "wall_ms": 11795.085099991411
+  },
+  {
+    "page": "chess",
+    "options": {},
+    "requests": 7,
+    "wall_ms": 4865.190199983772
+  },
+  {
+    "page": "poker",
+    "options": {},
+    "requests": 9,
+    "wall_ms": 6041.982399998233
+  },
+  {
+    "page": "thermal",
+    "options": {},
+    "requests": 24,
+    "wall_ms": 13526.508900045883
+  },
+  {
+    "page": "scheduler",
+    "options": {},
+    "requests": 12,
+    "wall_ms": 6670.039999997243
+  },
+  {
+    "page": "context",
+    "options": {},
+    "requests": 8,
+    "wall_ms": 5426.307699992321
+  },
+  {
+    "page": "observer",
+    "options": {},
+    "requests": 18,
+    "wall_ms": 10526.80110000074
+  },
+  {
+    "page": "calibration",
+    "options": {},
+    "requests": 14,
+    "wall_ms": 8296.841000032146
+  },
+  {
+    "page": "information",
+    "options": {},
+    "requests": 4,
+    "wall_ms": 2423.3241000329144
+  },
+  {
+    "page": "search",
+    "options": {},
+    "requests": 10,
+    "wall_ms": 7000.244900002144
+  },
+  {
+    "page": "frontier",
+    "options": {},
+    "requests": 0,
+    "wall_ms": 8.891700010281056
+  },
+  {
+    "page": "research-map",
+    "options": {},
+    "requests": 0,
+    "wall_ms": 0.06420002318918705
   }
 ]

@@ -1,0 +1,108 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"A\" | \"B\" | \"C\" | \"D\" | \"E\" | \"F\" | \"G\""
+  },
+  "response": {
+    "id": "chatcmpl-40e05dfce8124dcca88f91c7",
+    "object": "chat.completion",
+    "created": 1791081860,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -1.0902289736197737,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -1.0902289736197737,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -1.5475463259146955,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -1.9965323793814924,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -2.3656653749869614,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "G",
+                  "logprob": -2.4969024050162583,
+                  "bytes": [
+                    71
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 162,
+      "completion_tokens": 2,
+      "total_tokens": 164,
+      "prompt_tokens_details": {
+        "cached_tokens": 155
+      }
+    },
+    "timings": {
+      "cache_n": 155,
+      "prompt_n": 7,
+      "prompt_ms": 219.6,
+      "prompt_per_token_ms": 31.371,
+      "prompt_per_second": 31.9,
+      "predicted_n": 2,
+      "predicted_ms": 64.8,
+      "predicted_per_token_ms": 32.4,
+      "predicted_per_second": 30.9,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 295.58060003910214,
+  "captured_at": "2026-10-04T02:44:21Z"
+}

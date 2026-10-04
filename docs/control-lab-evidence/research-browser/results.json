@@ -1,0 +1,121 @@
+{
+  "checks": [
+    {
+      "case": "gallery-filter-search-motion",
+      "status": "passed"
+    },
+    {
+      "case": "live-connection-unavailable-confirmed",
+      "status": "passed"
+    },
+    {
+      "case": "samplers-controls-export-offline",
+      "status": "passed",
+      "requests": 9
+    },
+    {
+      "case": "sampler-sandbox-controls-export-offline",
+      "status": "passed",
+      "requests": 0
+    },
+    {
+      "case": "tictactoe-controls-export-offline",
+      "status": "passed",
+      "requests": 14
+    },
+    {
+      "case": "chess-controls-export-offline",
+      "status": "passed",
+      "requests": 7
+    },
+    {
+      "case": "poker-controls-export-offline",
+      "status": "passed",
+      "requests": 9
+    },
+    {
+      "case": "thermal-controls-export-offline",
+      "status": "passed",
+      "requests": 24
+    },
+    {
+      "case": "scheduler-controls-export-offline",
+      "status": "passed",
+      "requests": 12
+    },
+    {
+      "case": "context-controls-export-offline",
+      "status": "passed",
+      "requests": 8
+    },
+    {
+      "case": "observer-controls-export-offline",
+      "status": "passed",
+      "requests": 18
+    },
+    {
+      "case": "calibration-controls-export-offline",
+      "status": "passed",
+      "requests": 14
+    },
+    {
+      "case": "information-controls-export-offline",
+      "status": "passed",
+      "requests": 4
+    },
+    {
+      "case": "search-controls-export-offline",
+      "status": "passed",
+      "requests": 10
+    },
+    {
+      "case": "frontier-controls-export-offline",
+      "status": "passed",
+      "requests": 0
+    },
+    {
+      "case": "research-map-controls-export-offline",
+      "status": "passed",
+      "requests": 0
+    },
+    {
+      "case": "samplers-390px",
+      "status": "passed"
+    },
+    {
+      "case": "tictactoe-390px",
+      "status": "passed"
+    },
+    {
+      "case": "chess-390px",
+      "status": "passed"
+    },
+    {
+      "case": "thermal-390px",
+      "status": "passed"
+    },
+    {
+      "case": "frontier-390px",
+      "status": "passed"
+    },
+    {
+      "case": "research-map-390px",
+      "status": "passed"
+    },
+    {
+      "case": "reduced-motion-keyboard",
+      "status": "passed"
+    }
+  ],
+  "console_errors": [],
+  "external_requests": [],
+  "model_server": "live connection failure verified",
+  "viewport_desktop": [
+    1500,
+    1060
+  ],
+  "viewport_mobile": [
+    390,
+    844
+  ]
+}

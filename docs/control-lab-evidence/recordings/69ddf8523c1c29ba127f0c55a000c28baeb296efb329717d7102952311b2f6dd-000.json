@@ -1,0 +1,272 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTick 2. Temperature=62.96 C; load=80. Fan choices=0,30,60. Target=60 C; hard maximum=85 C. Next temperature=T+0.22*load-0.32*fan-0.04*(T-25).\nQUESTION: Choose a fan setting to approach 60 C without crossing 85 C.\nANSWERS:\nA: fan 0\nB: fan 30\nC: fan 60\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "grammar": "root ::= \"A\""
+  },
+  "response": {
+    "id": "chatcmpl-781d1e7e018e4d329faaafe0",
+    "object": "chat.completion",
+    "created": 1791082286,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -2.0142460020507884,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "B",
+                  "logprob": -0.8781318815673899,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -1.126014724584968,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -2.0142460020507884,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -2.614828124853523,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "T",
+                  "logprob": -3.5103302153076243,
+                  "bytes": [
+                    84
+                  ]
+                },
+                {
+                  "token": "**",
+                  "logprob": -5.7621555479492255,
+                  "bytes": [
+                    42,
+                    42
+                  ]
+                },
+                {
+                  "token": "Next",
+                  "logprob": -6.463344589086921,
+                  "bytes": [
+                    78,
+                    101,
+                    120,
+                    116
+                  ]
+                },
+                {
+                  "token": "Temperature",
+                  "logprob": -6.752624526831061,
+                  "bytes": [
+                    84,
+                    101,
+                    109,
+                    112,
+                    101,
+                    114,
+                    97,
+                    116,
+                    117,
+                    114,
+                    101
+                  ]
+                },
+                {
+                  "token": "To",
+                  "logprob": -6.779226318212897,
+                  "bytes": [
+                    84,
+                    111
+                  ]
+                },
+                {
+                  "token": "0",
+                  "logprob": -6.881339088293464,
+                  "bytes": [
+                    48
+                  ]
+                },
+                {
+                  "token": "The",
+                  "logprob": -7.194600120397956,
+                  "bytes": [
+                    84,
+                    104,
+                    101
+                  ]
+                },
+                {
+                  "token": "Looking",
+                  "logprob": -7.229669586035163,
+                  "bytes": [
+                    76,
+                    111,
+                    111,
+                    107,
+                    105,
+                    110,
+                    103
+                  ]
+                },
+                {
+                  "token": "6",
+                  "logprob": -7.284547820898444,
+                  "bytes": [
+                    54
+                  ]
+                },
+                {
+                  "token": "Given",
+                  "logprob": -7.535218253942878,
+                  "bytes": [
+                    71,
+                    105,
+                    118,
+                    101,
+                    110
+                  ]
+                },
+                {
+                  "token": "Calculate",
+                  "logprob": -7.729134574743659,
+                  "bytes": [
+                    67,
+                    97,
+                    108,
+                    99,
+                    117,
+                    108,
+                    97,
+                    116,
+                    101
+                  ]
+                },
+                {
+                  "token": "temperature",
+                  "logprob": -7.856531158300788,
+                  "bytes": [
+                    116,
+                    101,
+                    109,
+                    112,
+                    101,
+                    114,
+                    97,
+                    116,
+                    117,
+                    114,
+                    101
+                  ]
+                },
+                {
+                  "token": "Current",
+                  "logprob": -7.926839843603522,
+                  "bytes": [
+                    67,
+                    117,
+                    114,
+                    114,
+                    101,
+                    110,
+                    116
+                  ]
+                },
+                {
+                  "token": "State",
+                  "logprob": -8.032573715063483,
+                  "bytes": [
+                    83,
+                    116,
+                    97,
+                    116,
+                    101
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -8.262392059179694,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "Fan",
+                  "logprob": -8.288938537451179,
+                  "bytes": [
+                    70,
+                    97,
+                    110
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 158,
+      "completion_tokens": 2,
+      "total_tokens": 160,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 158,
+      "prompt_ms": 1099.8,
+      "prompt_per_token_ms": 6.961,
+      "prompt_per_second": 143.7,
+      "predicted_n": 2,
+      "predicted_ms": 62.4,
+      "predicted_per_token_ms": 31.2,
+      "predicted_per_second": 32.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 1186.062699998729,
+  "captured_at": "2026-10-04T02:51:28Z"
+}

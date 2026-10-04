@@ -7,6 +7,7 @@ import asyncio
 import json
 from pathlib import Path
 import time
+import sys
 
 from .catalog import PAGES
 from .client import Backend, Context, RECORDINGS, ROOT
@@ -44,6 +45,8 @@ async def capture(args):
 
 
 def main():
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base-url', default='http://127.0.0.1:8080')
     parser.add_argument('--output', default=str(RECORDINGS.parent))

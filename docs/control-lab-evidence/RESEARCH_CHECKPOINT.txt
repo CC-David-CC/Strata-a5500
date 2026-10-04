@@ -1,0 +1,6 @@
+Branch: work/control-lab
+Logprobs base: 2243cb1c5b1a87270731d8b8a76e4af001f96f97
+Sampler dependency: 450285f3c90748057a02648345e6c3973519a710
+Dependency merge: 11db33b05f860e345723981d0a2d1e13e7427734
+Implementation identity: research-source-manifest.json pins the tested source files.
+The full implementation commit will be added in the immediately following receipt commit.

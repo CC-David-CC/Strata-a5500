@@ -1,0 +1,115 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTime 2. Completed ['inspect']. Jobs: [{\"id\": \"patch\", \"duration\": 4, \"deadline\": 8, \"after\": [\"inspect\"], \"meaning\": \"repair the known bug\"}, {\"id\": \"verify\", \"duration\": 3, \"deadline\": 12, \"after\": [\"patch\"], \"meaning\": \"run verification\"}, {\"id\": \"docs\", \"duration\": 2, \"deadline\": 5, \"after\": [], \"meaning\": \"update release notes\"}]\nQUESTION: Which job should run next to reduce lateness while respecting dependencies?\nANSWERS:\nA: patch: repair the known bug\nB: verify: run verification\nC: docs: update release notes\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"A\" | \"C\""
+  },
+  "response": {
+    "id": "chatcmpl-9cf718f33d9d45118dbe7f06",
+    "object": "chat.completion",
+    "created": 1791082300,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "C"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "C",
+              "logprob": -0.47424433077959527,
+              "bytes": [
+                67
+              ],
+              "top_logprobs": [
+                {
+                  "token": "C",
+                  "logprob": -0.47424433077959527,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -1.0106270059504938,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -4.571471427337213,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "patch",
+                  "logprob": -6.803628180877252,
+                  "bytes": [
+                    112,
+                    97,
+                    116,
+                    99,
+                    104
+                  ]
+                },
+                {
+                  "token": "docs",
+                  "logprob": -7.556223128692193,
+                  "bytes": [
+                    100,
+                    111,
+                    99,
+                    115
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 194,
+      "completion_tokens": 2,
+      "total_tokens": 196,
+      "prompt_tokens_details": {
+        "cached_tokens": 187
+      }
+    },
+    "timings": {
+      "cache_n": 187,
+      "prompt_n": 7,
+      "prompt_ms": 207.1,
+      "prompt_per_token_ms": 29.586,
+      "prompt_per_second": 33.8,
+      "predicted_n": 2,
+      "predicted_ms": 55.3,
+      "predicted_per_token_ms": 27.65,
+      "predicted_per_second": 36.2,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 277.257300040219,
+  "captured_at": "2026-10-04T02:51:41Z"
+}

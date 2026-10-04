@@ -39,9 +39,9 @@ def distribution_stats(weights, levels=None):
     return result
 
 
-def literal_grammar(strings):
-    if not strings or len(strings) > 16 or len(set(strings)) != len(strings):
-        raise ValueError("Use 1..16 distinct literal answers")
+def literal_grammar(strings, *, max_literals=16):
+    if not strings or len(strings) > max_literals or len(set(strings)) != len(strings):
+        raise ValueError(f"Use 1..{max_literals} distinct literal answers")
     if any(not s or len(s.encode('utf-8')) > 256 or '\0' in s for s in strings):
         raise ValueError("Answers must have 1..256 UTF-8 bytes and no NUL")
     return 'root ::= ' + ' | '.join(json.dumps(s, ensure_ascii=False) for s in strings)

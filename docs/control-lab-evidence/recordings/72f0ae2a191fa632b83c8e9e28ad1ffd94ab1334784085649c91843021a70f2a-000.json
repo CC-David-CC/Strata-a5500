@@ -1,0 +1,110 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nTick 1. Temperature=68.5 C; load=70. Fan choices=0,30,60. Target=60 C; hard maximum=85 C. Next temperature=T+0.22*load-0.32*fan-0.04*(T-25).\nQUESTION: Choose a fan setting to approach 60 C without crossing 85 C.\nANSWERS:\nA: fan 0\nB: fan 30\nC: fan 60\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"A\" | \"B\" | \"C\""
+  },
+  "response": {
+    "id": "chatcmpl-bed69f9c53a448e5aa584448",
+    "object": "chat.completion",
+    "created": 1791082286,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "C"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "C",
+              "logprob": -0.6093601638072063,
+              "bytes": [
+                67
+              ],
+              "top_logprobs": [
+                {
+                  "token": "C",
+                  "logprob": -0.6093601638072063,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -1.0322803908579874,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "A",
+                  "logprob": -2.551958506702714,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "T",
+                  "logprob": -5.306089823841386,
+                  "bytes": [
+                    84
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -5.354607051014238,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 157,
+      "completion_tokens": 2,
+      "total_tokens": 159,
+      "prompt_tokens_details": {
+        "cached_tokens": 150
+      }
+    },
+    "timings": {
+      "cache_n": 150,
+      "prompt_n": 7,
+      "prompt_ms": 233.3,
+      "prompt_per_token_ms": 33.329,
+      "prompt_per_second": 30.0,
+      "predicted_n": 2,
+      "predicted_ms": 59.5,
+      "predicted_per_token_ms": 29.75,
+      "predicted_per_second": 33.6,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 313.9115999802016,
+  "captured_at": "2026-10-04T02:51:27Z"
+}

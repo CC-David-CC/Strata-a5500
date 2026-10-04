@@ -96,6 +96,7 @@ def create_app(backend_factory=None):
     async def catalog():
         return {'pages': PAGES, 'recordings': len(list(RECORDINGS.glob('*.json'))),
                 'base_commit': '2243cb1c5b1a87270731d8b8a76e4af001f96f97',
+                'sampler_dependency': '450285f3c90748057a02648345e6c3973519a710',
                 'live_backend_configured_on_server': True}
 
     @app.get('/api/evidence/speculation')
@@ -160,6 +161,9 @@ def create_app(backend_factory=None):
     app.mount('/static', StaticFiles(directory=STATIC), name='static')
 
     @app.get('/')
+    async def gallery():
+        return FileResponse(STATIC / 'gallery.html')
+
     @app.get('/lab/{name}')
     async def index(name: str = 'choice'):
         if name not in BY_ID:

@@ -1,0 +1,44 @@
+{
+  "page": "sampler-sandbox",
+  "options": {},
+  "result": {
+    "kind": "sandbox",
+    "tokens": [
+      "repair",
+      "inspect",
+      "retry",
+      "rewrite",
+      "skip",
+      "invent",
+      "loop",
+      "garbage"
+    ],
+    "logits": [
+      4.2,
+      3.7,
+      2.9,
+      2.4,
+      1.2,
+      0.6,
+      -0.2,
+      -2.5
+    ],
+    "history": [
+      "inspect",
+      "repair",
+      "retry",
+      "inspect",
+      "repair"
+    ],
+    "semantics": "Synthetic finite distribution. Every token is shown; this is not a truncated native top-N row. DRY-like and surprise-feedback modes teach mechanisms and are not advertised native implementations."
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 0,
+    "summed_request_ms": 0.0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "calls": []
+  },
+  "wall_ms": 0.037699996028095484
+}

@@ -1,0 +1,233 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nYou are X in tic-tac-toe. Rows are numbered 1 through 9. Current board:\nX 2 3\n4 O 6\n7 8 9\nQUESTION: Choose the move that wins or avoids losing.\nANSWERS:\nA: place X in square 2\nB: place X in square 3\nC: place X in square 4\nD: place X in square 6\nE: place X in square 7\nF: place X in square 8\nG: place X in square 9\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "grammar": "root ::= \"G\""
+  },
+  "response": {
+    "id": "chatcmpl-6b6ef8fa0f2741f0978bdedf",
+    "object": "chat.completion",
+    "created": 1791081859,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "G"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "G",
+              "logprob": -2.4969024050162583,
+              "bytes": [
+                71
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -1.0902289736197737,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -1.5475463259146955,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -1.9965323793814924,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -2.3656653749869614,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "G",
+                  "logprob": -2.4969024050162583,
+                  "bytes": [
+                    71
+                  ]
+                },
+                {
+                  "token": "F",
+                  "logprob": -2.6532935488150864,
+                  "bytes": [
+                    70
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -2.8585128176139145,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "X",
+                  "logprob": -4.767505584947899,
+                  "bytes": [
+                    88
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -8.130204139940574,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "Answer",
+                  "logprob": -8.917417465441062,
+                  "bytes": [
+                    65,
+                    110,
+                    115,
+                    119,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "[",
+                  "logprob": -9.533304153673484,
+                  "bytes": [
+                    91
+                  ]
+                },
+                {
+                  "token": "x",
+                  "logprob": -9.678758560411765,
+                  "bytes": [
+                    120
+                  ]
+                },
+                {
+                  "token": "H",
+                  "logprob": -9.714017807237937,
+                  "bytes": [
+                    72
+                  ]
+                },
+                {
+                  "token": "I",
+                  "logprob": -9.731210647814109,
+                  "bytes": [
+                    73
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -9.921102462999656,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": "To",
+                  "logprob": -9.94932359337075,
+                  "bytes": [
+                    84,
+                    111
+                  ]
+                },
+                {
+                  "token": "V",
+                  "logprob": -9.983454643480613,
+                  "bytes": [
+                    86
+                  ]
+                },
+                {
+                  "token": " A",
+                  "logprob": -9.996961532823875,
+                  "bytes": [
+                    32,
+                    65
+                  ]
+                },
+                {
+                  "token": "State",
+                  "logprob": -10.112029014818503,
+                  "bytes": [
+                    83,
+                    116,
+                    97,
+                    116,
+                    101
+                  ]
+                },
+                {
+                  "token": "Question",
+                  "logprob": -10.113424240343406,
+                  "bytes": [
+                    81,
+                    117,
+                    101,
+                    115,
+                    116,
+                    105,
+                    111,
+                    110
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 162,
+      "completion_tokens": 2,
+      "total_tokens": 164,
+      "prompt_tokens_details": {
+        "cached_tokens": 155
+      }
+    },
+    "timings": {
+      "cache_n": 155,
+      "prompt_n": 7,
+      "prompt_ms": 223.7,
+      "prompt_per_token_ms": 31.957,
+      "prompt_per_second": 31.3,
+      "predicted_n": 2,
+      "predicted_ms": 74.2,
+      "predicted_per_token_ms": 37.1,
+      "predicted_per_second": 27.0,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 310.29559997841716,
+  "captured_at": "2026-10-04T02:44:20Z"
+}

@@ -86,4 +86,6 @@ PAGES = [
          dict(repeats=3), ['logprobs', 'GBNF', 'JSON', 'latency'],
          'Profile the limiting kernels, bound memory/compute cost, then optimize one branch at a time. Keep target-only, MTP, suffix and replay measurements separate.'),
 ]
+from .research_catalog import PAGES as RESEARCH_PAGES
+PAGES += RESEARCH_PAGES
 BY_ID = {p['id']: p for p in PAGES}

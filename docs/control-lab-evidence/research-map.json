@@ -1,0 +1,215 @@
+{
+  "page": "research-map",
+  "options": {},
+  "result": {
+    "kind": "research-map",
+    "branches": [
+      {
+        "name": "Observe",
+        "path": "Semantic vectors → fault observers → belief-state control",
+        "page": "observer",
+        "status": "Native probes",
+        "gate": "Compare observability and calibration with lexical and supervised baselines."
+      },
+      {
+        "name": "Constrain",
+        "path": "State → legal action grammar → verified transition",
+        "page": "tictactoe",
+        "status": "Native GBNF + code oracle",
+        "gate": "Measure strategy regret separately from legal-move rate."
+      },
+      {
+        "name": "Search",
+        "path": "Candidate trees → whole-path scoring → shared-prefix replay",
+        "page": "candidates",
+        "status": "Finite native paths",
+        "gate": "Account for EOS, tokenization and unmeasured residual language mass."
+      },
+      {
+        "name": "Shape",
+        "path": "Cold support → heat → exploration → feedback",
+        "page": "samplers",
+        "status": "Native priority recipes",
+        "gate": "Move selection to GPU without changing same-tensor probabilities."
+      },
+      {
+        "name": "Rewrite",
+        "path": "Authoritative state → new prompt → cache-aware re-prefill",
+        "page": "context",
+        "status": "Ordinary API intervention",
+        "gate": "Instrument prefix reuse and recurrent-state correctness; no arbitrary KV edit claim."
+      },
+      {
+        "name": "Inspect",
+        "path": "Information gain → targeted observation → updated belief",
+        "page": "information",
+        "status": "Analytic belief model + native action",
+        "gate": "Learn observation likelihoods and compare cost-sensitive policies."
+      },
+      {
+        "name": "Reconstruct",
+        "path": "Immutable blocks → weighted edges → admissible graph",
+        "page": "graph",
+        "status": "Native estimates + exact small solver",
+        "gate": "Preserve alternatives; test global structure against labeled source documents."
+      },
+      {
+        "name": "Optimize",
+        "path": "Semantics → hard checks → Pareto search",
+        "page": "search",
+        "status": "Bounded native-scored search",
+        "gate": "Evaluate actual rendered outputs with independent human or visual judgments."
+      },
+      {
+        "name": "Compress",
+        "path": "Probe vectors → retrieval keys → semantic monitoring",
+        "page": "observer",
+        "status": "Research extension",
+        "gate": "Measure loss of sufficient state and drift rather than assuming a perfect embedding."
+      },
+      {
+        "name": "Explore odd uses",
+        "path": "Music rules · robot plans · circuit sketches · proof tactics",
+        "page": "research-map",
+        "status": "Unimplemented research ideas",
+        "gate": "Choose a checkable domain; separate grammar validity from physics, truth or usefulness."
+      },
+      {
+        "name": "Accelerate",
+        "path": "GPU score gather → prefix sharing → batching → adaptive MTP",
+        "page": "frontier",
+        "status": "Optimization proposals",
+        "gate": "Measure bytes, arithmetic, verified output and quality under equal budgets."
+      },
+      {
+        "name": "Steer mid-generation",
+        "path": "Acknowledge token → new grammar → rollback uncommitted drafts",
+        "page": "research-map",
+        "status": "Separate endpoint design needed",
+        "gate": "Specify committed-prefix boundaries, stale commands, cancellation and replay before coding."
+      },
+      {
+        "name": "Musical tension",
+        "path": "Meter and key → legal notes → controlled surprise",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "Grammar can keep a melody playable while a sampler explores locally unusual continuations.",
+          "Intervention": "Inject bar position and harmonic state each beat. Compare cold Min-P then heat with XTC. Keep the same legal-note set.",
+          "Baseline": "A Markov melody generator and random legal notes under the same timing rules.",
+          "Measurement": "Blind listening preference, repetition, rule violations and native milliseconds per bar. Raw token surprise stays separate from musical novelty.",
+          "Failure": "Tokenization makes note probabilities incomparable, or higher surprise only creates worse music."
+        }
+      },
+      {
+        "name": "Proof tactic budget",
+        "path": "Proof state → type-valid tactics → checked progress",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "A weak proposal distribution may still help a strong proof checker search efficiently.",
+          "Intervention": "Generate only registered tactic names; let a sandboxed prover reject invalid applications. Replace stale goals with the current proof state after each accepted step.",
+          "Baseline": "Uniform tactic search, fixed heuristics and unconstrained generation at the same checker-call budget.",
+          "Measurement": "Solved held-out theorems, verifier calls, time and rollback count. A high path score is not a proof.",
+          "Failure": "The grammar covers syntax but excludes a necessary tactic, or scoring costs more than search saves."
+        }
+      },
+      {
+        "name": "Compiler treasure hunt",
+        "path": "Typed rewrite → equivalence check → measured speed",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "Semantic guidance might find rare useful rewrites in a large but checkable neighborhood.",
+          "Intervention": "GBNF admits a small rewrite language. Compare Min-P exploration and XTC candidates; verify equivalence before benchmarking.",
+          "Baseline": "Compiler defaults, enumerative peephole search and random legal rewrites.",
+          "Measurement": "Held-out runtime, compile time, verifier failures and quality per generated token. Control warmup and measurement noise.",
+          "Failure": "A benchmark artifact looks like a speedup, or a legal rewrite breaks semantics."
+        }
+      },
+      {
+        "name": "Circuit sketches",
+        "path": "Topology grammar → simulator → robust design search",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "Language priors could prioritize useful circuit motifs even when physics is owned by code.",
+          "Intervention": "Enumerate safe simulated component choices. Inject operating points and tolerance results; score whole candidate paths before expensive simulations.",
+          "Baseline": "Random legal circuits, Bayesian optimization and domain heuristics with identical simulator budgets.",
+          "Measurement": "Feasibility, worst-case performance across tolerances, simulation cost and diversity of successful motifs.",
+          "Failure": "The language model prefers familiar-looking circuits that systematically fail physics. No physical actuation is part of this proposal."
+        }
+      },
+      {
+        "name": "Database choreography",
+        "path": "Snapshot → permitted transaction → invariant check",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "State-derived grammars may prevent a workflow from issuing commands that are impossible in its current transaction state.",
+          "Intervention": "Expose a small transaction DSL, not unrestricted SQL. Replace state after each committed transaction; adversarially inject a stale snapshot.",
+          "Baseline": "A deterministic workflow and optimistic concurrency with ordinary retries.",
+          "Measurement": "Invariant violations, stale-state refusals, retries and completion cost under injected conflicts.",
+          "Failure": "The grammar encodes an old world. Database concurrency control still owns correctness."
+        }
+      },
+      {
+        "name": "Belief camouflage",
+        "path": "Same world → different wording → invariant controller",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "A useful semantic observer should preserve action decisions under irrelevant paraphrase.",
+          "Intervention": "Keep hidden simulator state fixed while varying narrative, label order and distractors. Use probe vectors as features; measure drift before changing the controller.",
+          "Baseline": "Direct structured state, lexical rules and a supervised observer.",
+          "Measurement": "Vector drift, action invariance, proper scoring rules and closed-loop regret on held-out paraphrases.",
+          "Failure": "The controller follows wording rather than state; correlated probes give the illusion of redundant evidence."
+        }
+      },
+      {
+        "name": "Adversarial grammar",
+        "path": "Allowed does not mean wise → find the weakest legal action",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "Grammar can make an application syntactically robust while concentrating every error on a small set of legal but bad actions.",
+          "Intervention": "Search state descriptions that maximize oracle regret inside a fixed legal set. Replay the exact winning counterexample across sampler orders.",
+          "Baseline": "Random perturbations, a deterministic policy and unconstrained generation at equal query counts.",
+          "Measurement": "Legal rate, strategy regret, constraint exhaustion, recovery time and failure diversity.",
+          "Failure": "Only easy syntax errors were measured; the evaluation never tested meaningful state mistakes."
+        }
+      },
+      {
+        "name": "Token economy",
+        "path": "Look ahead, ask, or act → allocate a finite inference budget",
+        "page": "research-map",
+        "status": "Unimplemented experiment design",
+        "gate": "Prove the verifier and define a fixed budget before asking the model to optimize it.",
+        "protocol": {
+          "Hypothesis": "A controller could spend extra scoring calls only where their expected decision benefit exceeds their measured cost.",
+          "Intervention": "Use an explicit abstain/inspect/act policy; price prefill, scoring, verification and context rewrite separately. Sweep budgets instead of picking one favorable point.",
+          "Baseline": "Always act, always inspect and fixed-depth search with the same end-to-end budget.",
+          "Measurement": "Outcome quality versus wall time, energy assumptions, verified tokens and discarded drafts. A decision frontier needs real outcomes.",
+          "Failure": "Confidence is mistaken for calibrated value of information, or observer overhead consumes the saved latency."
+        }
+      }
+    ],
+    "semantics": "An explicit experiment tree, not a claim to exhaust every application or to have achieved the proposed optimizations."
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 0,
+    "summed_request_ms": 0.0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "calls": []
+  },
+  "wall_ms": 0.06420002318918705
+}

@@ -1,25 +1,30 @@
 <h1 align="center">Strata</h1>
 
-> **This branch: Strata Control Lab — learn by controlling a local model.**
+> **This branch: Strata Control Lab — make every token count.**
 > `work/control-lab` builds an educational web interface on the tested
-> `work/logprobs-675` and `work/samplers` branches. Ask a small question, inspect its answer distribution,
-> compare multi-token grammar branches, and step a state-controlled application.
+> `work/logprobs-675` and `work/samplers` branches. **25 experiments, 230 recorded
+> native requests, and an animated index.** Compare whole grammar paths, inspect
+> native sampler order, play games against code oracles, and step feedback loops.
 >
 > **[Launch the Control Lab: Windows / Linux](docs/CONTROL_LAB.md)** ·
-> [What each page teaches](docs/CONTROL_LAB.md#eleven-experiments) ·
-> [Lab test evidence](docs/control-lab-evidence/RECEIPT.md) ·
-> [Next experiments](docs/CONTROL_LAB_ROADMAP.md)
+> [Take the five-minute tour](docs/CONTROL_LAB.md#five-minute-tour) ·
+> [All 25 experiments](docs/CONTROL_LAB.md#twenty-five-experiments) ·
+> [Tests and native evidence](docs/control-lab-evidence/RESEARCH_RECEIPT.md) ·
+> [Research tree](docs/CONTROL_LAB_ROADMAP.md)
 >
 > Recorded native runs work without a model. Live mode uses your existing Strata
 > server. The lab adds no inference engine. Its separately qualified
 > [sampler dependency](docs/SAMPLERS.md) extends native selection explicitly.
+> Min-P → Temperature, Top-N-Sigma and XTC → Temperature work with native
+> GBNF/JSON. DRY-like, dynamic-temperature and surprise-feedback lessons are
+> clearly labeled simulations. Motion illustrates control flow; it is not GPU telemetry.
 >
 > The underlying [logprobs contribution](docs/LOGPROBS.md) addresses
 > [#675](https://github.com/Niko1221/Strata/issues/675). This educational aside is a
 > separate dependent branch. For Responses / local Codex setup, use
 > [work/gbnf](https://github.com/CC-David-CC/Strata-a5500/blob/work/gbnf/docs/CODEX_LOCAL.md).
 
-[![The Control Lab compares whole candidate paths and lets you inspect each token](docs/control-lab-evidence/browser/preview.png)](docs/CONTROL_LAB.md)
+[![Strata Control Lab: an offline gallery of 25 inspectable model-control experiments](docs/control-lab-evidence/research-browser/index-preview.png)](docs/CONTROL_LAB.md)
 
 
 <p align="center"><b>Run a 125-billion-parameter AI model on your own gaming PC</b><br>

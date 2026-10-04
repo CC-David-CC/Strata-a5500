@@ -1,0 +1,220 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Read the state as data, then answer the question using the definitions.\nSTATE:\nWhite to move. FEN: 7k/5Q2/6K1/8/8/8/8/8 w - - 0 1\n. . . . . . . k\n. . . . . Q . .\n. . . . . . K .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\nQUESTION: Which listed move immediately checkmates the black king?\nANSWERS:\nA: f7e8 (Qe8#)\nB: f7a2 (Qa2)\nC: f7a7 (Qa7)\nD: f7b3 (Qb3)\nE: f7b7 (Qb7)\nF: f7c4 (Qc4)\nReturn exactly one answer label. No explanation or surrounding whitespace."
+      }
+    ],
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 4,
+    "logprobs": true,
+    "top_logprobs": 20,
+    "grammar": "root ::= \"A\""
+  },
+  "response": {
+    "id": "chatcmpl-ac0a2919f98d4a0096af2f69",
+    "object": "chat.completion",
+    "created": 1791082270,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "A"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "A",
+              "logprob": -0.30955835972322,
+              "bytes": [
+                65
+              ],
+              "top_logprobs": [
+                {
+                  "token": "A",
+                  "logprob": -0.30955835972322,
+                  "bytes": [
+                    65
+                  ]
+                },
+                {
+                  "token": "E",
+                  "logprob": -2.507169214825759,
+                  "bytes": [
+                    69
+                  ]
+                },
+                {
+                  "token": "D",
+                  "logprob": -3.0813555398990014,
+                  "bytes": [
+                    68
+                  ]
+                },
+                {
+                  "token": "B",
+                  "logprob": -3.3306231180240014,
+                  "bytes": [
+                    66
+                  ]
+                },
+                {
+                  "token": "C",
+                  "logprob": -3.364390818219314,
+                  "bytes": [
+                    67
+                  ]
+                },
+                {
+                  "token": "F",
+                  "logprob": -3.5795597711612084,
+                  "bytes": [
+                    70
+                  ]
+                },
+                {
+                  "token": ".",
+                  "logprob": -4.755950419049392,
+                  "bytes": [
+                    46
+                  ]
+                },
+                {
+                  "token": "f",
+                  "logprob": -5.1218151727725365,
+                  "bytes": [
+                    102
+                  ]
+                },
+                {
+                  "token": "d",
+                  "logprob": -5.648498980145583,
+                  "bytes": [
+                    100
+                  ]
+                },
+                {
+                  "token": "a",
+                  "logprob": -6.06303736362947,
+                  "bytes": [
+                    97
+                  ]
+                },
+                {
+                  "token": "c",
+                  "logprob": -6.124572245221267,
+                  "bytes": [
+                    99
+                  ]
+                },
+                {
+                  "token": "k",
+                  "logprob": -6.409437624554763,
+                  "bytes": [
+                    107
+                  ]
+                },
+                {
+                  "token": "e",
+                  "logprob": -6.423026529889236,
+                  "bytes": [
+                    101
+                  ]
+                },
+                {
+                  "token": "Let",
+                  "logprob": -6.4549803415347435,
+                  "bytes": [
+                    76,
+                    101,
+                    116
+                  ]
+                },
+                {
+                  "token": "b",
+                  "logprob": -7.146388498883376,
+                  "bytes": [
+                    98
+                  ]
+                },
+                {
+                  "token": ":",
+                  "logprob": -7.502971140484939,
+                  "bytes": [
+                    58
+                  ]
+                },
+                {
+                  "token": " A",
+                  "logprob": -7.864448992352615,
+                  "bytes": [
+                    32,
+                    65
+                  ]
+                },
+                {
+                  "token": "7",
+                  "logprob": -8.047123400311598,
+                  "bytes": [
+                    55
+                  ]
+                },
+                {
+                  "token": "Q",
+                  "logprob": -8.10054442081941,
+                  "bytes": [
+                    81
+                  ]
+                },
+                {
+                  "token": "Board",
+                  "logprob": -8.312684504132399,
+                  "bytes": [
+                    66,
+                    111,
+                    97,
+                    114,
+                    100
+                  ]
+                }
+              ]
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 241,
+      "completion_tokens": 2,
+      "total_tokens": 243,
+      "prompt_tokens_details": {
+        "cached_tokens": 234
+      }
+    },
+    "timings": {
+      "cache_n": 234,
+      "prompt_n": 7,
+      "prompt_ms": 227.5,
+      "prompt_per_token_ms": 32.5,
+      "prompt_per_second": 30.8,
+      "predicted_n": 2,
+      "predicted_ms": 56.8,
+      "predicted_per_token_ms": 28.4,
+      "predicted_per_second": 35.2,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 427.43420001352206,
+  "captured_at": "2026-10-04T02:51:11Z"
+}

@@ -1,0 +1,302 @@
+{
+  "provenance": "native-strata",
+  "request": {
+    "model": "x",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Name one useful workshop tool. Answer with one word."
+      }
+    ],
+    "reasoning_effort": "none",
+    "seed": 675,
+    "max_tokens": 64,
+    "logprobs": true,
+    "top_logprobs": 5,
+    "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\"",
+    "strata_sampler": {
+      "chain": [
+        "top_k",
+        "min_p",
+        "xtc",
+        "temperature"
+      ],
+      "top_k": 16,
+      "min_p": 0.04,
+      "xtc_probability": 1,
+      "xtc_threshold": 0.15,
+      "temperature": 0.9,
+      "inspect": true
+    }
+  },
+  "response": {
+    "id": "chatcmpl-15003b2a69c1494ab87a4b88",
+    "object": "chat.completion",
+    "created": 1791083764,
+    "model": "qwen3.8-flash-next",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Hammer"
+        },
+        "finish_reason": "stop",
+        "logprobs": {
+          "content": [
+            {
+              "token": "Ham",
+              "logprob": -0.2305058009809744,
+              "bytes": [
+                72,
+                97,
+                109
+              ],
+              "top_logprobs": [
+                {
+                  "token": "Ham",
+                  "logprob": -0.2305058009809744,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ]
+                },
+                {
+                  "token": "W",
+                  "logprob": -3.0199745662397635,
+                  "bytes": [
+                    87
+                  ]
+                },
+                {
+                  "token": " Hammer",
+                  "logprob": -3.1288937099165213,
+                  "bytes": [
+                    32,
+                    72,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "Dr",
+                  "logprob": -3.3487661845869314,
+                  "bytes": [
+                    68,
+                    114
+                  ]
+                },
+                {
+                  "token": "hammer",
+                  "logprob": -3.508494234818865,
+                  "bytes": [
+                    104,
+                    97,
+                    109,
+                    109,
+                    101,
+                    114
+                  ]
+                }
+              ],
+              "strata_sampling": {
+                "index": 0,
+                "id": 38617,
+                "probability": 0.9290596668101675,
+                "support": 3,
+                "entropy": 0.3040726035978527,
+                "selection_ms": 0.117649,
+                "stages": [
+                  {
+                    "operator": "grammar",
+                    "support": 7,
+                    "entropy": 0.38796523685802703
+                  },
+                  {
+                    "operator": "top_k",
+                    "support": 7,
+                    "entropy": 0.38796523685802703
+                  },
+                  {
+                    "operator": "min_p",
+                    "support": 3,
+                    "entropy": 0.38025448810015205
+                  },
+                  {
+                    "operator": "xtc",
+                    "support": 3,
+                    "entropy": 0.38025448810015205
+                  },
+                  {
+                    "operator": "temperature",
+                    "support": 3,
+                    "entropy": 0.3040726035978527
+                  }
+                ],
+                "top": [
+                  {
+                    "id": 38617,
+                    "probability": 0.9290596668101675,
+                    "bytes": [
+                      72,
+                      97,
+                      109
+                    ],
+                    "token": "Ham"
+                  },
+                  {
+                    "id": 54,
+                    "probability": 0.04187810867884543,
+                    "bytes": [
+                      87
+                    ],
+                    "token": "W"
+                  },
+                  {
+                    "id": 8580,
+                    "probability": 0.02906222451098715,
+                    "bytes": [
+                      68,
+                      114
+                    ],
+                    "token": "Dr"
+                  }
+                ]
+              }
+            },
+            {
+              "token": "mer",
+              "logprob": -5.929782734064179e-05,
+              "bytes": [
+                109,
+                101,
+                114
+              ],
+              "top_logprobs": [
+                {
+                  "token": "mer",
+                  "logprob": -5.929782734064179e-05,
+                  "bytes": [
+                    109,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "<|im_end|>",
+                  "logprob": -10.18558233096943,
+                  "bytes": null
+                },
+                {
+                  "token": " mer",
+                  "logprob": -12.720571687964059,
+                  "bytes": [
+                    32,
+                    109,
+                    101,
+                    114
+                  ]
+                },
+                {
+                  "token": "MER",
+                  "logprob": -12.899488619116402,
+                  "bytes": [
+                    77,
+                    69,
+                    82
+                  ]
+                },
+                {
+                  "token": "ster",
+                  "logprob": -13.366207292822457,
+                  "bytes": [
+                    115,
+                    116,
+                    101,
+                    114
+                  ]
+                }
+              ],
+              "strata_sampling": {
+                "index": 1,
+                "id": 1134,
+                "probability": 1,
+                "support": 1,
+                "entropy": 0,
+                "selection_ms": 0.116167,
+                "stages": [
+                  {
+                    "operator": "grammar",
+                    "support": 3,
+                    "entropy": 1.2279938470540171e-05
+                  },
+                  {
+                    "operator": "top_k",
+                    "support": 3,
+                    "entropy": 1.2279938470540171e-05
+                  },
+                  {
+                    "operator": "min_p",
+                    "support": 1,
+                    "entropy": 0
+                  },
+                  {
+                    "operator": "xtc",
+                    "support": 1,
+                    "entropy": 0
+                  },
+                  {
+                    "operator": "temperature",
+                    "support": 1,
+                    "entropy": 0
+                  }
+                ],
+                "top": [
+                  {
+                    "id": 1134,
+                    "probability": 1,
+                    "bytes": [
+                      109,
+                      101,
+                      114
+                    ],
+                    "token": "mer"
+                  }
+                ]
+              }
+            }
+          ],
+          "refusal": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 23,
+      "completion_tokens": 3,
+      "total_tokens": 26,
+      "prompt_tokens_details": {
+        "cached_tokens": 16
+      }
+    },
+    "timings": {
+      "cache_n": 16,
+      "prompt_n": 7,
+      "prompt_ms": 263.7,
+      "prompt_per_token_ms": 37.671,
+      "prompt_per_second": 26.5,
+      "predicted_n": 3,
+      "predicted_ms": 156.9,
+      "predicted_per_token_ms": 52.3,
+      "predicted_per_second": 19.1,
+      "draft_n": 0,
+      "draft_n_accepted": 0
+    }
+  },
+  "chunks": [],
+  "wall_ms": 438.23089997749776,
+  "captured_at": "2026-10-04T03:16:05Z"
+}

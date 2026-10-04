@@ -1,0 +1,5990 @@
+{
+  "experiment": "samplers",
+  "type": "result",
+  "result": {
+    "kind": "samplers",
+    "runs": [
+      {
+        "name": "Min-P → Temperature",
+        "profile": {
+          "chain": [
+            "min_p",
+            "temperature"
+          ],
+          "min_p": 0.05,
+          "temperature": 1.5
+        },
+        "text": " Wrench",
+        "tokens": [
+          {
+            "token": " W",
+            "logprob": -1.659454212012728,
+            "bytes": [
+              32,
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 457,
+              "probability": 0.22825603185786042,
+              "support": 5,
+              "entropy": 1.3981324202929013,
+              "selection_ms": 19.808678,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.7408067373115717
+                },
+                {
+                  "operator": "min_p",
+                  "support": 5,
+                  "entropy": 1.1698564120119914
+                },
+                {
+                  "operator": "temperature",
+                  "support": 5,
+                  "entropy": 1.3981324202929013
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 0.4552714427168646,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 457,
+                  "probability": 0.22825603185786042,
+                  "bytes": [
+                    32,
+                    87
+                  ],
+                  "token": " W"
+                },
+                {
+                  "id": 86,
+                  "probability": 0.14204212835061195,
+                  "bytes": [
+                    119
+                  ],
+                  "token": "w"
+                },
+                {
+                  "id": 57478,
+                  "probability": 0.0884758203416939,
+                  "bytes": [
+                    32,
+                    119,
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": " wrench"
+                },
+                {
+                  "id": 12128,
+                  "probability": 0.08595457673296909,
+                  "bytes": [
+                    83,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": "Span"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.004906964006427179,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.004906964006427179,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -5.381522488298419,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -9.634113621416095,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "ench",
+                "logprob": -9.868043255510333,
+                "bytes": [
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.073991131486896,
+                "bytes": null
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.736814,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0333179279293565
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 1356.5205000340939,
+        "constraint": {}
+      },
+      {
+        "name": "Temperature → Min-P",
+        "profile": {
+          "chain": [
+            "temperature",
+            "min_p"
+          ],
+          "min_p": 0.05,
+          "temperature": 1.5
+        },
+        "text": "wrench",
+        "tokens": [
+          {
+            "token": "w",
+            "logprob": -2.3709705923227866,
+            "bytes": [
+              119
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 86,
+              "probability": 0.124907499723605,
+              "support": 8,
+              "entropy": 1.729549691248196,
+              "selection_ms": 23.011443,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.7408067373115717
+                },
+                {
+                  "operator": "temperature",
+                  "support": 248320,
+                  "entropy": 8.308190687604458
+                },
+                {
+                  "operator": "min_p",
+                  "support": 8,
+                  "entropy": 1.729549691248196
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 0.40035177074335226,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 457,
+                  "probability": 0.20072136743700125,
+                  "bytes": [
+                    32,
+                    87
+                  ],
+                  "token": " W"
+                },
+                {
+                  "id": 86,
+                  "probability": 0.124907499723605,
+                  "bytes": [
+                    119
+                  ],
+                  "token": "w"
+                },
+                {
+                  "id": 57478,
+                  "probability": 0.0778029281397222,
+                  "bytes": [
+                    32,
+                    119,
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": " wrench"
+                },
+                {
+                  "id": 12128,
+                  "probability": 0.0755858236861576,
+                  "bytes": [
+                    83,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": "Span"
+                },
+                {
+                  "id": 49,
+                  "probability": 0.044622311362351,
+                  "bytes": [
+                    82
+                  ],
+                  "token": "R"
+                },
+                {
+                  "id": 1426,
+                  "probability": 0.041229265042825376,
+                  "bytes": [
+                    115,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": "span"
+                },
+                {
+                  "id": 11564,
+                  "probability": 0.034779033864985355,
+                  "bytes": [
+                    32,
+                    83,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": " Span"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.0004922839585699735,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.0004922839585699735,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -8.897060582298414,
+                "bytes": null
+              },
+              {
+                "token": "ren",
+                "logprob": -9.422681042808668,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "renched",
+                "logprob": -10.558860966819898,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104,
+                  101,
+                  100
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -10.6941673251573,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 23.11223,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0066182173103476885
+                },
+                {
+                  "operator": "temperature",
+                  "support": 248320,
+                  "entropy": 1.4607687736021824
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 541.1536000319757,
+        "constraint": {}
+      },
+      {
+        "name": "Top-N-Sigma → Temperature",
+        "profile": {
+          "chain": [
+            "top_n_sigma",
+            "temperature"
+          ],
+          "top_n_sigma": 2,
+          "temperature": 1.5
+        },
+        "text": " Wrench",
+        "tokens": [
+          {
+            "token": " W",
+            "logprob": -1.659454212012728,
+            "bytes": [
+              32,
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 457,
+              "probability": 0.22825603185786042,
+              "support": 5,
+              "entropy": 1.3981324202929013,
+              "selection_ms": 20.511136,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.7408067373115717
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 5,
+                  "entropy": 1.1698564120119914
+                },
+                {
+                  "operator": "temperature",
+                  "support": 5,
+                  "entropy": 1.3981324202929013
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 0.4552714427168646,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 457,
+                  "probability": 0.22825603185786042,
+                  "bytes": [
+                    32,
+                    87
+                  ],
+                  "token": " W"
+                },
+                {
+                  "id": 86,
+                  "probability": 0.14204212835061195,
+                  "bytes": [
+                    119
+                  ],
+                  "token": "w"
+                },
+                {
+                  "id": 57478,
+                  "probability": 0.0884758203416939,
+                  "bytes": [
+                    32,
+                    119,
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": " wrench"
+                },
+                {
+                  "id": 12128,
+                  "probability": 0.08595457673296909,
+                  "bytes": [
+                    83,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": "Span"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.004906964006427179,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.004906964006427179,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -5.381522488298419,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -9.634113621416095,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "ench",
+                "logprob": -9.868043255510333,
+                "bytes": [
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.073991131486896,
+                "bytes": null
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 20.822917,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0333179279293565
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 496.3349999743514,
+        "constraint": {}
+      },
+      {
+        "name": "XTC → Temperature",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 0.12,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": " Wrench",
+        "tokens": [
+          {
+            "token": " W",
+            "logprob": -1.659454212012728,
+            "bytes": [
+              32,
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 457,
+              "probability": 0.1993439226747064,
+              "support": 5,
+              "entropy": 1.0878479006317316,
+              "selection_ms": 19.392784,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.7408067373115717
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 1.4658397063434956
+                },
+                {
+                  "operator": "min_p",
+                  "support": 5,
+                  "entropy": 1.1698564120119914
+                },
+                {
+                  "operator": "xtc",
+                  "support": 5,
+                  "entropy": 1.1698564120119914
+                },
+                {
+                  "operator": "temperature",
+                  "support": 5,
+                  "entropy": 1.0878479006317316
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 0.6300135806006539,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 457,
+                  "probability": 0.1993439226747064,
+                  "bytes": [
+                    32,
+                    87
+                  ],
+                  "token": " W"
+                },
+                {
+                  "id": 86,
+                  "probability": 0.09041930827980192,
+                  "bytes": [
+                    119
+                  ],
+                  "token": "w"
+                },
+                {
+                  "id": 57478,
+                  "probability": 0.0410777731202315,
+                  "bytes": [
+                    32,
+                    119,
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": " wrench"
+                },
+                {
+                  "id": 12128,
+                  "probability": 0.039145415324606206,
+                  "bytes": [
+                    83,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": "Span"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.004906964006427179,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.004906964006427179,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -5.381522488298419,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -9.634113621416095,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "ench",
+                "logprob": -9.868043255510333,
+                "bytes": [
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.073991131486896,
+                "bytes": null
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.807176,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0333179279293565
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.03179520337183098
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 493.8728000270203,
+        "constraint": {}
+      },
+      {
+        "name": "Temperature → XTC",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "temperature",
+            "xtc"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 0.12,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": " Wrench",
+        "tokens": [
+          {
+            "token": " W",
+            "logprob": -1.659454212012728,
+            "bytes": [
+              32,
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 457,
+              "probability": 0.1993439226747064,
+              "support": 5,
+              "entropy": 1.0878479006317316,
+              "selection_ms": 19.421507,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.7408067373115717
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 1.4658397063434956
+                },
+                {
+                  "operator": "min_p",
+                  "support": 5,
+                  "entropy": 1.1698564120119914
+                },
+                {
+                  "operator": "temperature",
+                  "support": 5,
+                  "entropy": 1.0878479006317316
+                },
+                {
+                  "operator": "xtc",
+                  "support": 5,
+                  "entropy": 1.0878479006317316
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 0.6300135806006539,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 457,
+                  "probability": 0.1993439226747064,
+                  "bytes": [
+                    32,
+                    87
+                  ],
+                  "token": " W"
+                },
+                {
+                  "id": 86,
+                  "probability": 0.09041930827980192,
+                  "bytes": [
+                    119
+                  ],
+                  "token": "w"
+                },
+                {
+                  "id": 57478,
+                  "probability": 0.0410777731202315,
+                  "bytes": [
+                    32,
+                    119,
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": " wrench"
+                },
+                {
+                  "id": 12128,
+                  "probability": 0.039145415324606206,
+                  "bytes": [
+                    83,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": "Span"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.004906964006427179,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.004906964006427179,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -5.381522488298419,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -9.634113621416095,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "ench",
+                "logprob": -9.868043255510333,
+                "bytes": [
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.073991131486896,
+                "bytes": null
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.743236,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0333179279293565
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.03179520337183098
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 487.67649999354035,
+        "constraint": {}
+      },
+      {
+        "name": "XTC gate forced on",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 1,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": "wrench",
+        "tokens": [
+          {
+            "token": "w",
+            "logprob": -2.3709705923227866,
+            "bytes": [
+              119
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 86,
+              "probability": 0.244385478868638,
+              "support": 4,
+              "entropy": 1.1592302465171145,
+              "selection_ms": 19.399376,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 1.7408067373115717
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 1.4658397063434956
+                },
+                {
+                  "operator": "min_p",
+                  "support": 5,
+                  "entropy": 1.1698564120119914
+                },
+                {
+                  "operator": "xtc",
+                  "support": 4,
+                  "entropy": 1.1997068170171108
+                },
+                {
+                  "operator": "temperature",
+                  "support": 4,
+                  "entropy": 1.1592302465171145
+                }
+              ],
+              "top": [
+                {
+                  "id": 457,
+                  "probability": 0.5387871343989626,
+                  "bytes": [
+                    32,
+                    87
+                  ],
+                  "token": " W"
+                },
+                {
+                  "id": 86,
+                  "probability": 0.244385478868638,
+                  "bytes": [
+                    119
+                  ],
+                  "token": "w"
+                },
+                {
+                  "id": 57478,
+                  "probability": 0.11102508353392851,
+                  "bytes": [
+                    32,
+                    119,
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": " wrench"
+                },
+                {
+                  "id": 12128,
+                  "probability": 0.10580230319847084,
+                  "bytes": [
+                    83,
+                    112,
+                    97,
+                    110
+                  ],
+                  "token": "Span"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.0004922839585699735,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.0004922839585699735,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -8.897060582298414,
+                "bytes": null
+              },
+              {
+                "token": "ren",
+                "logprob": -9.422681042808668,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "renched",
+                "logprob": -10.558860966819898,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104,
+                  101,
+                  100
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -10.6941673251573,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 19.572208,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 248320,
+                  "entropy": 0.0066182173103476885
+                },
+                {
+                  "operator": "top_k",
+                  "support": 16,
+                  "entropy": 0.003684030378731839
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 492.53670003963634,
+        "constraint": {}
+      },
+      {
+        "name": "GBNF + Min-P → Temperature",
+        "profile": {
+          "chain": [
+            "min_p",
+            "temperature"
+          ],
+          "min_p": 0.05,
+          "temperature": 1.5
+        },
+        "text": "Wrench",
+        "tokens": [
+          {
+            "token": "W",
+            "logprob": -0.6238154028086266,
+            "bytes": [
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 54,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.115806,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 7,
+                  "entropy": 0.0036290956354286265
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 1,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.00877353597177529,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.00877353597177529,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -4.827279776816502,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -8.926139563803806,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "renched",
+                "logprob": -9.493760794882908,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104,
+                  101,
+                  100
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -9.716224402670994,
+                "bytes": null
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.115064,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 5,
+                  "entropy": 0.0016351414203210587
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 461.9382999953814,
+        "constraint": {
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\""
+        }
+      },
+      {
+        "name": "GBNF + XTC gate on",
+        "profile": {
+          "chain": [
+            "top_k",
+            "min_p",
+            "xtc",
+            "temperature"
+          ],
+          "top_k": 16,
+          "min_p": 0.04,
+          "xtc_probability": 1,
+          "xtc_threshold": 0.15,
+          "temperature": 0.9
+        },
+        "text": "Wrench",
+        "tokens": [
+          {
+            "token": "W",
+            "logprob": -0.6238154028086266,
+            "bytes": [
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.6238154028086266,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -1.659454212012728,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -2.3709705923227866,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": " wrench",
+                "logprob": -3.0810621832041343,
+                "bytes": [
+                  32,
+                  119,
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "Span",
+                "logprob": -3.1244276617197593,
+                "bytes": [
+                  83,
+                  112,
+                  97,
+                  110
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 54,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.117819,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 7,
+                  "entropy": 0.0036290956354286265
+                },
+                {
+                  "operator": "top_k",
+                  "support": 7,
+                  "entropy": 0.0036290956354286265
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 1,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.00877353597177529,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.00877353597177529,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -4.827279776816502,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -8.926139563803806,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "renched",
+                "logprob": -9.493760794882908,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104,
+                  101,
+                  100
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -9.716224402670994,
+                "bytes": null
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 6446,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.117649,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 5,
+                  "entropy": 0.0016351414203210587
+                },
+                {
+                  "operator": "top_k",
+                  "support": 5,
+                  "entropy": 0.0016351414203210587
+                },
+                {
+                  "operator": "min_p",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "xtc",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 1,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 505.29679999453947,
+        "constraint": {
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\""
+        }
+      },
+      {
+        "name": "Strict JSON + Top-N-Sigma",
+        "profile": {
+          "chain": [
+            "top_n_sigma",
+            "temperature"
+          ],
+          "top_n_sigma": 2,
+          "temperature": 1.5
+        },
+        "text": "{\"tool\": \"Wrench\"}",
+        "tokens": [
+          {
+            "token": "{\"",
+            "logprob": -0.18704305382485786,
+            "bytes": [
+              123,
+              34
+            ],
+            "top_logprobs": [
+              {
+                "token": "{\"",
+                "logprob": -0.18704305382485786,
+                "bytes": [
+                  123,
+                  34
+                ]
+              },
+              {
+                "token": "{",
+                "logprob": -2.4995678493570845,
+                "bytes": [
+                  123
+                ]
+              },
+              {
+                "token": " {\"",
+                "logprob": -2.6514977047037642,
+                "bytes": [
+                  32,
+                  123,
+                  34
+                ]
+              },
+              {
+                "token": " {",
+                "logprob": -4.344042641837553,
+                "bytes": [
+                  32,
+                  123
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -6.900347573478178,
+                "bytes": [
+                  68,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 0,
+              "id": 4754,
+              "probability": 0.8237092793274966,
+              "support": 2,
+              "entropy": 0.4657220695287293,
+              "selection_ms": 0.113892,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 2,
+                  "entropy": 0.30274822392890804
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.30274822392890804
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.4657220695287293
+                }
+              ],
+              "top": [
+                {
+                  "id": 4754,
+                  "probability": 0.8237092793274966,
+                  "bytes": [
+                    123,
+                    34
+                  ],
+                  "token": "{\""
+                },
+                {
+                  "id": 90,
+                  "probability": 0.17629072067250348,
+                  "bytes": [
+                    123
+                  ],
+                  "token": "{"
+                }
+              ]
+            }
+          },
+          {
+            "token": "tool",
+            "logprob": -0.0008489982234200034,
+            "bytes": [
+              116,
+              111,
+              111,
+              108
+            ],
+            "top_logprobs": [
+              {
+                "token": "tool",
+                "logprob": -0.0008489982234200034,
+                "bytes": [
+                  116,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "token": "answer",
+                "logprob": -8.56667159954178,
+                "bytes": [
+                  97,
+                  110,
+                  115,
+                  119,
+                  101,
+                  114
+                ]
+              },
+              {
+                "token": "type",
+                "logprob": -8.904405821953889,
+                "bytes": [
+                  116,
+                  121,
+                  112,
+                  101
+                ]
+              },
+              {
+                "token": "dr",
+                "logprob": -9.23629592815506,
+                "bytes": [
+                  100,
+                  114
+                ]
+              },
+              {
+                "token": "text",
+                "logprob": -9.5920460120784,
+                "bytes": [
+                  116,
+                  101,
+                  120,
+                  116
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 1,
+              "id": 13766,
+              "probability": 1,
+              "support": 1,
+              "entropy": 0,
+              "selection_ms": 0.113421,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 4,
+                  "entropy": 8.282614667444033e-06
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 1,
+                  "entropy": 0
+                },
+                {
+                  "operator": "temperature",
+                  "support": 1,
+                  "entropy": 0
+                }
+              ],
+              "top": [
+                {
+                  "id": 13766,
+                  "probability": 1,
+                  "bytes": [
+                    116,
+                    111,
+                    111,
+                    108
+                  ],
+                  "token": "tool"
+                }
+              ]
+            }
+          },
+          {
+            "token": "\":",
+            "logprob": -0.048896849919964604,
+            "bytes": [
+              34,
+              58
+            ],
+            "top_logprobs": [
+              {
+                "token": "\":",
+                "logprob": -0.048896849919964604,
+                "bytes": [
+                  34,
+                  58
+                ]
+              },
+              {
+                "token": "\":\"",
+                "logprob": -3.0523796685234803,
+                "bytes": [
+                  34,
+                  58,
+                  34
+                ]
+              },
+              {
+                "token": "\"",
+                "logprob": -7.916282714177777,
+                "bytes": [
+                  34
+                ]
+              },
+              {
+                "token": "\":{\"",
+                "logprob": -10.73481661157768,
+                "bytes": [
+                  34,
+                  58,
+                  123,
+                  34
+                ]
+              },
+              {
+                "token": "\":[\"",
+                "logprob": -11.634544432927777,
+                "bytes": [
+                  34,
+                  58,
+                  91,
+                  34
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 2,
+              "id": 763,
+              "probability": 0.881040644923475,
+              "support": 2,
+              "entropy": 0.36484643851289006,
+              "selection_ms": 0.115155,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 3,
+                  "entropy": 0.1935764747872613
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.19039341468028984
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.36484643851289006
+                }
+              ],
+              "top": [
+                {
+                  "id": 763,
+                  "probability": 0.881040644923475,
+                  "bytes": [
+                    34,
+                    58
+                  ],
+                  "token": "\":"
+                },
+                {
+                  "id": 3147,
+                  "probability": 0.11895935507652496,
+                  "bytes": [
+                    34,
+                    58,
+                    34
+                  ],
+                  "token": "\":\""
+                }
+              ]
+            }
+          },
+          {
+            "token": " \"",
+            "logprob": -0.0009105559989121193,
+            "bytes": [
+              32,
+              34
+            ],
+            "top_logprobs": [
+              {
+                "token": " \"",
+                "logprob": -0.0009105559989121193,
+                "bytes": [
+                  32,
+                  34
+                ]
+              },
+              {
+                "token": " ",
+                "logprob": -7.720751559416881,
+                "bytes": [
+                  32
+                ]
+              },
+              {
+                "token": " W",
+                "logprob": -8.659213816802135,
+                "bytes": [
+                  32,
+                  87
+                ]
+              },
+              {
+                "token": " [\"",
+                "logprob": -9.603628909270396,
+                "bytes": [
+                  32,
+                  91,
+                  34
+                ]
+              },
+              {
+                "token": " {\"",
+                "logprob": -10.533980166594615,
+                "bytes": [
+                  32,
+                  123,
+                  34
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 3,
+              "id": 328,
+              "probability": 0.9942142841691783,
+              "support": 2,
+              "entropy": 0.03557905546069479,
+              "selection_ms": 0.115575,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 17,
+                  "entropy": 0.003946787146472947
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.003869390101986681
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.03557905546069479
+                }
+              ],
+              "top": [
+                {
+                  "id": 328,
+                  "probability": 0.9942142841691783,
+                  "bytes": [
+                    32,
+                    34
+                  ],
+                  "token": " \""
+                },
+                {
+                  "id": 220,
+                  "probability": 0.0057857158308216045,
+                  "bytes": [
+                    32
+                  ],
+                  "token": " "
+                }
+              ]
+            }
+          },
+          {
+            "token": "W",
+            "logprob": -0.03765687259511842,
+            "bytes": [
+              87
+            ],
+            "top_logprobs": [
+              {
+                "token": "W",
+                "logprob": -0.03765687259511842,
+                "bytes": [
+                  87
+                ]
+              },
+              {
+                "token": "Dr",
+                "logprob": -4.099142163122462,
+                "bytes": [
+                  68,
+                  114
+                ]
+              },
+              {
+                "token": "w",
+                "logprob": -4.240570156896876,
+                "bytes": [
+                  119
+                ]
+              },
+              {
+                "token": "Ham",
+                "logprob": -5.403898327673243,
+                "bytes": [
+                  72,
+                  97,
+                  109
+                ]
+              },
+              {
+                "token": "dr",
+                "logprob": -7.485420315588282,
+                "bytes": [
+                  100,
+                  114
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 4,
+              "id": 54,
+              "probability": 0.9135435799451571,
+              "support": 3,
+              "entropy": 0.34672507895943533,
+              "selection_ms": 0.114312,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 7,
+                  "entropy": 0.11481691378749861
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 3,
+                  "entropy": 0.11464478535079936
+                },
+                {
+                  "operator": "temperature",
+                  "support": 3,
+                  "entropy": 0.34672507895943533
+                }
+              ],
+              "top": [
+                {
+                  "id": 54,
+                  "probability": 0.9135435799451571,
+                  "bytes": [
+                    87
+                  ],
+                  "token": "W"
+                },
+                {
+                  "id": 8580,
+                  "probability": 0.060926865636149685,
+                  "bytes": [
+                    68,
+                    114
+                  ],
+                  "token": "Dr"
+                },
+                {
+                  "id": 38617,
+                  "probability": 0.02552955441869303,
+                  "bytes": [
+                    72,
+                    97,
+                    109
+                  ],
+                  "token": "Ham"
+                }
+              ]
+            }
+          },
+          {
+            "token": "rench",
+            "logprob": -0.0001378378215934278,
+            "bytes": [
+              114,
+              101,
+              110,
+              99,
+              104
+            ],
+            "top_logprobs": [
+              {
+                "token": "rench",
+                "logprob": -0.0001378378215934278,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "ench",
+                "logprob": -9.945458920890442,
+                "bytes": [
+                  101,
+                  110,
+                  99,
+                  104
+                ]
+              },
+              {
+                "token": "ren",
+                "logprob": -10.293409856254211,
+                "bytes": [
+                  114,
+                  101,
+                  110
+                ]
+              },
+              {
+                "token": "REN",
+                "logprob": -11.027172597343078,
+                "bytes": [
+                  82,
+                  69,
+                  78
+                ]
+              },
+              {
+                "token": "renched",
+                "logprob": -11.869392903739563,
+                "bytes": [
+                  114,
+                  101,
+                  110,
+                  99,
+                  104,
+                  101,
+                  100
+                ]
+              }
+            ],
+            "strata_sampling": {
+              "index": 5,
+              "id": 6446,
+              "probability": 0.9989544659031536,
+              "support": 2,
+              "entropy": 0.008220725624481427,
+              "selection_ms": 0.115225,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 5,
+                  "entropy": 0.0004024217735520775
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.00038237940819884925
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.008220725624481427
+                }
+              ],
+              "top": [
+                {
+                  "id": 6446,
+                  "probability": 0.9989544659031536,
+                  "bytes": [
+                    114,
+                    101,
+                    110,
+                    99,
+                    104
+                  ],
+                  "token": "rench"
+                },
+                {
+                  "id": 1388,
+                  "probability": 0.0010455340968462726,
+                  "bytes": [
+                    114,
+                    101,
+                    110
+                  ],
+                  "token": "ren"
+                }
+              ]
+            }
+          },
+          {
+            "token": "\"}",
+            "logprob": -0.002168235183329819,
+            "bytes": [
+              34,
+              125
+            ],
+            "top_logprobs": [
+              {
+                "token": "\"}",
+                "logprob": -0.002168235183329819,
+                "bytes": [
+                  34,
+                  125
+                ]
+              },
+              {
+                "token": "\",",
+                "logprob": -6.317065772414775,
+                "bytes": [
+                  34,
+                  44
+                ]
+              },
+              {
+                "token": "\"",
+                "logprob": -8.461381492019267,
+                "bytes": [
+                  34
+                ]
+              },
+              {
+                "token": "\"},",
+                "logprob": -9.940678176284404,
+                "bytes": [
+                  34,
+                  125,
+                  44
+                ]
+              },
+              {
+                "token": "<|im_end|>",
+                "logprob": -10.613724288344951,
+                "bytes": null
+              }
+            ],
+            "strata_sampling": {
+              "index": 6,
+              "id": 8934,
+              "probability": 0.9964578590049293,
+              "support": 2,
+              "entropy": 0.02352424660547566,
+              "selection_ms": 0.113441,
+              "stages": [
+                {
+                  "operator": "grammar",
+                  "support": 2,
+                  "entropy": 0.0020043714536031308
+                },
+                {
+                  "operator": "top_n_sigma",
+                  "support": 2,
+                  "entropy": 0.0020043714536031308
+                },
+                {
+                  "operator": "temperature",
+                  "support": 2,
+                  "entropy": 0.02352424660547566
+                }
+              ],
+              "top": [
+                {
+                  "id": 8934,
+                  "probability": 0.9964578590049293,
+                  "bytes": [
+                    34,
+                    125
+                  ],
+                  "token": "\"}"
+                },
+                {
+                  "id": 1,
+                  "probability": 0.0035421409950706327,
+                  "bytes": [
+                    34
+                  ],
+                  "token": "\""
+                }
+              ]
+            }
+          }
+        ],
+        "wall_ms": 1492.1352000092156,
+        "constraint": {
+          "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+              "name": "workshop_tool",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tool": {
+                    "enum": [
+                      "Hammer",
+                      "Wrench",
+                      "Drill"
+                    ]
+                  }
+                },
+                "required": [
+                  "tool"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    ],
+    "semantics": "Each run is a new generation. The six unconstrained recipes share the initial prompt. GBNF and strict JSON remove invalid continuations before sampling. Structured-output instructions can change the prompt; later tokens always depend on their own generated prefix."
+  },
+  "receipt": {
+    "mode": "live",
+    "requests": 9,
+    "summed_request_ms": 6327.465400099754,
+    "prompt_tokens": 325,
+    "completion_tokens": 32,
+    "calls": [
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "min_p",
+              "temperature"
+            ],
+            "min_p": 0.05,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-dbebfaf71ceb402f9263172a",
+          "object": "chat.completion",
+          "created": 1791084499,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": " Wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": " W",
+                    "logprob": -1.659454212012728,
+                    "bytes": [
+                      32,
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 457,
+                      "probability": 0.22825603185786042,
+                      "support": 5,
+                      "entropy": 1.3981324202929013,
+                      "selection_ms": 19.808678,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.7408067373115717
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 5,
+                          "entropy": 1.1698564120119914
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 5,
+                          "entropy": 1.3981324202929013
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 0.4552714427168646,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 457,
+                          "probability": 0.22825603185786042,
+                          "bytes": [
+                            32,
+                            87
+                          ],
+                          "token": " W"
+                        },
+                        {
+                          "id": 86,
+                          "probability": 0.14204212835061195,
+                          "bytes": [
+                            119
+                          ],
+                          "token": "w"
+                        },
+                        {
+                          "id": 57478,
+                          "probability": 0.0884758203416939,
+                          "bytes": [
+                            32,
+                            119,
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": " wrench"
+                        },
+                        {
+                          "id": 12128,
+                          "probability": 0.08595457673296909,
+                          "bytes": [
+                            83,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": "Span"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.004906964006427179,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.004906964006427179,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -5.381522488298419,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -9.634113621416095,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "ench",
+                        "logprob": -9.868043255510333,
+                        "bytes": [
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.073991131486896,
+                        "bytes": null
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.736814,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0333179279293565
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 27,
+            "prompt_ms": 1102.7,
+            "prompt_per_token_ms": 40.841,
+            "prompt_per_second": 24.5,
+            "predicted_n": 3,
+            "predicted_ms": 206.5,
+            "predicted_per_token_ms": 68.833,
+            "predicted_per_second": 14.5,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 1356.5205000340939,
+        "captured_at": "2026-10-04T03:28:21Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "temperature",
+              "min_p"
+            ],
+            "min_p": 0.05,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-b3005bccd9ae44e18ed18023",
+          "object": "chat.completion",
+          "created": 1791084500,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "w",
+                    "logprob": -2.3709705923227866,
+                    "bytes": [
+                      119
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 86,
+                      "probability": 0.124907499723605,
+                      "support": 8,
+                      "entropy": 1.729549691248196,
+                      "selection_ms": 23.011443,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.7408067373115717
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 248320,
+                          "entropy": 8.308190687604458
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 8,
+                          "entropy": 1.729549691248196
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 0.40035177074335226,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 457,
+                          "probability": 0.20072136743700125,
+                          "bytes": [
+                            32,
+                            87
+                          ],
+                          "token": " W"
+                        },
+                        {
+                          "id": 86,
+                          "probability": 0.124907499723605,
+                          "bytes": [
+                            119
+                          ],
+                          "token": "w"
+                        },
+                        {
+                          "id": 57478,
+                          "probability": 0.0778029281397222,
+                          "bytes": [
+                            32,
+                            119,
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": " wrench"
+                        },
+                        {
+                          "id": 12128,
+                          "probability": 0.0755858236861576,
+                          "bytes": [
+                            83,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": "Span"
+                        },
+                        {
+                          "id": 49,
+                          "probability": 0.044622311362351,
+                          "bytes": [
+                            82
+                          ],
+                          "token": "R"
+                        },
+                        {
+                          "id": 1426,
+                          "probability": 0.041229265042825376,
+                          "bytes": [
+                            115,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": "span"
+                        },
+                        {
+                          "id": 11564,
+                          "probability": 0.034779033864985355,
+                          "bytes": [
+                            32,
+                            83,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": " Span"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.0004922839585699735,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.0004922839585699735,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -8.897060582298414,
+                        "bytes": null
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -9.422681042808668,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "renched",
+                        "logprob": -10.558860966819898,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104,
+                          101,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -10.6941673251573,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 23.11223,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0066182173103476885
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 248320,
+                          "entropy": 1.4607687736021824
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 20
+            }
+          },
+          "timings": {
+            "cache_n": 20,
+            "prompt_n": 7,
+            "prompt_ms": 264.7,
+            "prompt_per_token_ms": 37.814,
+            "prompt_per_second": 26.4,
+            "predicted_n": 3,
+            "predicted_ms": 219.8,
+            "predicted_per_token_ms": 73.267,
+            "predicted_per_second": 13.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 541.1536000319757,
+        "captured_at": "2026-10-04T03:28:21Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_n_sigma",
+              "temperature"
+            ],
+            "top_n_sigma": 2,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-d19f60be1ebb436d84de5c0a",
+          "object": "chat.completion",
+          "created": 1791084501,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": " Wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": " W",
+                    "logprob": -1.659454212012728,
+                    "bytes": [
+                      32,
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 457,
+                      "probability": 0.22825603185786042,
+                      "support": 5,
+                      "entropy": 1.3981324202929013,
+                      "selection_ms": 20.511136,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.7408067373115717
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 5,
+                          "entropy": 1.1698564120119914
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 5,
+                          "entropy": 1.3981324202929013
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 0.4552714427168646,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 457,
+                          "probability": 0.22825603185786042,
+                          "bytes": [
+                            32,
+                            87
+                          ],
+                          "token": " W"
+                        },
+                        {
+                          "id": 86,
+                          "probability": 0.14204212835061195,
+                          "bytes": [
+                            119
+                          ],
+                          "token": "w"
+                        },
+                        {
+                          "id": 57478,
+                          "probability": 0.0884758203416939,
+                          "bytes": [
+                            32,
+                            119,
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": " wrench"
+                        },
+                        {
+                          "id": 12128,
+                          "probability": 0.08595457673296909,
+                          "bytes": [
+                            83,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": "Span"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.004906964006427179,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.004906964006427179,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -5.381522488298419,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -9.634113621416095,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "ench",
+                        "logprob": -9.868043255510333,
+                        "bytes": [
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.073991131486896,
+                        "bytes": null
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 20.822917,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0333179279293565
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 20
+            }
+          },
+          "timings": {
+            "cache_n": 20,
+            "prompt_n": 7,
+            "prompt_ms": 262.7,
+            "prompt_per_token_ms": 37.529,
+            "prompt_per_second": 26.6,
+            "predicted_n": 3,
+            "predicted_ms": 207.9,
+            "predicted_per_token_ms": 69.3,
+            "predicted_per_second": 14.4,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 496.3349999743514,
+        "captured_at": "2026-10-04T03:28:22Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "xtc",
+              "temperature"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 0.12,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-76370f407df44e54aa8fb141",
+          "object": "chat.completion",
+          "created": 1791084501,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": " Wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": " W",
+                    "logprob": -1.659454212012728,
+                    "bytes": [
+                      32,
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 457,
+                      "probability": 0.1993439226747064,
+                      "support": 5,
+                      "entropy": 1.0878479006317316,
+                      "selection_ms": 19.392784,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.7408067373115717
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 1.4658397063434956
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 5,
+                          "entropy": 1.1698564120119914
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 5,
+                          "entropy": 1.1698564120119914
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 5,
+                          "entropy": 1.0878479006317316
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 0.6300135806006539,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 457,
+                          "probability": 0.1993439226747064,
+                          "bytes": [
+                            32,
+                            87
+                          ],
+                          "token": " W"
+                        },
+                        {
+                          "id": 86,
+                          "probability": 0.09041930827980192,
+                          "bytes": [
+                            119
+                          ],
+                          "token": "w"
+                        },
+                        {
+                          "id": 57478,
+                          "probability": 0.0410777731202315,
+                          "bytes": [
+                            32,
+                            119,
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": " wrench"
+                        },
+                        {
+                          "id": 12128,
+                          "probability": 0.039145415324606206,
+                          "bytes": [
+                            83,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": "Span"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.004906964006427179,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.004906964006427179,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -5.381522488298419,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -9.634113621416095,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "ench",
+                        "logprob": -9.868043255510333,
+                        "bytes": [
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.073991131486896,
+                        "bytes": null
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.807176,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0333179279293565
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.03179520337183098
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 20
+            }
+          },
+          "timings": {
+            "cache_n": 20,
+            "prompt_n": 7,
+            "prompt_ms": 264.8,
+            "prompt_per_token_ms": 37.829,
+            "prompt_per_second": 26.4,
+            "predicted_n": 3,
+            "predicted_ms": 205.3,
+            "predicted_per_token_ms": 68.433,
+            "predicted_per_second": 14.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 493.8728000270203,
+        "captured_at": "2026-10-04T03:28:22Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "temperature",
+              "xtc"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 0.12,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-0451a73e075546b3b7bb2cb4",
+          "object": "chat.completion",
+          "created": 1791084502,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": " Wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": " W",
+                    "logprob": -1.659454212012728,
+                    "bytes": [
+                      32,
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 457,
+                      "probability": 0.1993439226747064,
+                      "support": 5,
+                      "entropy": 1.0878479006317316,
+                      "selection_ms": 19.421507,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.7408067373115717
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 1.4658397063434956
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 5,
+                          "entropy": 1.1698564120119914
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 5,
+                          "entropy": 1.0878479006317316
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 5,
+                          "entropy": 1.0878479006317316
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 0.6300135806006539,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 457,
+                          "probability": 0.1993439226747064,
+                          "bytes": [
+                            32,
+                            87
+                          ],
+                          "token": " W"
+                        },
+                        {
+                          "id": 86,
+                          "probability": 0.09041930827980192,
+                          "bytes": [
+                            119
+                          ],
+                          "token": "w"
+                        },
+                        {
+                          "id": 57478,
+                          "probability": 0.0410777731202315,
+                          "bytes": [
+                            32,
+                            119,
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": " wrench"
+                        },
+                        {
+                          "id": 12128,
+                          "probability": 0.039145415324606206,
+                          "bytes": [
+                            83,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": "Span"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.004906964006427179,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.004906964006427179,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -5.381522488298419,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -9.634113621416095,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "ench",
+                        "logprob": -9.868043255510333,
+                        "bytes": [
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.073991131486896,
+                        "bytes": null
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.743236,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0333179279293565
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.03179520337183098
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 20
+            }
+          },
+          "timings": {
+            "cache_n": 20,
+            "prompt_n": 7,
+            "prompt_ms": 264.5,
+            "prompt_per_token_ms": 37.786,
+            "prompt_per_second": 26.5,
+            "predicted_n": 3,
+            "predicted_ms": 205,
+            "predicted_per_token_ms": 68.333,
+            "predicted_per_second": 14.6,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 487.67649999354035,
+        "captured_at": "2026-10-04T03:28:23Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 6,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "xtc",
+              "temperature"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 1,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-0337b9f09938416a9aba6ab3",
+          "object": "chat.completion",
+          "created": 1791084502,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "w",
+                    "logprob": -2.3709705923227866,
+                    "bytes": [
+                      119
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 86,
+                      "probability": 0.244385478868638,
+                      "support": 4,
+                      "entropy": 1.1592302465171145,
+                      "selection_ms": 19.399376,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 1.7408067373115717
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 1.4658397063434956
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 5,
+                          "entropy": 1.1698564120119914
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 4,
+                          "entropy": 1.1997068170171108
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 4,
+                          "entropy": 1.1592302465171145
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 457,
+                          "probability": 0.5387871343989626,
+                          "bytes": [
+                            32,
+                            87
+                          ],
+                          "token": " W"
+                        },
+                        {
+                          "id": 86,
+                          "probability": 0.244385478868638,
+                          "bytes": [
+                            119
+                          ],
+                          "token": "w"
+                        },
+                        {
+                          "id": 57478,
+                          "probability": 0.11102508353392851,
+                          "bytes": [
+                            32,
+                            119,
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": " wrench"
+                        },
+                        {
+                          "id": 12128,
+                          "probability": 0.10580230319847084,
+                          "bytes": [
+                            83,
+                            112,
+                            97,
+                            110
+                          ],
+                          "token": "Span"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.0004922839585699735,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.0004922839585699735,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -8.897060582298414,
+                        "bytes": null
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -9.422681042808668,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "renched",
+                        "logprob": -10.558860966819898,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104,
+                          101,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -10.6941673251573,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 19.572208,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 248320,
+                          "entropy": 0.0066182173103476885
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 16,
+                          "entropy": 0.003684030378731839
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 20
+            }
+          },
+          "timings": {
+            "cache_n": 20,
+            "prompt_n": 7,
+            "prompt_ms": 264.8,
+            "prompt_per_token_ms": 37.829,
+            "prompt_per_second": 26.4,
+            "predicted_n": 3,
+            "predicted_ms": 208.3,
+            "predicted_per_token_ms": 69.433,
+            "predicted_per_second": 14.4,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 492.53670003963634,
+        "captured_at": "2026-10-04T03:28:23Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 64,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\"",
+          "strata_sampler": {
+            "chain": [
+              "min_p",
+              "temperature"
+            ],
+            "min_p": 0.05,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-9731623709eb48cb8523312f",
+          "object": "chat.completion",
+          "created": 1791084503,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "W",
+                    "logprob": -0.6238154028086266,
+                    "bytes": [
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 54,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.115806,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 7,
+                          "entropy": 0.0036290956354286265
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 1,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.00877353597177529,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.00877353597177529,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -4.827279776816502,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -8.926139563803806,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "renched",
+                        "logprob": -9.493760794882908,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104,
+                          101,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -9.716224402670994,
+                        "bytes": null
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.115064,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 5,
+                          "entropy": 0.0016351414203210587
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 20
+            }
+          },
+          "timings": {
+            "cache_n": 20,
+            "prompt_n": 7,
+            "prompt_ms": 265.4,
+            "prompt_per_token_ms": 37.914,
+            "prompt_per_second": 26.4,
+            "predicted_n": 3,
+            "predicted_ms": 158.5,
+            "predicted_per_token_ms": 52.833,
+            "predicted_per_second": 18.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 461.9382999953814,
+        "captured_at": "2026-10-04T03:28:24Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 64,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "grammar": "root ::= \"Hammer\" | \"Wrench\" | \"Drill\"",
+          "strata_sampler": {
+            "chain": [
+              "top_k",
+              "min_p",
+              "xtc",
+              "temperature"
+            ],
+            "top_k": 16,
+            "min_p": 0.04,
+            "xtc_probability": 1,
+            "xtc_threshold": 0.15,
+            "temperature": 0.9,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-6613038026784f12853e6cdf",
+          "object": "chat.completion",
+          "created": 1791084503,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "Wrench"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "W",
+                    "logprob": -0.6238154028086266,
+                    "bytes": [
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.6238154028086266,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -1.659454212012728,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -2.3709705923227866,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": " wrench",
+                        "logprob": -3.0810621832041343,
+                        "bytes": [
+                          32,
+                          119,
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "Span",
+                        "logprob": -3.1244276617197593,
+                        "bytes": [
+                          83,
+                          112,
+                          97,
+                          110
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 54,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.117819,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 7,
+                          "entropy": 0.0036290956354286265
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 7,
+                          "entropy": 0.0036290956354286265
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 1,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.00877353597177529,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.00877353597177529,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -4.827279776816502,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -8.926139563803806,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "renched",
+                        "logprob": -9.493760794882908,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104,
+                          101,
+                          100
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -9.716224402670994,
+                        "bytes": null
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 6446,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.117649,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 5,
+                          "entropy": 0.0016351414203210587
+                        },
+                        {
+                          "operator": "top_k",
+                          "support": 5,
+                          "entropy": 0.0016351414203210587
+                        },
+                        {
+                          "operator": "min_p",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "xtc",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 1,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 27,
+            "completion_tokens": 3,
+            "total_tokens": 30,
+            "prompt_tokens_details": {
+              "cached_tokens": 20
+            }
+          },
+          "timings": {
+            "cache_n": 20,
+            "prompt_n": 7,
+            "prompt_ms": 259.8,
+            "prompt_per_token_ms": 37.114,
+            "prompt_per_second": 26.9,
+            "predicted_n": 3,
+            "predicted_ms": 158.5,
+            "predicted_per_token_ms": 52.833,
+            "predicted_per_second": 18.9,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 505.29679999453947,
+        "captured_at": "2026-10-04T03:28:24Z"
+      },
+      {
+        "provenance": "native-strata",
+        "request": {
+          "model": "x",
+          "messages": [
+            {
+              "role": "user",
+              "content": "Choose a useful workshop tool for tightening a bolt. Answer with one word."
+            }
+          ],
+          "reasoning_effort": "none",
+          "seed": 675,
+          "max_tokens": 64,
+          "logprobs": true,
+          "top_logprobs": 5,
+          "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+              "name": "workshop_tool",
+              "strict": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tool": {
+                    "enum": [
+                      "Hammer",
+                      "Wrench",
+                      "Drill"
+                    ]
+                  }
+                },
+                "required": [
+                  "tool"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "strata_sampler": {
+            "chain": [
+              "top_n_sigma",
+              "temperature"
+            ],
+            "top_n_sigma": 2,
+            "temperature": 1.5,
+            "inspect": true
+          }
+        },
+        "response": {
+          "id": "chatcmpl-32494cf632754b3683176a62",
+          "object": "chat.completion",
+          "created": 1791084504,
+          "model": "qwen3.8-flash-next",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "{\"tool\": \"Wrench\"}"
+              },
+              "finish_reason": "stop",
+              "logprobs": {
+                "content": [
+                  {
+                    "token": "{\"",
+                    "logprob": -0.18704305382485786,
+                    "bytes": [
+                      123,
+                      34
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "{\"",
+                        "logprob": -0.18704305382485786,
+                        "bytes": [
+                          123,
+                          34
+                        ]
+                      },
+                      {
+                        "token": "{",
+                        "logprob": -2.4995678493570845,
+                        "bytes": [
+                          123
+                        ]
+                      },
+                      {
+                        "token": " {\"",
+                        "logprob": -2.6514977047037642,
+                        "bytes": [
+                          32,
+                          123,
+                          34
+                        ]
+                      },
+                      {
+                        "token": " {",
+                        "logprob": -4.344042641837553,
+                        "bytes": [
+                          32,
+                          123
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -6.900347573478178,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 0,
+                      "id": 4754,
+                      "probability": 0.8237092793274966,
+                      "support": 2,
+                      "entropy": 0.4657220695287293,
+                      "selection_ms": 0.113892,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 2,
+                          "entropy": 0.30274822392890804
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.30274822392890804
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.4657220695287293
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 4754,
+                          "probability": 0.8237092793274966,
+                          "bytes": [
+                            123,
+                            34
+                          ],
+                          "token": "{\""
+                        },
+                        {
+                          "id": 90,
+                          "probability": 0.17629072067250348,
+                          "bytes": [
+                            123
+                          ],
+                          "token": "{"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "tool",
+                    "logprob": -0.0008489982234200034,
+                    "bytes": [
+                      116,
+                      111,
+                      111,
+                      108
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "tool",
+                        "logprob": -0.0008489982234200034,
+                        "bytes": [
+                          116,
+                          111,
+                          111,
+                          108
+                        ]
+                      },
+                      {
+                        "token": "answer",
+                        "logprob": -8.56667159954178,
+                        "bytes": [
+                          97,
+                          110,
+                          115,
+                          119,
+                          101,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "type",
+                        "logprob": -8.904405821953889,
+                        "bytes": [
+                          116,
+                          121,
+                          112,
+                          101
+                        ]
+                      },
+                      {
+                        "token": "dr",
+                        "logprob": -9.23629592815506,
+                        "bytes": [
+                          100,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "text",
+                        "logprob": -9.5920460120784,
+                        "bytes": [
+                          116,
+                          101,
+                          120,
+                          116
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 1,
+                      "id": 13766,
+                      "probability": 1,
+                      "support": 1,
+                      "entropy": 0,
+                      "selection_ms": 0.113421,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 4,
+                          "entropy": 8.282614667444033e-06
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 1,
+                          "entropy": 0
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 1,
+                          "entropy": 0
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 13766,
+                          "probability": 1,
+                          "bytes": [
+                            116,
+                            111,
+                            111,
+                            108
+                          ],
+                          "token": "tool"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "\":",
+                    "logprob": -0.048896849919964604,
+                    "bytes": [
+                      34,
+                      58
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "\":",
+                        "logprob": -0.048896849919964604,
+                        "bytes": [
+                          34,
+                          58
+                        ]
+                      },
+                      {
+                        "token": "\":\"",
+                        "logprob": -3.0523796685234803,
+                        "bytes": [
+                          34,
+                          58,
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\"",
+                        "logprob": -7.916282714177777,
+                        "bytes": [
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\":{\"",
+                        "logprob": -10.73481661157768,
+                        "bytes": [
+                          34,
+                          58,
+                          123,
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\":[\"",
+                        "logprob": -11.634544432927777,
+                        "bytes": [
+                          34,
+                          58,
+                          91,
+                          34
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 2,
+                      "id": 763,
+                      "probability": 0.881040644923475,
+                      "support": 2,
+                      "entropy": 0.36484643851289006,
+                      "selection_ms": 0.115155,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 3,
+                          "entropy": 0.1935764747872613
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.19039341468028984
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.36484643851289006
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 763,
+                          "probability": 0.881040644923475,
+                          "bytes": [
+                            34,
+                            58
+                          ],
+                          "token": "\":"
+                        },
+                        {
+                          "id": 3147,
+                          "probability": 0.11895935507652496,
+                          "bytes": [
+                            34,
+                            58,
+                            34
+                          ],
+                          "token": "\":\""
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": " \"",
+                    "logprob": -0.0009105559989121193,
+                    "bytes": [
+                      32,
+                      34
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": " \"",
+                        "logprob": -0.0009105559989121193,
+                        "bytes": [
+                          32,
+                          34
+                        ]
+                      },
+                      {
+                        "token": " ",
+                        "logprob": -7.720751559416881,
+                        "bytes": [
+                          32
+                        ]
+                      },
+                      {
+                        "token": " W",
+                        "logprob": -8.659213816802135,
+                        "bytes": [
+                          32,
+                          87
+                        ]
+                      },
+                      {
+                        "token": " [\"",
+                        "logprob": -9.603628909270396,
+                        "bytes": [
+                          32,
+                          91,
+                          34
+                        ]
+                      },
+                      {
+                        "token": " {\"",
+                        "logprob": -10.533980166594615,
+                        "bytes": [
+                          32,
+                          123,
+                          34
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 3,
+                      "id": 328,
+                      "probability": 0.9942142841691783,
+                      "support": 2,
+                      "entropy": 0.03557905546069479,
+                      "selection_ms": 0.115575,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 17,
+                          "entropy": 0.003946787146472947
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.003869390101986681
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.03557905546069479
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 328,
+                          "probability": 0.9942142841691783,
+                          "bytes": [
+                            32,
+                            34
+                          ],
+                          "token": " \""
+                        },
+                        {
+                          "id": 220,
+                          "probability": 0.0057857158308216045,
+                          "bytes": [
+                            32
+                          ],
+                          "token": " "
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "W",
+                    "logprob": -0.03765687259511842,
+                    "bytes": [
+                      87
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "W",
+                        "logprob": -0.03765687259511842,
+                        "bytes": [
+                          87
+                        ]
+                      },
+                      {
+                        "token": "Dr",
+                        "logprob": -4.099142163122462,
+                        "bytes": [
+                          68,
+                          114
+                        ]
+                      },
+                      {
+                        "token": "w",
+                        "logprob": -4.240570156896876,
+                        "bytes": [
+                          119
+                        ]
+                      },
+                      {
+                        "token": "Ham",
+                        "logprob": -5.403898327673243,
+                        "bytes": [
+                          72,
+                          97,
+                          109
+                        ]
+                      },
+                      {
+                        "token": "dr",
+                        "logprob": -7.485420315588282,
+                        "bytes": [
+                          100,
+                          114
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 4,
+                      "id": 54,
+                      "probability": 0.9135435799451571,
+                      "support": 3,
+                      "entropy": 0.34672507895943533,
+                      "selection_ms": 0.114312,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 7,
+                          "entropy": 0.11481691378749861
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 3,
+                          "entropy": 0.11464478535079936
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 3,
+                          "entropy": 0.34672507895943533
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 54,
+                          "probability": 0.9135435799451571,
+                          "bytes": [
+                            87
+                          ],
+                          "token": "W"
+                        },
+                        {
+                          "id": 8580,
+                          "probability": 0.060926865636149685,
+                          "bytes": [
+                            68,
+                            114
+                          ],
+                          "token": "Dr"
+                        },
+                        {
+                          "id": 38617,
+                          "probability": 0.02552955441869303,
+                          "bytes": [
+                            72,
+                            97,
+                            109
+                          ],
+                          "token": "Ham"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "rench",
+                    "logprob": -0.0001378378215934278,
+                    "bytes": [
+                      114,
+                      101,
+                      110,
+                      99,
+                      104
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "rench",
+                        "logprob": -0.0001378378215934278,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "ench",
+                        "logprob": -9.945458920890442,
+                        "bytes": [
+                          101,
+                          110,
+                          99,
+                          104
+                        ]
+                      },
+                      {
+                        "token": "ren",
+                        "logprob": -10.293409856254211,
+                        "bytes": [
+                          114,
+                          101,
+                          110
+                        ]
+                      },
+                      {
+                        "token": "REN",
+                        "logprob": -11.027172597343078,
+                        "bytes": [
+                          82,
+                          69,
+                          78
+                        ]
+                      },
+                      {
+                        "token": "renched",
+                        "logprob": -11.869392903739563,
+                        "bytes": [
+                          114,
+                          101,
+                          110,
+                          99,
+                          104,
+                          101,
+                          100
+                        ]
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 5,
+                      "id": 6446,
+                      "probability": 0.9989544659031536,
+                      "support": 2,
+                      "entropy": 0.008220725624481427,
+                      "selection_ms": 0.115225,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 5,
+                          "entropy": 0.0004024217735520775
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.00038237940819884925
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.008220725624481427
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 6446,
+                          "probability": 0.9989544659031536,
+                          "bytes": [
+                            114,
+                            101,
+                            110,
+                            99,
+                            104
+                          ],
+                          "token": "rench"
+                        },
+                        {
+                          "id": 1388,
+                          "probability": 0.0010455340968462726,
+                          "bytes": [
+                            114,
+                            101,
+                            110
+                          ],
+                          "token": "ren"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "token": "\"}",
+                    "logprob": -0.002168235183329819,
+                    "bytes": [
+                      34,
+                      125
+                    ],
+                    "top_logprobs": [
+                      {
+                        "token": "\"}",
+                        "logprob": -0.002168235183329819,
+                        "bytes": [
+                          34,
+                          125
+                        ]
+                      },
+                      {
+                        "token": "\",",
+                        "logprob": -6.317065772414775,
+                        "bytes": [
+                          34,
+                          44
+                        ]
+                      },
+                      {
+                        "token": "\"",
+                        "logprob": -8.461381492019267,
+                        "bytes": [
+                          34
+                        ]
+                      },
+                      {
+                        "token": "\"},",
+                        "logprob": -9.940678176284404,
+                        "bytes": [
+                          34,
+                          125,
+                          44
+                        ]
+                      },
+                      {
+                        "token": "<|im_end|>",
+                        "logprob": -10.613724288344951,
+                        "bytes": null
+                      }
+                    ],
+                    "strata_sampling": {
+                      "index": 6,
+                      "id": 8934,
+                      "probability": 0.9964578590049293,
+                      "support": 2,
+                      "entropy": 0.02352424660547566,
+                      "selection_ms": 0.113441,
+                      "stages": [
+                        {
+                          "operator": "grammar",
+                          "support": 2,
+                          "entropy": 0.0020043714536031308
+                        },
+                        {
+                          "operator": "top_n_sigma",
+                          "support": 2,
+                          "entropy": 0.0020043714536031308
+                        },
+                        {
+                          "operator": "temperature",
+                          "support": 2,
+                          "entropy": 0.02352424660547566
+                        }
+                      ],
+                      "top": [
+                        {
+                          "id": 8934,
+                          "probability": 0.9964578590049293,
+                          "bytes": [
+                            34,
+                            125
+                          ],
+                          "token": "\"}"
+                        },
+                        {
+                          "id": 1,
+                          "probability": 0.0035421409950706327,
+                          "bytes": [
+                            34
+                          ],
+                          "token": "\""
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "refusal": null
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 109,
+            "completion_tokens": 8,
+            "total_tokens": 117,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 109,
+            "prompt_ms": 920.6,
+            "prompt_per_token_ms": 8.446,
+            "prompt_per_second": 118.4,
+            "predicted_n": 8,
+            "predicted_ms": 442.5,
+            "predicted_per_token_ms": 55.312,
+            "predicted_per_second": 18.1,
+            "draft_n": 0,
+            "draft_n_accepted": 0
+          }
+        },
+        "chunks": [],
+        "wall_ms": 1492.1352000092156,
+        "captured_at": "2026-10-04T03:28:26Z"
+      }
+    ]
+  },
+  "wall_ms": 6333.723900024779
+}
