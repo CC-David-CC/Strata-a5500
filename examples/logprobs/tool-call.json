@@ -1,0 +1,36 @@
+{
+  "model": "x",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Call echo with text hello. Do not answer before calling it."
+    }
+  ],
+  "max_tokens": 128,
+  "temperature": 0,
+  "logprobs": true,
+  "top_logprobs": 5,
+  "reasoning_effort": "none",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "echo",
+        "description": "Return the supplied text unchanged.",
+        "strict": false,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

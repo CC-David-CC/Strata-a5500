@@ -1,0 +1,14 @@
+{
+  "model": "x",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Answer with only A or B: is the sky blue? A) yes B) no"
+    }
+  ],
+  "max_tokens": 1,
+  "temperature": 0,
+  "logprobs": true,
+  "top_logprobs": 0,
+  "reasoning_effort": "none"
+}

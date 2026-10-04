@@ -83,6 +83,7 @@ public:
     /// window's commit (`tail`) and the window's pick at its last accepted row (`next`, the next window's row 0).
     void set_draft_history(const int32_t* tail, int64_t n_tail, int32_t next);
     bool coupled() const { return coupled_active_; }
+    int draft_vocab() const { return (int)(dhead_ ? n_dvocab_ : n_vocab_); }
 
     double ms_draft = 0, ms_prefill = 0;
     int64_t rounds = 0;

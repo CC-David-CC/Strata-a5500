@@ -269,6 +269,8 @@ class Event:
     kind: str                     # "reasoning" | "content" | "tool_call"
     text: str = ""
     call: ToolCall | None = None
+    source_start: int | None = field(default=None, compare=False, repr=False)
+    logprobs: list | None = field(default=None, compare=False, repr=False)
 
 
 THINK_END = "</think>"
@@ -368,7 +370,8 @@ class OutputParser:
     """Incremental parser of the model's text. Feed deltas; get events. A tag split across deltas is held back
     until it is complete, so clients never see `<tool_` or `</thi`."""
 
-    def __init__(self, thinking: bool = True, tools: list[dict] | None = None, stream_tools: bool = False):
+    def __init__(self, thinking: bool = True, tools: list[dict] | None = None, stream_tools: bool = False,
+                 track_source: bool = False):
         self.state = "reasoning" if thinking else "content"
         self.buf = ""
         self.lead = False
@@ -378,7 +381,22 @@ class OutputParser:
         # character; other types whole, once complete) - before the final "tool_call".  Without it, a client sees
         # nothing until the call is complete, which for a large file write can be many minutes.
         self.stream_tools = stream_tools
+        self.track_source, self.source_bytes = track_source, 0
         self._reset_scan()
+
+    @property
+    def source_position(self):
+        return self.source_bytes - len(self.buf.encode("utf-8"))
+
+    @property
+    def retained_position(self):
+        # An unannounced, unfinished call can still become literal text in finish().
+        if self.state == "call" and self.scall is not None:
+            return self.source_bytes
+        return self.source_position - (len(CALL_START) if self.state == "call" and self.scall is None else 0)
+
+    def _text(self, kind, text, prefix=0):
+        return Event(kind, text, source_start=self.source_position - prefix if self.track_source else None)
 
     def _reset_scan(self):
         self.sp = 0                  # how much of self.buf (the call body) the scanner has consumed
@@ -501,6 +519,8 @@ class OutputParser:
         return best
 
     def feed(self, delta: str) -> list[Event]:
+        if self.track_source:
+            self.source_bytes += len(delta.encode("utf-8"))
         self.buf += delta
         out: list[Event] = []
         while True:
@@ -509,11 +529,11 @@ class OutputParser:
                 if i < 0:
                     keep = self._hold(self.buf, (THINK_END,))
                     if len(self.buf) > keep:
-                        out.append(Event("reasoning", self.buf[:len(self.buf) - keep]))
+                        out.append(self._text("reasoning", self.buf[:len(self.buf) - keep]))
                         self.buf = self.buf[len(self.buf) - keep:]
                     return out
                 if i:
-                    out.append(Event("reasoning", self.buf[:i]))
+                    out.append(self._text("reasoning", self.buf[:i]))
                 self.buf = self.buf[i + len(THINK_END):]
                 self.state, self.lead = "content", True
             elif self.state == "content":
@@ -531,11 +551,11 @@ class OutputParser:
                     while j > 0 and self.buf[j - 1] == "\n":
                         j -= 1
                     if j > 0:
-                        out.append(Event("content", self.buf[:j]))
+                        out.append(self._text("content", self.buf[:j]))
                         self.buf = self.buf[j:]
                     return out
                 if i and self.buf[:i].strip():
-                    out.append(Event("content", self.buf[:i].rstrip("\n")))
+                    out.append(self._text("content", self.buf[:i].rstrip("\n")))
                 self.buf = self.buf[i + len(CALL_START):]
                 self.state = "call"
             else:
@@ -574,6 +594,6 @@ class OutputParser:
         if self.buf:
             kind = {"reasoning": "reasoning", "content": "content"}.get(self.state, "content")
             text = self.buf if self.state != "call" else CALL_START + self.buf
-            out.append(Event(kind, text))
+            out.append(self._text(kind, text, len(CALL_START) if self.state == "call" else 0))
             self.buf = ""
         return out

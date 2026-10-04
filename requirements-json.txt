@@ -1,0 +1,2 @@
+# Required for native Chat JSON with logprobs.
+jsonschema==4.26.0

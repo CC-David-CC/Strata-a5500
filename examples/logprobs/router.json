@@ -1,0 +1,15 @@
+{
+  "model": "x",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Choose one label: B=build failure, T=test failure, D=documentation request. Ticket: The unit tests fail on Windows. Answer only the label."
+    }
+  ],
+  "max_tokens": 8,
+  "temperature": 0,
+  "logprobs": true,
+  "top_logprobs": 20,
+  "reasoning_effort": "none",
+  "grammar": "root ::= \"B\" | \"T\" | \"D\""
+}

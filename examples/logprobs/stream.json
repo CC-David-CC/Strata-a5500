@@ -1,0 +1,15 @@
+{
+  "model": "x",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Explain a hash table in one short sentence."
+    }
+  ],
+  "max_tokens": 40,
+  "temperature": 0,
+  "logprobs": true,
+  "top_logprobs": 5,
+  "reasoning_effort": "none",
+  "stream": true
+}

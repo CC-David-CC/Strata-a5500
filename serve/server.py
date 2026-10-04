@@ -53,8 +53,13 @@ sys.path.insert(0, str(ROOT))   # run as a script (run-<model>.bat) as well as a
 from serve.frontend import (ChatTemplate, Event, OutputParser, anthropic_to_messages,  # noqa: E402
                             images_of, openai_to_messages)
 from serve.mcp import McpCancelled, hub_from_config  # noqa: E402
+from serve.grammar import (ANSWER_PREFIX, THINK_PREFIX, CAPABILITY, GrammarConstraint, GrammarToken, GrammarOutput,
+                           validate_grammar_request, validate_sampling, vocabulary_identity)
 from serve.winjob import contain  # noqa: E402
 from serve.structured import StructuredOutputError, prepare_format, validated_json  # noqa: E402
+from serve.logprobs import (CAPABILITY as LOGPROBS_CAPABILITY, ContentScores, ScoredToken,
+                            parse_score, validate_logprobs)
+from serve.json_output import prepare_chat_json, json_chunks
 
 IM_END = "<|im_end|>"
 IMAGE_PAD = "<|image_pad|>"
@@ -82,7 +87,8 @@ PP_SLACK = 3.0
 # ------------------------------------------------------------------------------------------------ engines
 class Engine(Protocol):
     max_context: int
-    def generate(self, ids: list[int], max_new: int, sampling: dict, cancel: threading.Event) -> Iterator[int]: ...
+    def generate(self, ids: list[int], max_new: int, sampling: dict,
+                 cancel: threading.Event) -> Iterator[int | ScoredToken | None]: ...
 
 
 class MockEngine:
@@ -424,6 +430,8 @@ class StrataEngine:
         """Start the engine again (the same command) after it died; the new process has its own line queue."""
         self.close()
         info = dict(self.info)
+        info.pop("grammar", None)
+        info.pop("logprobs", None)
         # #344: not alive until READY - __init__ sets max_context to 0 and blocks until the engine says READY, and a
         # request that saw alive() in that window skipped load() and failed with "context (0)".  __init__ clears
         # `ended` itself once READY (before its pump thread can set it again).
@@ -498,8 +506,41 @@ class StrataEngine:
         on = sampling.get("experimental_speed_projection")
         return f" cvec={int(on)}" if isinstance(on, bool) else ""
 
-    def generate(self, ids, max_new, sampling, cancel, embeddings=None):
-        """Yields token ids, and None as a heartbeat every 10 s while the engine is quiet (reading a long prompt):
+    def require_grammar(self, constraint):
+        if (constraint.json_schema or constraint.reasoning_tokens) and self.info.get("grammar") != "gbnf-v4":
+            raise ValueError("JSON output and native thinking budgets require a gbnf-v4 native build")
+        supported = ("gbnf-v4", CAPABILITY) if constraint.scoped else ("gbnf-v4", CAPABILITY, "gbnf-v2")
+        if self.info.get("grammar") not in supported:
+            raise ValueError("grammar requires a gbnf-v3 native build for reasoning/tools (gbnf-v2 for plain text) "
+                             "in a supported single-GPU text mode; "
+                             "this engine does not advertise that capability")
+
+
+    def validate_constraint(self, constraint):
+        """Compile before HTTP headers. Caller owns the ordinary service FIFO."""
+        self.require_grammar(constraint)
+        try:
+            self.proc.stdin.buffer.write(constraint.frame("CHECKG"))
+            self.proc.stdin.buffer.flush()
+        except OSError:
+            raise EngineDied("the engine stopped during grammar preflight") from None
+        try:
+            # Native work has its own cooperative bound. A pipe that loses step
+            # must be ended, or its late reply could belong to the next request.
+            line = self.lines.get(timeout=30)
+        except queue.Empty:
+            raise self._silent("native grammar preflight did not finish within 30 seconds") from None
+        if line is None:
+            raise EngineDied("the engine stopped during grammar preflight")
+        if line.startswith("ERR "):
+            raise ValueError(line[4:].strip())
+        if not line.startswith("GRAMMAR_OK bytes-v1-fnv1a64:"):
+            raise self._silent("unexpected native grammar preflight reply")
+        return line.strip().split(" ", 1)[1]
+
+
+    def generate(self, ids, max_new, sampling, cancel, embeddings=None, *, constraint=None):
+        """Yields token IDs (ScoredToken when requested), and None as a heartbeat every 10 s while the engine is quiet:
         the HTTP layer turns it into an SSE comment, which keeps clients' watchdogs calm and notices a client that
         has gone.  A consumer that stops early (or `cancel`) makes the engine STOP, so it does not run to max_new."""
         self.progress = None
@@ -507,9 +548,24 @@ class StrataEngine:
         # an image request takes the same sampling keys as text (#75: it used to decode greedily whatever was asked)
         head = f"GENI {int(max_new)}{self.sampling_keys(sampling or {})} {embeddings}" if embeddings else \
             f"GEN {int(max_new)}{self.sampling_keys(sampling or {})}"
+        score_count = validate_logprobs(sampling or {})
+        if score_count is not None and self.info.get("logprobs") != LOGPROBS_CAPABILITY:
+            raise ValueError("logprobs requires a native engine advertising raw-v1")
+        score_index = 0
+        if score_count is not None:
+            head += f" logprobs={score_count}"
+        command = f"{head} {','.join(str(int(t)) for t in ids)}"
+        if constraint is not None:
+            self.require_grammar(constraint)
+            if embeddings:
+                raise ValueError("grammar cannot be combined with image embeddings")
         try:
-            self.proc.stdin.write(f"{head} {','.join(str(int(t)) for t in ids)}\n")
-            self.proc.stdin.flush()
+            if constraint is not None:
+                self.proc.stdin.buffer.write(constraint.frame(command))
+                self.proc.stdin.buffer.flush()
+            else:
+                self.proc.stdin.write(command + "\n")
+                self.proc.stdin.flush()
         except OSError:                                  # the pipe is gone: the engine died (not the client)
             raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})") from None
         done = False
@@ -539,11 +595,36 @@ class StrataEngine:
                     done = True
                     raise EngineDied(f"the engine stopped unexpectedly (exit code {self.exit_code()})")
                 heard = time.monotonic()                  # any line is output: T, PP, RESUME, INFO ...
-                if line.startswith("T "):
+                if line.startswith("LP "):
+                    if score_count is None:
+                        raise ValueError("unexpected native logprobs record")
+                    allow = silence
+                    token = parse_score(line, score_index, score_count)
+                    if constraint is None and token.channel != "raw" or constraint is not None and token.channel == "raw":
+                        raise ValueError("native logprobs channel does not match the request")
+                    score_index += 1
+                    if cancel.is_set():
+                        return
+                    yield token
+                elif line.startswith("T "):
+                    if score_count is not None:
+                        raise ValueError("native token is missing requested logprobs")
                     allow = silence
                     if cancel.is_set():
                         return
                     yield int(line[2:])
+                elif line.startswith("TG "):
+                    if score_count is not None:
+                        raise ValueError("native token is missing requested logprobs")
+                    allow = silence
+                    if cancel.is_set():
+                        return
+                    if constraint is None or not constraint.scoped:
+                        raise ValueError("unexpected scoped native grammar token")
+                    _, channel, token = line.split()
+                    if channel not in ("answer", "reasoning", "tool", "control"):
+                        raise ValueError("invalid native grammar token channel")
+                    yield GrammarToken(int(token), channel)
                 elif line.startswith("PP "):
                     f = line.split()
                     if len(f) >= 3 and f[1].isdigit() and f[2].isdigit():
@@ -564,6 +645,8 @@ class StrataEngine:
                 elif line.startswith("DONE"):
                     self._parse_done(line)
                     done = True
+                    if score_count is not None and self.last.get("generated") != score_index:
+                        raise ValueError("native DONE count differs from logprobs records")
                     return
                 elif line.startswith("ERR"):
                     done = True
@@ -921,9 +1004,12 @@ class Detokenizer:
     every generated id cost 2 ms per token after 8K tokens and 4 ms after 16K (perf-review F-1).  A tokenizer
     without `token_bytes` (the tests' byte tokenizer) keeps the re-decode."""
 
-    def __init__(self, tok):
+    def __init__(self, tok, *, strict=False):
         self.tok, self.ids, self.sent = tok, [], 0
-        self.inc = codecs.getincrementaldecoder("utf-8")(errors="replace") if hasattr(tok, "token_bytes") else None
+        if strict and not hasattr(tok, "token_bytes"):
+            raise ValueError("grammar requires incremental token bytes")
+        self.inc = codecs.getincrementaldecoder("utf-8")(errors="strict" if strict else "replace") \
+            if hasattr(tok, "token_bytes") else None
 
     def pending(self) -> bool:
         """A character is split across the tokens so far: its first bytes are held."""
@@ -1334,10 +1420,17 @@ class Service:
                 "ram": {"used_gib": scaled(hw.get("ram_used"), 2 ** 30, 1),
                         "total_gib": scaled(hw.get("ram_total"), 2 ** 30, 1)} if hw.get("ram_total") else None}}
 
-    def prepare(self, messages, tools, kwargs, max_new=None):
+    def prepare(self, messages, tools, kwargs, max_new=None, *, constraint=None):
         """-> (ids, thinking, max_new). An unset or non-positive max_new (some clients send -1) means "unlimited":
         the rest of the context."""
         prompt = self.template.render(messages, tools=tools, **kwargs)
+        if constraint is not None:
+            thinking = kwargs.get("enable_thinking", True) is not False
+            if constraint.thinking != thinking or constraint.tools != bool(tools) or not prompt.endswith(
+                    THINK_PREFIX if thinking else ANSWER_PREFIX):
+                raise ValueError("grammar requires the matching Qwen reasoning/answer template boundary")
+            if images_of(messages):
+                raise ValueError("grammar does not support image inputs")
         ids = self.tok.encode(prompt, parse_special=True)
         self.embeddings.path = None
         images = images_of(messages)
@@ -1381,7 +1474,7 @@ class Service:
             if room < 1:
                 raise ValueError(f"prompt ({len(ids)} tokens) leaves no room to answer in the context "
                                  f"({self.engine.max_context}); requests are never truncated")
-            max_new = room
+            max_new = min(room, 8192) if constraint is not None and constraint.json_schema else room
         elif max_new > room:
             if not self.fit_max_tokens:
                 raise ValueError(f"prompt ({len(ids)} tokens) + max tokens ({max_new}) exceeds the context "
@@ -1389,6 +1482,8 @@ class Service:
                                  f"max_tokens (at most {max(0, room)} here), or add \"fit_max_tokens\": true to the "
                                  "model's strata-<model>.json to shorten it to the room left (#545)")
             max_new = max(1, room)          # --fit-max-tokens: a shorter completion beats a 400
+        if constraint is not None and max_new > 8192:
+            raise ValueError("grammar permits at most 8192 output tokens; set an explicit smaller output limit")
         return ids, kwargs.get("enable_thinking", True) is not False, max_new
 
     def _note(self, n, evs):
@@ -1427,15 +1522,40 @@ class Service:
                   f"{el:.0f} s", flush=True)
         return now
 
-    def run(self, ids, thinking, tools, max_new, sampling, cancel) -> Iterator[tuple[str, object]]:
+    def prepare_constraint(self, constraint, sampling):
+        """Same native compiler, before headers, using existing serialized admission."""
+        validate_sampling({**self.sampling_defaults, **self.shared, **sampling})
+        if constraint.thinking and self.reasoning_budget(sampling) and constraint.reasoning_tokens != min(self.reasoning_budget(sampling), 8192):
+            raise ValueError("grammar does not support injected reasoning-budget wrap-up; disable reasoning_budget_tokens")
+        with self.fifo:
+            self.ensure_loaded()
+            validate = getattr(self.engine, "validate_constraint", None)
+            if validate is None:
+                raise ValueError("this engine does not support native grammar enforcement")
+            if not hasattr(self, "_grammar_vocabularies"):
+                self._grammar_vocabularies = {}
+            if constraint.scoped not in self._grammar_vocabularies:
+                self._grammar_vocabularies[constraint.scoped] = vocabulary_identity(self.tok, self.stop_ids, constraint.scoped)
+            actual = validate(constraint)
+            if actual != self._grammar_vocabularies[constraint.scoped]:
+                raise ValueError("native grammar and HTTP tokenizer byte tables differ")
+
+
+    def run(self, ids, thinking, tools, max_new, sampling, cancel, *, constraint=None) -> Iterator[tuple[str, object]]:
         """Yields ("event", Event) as text arrives, then ("done", {"finish": .., "completion_tokens": ..})."""
         budget = self.reasoning_budget(sampling) if thinking else None   # #123: opt-in, off by default
         defaults = {**self.sampling_defaults, **self.shared}   # the config's, then the Chat settings shared with apps
         if defaults:                   # the request's own fields win (explicit 0 stays greedy)
             req_values = {k: v for k, v in (sampling or {}).items() if v is not None}
             sampling = {**defaults, **req_values}
-        parser = OutputParser(thinking=thinking, tools=tools, stream_tools=True)
-        detok, n, finish = Detokenizer(self.tok), 0, "length"
+        scores = ContentScores(self.tok) if (sampling or {}).get("logprobs") is True else None
+        if scores is not None and budget and constraint is None:
+            raise ValueError("logprobs cannot score injected reasoning-budget wrap-up; disable reasoning_budget_tokens")
+        scoped_output = GrammarOutput(tools) if constraint is not None and constraint.scoped else None
+        parser = None if constraint is not None else OutputParser(thinking=thinking, tools=tools, stream_tools=True,
+                                                                  track_source=scores is not None)
+        detok, n, finish = Detokenizer(self.tok, strict=constraint is not None or scores is not None), 0, "length"
+        decoded_bytes, pending_channel = 0, None
         timings, before = None, None                    # this request's timings; the engine's `last` before it
         raw_ids = []                                    # every generated id (STRATA_DEBUG: dump raw model text)
         emb = getattr(self.embeddings, "path", None)
@@ -1454,6 +1574,9 @@ class Service:
                             trace["queue_s"] += round(time.perf_counter() - waiting, 3)
                             trace["state"] = "generating"
                         self.status["queued"] -= 1
+                    if cancel.is_set():
+                        yield "done", {"finish": "cancel", "completion_tokens": 0}
+                        return
                     # issue #27: it died in an earlier request (or was unloaded) - start it again instead of failing
                     self.ensure_loaded()
                     with self.status_lock:
@@ -1466,8 +1589,10 @@ class Service:
                     last_print = time.time()
                     prompt, thought = ids, 0            # thought: the reasoning tokens so far (the budget's count)
                     while True:
-                        gen = self.engine.generate(prompt, max_new - n, sampling, cancel, embeddings=emb) if emb \
-                            else self.engine.generate(prompt, max_new - n, sampling, cancel)
+                        options = {"embeddings": emb} if emb else {}
+                        if constraint is not None:
+                            options["constraint"] = constraint
+                        gen = self.engine.generate(prompt, max_new - n, sampling, cancel, **options)
                         seg, wrap, leaving = [], False, False   # this pass's tokens; the budget is reached; closed
                         try:
                             for t in gen:
@@ -1475,22 +1600,44 @@ class Service:
                                     last_print = self._progress(last_print)
                                     yield "ping", None
                                     continue
+                                sample = t if isinstance(t, ScoredToken) else None
+                                if scores is not None and sample is None:
+                                    raise ValueError("engine omitted a requested token score")
+                                channel = t.channel if isinstance(t, (GrammarToken, ScoredToken)) else None
+                                t = t.id if isinstance(t, (GrammarToken, ScoredToken)) else t
+                                if scoped_output is not None and channel is None:
+                                    raise ValueError("native grammar omitted a token channel")
                                 n += 1
                                 if trace is not None and trace["first_token_s"] is None:
                                     with self.status_lock:
                                         trace["first_token_s"] = round(time.perf_counter() - trace["_clock"], 3)
                                 if t in self.stop_ids:
+                                    if (constraint is not None or scores is not None) and detok.pending():
+                                        raise ValueError("native output ended inside an incomplete UTF-8 character")
                                     finish = "stop"
                                     raw_ids.append(t)
                                     break
                                 raw_ids.append(t)
                                 seg.append(t)
-                                evs = parser.feed(detok.push(t))
+                                if scores is not None:
+                                    scores.add(sample)
+                                if detok.pending() and pending_channel != channel:
+                                    raise ValueError("native output changed channel inside a UTF-8 character")
+                                pending_channel = channel
+                                delta = detok.push(t)
+                                evs = scoped_output.feed(channel, delta) if scoped_output is not None else \
+                                    parser.feed(delta) if parser is not None else ([Event("content", delta)] if delta else [])
+                                if scores is not None:
+                                    for ev in evs:
+                                        if parser is None and ev.kind == "content":
+                                            ev.source_start = decoded_bytes
+                                    decoded_bytes += len(delta.encode("utf-8"))
+                                    scores.annotate(evs, parser.retained_position if parser is not None else decoded_bytes)
                                 self._note(n, evs)
                                 last_print = self._progress(last_print)
                                 for ev in evs:
                                     yield "event", ev
-                                if budget and parser.state == "reasoning":
+                                if budget and parser is not None and parser.state == "reasoning":
                                     thought += 1
                                     # at a clean point: no tag held back, no character split across tokens
                                     if thought >= budget and not parser.buf and not detok.pending():
@@ -1592,7 +1739,7 @@ class Service:
                             hit_msg = f", expert cache {hit_rate*100:.1f}% hit" if hit_rate is not None else ""
                             print(f"[strata] done: {n} tokens in {el:.0f} s ({rate:.1f} tok/s) "
                                   f"({finish}, cancel={cancel.is_set()}){hit_msg}", flush=True)
-                            if finish == "length" and parser.state == "reasoning":   # #530
+                            if finish == "length" and parser is not None and parser.state == "reasoning":   # #530
                                 print("[strata] the reply reached max tokens while still thinking, so it has no "
                                       "answer: a thinking budget (reasoning_budget_tokens, in the request or in "
                                       "strata-<model>.json for every request) leaves room to answer", flush=True)
@@ -1604,7 +1751,13 @@ class Service:
         finally:
             if emb:
                 Path(emb).unlink(missing_ok=True)
-        for ev in parser.finish():
+        evs = scoped_output.finish(finish) if scoped_output is not None else parser.finish() if parser is not None else []
+        if scores is not None:
+            if detok.pending():
+                raise ValueError("native output ended inside an incomplete UTF-8 character")
+            scores.annotate(evs, decoded_bytes)
+            scores.finish()
+        for ev in evs:
             yield "event", ev
         yield "done", {"finish": finish, "completion_tokens": n, "reused": (timings or {}).get("cache_n", 0),
                        "timings": timings}
@@ -1745,21 +1898,25 @@ def run_with_mcp(svc: Service, hub, messages, tools, kw, ids, thinking, max_new,
 
 
 # ------------------------------------------------------------------------------------------------ OpenAI
-def openai_chunks(svc: Service, req: dict, ids, thinking, tools, max_new, cancel, run=None):
+def openai_chunks(svc: Service, req: dict, ids, thinking, tools, max_new, cancel, run=None, *, constraint=None):
     """`run`: the events to send instead of Service.run's (run_with_mcp); its ("mcp", {...}) items become chunks with
     an empty delta and a `strata_mcp` field, which only the web app reads."""
     cid, created = "chatcmpl-" + uuid.uuid4().hex[:24], int(time.time())
     model = svc.model_for(req)
 
-    def chunk(delta, finish=None):
+    def chunk(delta, finish=None, scores=None):
+        choice = {"index": 0, "delta": delta, "finish_reason": finish}
+        if req.get("logprobs") is True:
+            choice["logprobs"] = {"content": scores or [], "refusal": None} if "content" in delta else None
         return {"id": cid, "object": "chat.completion.chunk", "created": created, "model": model,
-                "choices": [{"index": 0, "delta": delta, "finish_reason": finish}]}
+                "choices": [choice]}
 
     yield chunk({"role": "assistant", "content": ""})
     calls = 0
     streamed = {}                                  # tool call id -> index, for calls sent piece by piece
     finished = set()                               # ... and the ones whose final tool_call came (#211)
-    for kind, x in run if run is not None else svc.run(ids, thinking, tools, max_new, req, cancel):
+    options = {"constraint": constraint} if constraint is not None else {}
+    for kind, x in run if run is not None else svc.run(ids, thinking, tools, max_new, req, cancel, **options):
         if kind == "ping":
             yield None
         elif kind == "mcp":
@@ -1771,7 +1928,7 @@ def openai_chunks(svc: Service, req: dict, ids, thinking, tools, max_new, cancel
             if ev.kind == "reasoning" and ev.text:
                 yield chunk({"reasoning_content": ev.text})
             elif ev.kind == "content" and ev.text:
-                yield chunk({"content": ev.text})
+                yield chunk({"content": ev.text}, scores=ev.logprobs)
             elif ev.kind == "tool_start":
                 streamed[ev.call.id] = calls
                 calls += 1
@@ -1811,12 +1968,17 @@ def _is_json(text: str) -> bool:
 
 def openai_collect(chunks) -> dict:
     content, reasoning, by_index, last, mcp = [], [], {}, None, []
+    logprobs = None
     for c in chunks:
         if c is None:                              # a heartbeat
             continue
         if c.get("strata_mcp"):
             mcp.append(c["strata_mcp"])
         d = c["choices"][0]["delta"]
+        if "logprobs" in c["choices"][0]:
+            if logprobs is None:
+                logprobs = []
+            logprobs.extend((c["choices"][0]["logprobs"] or {}).get("content") or [])
         content.append(d.get("content") or "")
         reasoning.append(d.get("reasoning_content") or "")
         for tc in d.get("tool_calls") or []:       # streamed calls arrive in pieces: merge them by index
@@ -1842,6 +2004,8 @@ def openai_collect(chunks) -> dict:
            "usage": last["usage"]}
     if last.get("timings"):
         out["timings"] = last["timings"]
+    if logprobs is not None:
+        out["choices"][0]["logprobs"] = {"content": logprobs, "refusal": None}
     return out
 
 
@@ -2412,11 +2576,32 @@ def make_handler(svc: Service):
 
         def _openai(self, req):
             req = svc.with_shared(req, "openai")
+            score_count = validate_logprobs(req)
+            constraint = validate_grammar_request(req, "chat")
+            json_output = prepare_chat_json(req.get("response_format")) if score_count is not None else None
             messages, tools, kw = openai_to_messages(req)
-            messages, validator = prepare_format(req.get("response_format"), messages)
+            if json_output is None:
+                messages, validator = prepare_format(req.get("response_format"), messages)
+            else:
+                validator = None
+                validate_sampling(req)
+                messages = [dict(m) for m in messages]
+                directive = json_output.instruction()
+                if messages and messages[0].get("role") == "system":
+                    old = messages[0].get("content") or ""
+                    messages[0]["content"] = old + [{"type": "text", "text": directive}] if isinstance(old, list) else old + "\n\n" + directive
+                else:
+                    messages.insert(0, {"role": "system", "content": directive})
             if validator is not None and (tools or req.get("strata_mcp")):
                 raise ValueError("structured response_format with tools/MCP is not supported")
             svc.load()
+            if score_count is not None:
+                if getattr(svc.engine, "info", {}).get("logprobs") != LOGPROBS_CAPABILITY:
+                    raise ValueError("logprobs requires a native engine advertising raw-v1")
+                if not hasattr(svc.tok, "token_bytes"):
+                    raise ValueError("logprobs requires a tokenizer with explicit token bytes")
+                if images_of(messages):
+                    raise ValueError("logprobs currently supports text inputs only")
             max_req = max_new = int(req.get("max_completion_tokens") or req.get("max_tokens") or 0)   # 0/-1: the rest
             use_mcp = req.get("strata_mcp") is True and svc.mcp is not None      # the web app's opt-in (serve/mcp.py)
             own = {t.get("name") for t in tools or []}
@@ -2428,13 +2613,24 @@ def make_handler(svc: Service):
                 use_mcp = bool(extra)
                 tools = (tools or []) + extra or None
             svc.reasoning_budget(req)                         # a bad value is a 400 before anything is sent
-            ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new)
+            if constraint is not None:
+                constraint = constraint.with_scope(kw.get("enable_thinking", True) is not False, tools)
+            if json_output is not None:
+                constraint = json_output.constraint(kw.get("enable_thinking", True) is not False, tools,
+                                                    svc.reasoning_budget(req))
+            ids, thinking, max_new = svc.prepare(messages, tools, kw, max_new, constraint=constraint)
+            if score_count is not None and thinking and svc.reasoning_budget(req) and constraint is None:
+                raise ValueError("logprobs cannot score injected reasoning-budget wrap-up; disable reasoning_budget_tokens")
+            if constraint is not None:
+                svc.prepare_constraint(constraint, req)
             _debug_req("openai", req, messages, tools, max_new, thinking, len(ids))
             cancel = threading.Event()
             self._watch_client(cancel)                       # #430 #431
             run = run_with_mcp(svc, svc.mcp, messages, tools, kw, ids, thinking, max_new, max_req, req, cancel,
                                {t["name"] for t in extra}) if use_mcp else None
-            chunks = openai_chunks(svc, req, ids, thinking, tools, max_new, cancel, run=run)
+            chunks = openai_chunks(svc, req, ids, thinking, tools, max_new, cancel, run=run, constraint=constraint)
+            if json_output is not None:
+                chunks = json_chunks(chunks, json_output)
             if validator is not None:
                 chunks = structured_chunks(chunks, validator)
             chunks = self._capture(chunks, "openai")

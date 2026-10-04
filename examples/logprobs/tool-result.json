@@ -1,0 +1,55 @@
+{
+  "model": "x",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Call echo with text hello, then say hello."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_demo",
+          "type": "function",
+          "function": {
+            "name": "echo",
+            "arguments": "{\"text\":\"hello\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_demo",
+      "content": "hello"
+    }
+  ],
+  "max_tokens": 32,
+  "temperature": 0,
+  "logprobs": true,
+  "top_logprobs": 5,
+  "reasoning_effort": "none",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "echo",
+        "description": "Return the supplied text unchanged.",
+        "strict": false,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}
