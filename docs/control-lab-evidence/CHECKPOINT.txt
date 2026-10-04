@@ -1,0 +1,19 @@
+Strata Control Lab: first educational release
+
+Branch: work/control-lab
+Worktree: C:\Users\dflanag3\Documents\fleet\strata-control-lab
+Base branch: work/logprobs-675
+Base commit: 2243cb1c5b1a87270731d8b8a76e4af001f96f97
+Implementation and evidence commit: 52c80ff7899280a52241998134dc00ac01632880
+
+Qualification: October 4, 2026 UTC
+Native capture: 101 requests, llm-49 RTX 4090, target-only Qwen IQ1_M.
+Python: 59 passed; one documented dependency deprecation warning.
+Browser: 29 checks passed, including native cancellation and next request.
+Core engine/API changes relative to the base: none.
+
+This file records the preceding implementation commit, avoiding a self-referential
+commit hash. Later receipt-only commits do not change that tested implementation.
+
+Next gate: review the educational workflow and choose one measured follow-up
+from docs/CONTROL_LAB_ROADMAP.md.

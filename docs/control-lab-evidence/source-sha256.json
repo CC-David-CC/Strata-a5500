@@ -1,0 +1,18 @@
+{
+  "examples/control_lab/app.py": "bf7b567be872ec332c66fa4f61ae29d697f5d745f91959e277b33fb337420bd3",
+  "examples/control_lab/capture.py": "04f76754312dee29845e2f325925fc2d3c97dc25f198151dcd485504d742398e",
+  "examples/control_lab/catalog.py": "783eca4ba4aed426754024a10b20e9a94b1597f2a9c21248f8e1c4cb829c360b",
+  "examples/control_lab/check_browser.py": "cbcf357ebfe51591ed1942c3151bdbb6f0212be672930ce2ca501b5d115d5e1d",
+  "examples/control_lab/client.py": "ed77fd0fd3beff3505db6cf9c50b2e85f9d4d0e229951bdb6e8334a7b52e268f",
+  "examples/control_lab/core.py": "bdc7d66292d6f3f5b28179d70388bcea09d747e3eb00baea18bf482650cd0f30",
+  "examples/control_lab/requirements-test.txt": "25a8a3307e43b97957d5768f9a1ce6c34f5aa58dee76b04d3d826ebda447aaa7",
+  "examples/control_lab/requirements.txt": "3b7c4a9cce7eec658dc889c91545c1149363adb93df16933d355b1f73cdba2dd",
+  "examples/control_lab/scenarios.py": "a2974009418f9bdec58f32f61e6f28d0b65704f7da757a89d4024d5bafb21e6e",
+  "examples/control_lab/test_app.py": "080b9eccb7abc9e02b2d5acb2bb41346e9994decad29506e24c698f5ba816455",
+  "examples/control_lab/test_core.py": "551c872eb7326f3d22b08ded301719a75cbd6cb4cf4c0a62c78ae7149a167b66",
+  "examples/control_lab/__init__.py": "47b029fe9d7050e645c666d2a56d48dac2cf75eba9d1ecff3a4883e86428f544",
+  "examples/control_lab/__main__.py": "66e06e528136b2403beeee8180e9389c5f6ba70e5f3be7ebad847f85f827812a",
+  "examples/control_lab/static/index.html": "a8c7722d616f13f407d8ef7876fa635194c1ede696d475f4040573b7b29e725a",
+  "examples/control_lab/static/lab.css": "17a787c55403f268ceb910222d9e1277446a215122d9ce04cb99f35603cd203f",
+  "examples/control_lab/static/lab.js": "e9bb66f531645045edb8c6c7c64e695876b9e8fe60340ec70b64eb8c54e56bf2"
+}
