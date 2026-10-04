@@ -57,6 +57,12 @@ def gates(out):
             text=(out/(label+'.log')).read_text()
             if f'strata miss fetch geometry: blocks={blocks} threads=256;' not in text:
                 raise RuntimeError('Missing geometry activation: '+label)
+            required=[f'PASS bytes=5222400 ways={ways} overlap={overlap}'
+                      for ways in (8,16) for overlap in (0,1)]
+            if not all(marker in text for marker in required):
+                raise RuntimeError('Missing full-size capacity coverage: '+label)
+            state['capacity_full_blob_passes']=required
+            save(out/'result.json',state)
         for blocks in (32,):
             for sanitizer in ['memcheck','initcheck']:
                 run(f'fixture-{sanitizer}-blocks{blocks}',
