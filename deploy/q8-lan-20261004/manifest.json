@@ -1,0 +1,66 @@
+{
+  "created_utc": "2026-10-04T16:56:12.627625+00:00",
+  "endpoint": "http://10.0.7.68:8095/v1",
+  "service": "strata-q8-lan.service",
+  "deployment_path": "/home/dflanag3/.config/strata/q8-lan-20261004",
+  "engine_source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+  "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+  "config_sha256": "38d6c62951f5bea41ae9f081b771776e3295c5f6e7c3367341f40a6a358d10cd",
+  "model_files": [
+    {
+      "path": "/home/dflanag3/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00001-of-00006.gguf",
+      "size": 10946624,
+      "mtime_ns": 1790729589381418726
+    },
+    {
+      "path": "/home/dflanag3/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00002-of-00006.gguf",
+      "size": 682434912,
+      "mtime_ns": 1790729599307673074
+    },
+    {
+      "path": "/home/dflanag3/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00003-of-00006.gguf",
+      "size": 54400261312,
+      "mtime_ns": 1790730317598697581
+    },
+    {
+      "path": "/home/dflanag3/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00004-of-00006.gguf",
+      "size": 49446841216,
+      "mtime_ns": 1790731275566815044
+    },
+    {
+      "path": "/home/dflanag3/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00005-of-00006.gguf",
+      "size": 49668930400,
+      "mtime_ns": 1790732080147774654
+    },
+    {
+      "path": "/home/dflanag3/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00006-of-00006.gguf",
+      "size": 34015618784,
+      "mtime_ns": 1790732782539877339
+    }
+  ],
+  "model_inventory_note": "Path/size/mtime freeze; no new full-weight hash pass.",
+  "python_packages": [
+    "certifi==2026.7.22",
+    "charset-normalizer==3.5.1",
+    "cmake==4.4.3",
+    "idna==3.20",
+    "Jinja2==3.1.6",
+    "MarkupSafe==3.0.3",
+    "ninja==1.13.2",
+    "numpy==2.5.3",
+    "pillow==12.3.0",
+    "psutil==7.2.2",
+    "PyYAML==6.0.3",
+    "regex==2026.9.29",
+    "requests==2.34.2",
+    "tqdm==4.70.1",
+    "urllib3==2.8.0"
+  ],
+  "boot_enabled": true,
+  "lan_subnet": "10.0.0.0/17",
+  "dhcp_address": true,
+  "health": "ready; authenticated LAN HTTP checks passed",
+  "lan_mac": "74:56:3c:b8:66:2c",
+  "http_validation": "http-validation.json",
+  "host_validation": "host-validation.json"
+}

@@ -1,0 +1,293 @@
+{
+  "frozen_utc": "2026-10-04T17:05:09.973745+00:00",
+  "branches": [
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-full-expert-review",
+      "branch": "perf/full-expert-q4-q8",
+      "head": "3fcea83d13257625f930fdc26023eacd0f0f8540",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q4-q8-expert-reuse",
+      "branch": "perf/q4-q8-expert-reuse",
+      "head": "b5d3be154c6e1398e6b93276428ce820203c71a4",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-buffer-ownership-publish",
+      "branch": "experimental/rtxpro-q8-buffer-ownership",
+      "head": "6beb57fd61ff7e15e48913e59f6a3558c87c8e63",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-cache-budget",
+      "branch": "config/q8-cache-budget",
+      "head": "65a01b4d19de78c4b5d1284f7f7fddef3c50e601",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-cache-routing",
+      "branch": "diag/q8-cache-routing",
+      "head": "78cf0bdfd8e47d3a34eb5976933ff6984c276c09",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-cached-cpu",
+      "branch": "perf/q8-cached-cpu",
+      "head": "200eec26e1208a3c792a2059e73c3cd4c03798a6",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-compact-miss-fills",
+      "branch": "perf/q8-compact-miss-fills",
+      "head": "6f8f1152b88bbc90eeb67f90883a23e19c5c6902",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-cpu-expert-reuse",
+      "branch": "perf/q8-cpu-expert-reuse",
+      "head": "aa85daadc2dd5769db8b4d56c33332f14a451cb9",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-cupti-user-range",
+      "branch": "diag/q8-cupti-user-range",
+      "head": "94c37a621c78b83faa598b38478544282820c3f7",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-deferred-admission",
+      "branch": "perf/q8-deferred-admission",
+      "head": "e6d9912dcbf5b3f6ee5ed828ecf5f5517bcb1693",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-duplex-exchanges",
+      "branch": "perf/q8-duplex-exchanges",
+      "head": "822b21ef59e98f8f182b9241a435a44b4b4bb001",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-duplex-reuse",
+      "branch": "perf/q8-duplex-expert-reuse",
+      "head": "c29401079487431547628639bb11eaf164b65bb2",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-exchange-rotation",
+      "branch": "perf/q8-exchange-buffer-rotation",
+      "head": "0d4c740d0c0f6f0eb9b5a6331dcf2c20ff28be47",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-expert-reuse",
+      "branch": "perf/q8-expert-reuse",
+      "head": "44ef4a0379e853cd6520f81947e254d6b03f779e",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-fp16-placement",
+      "branch": "perf/q8-fp16-miss-placement",
+      "head": "d688aad3f514b82131fc93656f60e97488769ecb",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-gpu-refills",
+      "branch": "perf/q8-gpu-refills",
+      "head": "2fe2e6ad35f279e2c5a808b55b7de8d7052c8406",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-host-critical-path",
+      "branch": "perf/q8-host-critical-path",
+      "head": "777ac63e5f76c4f7a1e5c4253025ec5fc37b6a23",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-host-dram-traffic",
+      "branch": "diag/q8-host-dram-traffic",
+      "head": "c607f5dd475269d1bf9ede841e8e1aff2729c293",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-hybrid",
+      "branch": "perf/q8-hybrid",
+      "head": "3fcea83d13257625f930fdc26023eacd0f0f8540",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-lan-freeze",
+      "branch": "freeze/q8-lan-20261004",
+      "head": "ae4ba458b7dafa7208b9a84a5ef50ed6450259b4",
+      "uncommitted": "?? deploy/\n?? docs/Q8_FROZEN_ALL_MEASUREMENTS.md\n?? docs/Q8_FROZEN_MATRIX.md\n?? docs/Q8_GPU_REFILLS.md\n?? docs/benchmarks/q8-frozen-20261004/\n?? docs/benchmarks/q8-gpu-refill-complete-32k-20261004.json\n?? docs/benchmarks/q8-gpu-refill-first-mtp-20261004.json\n?? docs/benchmarks/q8-gpu-refill-lifecycle-20261004.json\n?? docs/benchmarks/q8-gpu-refill-reverse-32k-20261004.json",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-layer-admission",
+      "branch": "perf/q8-layer-admission",
+      "head": "ae4ba458b7dafa7208b9a84a5ef50ed6450259b4",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-layer-gpu-refills",
+      "branch": "perf/q8-layer-gpu-refills",
+      "head": "6e4c733973cf864ad6ccf1b2cff095e5627f841c",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-miss-cache-capacity",
+      "branch": "config/q8-miss-cache-capacity",
+      "head": "8d89e47011a5e611d2183ebefd76a3a38dd3c23b",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-miss-cache-trace",
+      "branch": "diag/q8-miss-cache-reuse",
+      "head": "9e960e4294bd5c7dcea5a66f09b2f61aaa7b5787",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-miss-fetch-geometry",
+      "branch": "perf/q8-miss-fetch-geometry",
+      "head": "d5060317b41ac63ef914ae37c025f94e1ffb9ea0",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-miss-fetch-overlap",
+      "branch": "perf/q8-miss-fetch-overlap",
+      "head": "b797877e88f1789d6c0d53778d9fdc7669cb7d5a",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-mtp-window",
+      "branch": "perf/q8-mtp-window",
+      "head": "3fcea83d13257625f930fdc26023eacd0f0f8540",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-ncu-graph-capture",
+      "branch": "diag/q8-ncu-graph-capture",
+      "head": "aef5bc8f50c2f6b090cd25096765b403d7e32a46",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-packed-loads",
+      "branch": "perf/q8-packed-loads",
+      "head": "66ac4cf9e45107b3733558878859e137567fbc3b",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-parallel-exchange",
+      "branch": "perf/q8-parallel-exchange-commit",
+      "head": "080891d445d1f28eb244d4ce4fbce22942dc0b29",
+      "uncommitted": "M CMakeLists.txt\n M src/core/expert_source.cpp\n?? include/strata/core/exchange_copy.hpp\n?? tests/core/exchange_copy_test.cpp",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-parallel-ple",
+      "branch": "perf/q8-parallel-ple-load",
+      "head": "f28f91d81ea5a1cfa0b8e0db1e6894cbd19cdacf",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-pcie-placement",
+      "branch": "perf/q8-pcie-miss-balance",
+      "head": "010128b8f9a768554011314e1555495a47d467b2",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-pcie-traffic",
+      "branch": "diag/q8-pcie-traffic",
+      "head": "fdb23e7519860d6bed55172aec053fd1ead2c55b",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-readonly-miss-cache",
+      "branch": "perf/q8-readonly-miss-cache",
+      "head": "4a7f67cbfe8ac7d94728f6cc7229e7dda2c2b906",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-retained-experts",
+      "branch": "perf/q8-retained-expert-copies",
+      "head": "130856d968f93c5009c87f98d92d5bf3afc7eceb",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-seeded-ram-copies",
+      "branch": "perf/q8-seeded-ram-copies",
+      "head": "9c53298b65f4cb677d6bfcffa8627e8263cd619c",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-q8-verifier-reuse",
+      "branch": "perf/q8-verifier-reuse",
+      "head": "e6c94b2008a55b59067c4b7386f47c10baffaa8a",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-rtxpro-q8-fp16-1m",
+      "branch": "experimental/rtxpro-q8-fp16-1m",
+      "head": "3e99f376ff46e94583139dd848778b072c9e7f94",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-rtxpro-q8-fp16-kv",
+      "branch": "config/rtxpro-q8-fp16-kv",
+      "head": "613fce2988e84c7f9dd30eaf0aab32e9ea2b64ab",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-rtxpro-q8-int8-kv",
+      "branch": "config/rtxpro-q8-int8-kv",
+      "head": "5a086ceae9aa1a7a086149415f60b49c2ff424fd",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    },
+    {
+      "worktree": "C:/Users/dflanag3/Documents/fleet/strata-rtxpro-synthetic-q8",
+      "branch": "experimental/rtxpro-synthetic-q8",
+      "head": "b5c6add954ee4abb996be21cf2c171d9487236f6",
+      "uncommitted": "",
+      "optimization_status": "paused"
+    }
+  ],
+  "inventory_note": "Branch/worktree snapshot before the freeze documentation commit; the freeze branch entry records its measured parent. Source/binary identities are in the profile index."
+}

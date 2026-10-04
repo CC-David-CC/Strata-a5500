@@ -1,0 +1,408 @@
+{
+  "started_utc": "2026-10-04T17:02:38.879867+00:00",
+  "client": "Windows fleet workspace, direct LAN HTTP",
+  "endpoint": "http://10.0.7.68:8095/v1",
+  "scope": "Auth, small completion, streaming, FIFO queuing and disconnect recovery; not a capacity/throughput benchmark.",
+  "checks": [
+    {
+      "name": "health",
+      "passed": true,
+      "response": {
+        "status": "ok",
+        "max_context": 139264,
+        "model": "flash-next-Q8_0",
+        "images": false,
+        "api_key": true,
+        "loaded": true,
+        "service": "strata"
+      }
+    },
+    {
+      "name": "missing-and-wrong-key-rejected",
+      "passed": true,
+      "paths": [
+        "/v1/models",
+        "/v1/chat/completions",
+        "/settings"
+      ]
+    },
+    {
+      "name": "authenticated-model-discovery",
+      "passed": true,
+      "models": {
+        "object": "list",
+        "data": [
+          {
+            "id": "flash-next-Q8_0",
+            "object": "model",
+            "status": {
+              "value": "loaded"
+            },
+            "meta": {
+              "n_ctx": 139264
+            },
+            "architecture": {
+              "input_modalities": [
+                "text"
+              ],
+              "output_modalities": [
+                "text"
+              ]
+            }
+          }
+        ]
+      },
+      "concurrency": {
+        "serving": 1,
+        "requested": 1
+      }
+    },
+    {
+      "name": "nonstream-completion",
+      "passed": true,
+      "result": {
+        "started": 1791133359.0368636,
+        "finished": 1791133359.205533,
+        "response": {
+          "id": "chatcmpl-85a0e109314d4858bfce9a71",
+          "object": "chat.completion",
+          "created": 1791133358,
+          "model": "flash-next-Q8_0",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "LAN test ready"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 19,
+            "completion_tokens": 4,
+            "total_tokens": 23,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 19,
+            "prompt_ms": 87.4,
+            "prompt_per_token_ms": 4.6,
+            "prompt_per_second": 217.4,
+            "predicted_n": 4,
+            "predicted_ms": 47.2,
+            "predicted_per_token_ms": 11.8,
+            "predicted_per_second": 84.7,
+            "draft_n": 3,
+            "draft_n_accepted": 2
+          }
+        }
+      }
+    },
+    {
+      "name": "sse-streaming",
+      "passed": true,
+      "chunks": 16,
+      "text": "```python\ndef add(a, b):\n    return a + b\n```"
+    },
+    {
+      "name": "two-clients-fifo",
+      "passed": true,
+      "queue_observed": true,
+      "first": {
+        "started": 1791133359.5602498,
+        "finished": 1791133360.8924026,
+        "response": {
+          "id": "chatcmpl-b05ab6c789bb4dabb352a6eb",
+          "object": "chat.completion",
+          "created": 1791133358,
+          "model": "flash-next-Q8_0",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n39\n40\n41\n42\n43\n44\n45\n46\n47\n48\n49\n50\n51\n52\n53\n54\n55\n56\n57\n58\n59\n60\n61\n62\n63\n64\n65\n66\n67\n68\n69\n70\n71\n72\n73\n74\n75\n76\n77\n78\n79\n80\n81\n82\n83\n84\n85\n86\n87\n88\n8"
+              },
+              "finish_reason": "length"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 37,
+            "completion_tokens": 256,
+            "total_tokens": 293,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 37,
+            "prompt_ms": 123.7,
+            "prompt_per_token_ms": 3.343,
+            "prompt_per_second": 299.1,
+            "predicted_n": 256,
+            "predicted_ms": 1198.5,
+            "predicted_per_token_ms": 4.682,
+            "predicted_per_second": 213.6,
+            "draft_n": 191,
+            "draft_n_accepted": 191
+          }
+        }
+      },
+      "second": {
+        "started": 1791133359.624887,
+        "finished": 1791133360.998726,
+        "response": {
+          "id": "chatcmpl-d62135a19e6b4f71a6d35f21",
+          "object": "chat.completion",
+          "created": 1791133358,
+          "model": "flash-next-Q8_0",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "second queued request finished"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 20,
+            "completion_tokens": 5,
+            "total_tokens": 25,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 20,
+            "prompt_ms": 70.1,
+            "prompt_per_token_ms": 3.505,
+            "prompt_per_second": 285.3,
+            "predicted_n": 5,
+            "predicted_ms": 32.8,
+            "predicted_per_token_ms": 6.56,
+            "predicted_per_second": 152.4,
+            "draft_n": 3,
+            "draft_n_accepted": 3
+          }
+        }
+      },
+      "observations": [
+        {
+          "busy": true,
+          "queued": 0
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 0
+        },
+        {
+          "busy": true,
+          "queued": 0
+        }
+      ]
+    },
+    {
+      "name": "disconnect-cancellation-and-following-request",
+      "passed": true,
+      "chunks_before_disconnect": 8,
+      "idle_within_seconds": 0.33860063552856445,
+      "recovered": {
+        "started": 1791133361.4980724,
+        "finished": 1791133361.6135156,
+        "response": {
+          "id": "chatcmpl-cf72d9ef27fd474ab637d617",
+          "object": "chat.completion",
+          "created": 1791133360,
+          "model": "flash-next-Q8_0",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "recovery ready"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 18,
+            "completion_tokens": 4,
+            "total_tokens": 22,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 18,
+            "prompt_ms": 67.5,
+            "prompt_per_token_ms": 3.75,
+            "prompt_per_second": 266.7,
+            "predicted_n": 4,
+            "predicted_ms": 37.1,
+            "predicted_per_token_ms": 9.275,
+            "predicted_per_second": 107.8,
+            "draft_n": 3,
+            "draft_n_accepted": 2
+          }
+        }
+      },
+      "final_status": {
+        "busy": false,
+        "queued": 0,
+        "phase": "answering",
+        "prompt_tokens": 40,
+        "generated": 13,
+        "max_tokens": 4096
+      }
+    }
+  ],
+  "completed": true,
+  "finished_utc": "2026-10-04T17:02:41.629500+00:00",
+  "final_status": {
+    "service": "strata",
+    "model": "flash-next-Q8_0",
+    "loaded": true,
+    "auto_load": true,
+    "structured_output": {
+      "formats": [
+        "json_object",
+        "json_schema"
+      ],
+      "method": "prompt_and_validate",
+      "constrained_decoding": false,
+      "stream_buffered": true
+    },
+    "engine": "0.1.38",
+    "started": 1791133071,
+    "uptime_s": 289,
+    "cache_max_tokens": 139264,
+    "context": {
+      "native": 139264,
+      "max_positions": 139264
+    },
+    "concurrency": {
+      "serving": 1,
+      "requested": 1
+    },
+    "dialects": [
+      "/v1/chat/completions",
+      "/v1/messages"
+    ],
+    "vision": {
+      "enabled": false,
+      "available": false,
+      "error": null
+    },
+    "activity": {
+      "requests": 11,
+      "in_flight": 0,
+      "last_request_at": 1791133360
+    },
+    "last_timings": {
+      "cache_n": 0,
+      "prompt_n": 18,
+      "prompt_ms": 67.5,
+      "prompt_per_token_ms": 3.75,
+      "prompt_per_second": 266.7,
+      "predicted_n": 4,
+      "predicted_ms": 37.1,
+      "predicted_per_token_ms": 9.275,
+      "predicted_per_second": 107.8,
+      "draft_n": 3,
+      "draft_n_accepted": 2,
+      "at": 1791133360
+    },
+    "machine": {
+      "at": 1791133360,
+      "gpu": {
+        "name": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+        "used_mib": 93766.0,
+        "total_mib": 97887.0,
+        "util_pct": 100,
+        "temp_c": 41,
+        "power_w": 351.749
+      },
+      "ram": {
+        "used_gib": 104.5,
+        "total_gib": 124.9
+      }
+    }
+  }
+}

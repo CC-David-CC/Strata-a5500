@@ -1,0 +1,43 @@
+{
+  "service": "MainPID=1177368\nNRestarts=0\nMemoryCurrent=74493693952\nMemoryPeak=75787206656\nActiveState=active\n",
+  "boot_enabled": "enabled",
+  "gpu": "0 %, 93129 MiB, 4121 MiB, 29",
+  "free": "               total        used        free      shared  buff/cache   available\nMem:          127906      107052         890       47276      120271       20853\nSwap:           4095         421        3674\n",
+  "firewall": "table inet fleet_q8_lan {\n\tchain input {\n\t\ttype filter hook input priority filter - 10; policy accept;\n\t\tip daddr 10.0.7.68 tcp dport 8095 ip saddr != 10.0.0.0/17 counter packets 0 bytes 0 drop\n\t}\n}\n",
+  "lan_mac": "74:56:3c:b8:66:2c",
+  "paused_units": {
+    "fleet-rtxpro-q8-cached-cpu-model-20261004": "MainPID=0\nActiveState=inactive\n",
+    "fleet-rtxpro-q8-layer-gpu-refills-20261004-r2": "MainPID=0\nActiveState=inactive\n",
+    "fleet-rtxpro-q8-gpu-refill-followup-20261004": "MainPID=0\nActiveState=inactive\n"
+  },
+  "startup_guards": "locked lookup table, full pinned complement, per-layer admission enabled",
+  "server_log_tail": "strata deferred admission: 0 deferred_swaps, publish 0.000000 ms/window; final drain included\nstrata layer admission: 0 affected-layer waits; all request exchanges drained\nstrata decode timing: 2 windows, avg T 2.50, 2.00 tokens/window, 18.57 ms/window = verify 17.97 (GPU-reach wait 9.95 + per-layer host 7.49 [plan 0.11 actq 0.11 jobs 0.16 CPU 7.10] + stage 0.01) + commit/emit 0.01 + draft 0.58; per layer-window: CPU experts 0.93 (1.06 entries), VRAM hits 23.30, PCIe 0.58\nstrata decode traffic: committed=4 pcie_expert_groups=56 uniform_blob_bytes=5222400 logical_pcie_weight_bytes=292454400 pcie_mode=auto (logical minimum, not a hardware traffic counter)\nstrata readonly miss cache: cumulative groups=12550 hits=1976 uploads=10574 bypasses=1777 avoided_upload_bytes=10319462400 uploaded_bytes=55221657600\nstrata serve: prompt 18 tokens = 0 reused + 18 read in 68 ms (266.5 tok/s), 4 generated in 37 ms (107.7 tok/s), drafts accepted 2 of 3, 0 checkpoints\nstrata serve: decode expert cache hit rate: 95.6% (2237 hits / 2339 lookups)\nstrata serve: resident RAM: 44.28 GiB of experts in RAM, 2795 exchanged with the VRAM tier, 0 blob reads from the file\nstrata serve: exchange rotation: 2795 blocks, 14596608000 host memcpy bytes avoided (cumulative payload)\nstrata serve: expert tiers: GPU 2237 hits this request; since the start RAM 31409 blobs, files 0 blobs 80806.2 MB read (the GGUF in place)",
+  "recorded_utc": "2026-10-04T17:08:05.562646+00:00",
+  "engine": {
+    "model": "flash-next-Q8_0",
+    "max_context": 139264,
+    "images": false,
+    "version": "0.1.38",
+    "context": 139264,
+    "kv": "fp16",
+    "kv_resident": 0,
+    "expert_slots": 15472,
+    "expert_cache_mib": 77057,
+    "expert_slots_primary": 15472,
+    "expert_cache_primary_mib": 77057,
+    "spec": 8,
+    "mtp_max": 4,
+    "lookup": 3,
+    "vram_free_mib": 4172,
+    "cvec": 0,
+    "arena_mib": 45342,
+    "pool_workers": 15,
+    "pcie_frac": "0.55",
+    "spec_min_p": "0.50",
+    "conversation_cache_mib": 0,
+    "conversation_cache_slots": 4,
+    "conversation_cache_min_free_mib": 2560,
+    "engine": "0.1.38"
+  },
+  "http_validation_passed": true
+}

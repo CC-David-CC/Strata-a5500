@@ -1,0 +1,6 @@
+table inet fleet_q8_lan {
+  chain input {
+    type filter hook input priority -10; policy accept;
+    ip daddr 10.0.7.68 tcp dport 8095 ip saddr != 10.0.0.0/17 counter drop
+  }
+}

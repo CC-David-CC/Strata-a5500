@@ -1,0 +1,9 @@
+[Unit]
+Description=LAN-only access guard for the frozen Q8 test endpoint
+Before=strata-q8-lan.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/nft -f /etc/strata-q8-lan.nft
+ExecStop=/usr/sbin/nft delete table inet fleet_q8_lan
+RemainAfterExit=yes

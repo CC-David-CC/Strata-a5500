@@ -1,4 +1,33 @@
-# Experimental Q8: admit completed expert transfers by layer
+# Frozen Q8 LAN test configuration
+
+**Optimization is paused.** This branch freezes the tested llm-60 setup,
+keeps competing configurations and reports speed and resource savings separately.
+
+- **[Complete matrix and branch status](docs/Q8_FROZEN_MATRIX.md)**
+- **[All 536 completed observations](docs/Q8_FROZEN_ALL_MEASUREMENTS.md)**, including controls and diagnostics
+- **[LAN connection, validation and rollback](deploy/q8-lan-20261004/README.md)**
+- [Bandwidth-saving alternative](docs/Q8_GPU_REFILLS.md): **61.85% fewer primary refill RAM-upload bytes**
+
+The LAN endpoint uses the per-layer engine described below, **MTP on, n-gram
+off**, with 139,264 allocated positions and FP16 KV. HTTP authentication,
+completion, streaming, FIFO queuing and disconnect recovery passed over LAN.
+The API key is stored outside the repository. Main is unchanged.
+
+## Resource saving is an independent win
+
+GPU refills reduced primary refill uploads from **41.4084 GB to 15.7978 GB**
+across two 32K-input/1K-output MTP requests, replacing **25.6106 GB** with
+GPU-local copies. Primary victim writebacks remained. Reversed-order tests
+repeated the saving and approximately 1-2% generation gains with exact matched
+output/work. This is primary refill payload, not total PCIe traffic or measured
+energy. The large byte saving remains useful even with a small speed gain.
+
+That alternative uses its own engine and sixteen secondary slots per layer.
+It is not combined with the faster scheduling path below. Combined layer/refill
+and cached-CPU model tests are paused and unvalidated. N-gram qualifications,
+negative results, 48 measured profiles and source/binary hashes are in the matrix.
+
+## Selected engine: admit completed expert transfers by layer
 
 A small experimental fork of [Niko1221/Strata](https://github.com/Niko1221/Strata).
 Credit for Strata, its kernels and serving engine belongs to upstream and its

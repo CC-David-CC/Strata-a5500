@@ -1,0 +1,388 @@
+{
+  "profiles": [
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-mtp-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-mtp-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-mtp-admission-deferred",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-mtp-admission-deferred-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-admission-deferred.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-mtp-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-mtp-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-plain-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-plain-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-plain-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-plain-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-ngram-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-ngram-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-ngram-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-ngram-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-ngram-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-ngram-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-mtp-ngram-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-mtp-ngram-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-ngram-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-admission-20261004-r2",
+      "label": "32768-mtp-ngram-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-admission-20261004-r2/layer-model-attempt-01/32768-mtp-ngram-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-ngram-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "32768-mtp-admission-layer-reverse",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/32768-mtp-admission-layer-reverse-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-admission-layer-reverse.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "32768-mtp-admission-control-reverse",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/32768-mtp-admission-control-reverse-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-admission-control-reverse.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-mtp-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-mtp-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-mtp-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-mtp-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-plain-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-plain-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-plain-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-plain-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-plain-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-plain-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-ngram-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-ngram-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-ngram-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-ngram-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-ngram-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-ngram-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-mtp-ngram-admission-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-mtp-ngram-admission-control-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-ngram-admission-control.json"
+    },
+    {
+      "job": "rtxpro-q8-layer-followup-20261004",
+      "label": "131072-mtp-ngram-admission-layer",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-layer-followup-20261004/host-path-attempt-01/131072-mtp-ngram-admission-layer-config.json",
+      "source": "ac398f5eb349eca70a6fd61eea63e824f843c868",
+      "engine_sha256": "95290a8a30c5d8d8984b02b5b7fc3128c8d2745f139891e5bdb9a5a9b5e6a7b9",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-ngram-admission-layer.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-mtp-gpu-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-mtp-gpu-control-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-gpu-control.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-mtp-gpu-snapshot",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-mtp-gpu-snapshot-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-gpu-snapshot.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-mtp-gpu-refill",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-mtp-gpu-refill-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-gpu-refill.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-plain-gpu-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-plain-gpu-control-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-gpu-control.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-plain-gpu-snapshot",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-plain-gpu-snapshot-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-gpu-snapshot.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-plain-gpu-refill",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-plain-gpu-refill-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-gpu-refill.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-ngram-gpu-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-ngram-gpu-control-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-ngram-gpu-control.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-ngram-gpu-refill",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-ngram-gpu-refill-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-ngram-gpu-refill.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-mtp-ngram-gpu-control",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-mtp-ngram-gpu-control-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-ngram-gpu-control.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refills-20261004",
+      "label": "32768-mtp-ngram-gpu-refill",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refills-20261004/refill-model-attempt-01/32768-mtp-ngram-gpu-refill-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-ngram-gpu-refill.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refill-followup-20261004",
+      "label": "32768-mtp-gpu-refill-reverse",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refill-followup-20261004/host-path-attempt-01/32768-mtp-gpu-refill-reverse-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-gpu-refill-reverse.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refill-followup-20261004",
+      "label": "32768-mtp-gpu-control-reverse",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refill-followup-20261004/host-path-attempt-01/32768-mtp-gpu-control-reverse-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-gpu-control-reverse.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refill-followup-20261004",
+      "label": "32768-plain-gpu-refill-reverse",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refill-followup-20261004/host-path-attempt-01/32768-plain-gpu-refill-reverse-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-gpu-refill-reverse.json"
+    },
+    {
+      "job": "rtxpro-q8-gpu-refill-followup-20261004",
+      "label": "32768-plain-gpu-control-reverse",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-gpu-refill-followup-20261004/host-path-attempt-01/32768-plain-gpu-control-reverse-config.json",
+      "source": "60e19d404a70edd2e1d6a3c824d0c3ca2096852e",
+      "engine_sha256": "b09d4aaa17f07d8c1c3e5f65dc22ff4cd80ed0a2c23e44a0001f549cb7b4f89a",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-gpu-control-reverse.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "32768-mtp-primary15472-ways16",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/32768-mtp-primary15472-ways16-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-primary15472-ways16.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "32768-mtp-primary16048-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/32768-mtp-primary16048-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-primary16048-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "32768-mtp-primary15472-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/32768-mtp-primary15472-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-primary15472-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "32768-plain-primary15472-ways16",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/32768-plain-primary15472-ways16-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-primary15472-ways16.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "32768-plain-primary15472-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/32768-plain-primary15472-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-plain-primary15472-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-mtp-primary15472-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-mtp-primary15472-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-primary15472-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-mtp-primary15472-ways16",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-mtp-primary15472-ways16-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-primary15472-ways16.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-mtp-primary16048-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-mtp-primary16048-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-primary16048-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-plain-primary15472-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-plain-primary15472-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-plain-primary15472-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-plain-primary15472-ways16",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-plain-primary15472-ways16-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-plain-primary15472-ways16.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-ngram-primary15472-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-ngram-primary15472-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-ngram-primary15472-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-ngram-primary15472-ways16",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-ngram-primary15472-ways16-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-ngram-primary15472-ways16.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-mtp-ngram-primary15472-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-mtp-ngram-primary15472-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-ngram-primary15472-ways4.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "131072-mtp-ngram-primary15472-ways16",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/131072-mtp-ngram-primary15472-ways16-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/131072-mtp-ngram-primary15472-ways16.json"
+    },
+    {
+      "job": "rtxpro-q8-cache-budget-20261004-r2",
+      "label": "32768-mtp-primary16560-ways4",
+      "path": "/home/dflanag3/fleet-downloads/rtxpro-q8-cache-budget-20261004-r2/budget-model-attempt-01/32768-mtp-primary16560-ways4-config.json",
+      "source": "3745a0d1fe36f2ef0cb6e3161544a92583219582",
+      "engine_sha256": "96c16a3a64ccc4d1583242c1cf5838b5d32186fdbbea9d055a8040b560fdd4b7",
+      "file": "deploy/q8-lan-20261004/measured-profiles/32768-mtp-primary16560-ways4.json"
+    }
+  ]
+}

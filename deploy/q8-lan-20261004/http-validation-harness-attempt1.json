@@ -1,0 +1,371 @@
+{
+  "started_utc": "2026-10-04T17:02:11.991102+00:00",
+  "client": "Windows fleet workspace, direct LAN HTTP",
+  "endpoint": "http://10.0.7.68:8095/v1",
+  "scope": "Auth, small completion, streaming, FIFO queuing and disconnect recovery; not a capacity/throughput benchmark.",
+  "checks": [
+    {
+      "name": "health",
+      "passed": true,
+      "response": {
+        "status": "ok",
+        "max_context": 139264,
+        "model": "flash-next-Q8_0",
+        "images": false,
+        "api_key": true,
+        "loaded": true,
+        "service": "strata"
+      }
+    },
+    {
+      "name": "missing-and-wrong-key-rejected",
+      "passed": true,
+      "paths": [
+        "/v1/models",
+        "/v1/chat/completions",
+        "/settings"
+      ]
+    },
+    {
+      "name": "authenticated-model-discovery",
+      "passed": true,
+      "models": {
+        "object": "list",
+        "data": [
+          {
+            "id": "flash-next-Q8_0",
+            "object": "model",
+            "status": {
+              "value": "loaded"
+            },
+            "meta": {
+              "n_ctx": 139264
+            },
+            "architecture": {
+              "input_modalities": [
+                "text"
+              ],
+              "output_modalities": [
+                "text"
+              ]
+            }
+          }
+        ]
+      },
+      "concurrency": {
+        "serving": 1,
+        "requested": 1
+      }
+    },
+    {
+      "name": "nonstream-completion",
+      "passed": true,
+      "result": {
+        "started": 1791133332.1502767,
+        "finished": 1791133332.4305353,
+        "response": {
+          "id": "chatcmpl-2be00c8285c44cc2ac58415a",
+          "object": "chat.completion",
+          "created": 1791133331,
+          "model": "flash-next-Q8_0",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "LAN test ready"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 19,
+            "completion_tokens": 4,
+            "total_tokens": 23,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 19,
+            "prompt_ms": 186.0,
+            "prompt_per_token_ms": 9.789,
+            "prompt_per_second": 102.2,
+            "predicted_n": 4,
+            "predicted_ms": 76.6,
+            "predicted_per_token_ms": 19.15,
+            "predicted_per_second": 52.2,
+            "draft_n": 3,
+            "draft_n_accepted": 2
+          }
+        }
+      }
+    },
+    {
+      "name": "sse-streaming",
+      "passed": true,
+      "chunks": 16,
+      "text": "```python\ndef add(a, b):\n    return a + b\n```"
+    },
+    {
+      "name": "two-clients-fifo",
+      "passed": true,
+      "queue_observed": true,
+      "first": {
+        "started": 1791133333.011643,
+        "finished": 1791133335.753933,
+        "response": {
+          "id": "chatcmpl-8f793138690940feb69f1b7e",
+          "object": "chat.completion",
+          "created": 1791133332,
+          "model": "flash-next-Q8_0",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n39\n40\n41\n42\n43\n44\n45\n46\n47\n48\n49\n50\n51\n52\n53\n54\n55\n56\n57\n58\n59\n60\n61\n62\n63\n64\n65\n66\n67\n68\n69\n70\n71\n72\n73\n74\n75\n76\n77\n78\n79\n80\n81\n82\n83\n84\n85\n86\n87\n88\n8"
+              },
+              "finish_reason": "length"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 37,
+            "completion_tokens": 256,
+            "total_tokens": 293,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 37,
+            "prompt_ms": 162.3,
+            "prompt_per_token_ms": 4.386,
+            "prompt_per_second": 228.0,
+            "predicted_n": 256,
+            "predicted_ms": 2568.3,
+            "predicted_per_token_ms": 10.032,
+            "predicted_per_second": 99.7,
+            "draft_n": 191,
+            "draft_n_accepted": 191
+          }
+        }
+      },
+      "second": {
+        "started": 1791133333.080279,
+        "finished": 1791133335.8899882,
+        "response": {
+          "id": "chatcmpl-1b7d6250b49c43f881cf1398",
+          "object": "chat.completion",
+          "created": 1791133332,
+          "model": "flash-next-Q8_0",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "second queued request finished"
+              },
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 20,
+            "completion_tokens": 5,
+            "total_tokens": 25,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 20,
+            "prompt_ms": 89.1,
+            "prompt_per_token_ms": 4.455,
+            "prompt_per_second": 224.5,
+            "predicted_n": 5,
+            "predicted_ms": 45.2,
+            "predicted_per_token_ms": 9.04,
+            "predicted_per_second": 110.6,
+            "draft_n": 3,
+            "draft_n_accepted": 3
+          }
+        }
+      },
+      "observations": [
+        {
+          "busy": true,
+          "queued": 0
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 1
+        },
+        {
+          "busy": true,
+          "queued": 0
+        },
+        {
+          "busy": true,
+          "queued": 0
+        }
+      ]
+    }
+  ],
+  "completed": false,
+  "error": "AttributeError(\"'NoneType' object has no attribute 'shutdown'\")"
+}

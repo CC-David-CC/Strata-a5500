@@ -1,0 +1,28 @@
+[Unit]
+Description=Frozen Q8 FP16 MTP LAN test endpoint (llm-60)
+Wants=network-online.target
+After=network-online.target strata-q8-lan-firewall.service
+Requires=strata-q8-lan-firewall.service
+StartLimitIntervalSec=600
+StartLimitBurst=2
+
+[Service]
+Type=simple
+User=dflanag3
+Group=dflanag3
+WorkingDirectory=/home/dflanag3/src/q8-layer-admission-ac398f5e
+EnvironmentFile=/home/dflanag3/.config/strata/q8-lan-20261004/api.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/dflanag3/src/Strata/.venv/bin/python /home/dflanag3/.config/strata/q8-lan-20261004/start.py
+Restart=on-failure
+RestartSec=15
+KillMode=mixed
+TimeoutStopSec=90
+LimitMEMLOCK=infinity
+LimitNOFILE=1048576
+MemoryMax=120G
+MemorySwapMax=0
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
