@@ -1713,6 +1713,26 @@ int64_t FileExpertSource::commit_exchanges() {
         }
         override_[x.out] = nullptr;
     }
+    // Diagnostic only: record committed ownership transitions, never speculative
+    // plans. Replay can measure whether retaining an incoming RAM copy would
+    // avoid a later D2H eviction without changing expert placement or arithmetic.
+    static const bool trace_exchanges = [] {
+        const char* value = std::getenv("STRATA_EXCHANGE_TRACE");
+        return value && std::strcmp(value, "1") == 0;
+    }();
+    if (trace_exchanges && !staged_.empty()) {
+        std::ostringstream row;
+        row << "{\"schema\":1,\"first\":" << exchanges_
+            << ",\"experts\":" << blobs_ << ",\"per_layer\":" << n_expert_
+            << ",\"bytes\":" << xstage_blob_ << ",\"applied\":" << n << ",\"pairs\":[";
+        for (size_t i = 0; i < staged_.size(); ++i) {
+            if (i) row << ',';
+            row << '[' << staged_[i].in << ',' << staged_[i].out << ']';
+        }
+        row << "]}";
+        // One stdio operation keeps each record together with other log writers.
+        std::fprintf(stderr, "strata exchange trace: %s\n", row.str().c_str());
+    }
     staged_.clear();
     exchanges_ += n;
     return n;
