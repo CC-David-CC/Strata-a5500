@@ -554,6 +554,7 @@ void test_rotating_source(bool rotate, bool pin) {
     std::vector<uint8_t> actual(bytes);
     double commit_ms = 0;
     for (int round = 0; round < 32; ++round) {
+        const bool early_admission = round % 3 == 2;
         const uint8_t* prior[2]{};
         uint8_t* eviction[2]{};
         for (int q = 0; q < 2; ++q) {
@@ -565,11 +566,24 @@ void test_rotating_source(bool rotate, bool pin) {
             require(src.stage_exchange(0, incoming[q], outgoing[q], q), "stage rejected");
             require(!std::memcmp(src.blob(0, outgoing[q]), truth[outgoing[q]].data(), bytes), "staged override wrong");
             require(cache.fill_slot_blocking(q, prior[q], err), err); // H2D completed before commit
+            if (early_admission) {
+                // One ready range may be admitted while a later range still
+                // owns its original CPU/GPU bytes. Exercise fixed and rotating
+                // storage with the same readiness contract.
+                require(src.commit_exchanges() == 1, "early commit count wrong");
+                if (q == 0) {
+                    require(!std::memcmp(src.resident_blob(0, incoming[1]), truth[incoming[1]].data(), bytes),
+                            "early commit changed later incoming bytes");
+                    require(cache.verify_slot(1, truth[outgoing[1]].data(), err), err);
+                }
+            }
         }
         require(!src.stage_exchange(0, incoming[0], outgoing[0], 0), "duplicate stage accepted");
         require(!src.stage_exchange(0, incoming[0], 5, 0), "invalid expert accepted");
         const auto t0 = std::chrono::steady_clock::now();
-        if (round % 2) {
+        if (early_admission) {
+            require(src.commit_exchanges() == 0, "early ranges left staged ownership");
+        } else if (round % 2) {
             src.commit_copies();
             for (int q = 0; q < 2; ++q) {
                 require(!std::memcmp(src.blob(0, outgoing[q]), truth[outgoing[q]].data(), bytes),
