@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "source_commit": "4d5632034eff391d69db945d4de85350397f29f2",
+  "engine_sha256": "563b0b1e9143f7afa5fac18e4fd10b035175de371249b9db922c516d01519931",
+  "upstream_base": "6f32ec070f23ced9f50e704d854d775da52591ab",
+  "hardware": "RTX PRO 6000 Blackwell Workstation 96 GB; 400 W; Ryzen 9 7950X; 128 GB RAM",
+  "build": "CUDA 13.2, architecture 120, Release, native experts; no PDL or Q8 adaptation patches",
+  "frontend_tests": 11,
+  "requests_completed": 64,
+  "committed_output_tokens": 32768,
+  "limits": [
+    "Single screening pass per cohort; no repeated performance estimate.",
+    "No GPU sanitizer or cancellation/rollback sweep on this exact build.",
+    "Only Q4 32K and IQ3_S 8K waves were remeasured on the clean branch.",
+    "Token hashes describe the synthetic coding workload; no answer-quality claim."
+  ],
+  "q4_exact_token_pairs": 14,
+  "cases": [
+    {
+      "model": "iq3_s",
+      "policy": "nomtp",
+      "input": 8192,
+      "output": 512,
+      "capacity": 16,
+      "source_result_sha256": "a1661914bd4994047581a31e7aa22175166257f303e1575f978786e183d84ba0",
+      "input_sha256": "3fe231f96f0fe56c19cb922bddff39a9bccbd88d057ceeddd70d98f5ef691b4e",
+      "all_recorded_token_checks_passed": true,
+      "runs": [
+        {
+          "n": 8,
+          "combined_decode": 314.22798201288936,
+          "effective": 131.854718418314,
+          "total_seconds": 31.064493171987124,
+          "min_stream": 39.256243645236324,
+          "max_stream": 39.345260070735726,
+          "peak_gpu_mib": 64297.0,
+          "peak_process_swap_mib": 0.0
+        },
+        {
+          "n": 12,
+          "combined_decode": 312.146650557689,
+          "effective": 131.83155170786122,
+          "total_seconds": 46.60492818604689,
+          "min_stream": 25.972688629230202,
+          "max_stream": 26.031987005096024,
+          "peak_gpu_mib": 64473.0,
+          "peak_process_swap_mib": 0.0
+        },
+        {
+          "n": 16,
+          "combined_decode": 311.8038262965515,
+          "effective": 132.09547348828607,
+          "total_seconds": 62.015751059981994,
+          "min_stream": 19.448618359478047,
+          "max_stream": 19.4933278269711,
+          "peak_gpu_mib": 64511.0,
+          "peak_process_swap_mib": 0.0
+        }
+      ]
+    },
+    {
+      "model": "unsloth_q4",
+      "policy": "mtp",
+      "input": 32768,
+      "output": 512,
+      "capacity": 8,
+      "source_result_sha256": "d20cfdcde5ba456701212cb334918039783b7bab8dc95f9ee4510548db08b083",
+      "input_sha256": "fd9d5e773241140f15dd415d3979c822d59c2a3697b21d01999c21b152aceaf6",
+      "all_recorded_token_checks_passed": true,
+      "runs": [
+        {
+          "n": 2,
+          "combined_decode": 232.44791172392837,
+          "effective": 34.921821319349505,
+          "total_seconds": 29.322640152007807,
+          "min_stream": 116.22395586196419,
+          "max_stream": 116.22395586196419,
+          "peak_gpu_mib": 92925.0,
+          "peak_process_swap_mib": 0.0
+        },
+        {
+          "n": 4,
+          "combined_decode": 277.9501406408356,
+          "effective": 35.82553812257823,
+          "total_seconds": 57.165924291010015,
+          "min_stream": 68.89226786871654,
+          "max_stream": 70.00343347950229,
+          "peak_gpu_mib": 92961.0,
+          "peak_process_swap_mib": 0.0
+        },
+        {
+          "n": 8,
+          "combined_decode": 276.19459891088115,
+          "effective": 35.70777492048607,
+          "total_seconds": 114.70891168998787,
+          "min_stream": 33.51449086118135,
+          "max_stream": 35.114227895127954,
+          "peak_gpu_mib": 93063.0,
+          "peak_process_swap_mib": 0.0
+        }
+      ]
+    },
+    {
+      "model": "unsloth_q4",
+      "policy": "nomtp",
+      "input": 32768,
+      "output": 512,
+      "capacity": 8,
+      "source_result_sha256": "5e96550f8a751c3c213baf55bafc902149e77b7b8c839eec983b167fc9f46625",
+      "input_sha256": "fd9d5e773241140f15dd415d3979c822d59c2a3697b21d01999c21b152aceaf6",
+      "all_recorded_token_checks_passed": true,
+      "runs": [
+        {
+          "n": 2,
+          "combined_decode": 178.2486132633096,
+          "effective": 33.34136099861492,
+          "total_seconds": 30.7126034849789,
+          "min_stream": 89.1243066316548,
+          "max_stream": 89.1243066316548,
+          "peak_gpu_mib": 92025.0,
+          "peak_process_swap_mib": 0.0
+        },
+        {
+          "n": 4,
+          "combined_decode": 244.4244622044917,
+          "effective": 35.25494827875901,
+          "total_seconds": 58.0911361380131,
+          "min_stream": 61.003069825067065,
+          "max_stream": 61.140464126474875,
+          "peak_gpu_mib": 92055.0,
+          "peak_process_swap_mib": 0.0
+        },
+        {
+          "n": 8,
+          "combined_decode": 297.3033041152462,
+          "effective": 36.12136282282653,
+          "total_seconds": 113.39550005603814,
+          "min_stream": 37.04714069971915,
+          "max_stream": 37.21553679380878,
+          "peak_gpu_mib": 92167.0,
+          "peak_process_swap_mib": 0.0
+        }
+      ]
+    }
+  ],
+  "full_receipt": "https://github.com/CC-David-CC/Strata-a5500/blob/work/concurrency-waves/bench/concurrency-20261005/focused-receipt.json"
+}

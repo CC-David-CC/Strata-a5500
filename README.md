@@ -1,3 +1,25 @@
+# Experimental concurrent serving - draft integration
+
+**Q4: 275.8 aggregate decode tok/s in research; 276.2 tok/s reproduced on this
+focused branch**, across **eight MTP requests**, each with **32K input + 512 output**,
+**FP16 KV**, on an **RTX PRO 6000 Blackwell Workstation 96 GB (400 W)**.
+Including all prefills: **35.7 effective tok/s**. These are aggregate rates.
+
+At **two concurrent requests**, the clean build measured **+30.4% decode** and
+**+4.7% effective throughput** with grouped MTP. At eight, non-MTP was faster
+(**297.3 decode / 36.1 effective tok/s**). Single screening runs, not repeated gains.
+
+[**Results, limits, reproduction and full seven-model research matrix**](docs/CONCURRENT_SERVING.md)
+
+Built on [Niko1221/Strata](https://github.com/Niko1221/Strata), preserving
+[rkcth's concurrent MTP authorship (#846)](https://github.com/Niko1221/Strata/pull/846).
+Includes [the resident-batch fix (#947)](https://github.com/Niko1221/Strata/pull/947),
+opt-in bounded slot waves, counters and focused NVIDIA validation. **64 requests
+and 14 exact Q4 MTP/control token pairs passed**. GPU sanitizer and cancellation/
+rollback sweeps remain pending. Upstream documentation follows below.
+
+---
+
 <h1 align="center">Strata</h1>
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Português](README.pt-BR.md)

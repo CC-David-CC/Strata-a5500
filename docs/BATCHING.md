@@ -21,9 +21,9 @@ asked, with a note when it is more than setup would recommend.
 
 On one GPU with MTP enabled, set `MULTI_CONCURRENCY=TRUE` in the server's
 environment to let batch slots use one MTP proposal each. It is opt-in; without
-it, the batch behavior described below is unchanged. The grouped path has only
-been tested upstream on an AMD R9700; this integration adds an experimental
-NVIDIA test path. It needs additional VRAM per slot for draft state
+it, the batch behavior described below is unchanged. The grouped path was initially
+tested upstream on an AMD R9700; this integration adds
+[RTX PRO 6000 Blackwell measurements](CONCURRENT_SERVING.md). It needs additional VRAM per slot for draft state
 and buffers, so check the engine's free-memory log before using it on a smaller
 card. A layer split is unsupported for grouped MTP.
 
