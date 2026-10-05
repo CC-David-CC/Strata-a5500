@@ -1,38 +1,22 @@
-# Experimental Q8: 24.5–28.2% faster decode with buffer rotation
+# Experimental Q8: PDL and independent graph branches
 
-**Draft integration fork of [Niko1221/Strata](https://github.com/Niko1221/Strata).**
-Tested on **RTX PRO 6000 Blackwell Workstation 96 GB + Ryzen 9 7950X + 128 GB RAM**.
-Model: **Unsloth Qwen3.8-Flash-Next Q8_0 experts/PLE**, compatibility BF16 small
-projections and Q5_K head; **FP16 KV**. This is the Q8 experiment on llm-60.
+Integration fork of [Niko1221/Strata](https://github.com/Niko1221/Strata),
+with **Hardin22 / Francesco Albano's [PR #904](https://github.com/Niko1221/Strata/pull/904)**
+PDL and graph branches applied to our Q8 adaptation stack. Original authorship
+is preserved. Both features are opt-in in this branch.
 
-**32K input + 1K output, MTP T4, one request, physically locked PLE:**
+**RTX PRO 6000 Blackwell Workstation 96 GB + Ryzen 9 7950X + 128 GB RAM.**
+Q8_0 experts/PLE, FP16 KV, MTP T4, actual 32K input + 1K output, one request.
+Combined decode change: **+1.69% / +2.45%** in reversed-order comparisons;
+full-request time reduction **+0.22% / +0.26%**. Both combined pairs have identical output token IDs and recorded work.
 
-| Same async + duplex + per-layer stack | Rotation off | Rotation on | Decode gain |
-| --- | ---: | ---: | ---: |
-| First pair | 113.224 tok/s | 140.979 tok/s | **+24.513%** |
-| Reversed-order pair | 111.568 tok/s | 142.975 tok/s | **+28.151%** |
+**[Complete results, configuration, validation, credit and raw evidence](docs/Q8_PDL_BRANCHES.md)**.
+This is a small coding-workload experiment. The earlier individual-feature
+gains are separated from the new combined measurements in the report.
 
-Both pairs had **identical 1,024 output token IDs and recorded work counters**.
-Rotation removed **18.0 GB of host-copy payload per request**; PCIe payload
-was unchanged. Full request time fell about **2.9–3.2%**, because prefill
-accounted for approximately 53 seconds.
-
-Fresh upstream comparison: **main + Q8 reader 106.1–106.8 tok/s → full stack 141.7–141.8 tok/s**. The reader is required to load this Q8 PLE; the full configurations have different output/work trajectories. See the report for both paired results and full request times.
-
-**128K follow-up:** the same build also completed **131,072 input + 1,024 output tokens at 141.1 tok/s**; prefill 213.2 s, total request 220.5 s. This is one longer-input run, not a new percentage-gain comparison. Cancellation/recovery completed operationally; exact state equivalence remains unproved. [Details](docs/Q8_RESIDENT_ADAPTATION.md#actual-128k-input-follow-up).
-
-The **24.5–28.2% claim isolates rotation within the combined stack**.
-It is separate from the upstream comparison. All new behaviors are opt-in;
-the resident-RAM configuration is explicit and upstream presets are unchanged.
-
-**[Results, baseline TPS, configuration, validation and experiment history](docs/Q8_RESIDENT_ADAPTATION.md)**
-
-This draft preserves and credits **Hardin22 / Francesco Albano's async work
-in [#876](https://github.com/Niko1221/Strata/pull/876)**, with the separate
-[rotation #864](https://github.com/Niko1221/Strata/pull/864),
-[Q8 reader #865](https://github.com/Niko1221/Strata/pull/865), duplex and
-per-layer integration changes. It is an integration review package; existing
-focused PRs remain the route to reviewing their individual changes.
+Base: `draft/q8-resident-adaptation` ([its earlier Q8 results](docs/Q8_RESIDENT_ADAPTATION.md)).
+This branch's PR targets that branch in this fork; upstream implementation
+review remains in Hardin22's #904.
 
 ---
 
