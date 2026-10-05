@@ -1,3 +1,22 @@
+# Concurrent-serving research branch
+
+This branch archives experimental single-GPU concurrency work on an **RTX PRO
+6000 Blackwell Workstation 96 GB**. The Q4 research result was **275.8 aggregate
+decode tok/s across eight MTP requests**, each with **32K input + 512 output**,
+**FP16 KV**; effective throughput including prefill was **35.7 tok/s**.
+
+See the [dated measurements and reproduction harness](bench/concurrency-20261005/README.md).
+The focused review branch is [`contrib/concurrent-mtp-waves`](https://github.com/CC-David-CC/Strata-a5500/tree/contrib/concurrent-mtp-waves).
+The broader 64K/128K and concurrency-knee study continues; token differences in
+partially resident cases are not yet classified.
+
+Built on [Niko1221/Strata](https://github.com/Niko1221/Strata), with concurrent MTP
+from [rkcth #846](https://github.com/Niko1221/Strata/pull/846) and PDL/graph work
+from [Hardin22 #904](https://github.com/Niko1221/Strata/pull/904). Older integration
+notes and upstream documentation follow below.
+
+---
+
 # Experimental Q8: PDL and independent graph branches
 
 Integration fork of [Niko1221/Strata](https://github.com/Niko1221/Strata),
