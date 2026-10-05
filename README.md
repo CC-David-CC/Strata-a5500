@@ -19,6 +19,8 @@ accounted for approximately 53 seconds.
 
 Fresh upstream comparison: **main + Q8 reader 106.1–106.8 tok/s → full stack 141.7–141.8 tok/s**. The reader is required to load this Q8 PLE; the full configurations have different output/work trajectories. See the report for both paired results and full request times.
 
+**128K follow-up:** the same build also completed **131,072 input + 1,024 output tokens at 141.1 tok/s**; prefill 213.2 s, total request 220.5 s. This is one longer-input run, not a new percentage-gain comparison. Cancellation/recovery completed operationally; exact state equivalence remains unproved. [Details](docs/Q8_RESIDENT_ADAPTATION.md#actual-128k-input-follow-up).
+
 The **24.5–28.2% claim isolates rotation within the combined stack**.
 It is separate from the upstream comparison. All new behaviors are opt-in;
 the resident-RAM configuration is explicit and upstream presets are unchanged.

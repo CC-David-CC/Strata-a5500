@@ -54,6 +54,38 @@ model, GPU/RAM budgets, physically locked PLE, prompt, stopping policy and
 build configuration. This isolates the combined adaptation changes without
 claiming stock main already supports the full Q8 configuration.
 
+## Actual 128K input follow-up
+
+The same `07ff95b` code and verified binary completed **131,072 input tokens +
+1,024 output tokens** with all four adaptation features active, MTP T4 and
+FP16 KV. This was actual input length; no prompt tokens were reused.
+
+| Measurement | Result |
+| --- | ---: |
+| Decode throughput | **141.115 tok/s** |
+| Prefill | 213.195 s |
+| Generation | 7.2565 s |
+| Request wall time | 220.487 s |
+| Effective output / request wall time | 4.644 tok/s |
+| Model startup, excluded above | 122.344 s |
+
+The request finished at its requested length without a reported inference or
+allocation error. This is one longer-input result, not a new rotation or
+upstream speedup comparison at 128K.
+
+A separate 4K editing request was cancelled after 128 delivered tokens (the
+engine reported 135 generated positions as in-flight work drained). The next
+request completed all 512 tokens at 134.021 tok/s. A fresh engine completed the
+same prompt at 126.972 tok/s, but outputs first differed at token index **43**
+and measured work differed. This establishes operational recovery, **not exact
+state equivalence or a speedup**. Persistent cache/adaptation history and
+CPU/GPU arithmetic placement are possible explanations; this test does not
+exclude cancellation-state contamination. A placement-controlled comparison
+or state-digest trace remains necessary.
+
+**[Raw follow-up evidence, token IDs, logs and hash manifest](https://github.com/CC-David-CC/Strata-a5500/tree/f5064b483cc3fd7ed89760255cb4ddbf1a8643ae/bench/results/2026-10-05-q8-resident-adaptation/followup-128k)**.
+The complete three-case job exited zero in 628.8 seconds.
+
 ## Why rotation helps here
 
 The existing resident-RAM path uploads an incoming expert and downloads the
@@ -195,8 +227,8 @@ compute-sanitizer --tool memcheck --error-exitcode 86 ./build/duplex_exchange_te
   linked in the respective reader/rotation/duplex reports.
 
 Remaining before promoting the whole integration from draft: broader prompts
-and run counts, Q8 cancellation/state-differential coverage of all async
-boundaries, longer actual input lengths on this exact integration, and review
+and run counts (including more 128K cases), Q8 cancellation/state-differential
+coverage of all async boundaries, and review
 of interactions with other pipelined adaptation changes. Full-model routing,
 KV/recurrent-state hashes and Nsight DRAM transactions were not collected for
 the headline pairs. The two repetitions are not a confidence interval or an

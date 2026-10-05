@@ -62,5 +62,17 @@
       "decode_ms": 9590.3,
       "request_wall_seconds": 62.604124122997746
     }
-  ]
+  ],
+  "followup_128k": {
+    "evidence_commit": "f5064b483cc3fd7ed89760255cb4ddbf1a8643ae",
+    "evidence_url": "https://github.com/CC-David-CC/Strata-a5500/tree/f5064b483cc3fd7ed89760255cb4ddbf1a8643ae/bench/results/2026-10-05-q8-resident-adaptation/followup-128k",
+    "source_commit": "07ff95bed2889453d4fca3d45cd86765234d0b29",
+    "actual_input_tokens": 131072,
+    "output_tokens": 1024,
+    "decode_tok_s": 141.11486253703575,
+    "prefill_seconds": 213.1948,
+    "decode_seconds": 7.2565,
+    "request_wall_seconds": 220.48721176901017,
+    "recovery": "Completed operationally; fresh versus post-cancellation tokens/work differ, first token index43; exact state equivalence unproved."
+  }
 }
