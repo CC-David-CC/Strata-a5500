@@ -1,0 +1,159 @@
+{
+  "status": "completed integration screen; fresh standalone validation pending",
+  "patch_commit": "b5daaea150a6b13c027719228f35bd4767e61fd9",
+  "tested_integration_commit": "66b9474e956209edea274f4f506448ceb4158595",
+  "upstream_base": "6f32ec070f23ced9f50e704d854d775da52591ab",
+  "source_result_sha256": "af047aae41d25166eadd65fa84ccc175058cefb55207cf5737e92b43df4d19a9",
+  "protocol": "One single MTP T4 request, then exactly two batch-slot requests together per model. Each8192input+512output. FP16 KV,16384context per session,all experts GPU,PDL+branches enabled,400W existing limit.",
+  "limits": [
+    "Batch slots do not use MTP; single request does.",
+    "One screen per model; not a repeated comparison.",
+    "IQ1 LAN transfer continues during this requested quick screen.",
+    "Single and pair use the same engine; prompt cache disabled, no reused prompt tokens allowed.",
+    "Aggregate effective TPS=all committed output tokens / complete pair wall time, including prefill.",
+    "Post-first-token rates include interleaved prefill stalls and are not pure GPU kernel rates."
+  ],
+  "hardware": "name, power.limit [W], memory.total [MiB]\nNVIDIA RTX PRO 6000 Blackwell Workstation Edition, 400.00 W, 97887 MiB\n",
+  "models": [
+    {
+      "model": "iq3_s",
+      "completed": true,
+      "engine_sha256": "79120adc0dc167bd6b37f0c00669fdc84f19f0559f5a8f784867516a3d95fdaa",
+      "requests": [
+        {
+          "label": "iq3_s-single-mtp",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "e7494d8d54e3a903238ccfff75436e5fd681b809ce68bed3e20e4a0ffb53ad5e",
+          "request_seconds": 4.057717225019587
+        },
+        {
+          "label": "iq3_s-parallel-0",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "e7494d8d54e3a903238ccfff75436e5fd681b809ce68bed3e20e4a0ffb53ad5e",
+          "request_seconds": 9.420909202017356
+        },
+        {
+          "label": "iq3_s-parallel-1",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "09a82a803e671b23ce9e2526e1303fa0b082255e0980898b18f783eb5bd4bb24",
+          "request_seconds": 10.338953272992512
+        }
+      ]
+    },
+    {
+      "model": "iq3_xxs",
+      "completed": true,
+      "engine_sha256": "79120adc0dc167bd6b37f0c00669fdc84f19f0559f5a8f784867516a3d95fdaa",
+      "requests": [
+        {
+          "label": "iq3_xxs-single-mtp",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "1ca0b70300484fe3518a7c39b6b45cbb4de70faab7254d2b5946ecb1023b1e77",
+          "request_seconds": 3.94542554198415
+        },
+        {
+          "label": "iq3_xxs-parallel-0",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "1ca0b70300484fe3518a7c39b6b45cbb4de70faab7254d2b5946ecb1023b1e77",
+          "request_seconds": 9.108159906987567
+        },
+        {
+          "label": "iq3_xxs-parallel-1",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "55cdd49c545b6a8afddde096cb25b0b31a3e63092f2e6ea5c4595ea8d87af1df",
+          "request_seconds": 10.003545499988832
+        }
+      ]
+    },
+    {
+      "model": "q2_0",
+      "completed": true,
+      "engine_sha256": "79120adc0dc167bd6b37f0c00669fdc84f19f0559f5a8f784867516a3d95fdaa",
+      "requests": [
+        {
+          "label": "q2_0-single-mtp",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "ec5d1a2bea95978e76e9339e984a372cf8376872bf07c41a3e8acbcb1fee6bad",
+          "request_seconds": 3.7502401070087217
+        },
+        {
+          "label": "q2_0-parallel-0",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "ec5d1a2bea95978e76e9339e984a372cf8376872bf07c41a3e8acbcb1fee6bad",
+          "request_seconds": 8.624925003008684
+        },
+        {
+          "label": "q2_0-parallel-1",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "666d2c8e8c5bd05212bcb9db88c65b5907ccc5668e2bc484622fa8b467cb00b4",
+          "request_seconds": 9.45673756301403
+        }
+      ]
+    },
+    {
+      "model": "coder_iq1_m",
+      "completed": true,
+      "engine_sha256": "79120adc0dc167bd6b37f0c00669fdc84f19f0559f5a8f784867516a3d95fdaa",
+      "requests": [
+        {
+          "label": "coder_iq1_m-single-mtp",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "e27eda25905b2913c32cc4dff2ebd27cb5bb885574d03f9e4ae26fbd2ed29e85",
+          "request_seconds": 4.285573000990553
+        },
+        {
+          "label": "coder_iq1_m-parallel-0",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "e27eda25905b2913c32cc4dff2ebd27cb5bb885574d03f9e4ae26fbd2ed29e85",
+          "request_seconds": 9.58856073700008
+        },
+        {
+          "label": "coder_iq1_m-parallel-1",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "35ed1e1dbdd6d670f936ef28acde64121e9b18b839ff3541f1be9279e51efdb2",
+          "request_seconds": 10.401021922007203
+        }
+      ]
+    },
+    {
+      "model": "unsloth_q4",
+      "completed": true,
+      "engine_sha256": "79120adc0dc167bd6b37f0c00669fdc84f19f0559f5a8f784867516a3d95fdaa",
+      "requests": [
+        {
+          "label": "unsloth_q4-single-mtp",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "353a94e0a3829201a6edb9f8445bc3a26957dc05b81d18e00d3e12f8fa723883",
+          "request_seconds": 5.119420418021036
+        },
+        {
+          "label": "unsloth_q4-parallel-0",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "353a94e0a3829201a6edb9f8445bc3a26957dc05b81d18e00d3e12f8fa723883",
+          "request_seconds": 11.463168905000202
+        },
+        {
+          "label": "unsloth_q4-parallel-1",
+          "input_tokens": 8192,
+          "output_tokens": 512,
+          "output_ids_sha256": "89a9f6cbb14708e32423f2a9c8589a7ea936e226cd8a660db5c9285a6b31a08c",
+          "request_seconds": 12.75049786400632
+        }
+      ]
+    }
+  ]
+}
