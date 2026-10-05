@@ -1,0 +1,66 @@
+{
+  "code_commit": "07ff95bed2889453d4fca3d45cd86765234d0b29",
+  "evidence_commit": "8c473b947c5076edd39539bc5d69c082b237842b",
+  "evidence_url": "https://github.com/CC-David-CC/Strata-a5500/tree/8c473b947c5076edd39539bc5d69c082b237842b/bench/results/2026-10-05-q8-resident-adaptation",
+  "baseline_source_commit": "18d3da487f82c8e7b5d8e91f6fdd8c75972182f1",
+  "baseline_comparisons": [
+    {
+      "labels": [
+        "q8-32k-r0-reference",
+        "q8-32k-r0-candidate"
+      ],
+      "tokens_identical": false,
+      "require_token_equality": false,
+      "require_work_equality": false,
+      "comparison_scope": "Upstream plus Q8 reader versus opt-in combined stack; report any token/work differences.",
+      "first_difference": 906,
+      "decode_gain_pct": 33.728999016606885,
+      "total_time_reduction_pct": 3.8808019375142777,
+      "work_identical": false
+    },
+    {
+      "labels": [
+        "q8-32k-r1-reference",
+        "q8-32k-r1-candidate"
+      ],
+      "tokens_identical": false,
+      "require_token_equality": false,
+      "require_work_equality": false,
+      "comparison_scope": "Upstream plus Q8 reader versus opt-in combined stack; report any token/work differences.",
+      "first_difference": 906,
+      "decode_gain_pct": 32.68262313226342,
+      "total_time_reduction_pct": 3.915127918985273,
+      "work_identical": false
+    }
+  ],
+  "baseline_runs": [
+    {
+      "label": "q8-32k-r0-reference",
+      "decode_tok_s": 106.05793829168005,
+      "prompt_ms": 52911.1,
+      "decode_ms": 9655.1,
+      "request_wall_seconds": 62.58093822101364
+    },
+    {
+      "label": "q8-32k-r0-candidate",
+      "decode_tok_s": 141.83021925511434,
+      "prompt_ms": 52918.2,
+      "decode_ms": 7219.9,
+      "request_wall_seconds": 60.15229595801793
+    },
+    {
+      "label": "q8-32k-r1-candidate",
+      "decode_tok_s": 141.67127836192586,
+      "prompt_ms": 52911.1,
+      "decode_ms": 7228.0,
+      "request_wall_seconds": 60.153092581022065
+    },
+    {
+      "label": "q8-32k-r1-reference",
+      "decode_tok_s": 106.77455345505355,
+      "prompt_ms": 52993.8,
+      "decode_ms": 9590.3,
+      "request_wall_seconds": 62.604124122997746
+    }
+  ]
+}

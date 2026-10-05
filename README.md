@@ -1,3 +1,44 @@
+# Experimental Q8: 24.5–28.2% faster decode with buffer rotation
+
+**Draft integration fork of [Niko1221/Strata](https://github.com/Niko1221/Strata).**
+Tested on **RTX PRO 6000 Blackwell Workstation 96 GB + Ryzen 9 7950X + 128 GB RAM**.
+Model: **Unsloth Qwen3.8-Flash-Next Q8_0 experts/PLE**, compatibility BF16 small
+projections and Q5_K head; **FP16 KV**. This is the Q8 experiment on llm-60.
+
+**32K input + 1K output, MTP T4, one request, physically locked PLE:**
+
+| Same async + duplex + per-layer stack | Rotation off | Rotation on | Decode gain |
+| --- | ---: | ---: | ---: |
+| First pair | 113.224 tok/s | 140.979 tok/s | **+24.513%** |
+| Reversed-order pair | 111.568 tok/s | 142.975 tok/s | **+28.151%** |
+
+Both pairs had **identical 1,024 output token IDs and recorded work counters**.
+Rotation removed **18.0 GB of host-copy payload per request**; PCIe payload
+was unchanged. Full request time fell about **2.9–3.2%**, because prefill
+accounted for approximately 53 seconds.
+
+Fresh upstream comparison: **main + Q8 reader 106.1–106.8 tok/s → full stack 141.7–141.8 tok/s**. The reader is required to load this Q8 PLE; the full configurations have different output/work trajectories. See the report for both paired results and full request times.
+
+The **24.5–28.2% claim isolates rotation within the combined stack**.
+It is separate from the upstream comparison. All new behaviors are opt-in;
+the resident-RAM configuration is explicit and upstream presets are unchanged.
+
+**[Results, baseline TPS, configuration, validation and experiment history](docs/Q8_RESIDENT_ADAPTATION.md)**
+
+This draft preserves and credits **Hardin22 / Francesco Albano's async work
+in [#876](https://github.com/Niko1221/Strata/pull/876)**, with the separate
+[rotation #864](https://github.com/Niko1221/Strata/pull/864),
+[Q8 reader #865](https://github.com/Niko1221/Strata/pull/865), duplex and
+per-layer integration changes. It is an integration review package; existing
+focused PRs remain the route to reviewing their individual changes.
+
+---
+
+## Original upstream README
+
+The following is the original project's introduction and its own benchmarks;
+those hardware/model results are separate from this fork's Q8 measurements above.
+
 <h1 align="center">Strata</h1>
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Português](README.pt-BR.md)
