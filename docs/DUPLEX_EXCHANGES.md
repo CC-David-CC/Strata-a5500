@@ -101,11 +101,11 @@ much of the total time. The full arena held 31.64 GiB of expert data in RAM vers
 16.19 GiB here; the 8K/512 gate measured about 160 tok/s with the full arena, faster
 than either resident arm. Resident RAM is a storage tradeoff, not a faster default.
 
-### Q8 integration: correctness passed; timing unresolved
+### Q8 integration: correctness and memory-lock diagnostic
 
 A separate validation branch combines this change with the opt-in Q8 PLE reader
-and exchange-buffer rotation. All **12 Q8 comparisons** passed exact token and
-recorded-work equality: eight in the first suite and four with a wider MTP policy.
+and exchange-buffer rotation. The initial **12 Q8 comparisons** passed exact token
+and recorded-work equality: eight in the first suite and four with a wider MTP policy.
 This includes a real 131,072-token input, target-only decode, rotation disabled,
 and a cancellation followed by another request. Together with the Q2 checks above,
 there are 35 matching comparisons across 72 requests.
@@ -116,7 +116,7 @@ a 44.28 GiB pinned RAM complement, FP16 KV, 139,264 allocated context, and 1,024
 prefill chunks. Each normal request generates 1,024 tokens. The reader is enabled
 with `STRATA_EXPERIMENTAL_Q8_PLE=1`; rotation is on unless the case says otherwise.
 
-**The Q8 timing pairs are not a repeatable speed claim.** For transparency, these
+**The initial Q8 timing pairs are not a repeatable speed claim.** For transparency, these
 are the completed repeated 32K-input measurements (off/on output tok/s):
 
 | MTP policy | Task | First pair | Reverse-order pair |
@@ -136,10 +136,41 @@ The logs show that `--ple-io ram` touched the Q8 lookup table but failed to lock
 it. The SSH process's memory-lock limit was 16,764,923,904 bytes, below this table's
 size. Later resource snapshots from a separate PR #876 screen show substantial
 memory reclamation and swapping, including an inconsistent flag-disabled control.
-This is a concrete measurement confound; it does not yet establish the cause of
-every timing difference. A separate diagnostic raises only its launcher's lock
-limit, verifies the table is locked, and repeats the pair. The initial raw results
-remain available below. No large Q8 speedup is claimed here.
+This is a concrete measurement confound; it does not establish the cause of every
+timing difference. The initial raw results remain available below.
+
+#### Locked-table repeat: 32K coding, MTP T4
+
+A separate diagnostic raised only its launcher's soft/hard memory-lock limit with
+`sudo prlimit --pid <launcher-pid> --memlock=unlimited:unlimited`. It required
+`PLE table locked in RAM` before each request; all four engines reported 50.66 GiB
+locked. No engine code, model, placement, global limits or service settings changed.
+Both arms used the same integration binary, the Q8 configuration above, and
+`--spec 8 --mtp-max-t 4 --spec-min-p 0.5`. Suffix drafting was off.
+
+Two pairs ran in AB then BA order, each with 32,768 input + 1,024 output tokens.
+All output tokens and recorded work matched, including 698/858 accepted/offered
+drafts and 6,587 offloads in every request.
+
+| Pair | Sequential tok/s | Duplex tok/s | Decode gain | Total seconds, off to on |
+|---|---:|---:|---:|---:|
+| AB | 129.72 | 136.65 | +5.35% | 60.81 to 62.59 |
+| BA | 128.70 | 136.93 | +6.39% | 60.86 to 60.41 |
+
+Across both pairs, total output tokens divided by total decode time improved from
+**129.21 to 136.79 tok/s (+5.87%)**. Mean decode time fell from 7.925 to 7.486 seconds.
+Mean prefill was 52.911 versus 54.017 seconds, so mean total request time was
+60.836 versus 61.503 seconds: **no consistent end-to-end gain**. These totals exclude
+model startup. This supports a repeated decode improvement for this coding case,
+not a claim about all tasks or 128K performance. There are only two pairs.
+
+Locking the table did not eliminate all memory pressure. The first-token-to-end
+system counters still recorded swap-ins and major faults; one run recorded
+background reclamation. No direct reclamation or swap-outs occurred in those
+decode intervals. These are system-wide counters, not per-engine attribution.
+The diagnostic adds two equality checks, bringing the total to **37 comparisons
+across 76 requests**. Its logs, launcher, resource snapshots and hashes are archived
+separately from the original unlocked runs.
 
 ### Evidence
 
