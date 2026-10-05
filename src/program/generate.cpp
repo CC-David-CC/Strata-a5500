@@ -6402,6 +6402,7 @@ int main(int argc, char** argv) {
             int32_t x = 0;                 ///< the token the next window feeds (not yet in the slot's state)
             std::array<int32_t, strata::kernels::kVerifyMaxT> draft{}; ///< the slot's next MTP proposal
             bool draft_ready = false;
+            int64_t draft_proposed = 0, draft_accepted = 0;
             int64_t p = 0;                 ///< its position
             int64_t produced = 0, max_new = 0;
             Clock::time_point t0;
@@ -6592,6 +6593,10 @@ int main(int argc, char** argv) {
             for (int t = 0; t < A; ++t) {
                 const int b = active[t];
                 BSlot& sl = bs[(size_t) b];
+                if (batch_mtp) {
+                    ++sl.draft_proposed;
+                    sl.draft_accepted += keep[b] - 1;
+                }
                 for (int j = 0; j < keep[b]; ++j) {
                     const int32_t y = outb[first[t] + j];
                     sl.ids.push_back(tok[first[t] + j]);
@@ -6603,6 +6608,10 @@ int main(int argc, char** argv) {
                     if (fin != nullptr) {
                         const double ms = std::chrono::duration<double, std::milli>(Clock::now() - sl.t0).count();
                         std::printf("BDONE %d %lld %s %.1f\n", b, (long long) sl.produced, fin, ms);
+                        if (batch_mtp)
+                            std::fprintf(stderr, "strata batch MTP: slot %d proposed=%lld accepted=%lld generated=%lld finish=%s\n",
+                                         b, (long long) sl.draft_proposed, (long long) sl.draft_accepted,
+                                         (long long) sl.produced, fin);
                         sl.active = false;
                         sl.cached = o.prompt_cache > 0 && !sl.img;
                         break;
@@ -7973,6 +7982,7 @@ int main(int argc, char** argv) {
                     sl.t0 = Clock::now();
                     sl.ids = live;
                     if (batch_mtp) {
+                        sl.draft_proposed = sl.draft_accepted = 0;
                         if (!slot_mtp[(size_t) admit_slot]->draft_first(1, ver.final_R_all(), sl.x,
                                                                         sl.p - 1, sl.draft.data(), err)) {
                             std::fprintf(stderr, "strata batch: MTP admission for slot %d failed: %s\n",
