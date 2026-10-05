@@ -1,11 +1,21 @@
 # Experimental concurrent serving: Q4 at 32K
 
-The research integration measured **275.8 combined committed output tokens/s**
-on Unsloth **UD-Q4_K_XL**, with **eight concurrent requests**, each reading
-**32,768 input tokens** and producing **512 output tokens**. Including prefill,
-that is **35.7 effective output tokens/s**, or **114.83 seconds** to finish all
-eight requests. Hardware: **RTX PRO 6000 Blackwell Workstation 96 GB**, existing
-400 W power limit, Ryzen 9 7950X, 128 GB system RAM. KV: **FP16**.
+**Highest Q4 aggregate decode in the focused screen: 297.3 committed output
+tokens/s with eight non-MTP requests.** Each request reads **32,768 input tokens**
+and produces **512 output tokens**, using Unsloth **UD-Q4_K_XL** and **FP16 KV**.
+Hardware: **RTX PRO 6000 Blackwell Workstation 96 GB**, existing 400 W power limit,
+Ryzen 9 7950X, 128 GB system RAM.
+
+| Eight concurrent requests | Combined decode tok/s | Effective tok/s | Finish all eight (s) |
+|---|---:|---:|---:|
+| **Non-MTP** | **297.3** | **36.1** | **113.40** |
+| Grouped MTP | 276.2 | 35.7 | 114.71 |
+
+Non-MTP streams each delivered **37.0-37.2 steady tok/s**. At two requests,
+grouped MTP improved decode **30.4%** and effective throughput **4.7%**.
+The earlier research integration measured 297.7 non-MTP and 275.8 MTP at N=8;
+the focused build reproduced both results. The absolute rates and policy
+comparisons are separate from a speedup claim against unmodified upstream.
 
 These are synthetic coding workload measurements, not answer-quality scores or
 single-stream speeds. This is a draft integration of upstream contributions and

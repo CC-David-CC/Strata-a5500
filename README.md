@@ -1,13 +1,17 @@
 # Experimental concurrent serving - draft integration
 
-**Q4: 275.8 aggregate decode tok/s in research; 276.2 tok/s reproduced on this
-focused branch**, across **eight MTP requests**, each with **32K input + 512 output**,
-**FP16 KV**, on an **RTX PRO 6000 Blackwell Workstation 96 GB (400 W)**.
-Including all prefills: **35.7 effective tok/s**. These are aggregate rates.
+**Q4: 297.3 combined decode tok/s with eight non-MTP requests** is the highest
+Q4 aggregate rate in this focused screen. Each request reads **32K input + 512
+output**, using **FP16 KV** on an **RTX PRO 6000 Blackwell Workstation 96 GB (400 W)**.
 
-At **two concurrent requests**, the clean build measured **+30.4% decode** and
-**+4.7% effective throughput** with grouped MTP. At eight, non-MTP was faster
-(**297.3 decode / 36.1 effective tok/s**). Single screening runs, not repeated gains.
+| Eight concurrent requests | Combined decode tok/s | Effective tok/s, including prefill |
+|---|---:|---:|
+| **Non-MTP** | **297.3** | **36.1** |
+| Grouped MTP | 276.2 | 35.7 |
+
+The non-MTP streams each delivered **37.0-37.2 steady tok/s**. At **two concurrent
+requests**, grouped MTP improved decode **30.4%** and effective throughput **4.7%**.
+These are single screening measurements; 297.3 is an absolute aggregate rate.
 
 [**Results, limits, reproduction and full seven-model research matrix**](docs/CONCURRENT_SERVING.md)
 
