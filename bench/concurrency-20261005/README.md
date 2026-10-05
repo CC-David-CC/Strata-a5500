@@ -1,5 +1,7 @@
 # Concurrent-serving research snapshot
 
+**Update: [the full 64K initial screen is archived here](64k/README.md).**
+
 This folder supports the focused `contrib/concurrent-mtp-waves` draft. The engine
 used for the historical 32K/64K matrix is `cd9fcca`, immediately before this
 evidence commit. It includes other experiments and is not the minimal PR diff.
@@ -64,4 +66,5 @@ physical verifier rows; they do not increase kernel width. Effective throughput
 includes all prefills. Q8 and reduced-cache Q4 token differences remain
 unclassified, and Q8 showed process swap. No numerical-equivalence, answer-quality,
 multi-GPU or GPU-sanitizer claim follows from successful request completion.
-Most points have one observation; repeated knee measurements remain in progress.
+Most points have one observation. No repeat-validation jobs are scheduled in this
+roofline branch; distinct context/output exploration continues separately.

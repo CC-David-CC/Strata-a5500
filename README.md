@@ -1,19 +1,25 @@
-# Concurrent-serving research branch
+# Concurrent-serving roofline research
 
-This branch archives experimental single-GPU concurrency work on an **RTX PRO
-6000 Blackwell Workstation 96 GB**. The Q4 research result was **275.8 aggregate
-decode tok/s across eight MTP requests**, each with **32K input + 512 output**,
-**FP16 KV**; effective throughput including prefill was **35.7 tok/s**.
+Research fork of [Niko1221/Strata](https://github.com/Niko1221/Strata) on an
+**RTX PRO 6000 Blackwell Workstation 96 GB**, 400 W, Ryzen 9 7950X and 128 GB RAM.
 
-See the [dated measurements and reproduction harness](bench/concurrency-20261005/README.md).
-The focused review branch is [`contrib/concurrent-mtp-waves`](https://github.com/CC-David-CC/Strata-a5500/tree/contrib/concurrent-mtp-waves).
-The broader 64K/128K and concurrency-knee study continues; token differences in
-partially resident cases are not yet classified.
+**The initial 64K + 512-output screen is complete:** seven models, both policies,
+60 cohorts and 412 requests. At eight concurrent requests, non-MTP combined decode
+reached **320.9 tok/s for Q2_0**, **299.2 for IQ3_S**, **248.5 for Unsloth Q4** and
+**67.9 for Q8**. These are aggregate committed output rates; effective rates and
+all prefill costs are in the table. They are not speedup percentages over stock.
 
-Built on [Niko1221/Strata](https://github.com/Niko1221/Strata), with concurrent MTP
-from [rkcth #846](https://github.com/Niko1221/Strata/pull/846) and PDL/graph work
-from [Hardin22 #904](https://github.com/Niko1221/Strata/pull/904). Older integration
-notes and upstream documentation follow below.
+**[Complete 64K table, graph, hashes and baseline comparisons](bench/concurrency-20261005/64k/README.md)**
+
+The existing focused contribution is [PR #969](https://github.com/Niko1221/Strata/pull/969)
+on `contrib/concurrent-mtp-waves`. This research archive adds evidence without
+changing the engine. The 128K and longer-output exploration continues; no repeat
+validation is scheduled in this roofline branch. Partially resident Q4/Q8 token
+differences remain recorded and unclassified.
+
+Concurrent MTP comes from [rkcth #846](https://github.com/Niko1221/Strata/pull/846),
+with PDL/graph work from [Hardin22 #904](https://github.com/Niko1221/Strata/pull/904).
+Older integration notes and the original upstream introduction follow below.
 
 ---
 

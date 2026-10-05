@@ -1,0 +1,803 @@
+{
+  "protocol": "llm-60 RTX PRO6000 Blackwell96GB;32K input+1K output;FP16 KV;139264 allocated context;all experts GPU;PLE RAM;ngram drafts off",
+  "reference": "18d3da4: upstream main6f32ec0 plus opt-in Q8 PLE reader, unused by these IQ4_NL tables",
+  "candidate": "70ed61f: Q8 adaptation integration with PDL and independent graph branches enabled",
+  "limits": [
+    "Single screening run per model/build/MTP mode; no confidence interval.",
+    "The all-resident model path omits CPU cache hit counters; full residency is confirmed by graph activation.",
+    "Transfer/eviction/admission optimizations have no misses to accelerate in these configurations.",
+    "Coder IQ1_M is a different, pruned256-expert/layer model; the other five have512 per layer.",
+    "Unsloth small projections use the existing BF16 compatibility pack."
+  ],
+  "completed": true,
+  "all_prompt_hashes_match": true,
+  "original_summary_sha256": "1e98e09b0a1e970953bebafc58a3ddc82825a8f2fec7e61e2a825b42ddd788f4",
+  "models": [
+    {
+      "name": "iq3_s",
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "3e52d8c534b271025c50b8b301c5090685abfbf77750230cad65e9b590d8ec74"
+      },
+      "pack_hashes": {
+        "index.txt": "b2a014878c3b61d6a6f915e194055a5e68ede34f9465dd1cb13249d902f008ac",
+        "native_experts.txt": "d9ac2dfa3ee63c55c9c6a6db26f72da0cec0ee41733f007e5cbbbba71617aa5d"
+      },
+      "runs": [
+        {
+          "label": "iq3_s-t1-reference",
+          "engine": "reference",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 128.65937931900993,
+          "effective_tok_s": 63.02314130969965,
+          "prefill_seconds": 8.289,
+          "decode_seconds": 7.959,
+          "request_seconds": 16.251946551987203,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "89a48eef592b546c0e6586d6b60be275b587288042348ee5d953da31bf8bbaf5",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "46.84"
+            ]
+          ]
+        },
+        {
+          "label": "iq3_s-t1-candidate",
+          "engine": "candidate",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 132.09664727357165,
+          "effective_tok_s": 63.73232423819957,
+          "prefill_seconds": 8.315299999999999,
+          "decode_seconds": 7.7519,
+          "request_seconds": 16.071018649992766,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "89a48eef592b546c0e6586d6b60be275b587288042348ee5d953da31bf8bbaf5",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "46.84"
+            ]
+          ]
+        },
+        {
+          "label": "iq3_s-t4-reference",
+          "engine": "reference",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 253.63485497733632,
+          "effective_tok_s": 82.75750596031843,
+          "prefill_seconds": 8.336200000000002,
+          "decode_seconds": 4.0373,
+          "request_seconds": 12.378328399005113,
+          "accepted_drafts": 699,
+          "offered_drafts": 868,
+          "tokens_sha256": "89a48eef592b546c0e6586d6b60be275b587288042348ee5d953da31bf8bbaf5",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "46.84"
+            ]
+          ]
+        },
+        {
+          "label": "iq3_s-t4-candidate",
+          "engine": "candidate",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 259.82593692116416,
+          "effective_tok_s": 83.37132807920277,
+          "prefill_seconds": 8.341299999999999,
+          "decode_seconds": 3.9411,
+          "request_seconds": 12.286463015014306,
+          "accepted_drafts": 699,
+          "offered_drafts": 868,
+          "tokens_sha256": "89a48eef592b546c0e6586d6b60be275b587288042348ee5d953da31bf8bbaf5",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "46.84"
+            ]
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "labels": [
+            "iq3_s-t1-reference",
+            "iq3_s-t1-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.671603090855146,
+          "total_time_reduction_pct": 1.1132691177372478,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "iq3_s-t4-reference",
+            "iq3_s-t4-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.4409428839664127,
+          "total_time_reduction_pct": 0.7421469283218518,
+          "work_identical": true
+        }
+      ]
+    },
+    {
+      "name": "iq3_xxs",
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "3e52d8c534b271025c50b8b301c5090685abfbf77750230cad65e9b590d8ec74"
+      },
+      "pack_hashes": {
+        "index.txt": "1afe12b36cd2d13bf122b741fa0e81e1f751319cc3c451e54ba75524d825f148",
+        "native_experts.txt": "ae28cf7a2a1c9063c4b55d6c8cf86d4d079dcddcf597f9e8697c9157d462c0ee"
+      },
+      "runs": [
+        {
+          "label": "iq3_xxs-t1-reference",
+          "engine": "reference",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 131.85511389242993,
+          "effective_tok_s": 64.2679168784872,
+          "prefill_seconds": 8.1672,
+          "decode_seconds": 7.766100000000001,
+          "request_seconds": 15.94729467999423,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "60d00771369ff6ce98b2a911fc7dc8b49da3901e5f5ece0b643d1bf2c40cb491",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "39.97"
+            ]
+          ]
+        },
+        {
+          "label": "iq3_xxs-t1-candidate",
+          "engine": "candidate",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 136.51513131582456,
+          "effective_tok_s": 65.57125110459383,
+          "prefill_seconds": 8.1156,
+          "decode_seconds": 7.501,
+          "request_seconds": 15.621089942986146,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "60d00771369ff6ce98b2a911fc7dc8b49da3901e5f5ece0b643d1bf2c40cb491",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "39.97"
+            ]
+          ]
+        },
+        {
+          "label": "iq3_xxs-t4-reference",
+          "engine": "reference",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 260.1097337939443,
+          "effective_tok_s": 84.94330200496056,
+          "prefill_seconds": 8.1183,
+          "decode_seconds": 3.9368000000000003,
+          "request_seconds": 12.059124688006705,
+          "accepted_drafts": 698,
+          "offered_drafts": 888,
+          "tokens_sha256": "60d00771369ff6ce98b2a911fc7dc8b49da3901e5f5ece0b643d1bf2c40cb491",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "39.97"
+            ]
+          ]
+        },
+        {
+          "label": "iq3_xxs-t4-candidate",
+          "engine": "candidate",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 267.88050018312146,
+          "effective_tok_s": 85.72552762220492,
+          "prefill_seconds": 8.1225,
+          "decode_seconds": 3.8226,
+          "request_seconds": 11.949311468983069,
+          "accepted_drafts": 698,
+          "offered_drafts": 888,
+          "tokens_sha256": "60d00771369ff6ce98b2a911fc7dc8b49da3901e5f5ece0b643d1bf2c40cb491",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "39.97"
+            ]
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "labels": [
+            "iq3_xxs-t1-reference",
+            "iq3_xxs-t1-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 3.5341954406079124,
+          "total_time_reduction_pct": 2.0455177103945066,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "iq3_xxs-t4-reference",
+            "iq3_xxs-t4-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.987495421964126,
+          "total_time_reduction_pct": 0.9106234645110622,
+          "work_identical": true
+        }
+      ]
+    },
+    {
+      "name": "q2_0",
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "3e52d8c534b271025c50b8b301c5090685abfbf77750230cad65e9b590d8ec74"
+      },
+      "pack_hashes": {
+        "index.txt": "c758314d495a1261d06a806b1c415596dfabe62e0cbf44ce592dc84c53229ccd",
+        "native_experts.txt": "015e53d3ae36324f172be4942bcf129539b343e2eb4fcd4f25ca5eff180bfa41"
+      },
+      "runs": [
+        {
+          "label": "q2_0-t1-reference",
+          "engine": "reference",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 141.3642199428469,
+          "effective_tok_s": 69.29453561157165,
+          "prefill_seconds": 7.5338,
+          "decode_seconds": 7.2437,
+          "request_seconds": 14.7812928140047,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "0abc727cd3a34218d71e65872d9628b461eb66b46a007dbd5c0491f82a653d00",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "31.64"
+            ]
+          ]
+        },
+        {
+          "label": "q2_0-t1-candidate",
+          "engine": "candidate",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 145.8398609963825,
+          "effective_tok_s": 70.32967032967034,
+          "prefill_seconds": 7.538600000000001,
+          "decode_seconds": 7.0214,
+          "request_seconds": 14.56442142999731,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "0abc727cd3a34218d71e65872d9628b461eb66b46a007dbd5c0491f82a653d00",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "31.64"
+            ]
+          ]
+        },
+        {
+          "label": "q2_0-t4-reference",
+          "engine": "reference",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 279.07990842690504,
+          "effective_tok_s": 91.2664105740693,
+          "prefill_seconds": 7.5507,
+          "decode_seconds": 3.6692,
+          "request_seconds": 11.224173615977634,
+          "accepted_drafts": 708,
+          "offered_drafts": 863,
+          "tokens_sha256": "0abc727cd3a34218d71e65872d9628b461eb66b46a007dbd5c0491f82a653d00",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "31.64"
+            ]
+          ]
+        },
+        {
+          "label": "q2_0-t4-candidate",
+          "engine": "candidate",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 287.23702664796633,
+          "effective_tok_s": 92.1517984899344,
+          "prefill_seconds": 7.5471,
+          "decode_seconds": 3.565,
+          "request_seconds": 11.116143277991796,
+          "accepted_drafts": 708,
+          "offered_drafts": 863,
+          "tokens_sha256": "0abc727cd3a34218d71e65872d9628b461eb66b46a007dbd5c0491f82a653d00",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "31.64"
+            ]
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "labels": [
+            "q2_0-t1-reference",
+            "q2_0-t1-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 3.1660352636226463,
+          "total_time_reduction_pct": 1.467201730838541,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "q2_0-t4-reference",
+            "q2_0-t4-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.922861150070122,
+          "total_time_reduction_pct": 0.9624792139000471,
+          "work_identical": true
+        }
+      ]
+    },
+    {
+      "name": "coder_iq1_m",
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "3e52d8c534b271025c50b8b301c5090685abfbf77750230cad65e9b590d8ec74"
+      },
+      "pack_hashes": {
+        "index.txt": "2cb3352786bcae81ea4d933eee6b2d5db45774069320c924a6dea48eb65a3cd3",
+        "native_experts.txt": "9ace1b92e1fe12595de469409e69dd52c8d5418c7981c405d9a51aa9d574dd3b"
+      },
+      "runs": [
+        {
+          "label": "coder_iq1_m-t1-reference",
+          "engine": "reference",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 119.81793290663796,
+          "effective_tok_s": 64.10938664095613,
+          "prefill_seconds": 7.426399999999999,
+          "decode_seconds": 8.546299999999999,
+          "request_seconds": 15.977317202981794,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "06d90b1cde361d3805273dbe6fb6cd2f3d2bccde3284071181d9267f801af54f",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "12288",
+              "23.42"
+            ]
+          ]
+        },
+        {
+          "label": "coder_iq1_m-t1-candidate",
+          "engine": "candidate",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 122.8745935178852,
+          "effective_tok_s": 65.2815585972115,
+          "prefill_seconds": 7.3522,
+          "decode_seconds": 8.3337,
+          "request_seconds": 15.690070832992205,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "06d90b1cde361d3805273dbe6fb6cd2f3d2bccde3284071181d9267f801af54f",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "12288",
+              "23.42"
+            ]
+          ]
+        },
+        {
+          "label": "coder_iq1_m-t4-reference",
+          "engine": "reference",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 213.613701316311,
+          "effective_tok_s": 84.43132534094094,
+          "prefill_seconds": 7.3345,
+          "decode_seconds": 4.793699999999999,
+          "request_seconds": 12.132541468017735,
+          "accepted_drafts": 700,
+          "offered_drafts": 844,
+          "tokens_sha256": "06d90b1cde361d3805273dbe6fb6cd2f3d2bccde3284071181d9267f801af54f",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "12288",
+              "23.42"
+            ]
+          ]
+        },
+        {
+          "label": "coder_iq1_m-t4-candidate",
+          "engine": "candidate",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 218.7520027344,
+          "effective_tok_s": 85.2133245679002,
+          "prefill_seconds": 7.3358,
+          "decode_seconds": 4.681100000000001,
+          "request_seconds": 12.020623162999982,
+          "accepted_drafts": 700,
+          "offered_drafts": 844,
+          "tokens_sha256": "06d90b1cde361d3805273dbe6fb6cd2f3d2bccde3284071181d9267f801af54f",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "12288",
+              "23.42"
+            ]
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "labels": [
+            "coder_iq1_m-t1-reference",
+            "coder_iq1_m-t1-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.551087752138903,
+          "total_time_reduction_pct": 1.797838562884524,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "coder_iq1_m-t4-reference",
+            "coder_iq1_m-t4-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.4054175300677105,
+          "total_time_reduction_pct": 0.9224638161161702,
+          "work_identical": true
+        }
+      ]
+    },
+    {
+      "name": "unsloth_q4",
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "3e52d8c534b271025c50b8b301c5090685abfbf77750230cad65e9b590d8ec74"
+      },
+      "pack_hashes": {
+        "index.txt": "cfc07e91c4d9b8e8c999fd1f70fa364e584748e70fa377b30e0fc85426f52711",
+        "native_experts.txt": "5ed2c4a55910616db1efe16f0c989e9bec80cc8b9e95bf1c42f886aadfffd2d6"
+      },
+      "runs": [
+        {
+          "label": "unsloth_q4-t1-reference",
+          "engine": "reference",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 117.45004931984492,
+          "effective_tok_s": 49.273172586023556,
+          "prefill_seconds": 12.0635,
+          "decode_seconds": 8.7186,
+          "request_seconds": 20.786852716992144,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "131a395921f0eb87216c27e9c3e8d3029b05b5cde10d6a4b0a894b9e73eab41e",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "71.73"
+            ]
+          ]
+        },
+        {
+          "label": "unsloth_q4-t1-candidate",
+          "engine": "candidate",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 120.44649893550701,
+          "effective_tok_s": 50.040560219709334,
+          "prefill_seconds": 11.9617,
+          "decode_seconds": 8.501700000000001,
+          "request_seconds": 20.467464891000418,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "131a395921f0eb87216c27e9c3e8d3029b05b5cde10d6a4b0a894b9e73eab41e",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "71.73"
+            ]
+          ]
+        },
+        {
+          "label": "unsloth_q4-t4-reference",
+          "engine": "reference",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 241.4752629344904,
+          "effective_tok_s": 63.174779443519036,
+          "prefill_seconds": 11.968399999999999,
+          "decode_seconds": 4.240600000000001,
+          "request_seconds": 16.21354107701336,
+          "accepted_drafts": 708,
+          "offered_drafts": 837,
+          "tokens_sha256": "131a395921f0eb87216c27e9c3e8d3029b05b5cde10d6a4b0a894b9e73eab41e",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "71.73"
+            ]
+          ]
+        },
+        {
+          "label": "unsloth_q4-t4-candidate",
+          "engine": "candidate",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 248.1762439107147,
+          "effective_tok_s": 63.58194868738047,
+          "prefill_seconds": 11.9791,
+          "decode_seconds": 4.1261,
+          "request_seconds": 16.10927715100115,
+          "accepted_drafts": 708,
+          "offered_drafts": 837,
+          "tokens_sha256": "131a395921f0eb87216c27e9c3e8d3029b05b5cde10d6a4b0a894b9e73eab41e",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "71.73"
+            ]
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "labels": [
+            "unsloth_q4-t1-reference",
+            "unsloth_q4-t1-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.5512544549913585,
+          "total_time_reduction_pct": 1.5364895799287792,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "unsloth_q4-t4-reference",
+            "unsloth_q4-t4-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 2.775017571071947,
+          "total_time_reduction_pct": 0.6430669618497364,
+          "work_identical": true
+        }
+      ]
+    },
+    {
+      "name": "unsloth_iq1",
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "3e52d8c534b271025c50b8b301c5090685abfbf77750230cad65e9b590d8ec74"
+      },
+      "pack_hashes": {
+        "index.txt": "1d20f74d2ff84332058f749ef3c39d294ba27a6a1302f7a2121c741a1b0c4c00",
+        "native_experts.txt": "204bf1c16fd1693c21e55ef7da36aff9b580e053269b9b10241491583f922a2e"
+      },
+      "runs": [
+        {
+          "label": "unsloth_iq1-t1-reference",
+          "engine": "reference",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 127.10233972568733,
+          "effective_tok_s": 56.86582663697501,
+          "prefill_seconds": 9.9508,
+          "decode_seconds": 8.0565,
+          "request_seconds": 18.022171591001097,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "50512ddb30a648f67bef4efe14a56a08068bec2c57dacb024dfeab6635207c84",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "38.96"
+            ]
+          ]
+        },
+        {
+          "label": "unsloth_iq1-t1-candidate",
+          "engine": "candidate",
+          "mtp_t": 1,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 138.24200450906537,
+          "effective_tok_s": 58.99535065937675,
+          "prefill_seconds": 9.95,
+          "decode_seconds": 7.4073,
+          "request_seconds": 17.361217745987233,
+          "accepted_drafts": 0,
+          "offered_drafts": 0,
+          "tokens_sha256": "50512ddb30a648f67bef4efe14a56a08068bec2c57dacb024dfeab6635207c84",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "38.96"
+            ]
+          ]
+        },
+        {
+          "label": "unsloth_iq1-t4-reference",
+          "engine": "reference",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 268.2664850279008,
+          "effective_tok_s": 74.1674271725117,
+          "prefill_seconds": 9.9895,
+          "decode_seconds": 3.8171,
+          "request_seconds": 13.810935154993786,
+          "accepted_drafts": 703,
+          "offered_drafts": 845,
+          "tokens_sha256": "50512ddb30a648f67bef4efe14a56a08068bec2c57dacb024dfeab6635207c84",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "38.96"
+            ]
+          ]
+        },
+        {
+          "label": "unsloth_iq1-t4-candidate",
+          "engine": "candidate",
+          "mtp_t": 4,
+          "input_tokens": 32768,
+          "output_tokens": 1024,
+          "decode_tok_s": 276.53254118282473,
+          "effective_tok_s": 74.51065997234956,
+          "prefill_seconds": 10.04,
+          "decode_seconds": 3.703,
+          "request_seconds": 13.747635364998132,
+          "accepted_drafts": 703,
+          "offered_drafts": 845,
+          "tokens_sha256": "50512ddb30a648f67bef4efe14a56a08068bec2c57dacb024dfeab6635207c84",
+          "prompt_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+          "expert_cache": [
+            [
+              "24576",
+              "38.96"
+            ]
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "labels": [
+            "unsloth_iq1-t1-reference",
+            "unsloth_iq1-t1-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 8.764327082742685,
+          "total_time_reduction_pct": 3.6674484075154057,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "unsloth_iq1-t4-reference",
+            "unsloth_iq1-t4-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same quant, full GPU residency, MTP policy and prompt; baseline vs current integration.",
+          "first_difference": null,
+          "decode_gain_pct": 3.081285444234383,
+          "total_time_reduction_pct": 0.45833094779802463,
+          "work_identical": true
+        }
+      ]
+    }
+  ]
+}
