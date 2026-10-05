@@ -19,7 +19,8 @@ Compute Sanitizer memcheck and ASan/UBSan passed as described in the report.
 | Q2 repeated 8K/32K coding and editing | 32 | 16 |
 | Q8 T2, target-only, rotation-off, 128K and cancellation | 18 | 8 |
 | Q8 wider MTP, repeated 32K coding and editing | 8 | 4 |
-| Total | 72 | 35 |
+| Q8 locked-table diagnostic, repeated 32K coding | 4 | 2 |
+| Total | 76 | 37 |
 
 The cancelled request itself is a protocol/lifetime check; the paired equality
 check applies to the following complete request. These results are not a model
@@ -31,7 +32,7 @@ quality evaluation or proof of all possible state interleavings.
   0.7-1.2%; the report retains both improvements and regressions.
 - The isolated Q8-sized 4/16-slot transfer batches took 27.0/34.0% less time.
   This measures transfer latency, not model throughput or fewer bytes.
-- Q8 pairs varied substantially between repetitions. They validate token/work
+- Initial Q8 pairs varied substantially between repetitions. They validate token/work
   equality, but do not support a large repeated Q8 speed claim.
 - The Q8 fixture has Q8_0 experts/PLE and a compatibility dense pack with a Q5_K
   head. Its RAM lookup table failed to lock under the test launcher's limit.
@@ -39,7 +40,25 @@ quality evaluation or proof of all possible state interleavings.
   (Francesco Albano / Hardin22) captured heavy reclamation/swapping and unstable
   flag-disabled timings. This diagnostic does not establish that every timing
   difference has the same cause. Its asynchronous outputs can differ, and are
-  not included in the 35 duplex equality checks above.
+  not included in the duplex equality checks above.
+
+### Locked-table diagnostic
+
+Raising only the diagnostic launcher's memlock limit allowed the 50.66 GiB lookup
+table to lock successfully. With the same Q8 binary, model and settings, two AB/BA
+pairs of 32,768 input + 1,024 output tokens measured:
+
+| Order | Sequential tok/s | Duplex tok/s | Decode gain | Total seconds, off to on |
+|---|---:|---:|---:|---:|
+| AB | 129.72 | 136.65 | +5.35% | 60.81 to 62.59 |
+| BA | 128.70 | 136.93 | +6.39% | 60.86 to 60.41 |
+
+Tokens and recorded work matched in both pairs. Aggregate decode rate was
+129.21 to 136.79 tok/s (+5.87%). Prefill dominated: mean total time was
+60.836 to 61.503 seconds, with no consistent end-to-end gain. This is a limited
+coding result, with MTP T4, FP16 KV and suffix drafting off. Remaining swap-ins
+and major faults mean it is not a claim that all paging was eliminated. No
+global memory limits or service settings changed. The report gives full settings.
 
 ## Files and reproduction
 
@@ -53,6 +72,10 @@ quality evaluation or proof of all possible state interleavings.
 - `fixture-4090.json`: matching fixture source hashes and the second GPU receipt.
 - `separate-async-memory-screen.json.gz`: the later #876 screen's token results,
   process counters, Linux memory-pressure counters, GPU snapshots and settings.
+- `locked-duplex-results.tar.gz`: completed locked-table diagnostic, including
+  process-local limit launcher, actual runner, plan, raw tokens, logs, process and
+  system counters, binary hashes, and an individual-file hash manifest.
+- `locked-summary.json`: derived locked-table timing and memory-counter summaries.
 
 Unpack `raw-results.tar.gz`, read a suite's `result.json` and its corresponding
 plan, and follow the report's build commands. The plans preserve the exact host

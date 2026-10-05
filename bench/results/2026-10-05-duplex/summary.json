@@ -427,5 +427,42 @@
     ]
   },
   "raw_archive_sha256": "16117e88e417c00bd608e80a8ecbfeeec58ff218e651f1eed123a22fa0dbc016",
-  "interpretation": "Q2/copy timings reported with limits. Q8 exact-token checks passed, but timing is confounded by run-to-run variability and unlocked PLE memory; no large Q8 speed claim."
+  "interpretation": "Original Q8 timings remain confounded and archived. A separate locked-PLE intervention passed two additional coding pairs and measured 5.35-6.39% decode gains, without a consistent total-request gain. Q2/copy claims retain their stated limits.",
+  "q8-locked-memory": {
+    "requests": 4,
+    "comparisons": 2,
+    "all_tokens_and_work_identical": true,
+    "summary": "locked-summary.json",
+    "raw_archive_sha256": "49b4a6ef8316a6b78e7efaf5d313a72ede3ed478a38e36e1d9bf3590b8ffc7ec",
+    "pairs": [
+      {
+        "labels": [
+          "q8-32768-t4-code-rotate1-r0-duplex0",
+          "q8-32768-t4-code-rotate1-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "require_token_equality": true,
+        "require_work_equality": true,
+        "comparison_scope": "default-path parity",
+        "first_difference": null,
+        "decode_gain_pct": 5.348706862038588,
+        "total_time_reduction_pct": -2.934250336534161,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t4-code-rotate1-r1-duplex0",
+          "q8-32768-t4-code-rotate1-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "require_token_equality": true,
+        "require_work_equality": true,
+        "comparison_scope": "default-path parity",
+        "first_difference": null,
+        "decode_gain_pct": 6.38764458113259,
+        "total_time_reduction_pct": 0.7417653936994784,
+        "work_identical": true
+      }
+    ]
+  }
 }

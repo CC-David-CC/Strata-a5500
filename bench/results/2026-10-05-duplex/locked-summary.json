@@ -1,0 +1,170 @@
+{
+  "completed": true,
+  "requests": 4,
+  "comparisons": 2,
+  "all_tokens_and_work_identical": true,
+  "raw_archive_sha256": "49b4a6ef8316a6b78e7efaf5d313a72ede3ed478a38e36e1d9bf3590b8ffc7ec",
+  "source_commits": {
+    "integration": "21b5487a6615b49daafff1bf3c06f55f7525e19c"
+  },
+  "engine_sha256": {
+    "integration": "987ef4bd4e1908dcc3a059219d4c0ef10462fd80f113f4b88335901912b05981"
+  },
+  "harness_sha256": "dd62edc4eb425f7e475325dd2765a91bceb00f4ddeb848bdb33a483e15fcf00b",
+  "memlock_intervention": {
+    "phase": "complete",
+    "started_unix": 1791170974.140687,
+    "memlock_before": [
+      16764923904,
+      16764923904
+    ],
+    "memlock_after": [
+      -1,
+      -1
+    ],
+    "exit_code": 0,
+    "completed": true,
+    "finished_unix": 1791171751.3087175
+  },
+  "rows": [
+    {
+      "label": "q8-32768-t4-code-rotate1-r0-duplex0",
+      "duplex": 0,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "decode_tok_s": 129.71548731980442,
+      "prefill_s": 52.9154,
+      "decode_s": 7.8942,
+      "total_engine_s": 60.809599999999996,
+      "request_wall_s": 60.82408933597617,
+      "effective_tok_s": 16.839446403199496,
+      "locked_kib_first_token": 53125256,
+      "swap_kib_first_token": 1517876,
+      "swap_kib_after": 1443692,
+      "decode_system_vmstat_delta": {
+        "pgmajfault": 3124,
+        "pswpin": 18961,
+        "pswpout": 0,
+        "pgscan_kswapd": 0,
+        "pgscan_direct": 0
+      }
+    },
+    {
+      "label": "q8-32768-t4-code-rotate1-r0-duplex1",
+      "duplex": 1,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "decode_tok_s": 136.6535884912056,
+      "prefill_s": 55.1006,
+      "decode_s": 7.493399999999999,
+      "total_engine_s": 62.594,
+      "request_wall_s": 62.60882038201089,
+      "effective_tok_s": 16.359395469214302,
+      "locked_kib_first_token": 53125256,
+      "swap_kib_first_token": 1531180,
+      "swap_kib_after": 1416536,
+      "decode_system_vmstat_delta": {
+        "pgmajfault": 3889,
+        "pswpin": 28672,
+        "pswpout": 0,
+        "pgscan_kswapd": 174376,
+        "pgscan_direct": 0
+      }
+    },
+    {
+      "label": "q8-32768-t4-code-rotate1-r1-duplex1",
+      "duplex": 1,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "decode_tok_s": 136.92585411513005,
+      "prefill_s": 52.9333,
+      "decode_s": 7.4785,
+      "total_engine_s": 60.4118,
+      "request_wall_s": 60.42727357900003,
+      "effective_tok_s": 16.95033089561973,
+      "locked_kib_first_token": 53125256,
+      "swap_kib_first_token": 1638772,
+      "swap_kib_after": 1524172,
+      "decode_system_vmstat_delta": {
+        "pgmajfault": 3669,
+        "pswpin": 28545,
+        "pswpout": 0,
+        "pgscan_kswapd": 0,
+        "pgscan_direct": 0
+      }
+    },
+    {
+      "label": "q8-32768-t4-code-rotate1-r1-duplex0",
+      "duplex": 0,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "decode_tok_s": 128.70465800256403,
+      "prefill_s": 52.907199999999996,
+      "decode_s": 7.9562,
+      "total_engine_s": 60.86339999999999,
+      "request_wall_s": 60.87885183398612,
+      "effective_tok_s": 16.824561230558924,
+      "locked_kib_first_token": 53125256,
+      "swap_kib_first_token": 1640408,
+      "swap_kib_after": 1524976,
+      "decode_system_vmstat_delta": {
+        "pgmajfault": 3744,
+        "pswpin": 28823,
+        "pswpout": 0,
+        "pgscan_kswapd": 0,
+        "pgscan_direct": 0
+      }
+    }
+  ],
+  "groups": {
+    "0": {
+      "requests": 2,
+      "decode_tok_s": 129.20809569474588,
+      "mean_prefill_s": 52.9113,
+      "mean_decode_s": 7.9252,
+      "mean_total_engine_s": 60.836499999999994,
+      "effective_tok_s": 16.83200052600002
+    },
+    "1": {
+      "requests": 2,
+      "decode_tok_s": 136.7895858241105,
+      "mean_prefill_s": 54.01695,
+      "mean_decode_s": 7.48595,
+      "mean_total_engine_s": 61.5029,
+      "effective_tok_s": 16.649621399966506
+    }
+  },
+  "pairs": [
+    {
+      "labels": [
+        "q8-32768-t4-code-rotate1-r0-duplex0",
+        "q8-32768-t4-code-rotate1-r0-duplex1"
+      ],
+      "tokens_identical": true,
+      "require_token_equality": true,
+      "require_work_equality": true,
+      "comparison_scope": "default-path parity",
+      "first_difference": null,
+      "decode_gain_pct": 5.348706862038588,
+      "total_time_reduction_pct": -2.934250336534161,
+      "work_identical": true
+    },
+    {
+      "labels": [
+        "q8-32768-t4-code-rotate1-r1-duplex0",
+        "q8-32768-t4-code-rotate1-r1-duplex1"
+      ],
+      "tokens_identical": true,
+      "require_token_equality": true,
+      "require_work_equality": true,
+      "comparison_scope": "default-path parity",
+      "first_difference": null,
+      "decode_gain_pct": 6.38764458113259,
+      "total_time_reduction_pct": 0.7417653936994784,
+      "work_identical": true
+    }
+  ],
+  "aggregate_decode_gain_pct": 5.8676587473867725,
+  "aggregate_total_time_change_pct": 1.0953950342311058,
+  "interpretation": "Two AB/BA pairs support a 32K coding decode gain with locked PLE. Same tokens/work, settings and binary; total completion time did not consistently improve. Paging was not eliminated; Linux vmstat deltas are system-wide. This is not a general task, context or model-quality result."
+}
