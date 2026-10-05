@@ -6926,6 +6926,8 @@ int main(int argc, char** argv) {
         struct AHome { strata::core::ExpertCache* cache; cudaStream_t stream; cudaEvent_t ev; int dev; bool used; };
         enum class AState { Idle, CopyBack, SwapIn, Commit };
         AState astate = AState::Idle;
+        bool a_duplex_round = false;
+        int64_t a_duplex_rounds = 0;
         std::vector<ASwap> aswaps;
         std::vector<float> a_usage;
         std::vector<int32_t> a_res;
@@ -6986,6 +6988,16 @@ int main(int argc, char** argv) {
                 aswaps.push_back({c.layer, c.in, c.out, slot, multi_gpu ? stage_of(c.layer) : 0, (int64_t) aswaps.size(), x});
             }
             for (AHome& h : ahomes) h.used = false;
+            // Duplex overwrites GPU slots, so it cannot run beside a window
+            // that still plans their old occupants. Choose on the helper, then
+            // submit paired copies at the next safe decode boundary. Batches
+            // needing file reads or duplicate RAM copies retain #876's path.
+            a_duplex_round = duplex_active && !aswaps.empty() &&
+                std::all_of(aswaps.begin(), aswaps.end(), [&](const ASwap& w) {
+                    return w.home == 0 && w.exchange && src.pinned(w.layer, w.in) &&
+                           src.resident_blob(w.layer, w.in) != nullptr;
+                });
+            if (a_duplex_round) return;
             for (const ASwap& w : aswaps) {
                 if (!w.exchange) continue;
                 AHome& h = ahomes[(size_t) w.home];
@@ -7063,6 +7075,29 @@ int main(int argc, char** argv) {
                 case AState::CopyBack: {   // step 2: the evicted experts leave the GPU's plan
                     if (!a_ready(drain)) return true;
                     if (a_err.load()) return false;
+                    if (a_duplex_round) {
+                        std::vector<strata::core::DuplexExchange::Copy> copies;
+                        copies.reserve(aswaps.size());
+                        for (const ASwap& w : aswaps) {
+                            const size_t out = (size_t) w.layer * g.n_expert + w.out;
+                            if (host_res[out] != w.slot) return false;
+                            copies.push_back({xcache.device_slot(w.slot), src.resident_blob(w.layer, w.in),
+                                src.exchange_buffer(w.j),
+                                (size_t) strata::kernels::cpu::expert_layout().blob_bytes(w.layer)});
+                        }
+                        const cudaError_t enqueued = duplex_active->enqueue(copies.data(), copies.size(), adapt_stream);
+                        if (enqueued != cudaSuccess || duplex_active->wait_evictions() != cudaSuccess) {
+                            (void) duplex_active->drain();
+                            std::fprintf(stderr, "strata serve: async duplex exchange failed\n");
+                            return false;
+                        }
+                        // All outgoing CPU bytes now exist. H2D may still be in
+                        // flight; no new compute is launched until retirement
+                        // and the residency upload below have finished.
+                        ahomes[0].used = true;
+                        a_flush();
+                        ++a_duplex_rounds;
+                    }
                     size_t k = 0;
                     for (size_t i = 0; i < aswaps.size(); ++i) {
                         const ASwap w = aswaps[i];
@@ -7079,7 +7114,7 @@ int main(int argc, char** argv) {
                     }
                     aswaps.resize(k);
                     res_upload();
-                    ajob->post(a_copy_in);
+                    if (!a_duplex_round) ajob->post(a_copy_in);
                     astate = AState::SwapIn;
                     if (!drain) return true;
                     continue;
@@ -7093,6 +7128,14 @@ int main(int argc, char** argv) {
                     }
                     res_upload();
                     a_swapped += (int64_t) aswaps.size();
+                    if (src.exchange_rotation()) {
+                        // The GPU fill and old CPU readers are finished here.
+                        // No host copy remains to overlap with another window.
+                        src.commit_flip();
+                        aswaps.clear();
+                        astate = AState::Idle;
+                        continue;
+                    }
                     ajob->post([&] { src.commit_copies(); });
                     astate = AState::Commit;
                     if (!drain) return true;
@@ -9833,6 +9876,12 @@ int main(int argc, char** argv) {
                 x = outv[(size_t) a];
                 p += a + 1;
             }
+            // Experimental combinations finish ownership at STOP/EOS/length,
+            // charging the final drain to this request, before checkpointing.
+            if (ajob && (duplex_active || src.exchange_rotation()) && !adapt_tick(true)) {
+                std::printf("ERR draining combined adaptive exchanges\n");
+                return 1;
+            }
             const double decode_ms = std::chrono::duration<double, std::milli>(Clock::now() - d0).count();
             // the last commit (set_commit_async): the session is complete before anything reads or copies it
             if (!ver.wait_commit(err)) {
@@ -10086,6 +10135,9 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "strata serve: asynchronous adaptive tier: %lld rounds, %lld experts swapped in, "
                                      "%.1f ms per round (start to flip, between windows)\n",
                              (long long) a_rounds, (long long) a_swapped, a_rounds > 0 ? a_ms / (double) a_rounds : 0.0);
+            if (ajob && duplex_active)
+                std::fprintf(stderr, "strata serve: async duplex: %lld rounds, final request drain included\n",
+                             (long long) a_duplex_rounds);
             if (src.exchange_rotation())
                 std::fprintf(stderr, "strata serve: exchange rotation: %llu blocks, %llu host memcpy bytes avoided (cumulative payload)\n",
                              (unsigned long long)src.rotated_exchanges(),

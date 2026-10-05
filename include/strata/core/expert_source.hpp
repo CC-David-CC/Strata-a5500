@@ -544,7 +544,8 @@ public:
     /// `commit_exchanges` in two halves, for the asynchronous adaptive tier (--adapt-async): `commit_copies` moves
     /// every staged evicted blob into its `in`'s place in the copy (on another thread: safe once nothing computes `in`
     /// from RAM - it is resident on the GPU - while `out` is still read from its exchange buffer), then `commit_flip`
-    /// (the caller's thread, between windows) points `out` there and drops the staging.  Returns how many were applied.
+    /// (the caller's thread, between windows) points `out` there and drops the staging. With rotation, copies is
+    /// a no-op and flip transfers buffer ownership at that same safe boundary. Returns how many were applied.
     void commit_copies();
     int64_t commit_flip();
     /// The compact copy's blob of `(layer, expert)`, or null; not counted as a read (any thread).

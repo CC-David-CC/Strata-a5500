@@ -2191,6 +2191,7 @@ void FileExpertSource::commit_copies() {
 }
 
 int64_t FileExpertSource::commit_flip() {
+    if (exchange_storage_.active()) return commit_exchanges();
     int64_t n = 0;
     for (const Exchange& x : staged_) {
         const uint8_t* src = override_[x.out];
