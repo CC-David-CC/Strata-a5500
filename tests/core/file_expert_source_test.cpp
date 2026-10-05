@@ -386,6 +386,7 @@ void test_rotating_source(bool rotate, bool pin) {
         for (int q = 0; q < 2; ++q) {
             prior[q] = src.blob(0, incoming[q]); eviction[q] = src.exchange_buffer(q);
             require(prior[q] && !std::memcmp(prior[q], truth[incoming[q]].data(), bytes), "wrong incoming bytes");
+            require(src.resident_blob(0, incoming[q]) == prior[q], "async reader used stale physical ownership");
             require(cudaMemcpy(eviction[q], cache.device_slot(q), bytes, cudaMemcpyDeviceToHost) == cudaSuccess,
                     "D2H eviction failed");
             require(src.stage_exchange(0, incoming[q], outgoing[q], q), "stage rejected");
@@ -395,12 +396,25 @@ void test_rotating_source(bool rotate, bool pin) {
         require(!src.stage_exchange(0, incoming[0], outgoing[0], 0), "duplicate stage accepted");
         require(!src.stage_exchange(0, incoming[0], 5, 0), "invalid expert accepted");
         const auto t0 = std::chrono::steady_clock::now();
-        require(src.commit_exchanges() == 2, "commit count wrong");
+        if (round % 2) {
+            src.commit_copies();
+            for (int q = 0; q < 2; ++q) {
+                require(!std::memcmp(src.blob(0, outgoing[q]), truth[outgoing[q]].data(), bytes),
+                        "split commit lost the outgoing override");
+                if (rotate && pin)
+                    require(!std::memcmp(prior[q], truth[incoming[q]].data(), bytes),
+                            "rotation copy phase overwrote the incoming buffer");
+            }
+            require(src.commit_flip() == 2, "split commit count wrong");
+            require(src.commit_flip() == 0, "empty split commit not empty");
+        } else require(src.commit_exchanges() == 2, "commit count wrong");
         commit_ms += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
         require(src.commit_exchanges() == 0, "empty commit not empty");
         for (int q = 0; q < 2; ++q) {
             require(!src.has_resident(0, incoming[q]) && src.has_resident(0, outgoing[q]), "residency wrong");
             const uint8_t* held = src.blob(0, outgoing[q]);
+            require(src.resident_blob(0, outgoing[q]) == held, "async reader missed rotated resident");
+            require(!src.resident_blob(0, incoming[q]), "async reader returned GPU-only expert");
             require(!std::memcmp(held, truth[outgoing[q]].data(), bytes), "evicted bytes corrupted");
             require(held == ((rotate && pin) ? eviction[q] : prior[q]), "wrong storage selected");
             if (rotate && pin) require(src.exchange_buffer(q) == prior[q], "old input not recycled");

@@ -1846,6 +1846,9 @@ int64_t FileExpertSource::commit_exchanges() {
 }
 
 void FileExpertSource::commit_copies() {
+    // Rotation keeps both blobs in their current physical buffers. Only the
+    // decode thread may publish the new ownership, in commit_flip().
+    if (exchange_storage_.active()) return;
     for (const Exchange& x : staged_) {
         const uint8_t* src = override_.empty() ? nullptr : override_[x.out];
         const uint64_t at = complement_offsets_[x.in];
@@ -1856,6 +1859,7 @@ void FileExpertSource::commit_copies() {
 }
 
 int64_t FileExpertSource::commit_flip() {
+    if (exchange_storage_.active()) return commit_exchanges();
     int64_t n = 0;
     for (const Exchange& x : staged_) {
         const uint8_t* src = override_[x.out];
@@ -1875,8 +1879,7 @@ const uint8_t* FileExpertSource::resident_blob(int64_t layer, int64_t expert) co
     if (!complement_ready_ || complement_host_ == nullptr || layer < 0 || expert < 0 || layer >= n_layers_ ||
         expert >= n_expert_) return nullptr;
     const size_t index = (size_t) layer * (size_t) n_expert_ + (size_t) expert;
-    if (index >= complement_offsets_.size() || complement_offsets_[index] == kNoComplement) return nullptr;
-    return complement_host_ + (size_t) complement_offsets_[index];
+    return resident_blob(index);
 }
 
 const uint8_t* FileExpertSource::blob(int64_t layer, int64_t expert) {
