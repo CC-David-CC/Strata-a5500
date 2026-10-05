@@ -25,6 +25,7 @@
 #include "strata/core/coupled_draft.hpp"
 #include "strata/core/expert_source.hpp"
 #include "strata/core/duplex_exchange.hpp"
+#include "strata/core/layer_exchange_events.hpp"
 #include "strata/core/pinned.hpp"
 #include "strata/core/remote_experts.hpp"
 #include "strata/core/on_device.hpp"
@@ -931,6 +932,8 @@ bool parse_i64_list(const char* s, std::vector<int64_t>& out, std::string& err) 
 /// The pool's adapter plus the wall-clock it spent, so the report can say how much of the token was the CPU.
 struct Drive {
     strata::core::ExpertDispatch d;
+    std::function<bool(int64_t)> before_layer;
+    int64_t admission_width = 0;
     double cpu_ms = 0;
     int64_t calls = 0;
     /// THE ROUTING TRACE, which is P0.S8 and a stated prerequisite of Phase 3.  `drive_pool` is called once
@@ -974,6 +977,15 @@ void drive_pool_multi(void* user, const float* x_f, const int32_t* ids, int64_t 
                       int64_t layer) {
     Drive* t = (Drive*) user;
     t->d.layers = layer;
+    if (t->before_layer && (t->d.failed || !t->before_layer(layer))) {
+        t->d.failed = true;
+        t->d.fail = "per-layer async expert admission failed";
+        t->d.fail_layer = layer;
+        // The verifier drains this failed window with empty GPU work; no token
+        // from the window is committed. Do not expose uninitialized CPU rows.
+        std::fill_n(out, (size_t)n_tok * (size_t)k * (size_t)t->admission_width, 0.0f);
+        return;
+    }
     const Clock::time_point a = Clock::now();
     strata::core::expert_pool_dispatch_multi(t->d, x_f, ids, n_tok, k, out);
     t->cpu_ms += std::chrono::duration<double, std::milli>(Clock::now() - a).count();
@@ -6924,10 +6936,13 @@ int main(int argc, char** argv) {
         // copy lands.  `j`: the swap's exchange buffer (its copy back) and bounce buffer (a_cap + j).
         struct ASwap { int32_t layer, in, out, slot; int home; int64_t j; bool exchange; };
         struct AHome { strata::core::ExpertCache* cache; cudaStream_t stream; cudaEvent_t ev; int dev; bool used; };
-        enum class AState { Idle, CopyBack, SwapIn, Commit };
+        enum class AState { Idle, CopyBack, SwapIn, Commit, LayerFill };
         AState astate = AState::Idle;
         bool a_duplex_round = false;
         int64_t a_duplex_rounds = 0;
+        strata::core::LayerExchangeEvents a_layer_events;
+        bool a_layer_enabled = false;
+        int64_t a_layer_admissions = 0;
         std::vector<ASwap> aswaps;
         std::vector<float> a_usage;
         std::vector<int32_t> a_res;
@@ -6944,6 +6959,12 @@ int main(int argc, char** argv) {
             ajob = std::make_unique<JobThread>();
             std::fprintf(stderr, "strata serve: adaptive tier asynchronous (--adapt-async 1): up to %lld swaps per round, "
                                  "a round every %d windows\n", (long long) a_cap, o.adapt_every);
+        }
+        if (const char* v = std::getenv("STRATA_ASYNC_LAYER_ADMIT"); v && std::strcmp(v, "1") == 0) {
+            a_layer_enabled = ajob && duplex_active && src.exchange_rotation() && !ver.device_plan_enabled();
+            if (a_layer_enabled && a_layer_events.open((size_t)g.n_layers) != cudaSuccess) return 1;
+            std::fprintf(stderr, "strata serve: async per-layer admission %s\n",
+                         a_layer_enabled ? "enabled" : "unavailable: requires async, rotation, duplex and host planning");
         }
         auto a_flush = [&]() {   // the job's copies: an event after them on every stream used, submitted now (WDDM)
             for (AHome& h : ahomes)
@@ -6997,6 +7018,10 @@ int main(int argc, char** argv) {
                     return w.home == 0 && w.exchange && src.pinned(w.layer, w.in) &&
                            src.resident_blob(w.layer, w.in) != nullptr;
                 });
+            if (a_duplex_round && a_layer_enabled)
+                std::stable_sort(aswaps.begin(), aswaps.end(), [](const ASwap& a, const ASwap& b) {
+                    return a.layer < b.layer;
+                }); // rank/capacity selection happened first; only copy order changes
             if (a_duplex_round) return;
             for (const ASwap& w : aswaps) {
                 if (!w.exchange) continue;
@@ -7052,6 +7077,31 @@ int main(int argc, char** argv) {
                 }
             return true;
         };
+        auto a_admit_layer = [&](int64_t layer) -> bool {
+            if (layer < 0 || layer >= g.n_layers) return false;
+            const auto* range = a_layer_events.pending((size_t)layer);
+            if (!range) return true;
+            if (a_layer_events.wait((size_t)layer) != cudaSuccess || range->end > aswaps.size()) return false;
+            // The layer's final H2D event proves both directions complete.
+            // Publish only this layer's outgoing RAM views, then rotate them.
+            for (size_t q = range->begin; q < range->end; ++q) {
+                const ASwap& w = aswaps[q];
+                if (w.layer != layer || !src.stage_exchange(w.layer, w.in, w.out, w.j)) return false;
+            }
+            if (src.commit_flip() != (int64_t)(range->end-range->begin)) return false;
+            for (size_t q = range->begin; q < range->end; ++q) {
+                const ASwap& w = aswaps[q];
+                host_res[(size_t)w.layer*g.n_expert+w.in] = w.slot;
+                srcp->release(w.layer,w.in);
+            }
+            a_swapped += (int64_t)(range->end-range->begin);
+            ++a_layer_admissions;
+            return a_layer_events.admit((size_t)layer);
+        };
+        if (a_layer_enabled) {
+            drive.admission_width = g.n_embd;
+            drive.before_layer = [&](int64_t layer) { return astate != AState::LayerFill || a_admit_layer(layer); };
+        }
         // between windows: `drain` finishes the round in flight and starts none.  False when a copy failed.
         auto adapt_tick = [&](bool drain) -> bool {
             if (!ajob) return true;
@@ -7078,22 +7128,30 @@ int main(int argc, char** argv) {
                     if (a_duplex_round) {
                         std::vector<strata::core::DuplexExchange::Copy> copies;
                         copies.reserve(aswaps.size());
+                        if (a_layer_enabled) {
+                            std::vector<int> layers;
+                            for (const ASwap& w : aswaps) layers.push_back(w.layer);
+                            if (!a_layer_events.prepare(layers)) return false;
+                        }
                         for (const ASwap& w : aswaps) {
                             const size_t out = (size_t) w.layer * g.n_expert + w.out;
                             if (host_res[out] != w.slot) return false;
                             copies.push_back({xcache.device_slot(w.slot), src.resident_blob(w.layer, w.in),
                                 src.exchange_buffer(w.j),
-                                (size_t) strata::kernels::cpu::expert_layout().blob_bytes(w.layer)});
+                                (size_t) strata::kernels::cpu::expert_layout().blob_bytes(w.layer),
+                                a_layer_enabled ? a_layer_events.completion_event(copies.size()) : nullptr});
                         }
                         const cudaError_t enqueued = duplex_active->enqueue(copies.data(), copies.size(), adapt_stream);
-                        if (enqueued != cudaSuccess || duplex_active->wait_evictions() != cudaSuccess) {
+                        if (enqueued != cudaSuccess || (!a_layer_enabled && duplex_active->wait_evictions() != cudaSuccess)) {
                             (void) duplex_active->drain();
                             std::fprintf(stderr, "strata serve: async duplex exchange failed\n");
                             return false;
                         }
-                        // All outgoing CPU bytes now exist. H2D may still be in
-                        // flight; no new compute is launched until retirement
-                        // and the residency upload below have finished.
+                        if (a_layer_enabled && !a_layer_events.arm()) return false;
+                        // Whole-batch mode has the outgoing CPU bytes already.
+                        // Layer mode publishes each outgoing view only after
+                        // that layer's completion event in before_layer. Both
+                        // retire old GPU slots before launching new compute.
                         ahomes[0].used = true;
                         a_flush();
                         ++a_duplex_rounds;
@@ -7103,19 +7161,20 @@ int main(int argc, char** argv) {
                         const ASwap w = aswaps[i];
                         const size_t out = (size_t) w.layer * g.n_expert + w.out;
                         if (host_res[out] != w.slot) continue;   // the table moved since the snapshot: not this one
-                        if (w.exchange && !src.stage_exchange(w.layer, w.in, w.out, w.j)) {
+                        if (w.exchange && !(a_duplex_round && a_layer_enabled) &&
+                            !src.stage_exchange(w.layer, w.in, w.out, w.j)) {
                             std::fprintf(stderr, "strata serve: adaptive tier: stage_exchange refused layer %d in %d out %d\n",
                                          (int) w.layer, (int) w.in, (int) w.out);
                             return false;
                         }
                         host_res[out] = strata::core::kNotResident;   // the CPU computes it from the next window on
-                        srcp->prefetch(w.layer, w.out);
+                        if (!(a_duplex_round && a_layer_enabled)) srcp->prefetch(w.layer, w.out);
                         aswaps[k++] = w;
                     }
                     aswaps.resize(k);
                     res_upload();
                     if (!a_duplex_round) ajob->post(a_copy_in);
-                    astate = AState::SwapIn;
+                    astate = a_duplex_round && a_layer_enabled ? AState::LayerFill : AState::SwapIn;
                     if (!drain) return true;
                     continue;
                 }
@@ -7148,6 +7207,16 @@ int main(int argc, char** argv) {
                     aswaps.clear();
                     astate = AState::Idle;
                     continue;   // a round due now starts at this same boundary
+                case AState::LayerFill:
+                    // Outside the captured graph: complete any unvisited
+                    // layers (STOP/EOS included), then upload the coherent map.
+                    for (int64_t layer = 0; layer < g.n_layers; ++layer)
+                        if (!a_admit_layer(layer)) return false;
+                    if (!a_layer_events.finish()) return false;
+                    res_upload();
+                    aswaps.clear();
+                    astate = AState::Idle;
+                    continue;
                 }
             }
         };
@@ -10138,6 +10207,9 @@ int main(int argc, char** argv) {
             if (ajob && duplex_active)
                 std::fprintf(stderr, "strata serve: async duplex: %lld rounds, final request drain included\n",
                              (long long) a_duplex_rounds);
+            if (a_layer_enabled)
+                std::fprintf(stderr, "strata serve: async layer admission: %lld completed layers\n",
+                             (long long) a_layer_admissions);
             if (src.exchange_rotation())
                 std::fprintf(stderr, "strata serve: exchange rotation: %llu blocks, %llu host memcpy bytes avoided (cumulative payload)\n",
                              (unsigned long long)src.rotated_exchanges(),

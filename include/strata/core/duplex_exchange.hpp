@@ -13,7 +13,10 @@ namespace strata::core {
 // Each overwrite waits for its own eviction; other slots' D2H and H2D may overlap.
 class DuplexExchange {
 public:
-    struct Copy { void* slot; const void* incoming; void* outgoing; size_t bytes; };
+    struct Copy {
+        void* slot; const void* incoming; void* outgoing; size_t bytes;
+        cudaEvent_t filled = nullptr; // optional: recorded only after this H2D
+    };
     DuplexExchange() = default;
     DuplexExchange(const DuplexExchange&) = delete;
     DuplexExchange& operator=(const DuplexExchange&) = delete;
@@ -46,6 +49,7 @@ public:
             if (e == cudaSuccess) e = cudaEventRecord(events_[i], evict_);
             if (e == cudaSuccess) e = cudaStreamWaitEvent(fill, events_[i], 0);
             if (e == cudaSuccess) e = cudaMemcpyAsync(c.slot, c.incoming, c.bytes, cudaMemcpyHostToDevice, fill);
+            if (e == cudaSuccess && c.filled) e = cudaEventRecord(c.filled, fill);
             if (e != cudaSuccess) { drain(); return e; }
             ++copies_;
             payload_ += 2 * c.bytes;
