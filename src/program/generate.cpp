@@ -3061,6 +3061,12 @@ int main(int argc, char** argv) {
     // engine still starts and serves one request at a time.
     const char* multi_concurrency = std::getenv("MULTI_CONCURRENCY");
     const bool batch_mtp_requested = multi_concurrency != nullptr && std::strcmp(multi_concurrency, "TRUE") == 0;
+    const char* waves_env = std::getenv("STRATA_BATCH_WAVES");
+    const bool batch_waves = waves_env != nullptr && std::strcmp(waves_env, "1") == 0;
+    if (batch_waves && multi_gpu) {
+        std::fprintf(stderr, "strata generate: STRATA_BATCH_WAVES=1 currently needs one GPU\n");
+        return 2;
+    }
     std::vector<std::vector<std::unique_ptr<strata::core::SessionState>>> bslot_ss;
     if (o.batch != 0) {
         const int cap = strata::kernels::kVerifyMaxT;
@@ -3069,7 +3075,7 @@ int main(int argc, char** argv) {
         if (off != nullptr) {
             std::fprintf(stderr, "strata generate: WARNING: --batch %d is off: %s\n", o.batch, off);
             o.batch = 0;
-        } else if (o.batch > cap && !batch_mtp_requested) {
+        } else if (o.batch > cap && !batch_mtp_requested && !batch_waves) {
             std::fprintf(stderr, "strata generate: WARNING: --batch %d: a batch window holds at most %d rows, so %d "
                                  "slots\n", o.batch, cap, cap);
             o.batch = cap;
@@ -6552,7 +6558,8 @@ int main(int argc, char** argv) {
                     }
                 }
             }
-            if (batch_mtp && A > 0) next_slot = ((size_t) active[A - 1] + 1) % bs.size();
+            if ((batch_mtp || (batch_waves && bs.size() > strata::kernels::kVerifyMaxT)) && A > 0)
+                next_slot = ((size_t) active[A - 1] + 1) % bs.size();
             if (S == 0) return true;
             const bool was_busy = strata::core::progress().busy.load();
             strata::core::progress().busy.store(true);
