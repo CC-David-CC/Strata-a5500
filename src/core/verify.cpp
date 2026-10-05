@@ -494,13 +494,9 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         err = "verify: event create failed";
         return false;
     }
-    {   // STRATA_DF_BRANCH (CUDA: default on; HIP: STRATA_DF_BRANCH=1, not measured there); 0: one stream, as before
+    {   // STRATA_DF_BRANCH=1 opts into independent graph branches; unset/0 keeps the serial path.
         const char* v = std::getenv("STRATA_DF_BRANCH");
-#if defined(STRATA_USE_HIP) || defined(STRATA_HIP_GFX906)
         df_branch_ = v != nullptr && std::atoi(v) != 0;
-#else
-        df_branch_ = v == nullptr || std::atoi(v) != 0;
-#endif
         if (df_branch_ && df_fork_ == nullptr) {
             bool okb = cudaEventCreateWithFlags(&df_fork_, cudaEventDisableTiming) == cudaSuccess;
             for (int i = 0; i < 2 && okb; ++i)
@@ -508,6 +504,8 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
                       cudaEventCreateWithFlags(&df_join_[i], cudaEventDisableTiming) == cudaSuccess;
             if (!okb) { cudaGetLastError(); df_branch_ = false; }
         }
+        if (df_branch_)
+            std::fprintf(stderr, "strata verify: independent graph branches enabled (STRATA_DF_BRANCH)\n");
     }
     // Check whether 100% of experts across [lb_, le_) are resident in this stage's VRAM cache.
     // When true, every layer plans on device and writes directly into parts_ without any CPU doorbells,

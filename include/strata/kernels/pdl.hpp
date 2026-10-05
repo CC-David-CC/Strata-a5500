@@ -28,7 +28,7 @@ namespace strata::kernels {
 bool& pdl_scope();
 
 /// The current device runs PDL: a CUDA 12.3+ build, sm_90+ (STRATA_EMULATE_CC counts), code built for it, and
-/// STRATA_DF_PDL is not 0.  Always false on HIP.
+/// STRATA_DF_PDL is explicitly nonzero (unset is off).  Always false on HIP.
 bool pdl_supported();
 
 #if (defined(__CUDACC__) || defined(__HIPCC__))
