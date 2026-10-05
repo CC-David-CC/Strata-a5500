@@ -1,0 +1,840 @@
+[
+  {
+    "path": "async-locked-20261005/bench_locked.py",
+    "bytes": 11131,
+    "sha256": "dd62edc4eb425f7e475325dd2765a91bceb00f4ddeb848bdb33a483e15fcf00b"
+  },
+  {
+    "path": "async-locked-20261005/coordinator.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-async-off-parity-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-async-off-parity.log",
+    "bytes": 4544,
+    "sha256": "9f9d635ad6fc1d01eb763357d6d1d614a9dcb0d5217edf4dc162c1114813c28f"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r0-async0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r0-async0.log",
+    "bytes": 4549,
+    "sha256": "1f009ed95a617fe015427dfdaa0098fd6a3bbba8defac5de06fd0c2079ac61f0"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r0-async1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r0-async1.log",
+    "bytes": 4735,
+    "sha256": "ee095c241e9cc5b4569ec815e6a46125726f68fab1d2415ccd7da2fb825fe398"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r1-async0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r1-async0.log",
+    "bytes": 4548,
+    "sha256": "1880eb8b0eb51c45114ae52ebbba441ec9aa2c6c52704d39a6560103fdd01713"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r1-async1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-code-32768-t4-r1-async1.log",
+    "bytes": 4735,
+    "sha256": "a6836cad2db5b8c73029ae6a18fee75aadb46dca5fa66f36ded075cdcda4b666"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-reference-reader-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "async-locked-20261005/model/q8-reference-reader.log",
+    "bytes": 4543,
+    "sha256": "b97b260ccd1082edbe31dcde16ce6761881ed0599f5d368765c1d3ff04f14f4e"
+  },
+  {
+    "path": "async-locked-20261005/model/result.json",
+    "bytes": 255920,
+    "sha256": "a3954c069af4d3abaeaa6c903feb0b61003d03efa49247dabece10e20eae8549"
+  },
+  {
+    "path": "async-locked-20261005/model.log",
+    "bytes": 5161,
+    "sha256": "f9b2e20c5f1c084d7946e061977fb153cba837b1f2cb09c004e0fa1b3ea4fbb6"
+  },
+  {
+    "path": "async-locked-20261005/plan.json",
+    "bytes": 6654,
+    "sha256": "33779dc8f27d5f46272e2932f48562dec291747fc417738a4f84d18c69de4d26"
+  },
+  {
+    "path": "async-locked-20261005/run_async_locked_after.py",
+    "bytes": 2397,
+    "sha256": "3889ceeb7ce85abce14dc97a2d45cc2c53bddbdfa497b39f665bb25e91952310"
+  },
+  {
+    "path": "async-locked-20261005/status.json",
+    "bytes": 243,
+    "sha256": "97375973b8abdb49301f89143b8c40fe122fadd3158af00b288263c01e17569d"
+  },
+  {
+    "path": "adaptation-combined-20261005/bench_combined.py",
+    "bytes": 11804,
+    "sha256": "064f39f2550db3e5cff917974b3761e82ce0d63763a89f16b576d2f587f4cdfc"
+  },
+  {
+    "path": "adaptation-combined-20261005/build.log",
+    "bytes": 37471,
+    "sha256": "551459a63c267ae254c3182226dec95b100ae806ba48706cef9f25d264c53c04"
+  },
+  {
+    "path": "adaptation-combined-20261005/configure.log",
+    "bytes": 1904,
+    "sha256": "920edc8e703a65ec9b0cdb2cc6fad0982900db8b582056ab8bfcd4d0606a43f1"
+  },
+  {
+    "path": "adaptation-combined-20261005/coordinator.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "adaptation-combined-20261005/ctest.log",
+    "bytes": 579,
+    "sha256": "215ededa89ee2c3724e17a3bfe15006380c6acb3b5f76f361aa702ee396fcf15"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/arena-fallback-input.json",
+    "bytes": 6001,
+    "sha256": "a4f4a78cdc41924809fbbbcbabf4d733a627245682d32abf61800c1c06d9cb9d"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/arena-fallback.log",
+    "bytes": 3395,
+    "sha256": "ea9dc8c00433962d66d6bbb2385499e73ead1ffdd0b853d463759aa8e839317d"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/async-rotation-duplex-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/async-rotation-duplex.log",
+    "bytes": 4962,
+    "sha256": "9e5e132f2466f56f502abd70eb7aff12e51253236f9c381c522f1a9963105644"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/async-rotation-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/async-rotation.log",
+    "bytes": 4768,
+    "sha256": "a70e72de14a05a242e6550ab4252af15dba7cbd2f06bbc735cd2066def8603e8"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/combined-cancel-input.json",
+    "bytes": 47978,
+    "sha256": "9c66c266a776c468f264eab49610b9686b37fd12e00275cd221b4ba412ad964a"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/combined-cancel.log",
+    "bytes": 5874,
+    "sha256": "1e97a79413637255aadcdf9727d6f3618789095db589b4ea5467222eb9b3f2c7"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/combined-flags-off-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/combined-flags-off.log",
+    "bytes": 4370,
+    "sha256": "725b439f6945c223d0b17bbee574bf091d4dc01a90de3f138a10745932d43c4a"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/reference-flags-off-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/reference-flags-off.log",
+    "bytes": 4370,
+    "sha256": "5dbaf1ed1e8a4d8b734b42c665f18b304d9063385aebd12943c1c0c09adb341a"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate/result.json",
+    "bytes": 241906,
+    "sha256": "cc7504e8a498566742506f6fa813d3ef3c7c0e30dba9fdda2559bea836953244"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate-plan.json",
+    "bytes": 6269,
+    "sha256": "9850bd3cab18be16a1982f8785f2459257506e13df22d485cbc32fb07612f7f1"
+  },
+  {
+    "path": "adaptation-combined-20261005/q2-gate.log",
+    "bytes": 3308,
+    "sha256": "635946bc4f5a6f8ba06a67afe1a1da6350ffe94ca695dc154b6b59593496f892"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r0-mode0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r0-mode0.log",
+    "bytes": 4888,
+    "sha256": "ed5ce8f5f002c1acafc4948bb1406ce91a65d77bf0ff6e8d4dfab5ef080be343"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r0-mode1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r0-mode1.log",
+    "bytes": 4950,
+    "sha256": "94eadcefeaba80440efa456c3cff7b54ef45529be5f92628146e51ef7da2d7c1"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r0-mode2-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r0-mode2.log",
+    "bytes": 5145,
+    "sha256": "cf1df9a477d8c230c289cb1d2799b1f90a5f7218743d2bf8ef41670e2e7be2fa"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r1-mode0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r1-mode0.log",
+    "bytes": 4889,
+    "sha256": "92175a2cc899b4b31300543c13152afc8a07e25f0b2fe7eeee611edb36784157"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r1-mode1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r1-mode1.log",
+    "bytes": 4950,
+    "sha256": "03920a20be79b43424ee31db79521dc56d050932e6a81c65fd3090f1cba9bfc0"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r1-mode2-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/q8-code-32768-r1-mode2.log",
+    "bytes": 5145,
+    "sha256": "9e174a14f65d33fc1b07617cd88eca85eacb20db26fab43908fa6469cdfcf8a5"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen/result.json",
+    "bytes": 278009,
+    "sha256": "24cb04e6ff4e80d56500d2a0d357f94e45c83d80e95420f3cd413cf179e9ef9a"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen-plan.json",
+    "bytes": 7367,
+    "sha256": "af3ed43accf4b3dd8e0342f22f5a4dc0ec41632850fdc44685194bbc07538ca7"
+  },
+  {
+    "path": "adaptation-combined-20261005/q8-screen.log",
+    "bytes": 5342,
+    "sha256": "7b0ce627624ec9259907a9325f7cb8d552c5f7a4c116c7d11197992e682a0bcb"
+  },
+  {
+    "path": "adaptation-combined-20261005/run_combined.py",
+    "bytes": 3378,
+    "sha256": "009730c0f7a70c12f1f498c65bc4d58220411fbf197add7f8a426256d0b19fed"
+  },
+  {
+    "path": "adaptation-combined-20261005/status.json",
+    "bytes": 812,
+    "sha256": "f9d396c78f2e0473d4b1cefbc3a3422aec080f0030ef6eb1de9b285f35b75fb4"
+  },
+  {
+    "path": "adaptation-combined-20261005/source.tar.gz",
+    "included": false,
+    "note": "Source is retained in the implementation commit history.",
+    "sha256": "e67cbfcd9e2ef299a8a505ac8c0dcdefa665642318869fa66dee8fe08e80ce17"
+  },
+  {
+    "path": "adaptation-layer-20261005/bench_combined.py",
+    "bytes": 12218,
+    "sha256": "95b2ea8a278f17eb9df572b744667af2fac8a2d313b43ccbe3ee6010f005d62f"
+  },
+  {
+    "path": "adaptation-layer-20261005/build.log",
+    "bytes": 37625,
+    "sha256": "401081fccdf07faa7b16f193a76d26743ce2f314439cc4b4d00ebfb673be2c3c"
+  },
+  {
+    "path": "adaptation-layer-20261005/configure.log",
+    "bytes": 1901,
+    "sha256": "3c46088569e66d657033c922d0cd4a0ac26706bc2f1035bcbf9b68463f38e713"
+  },
+  {
+    "path": "adaptation-layer-20261005/coordinator.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "adaptation-layer-20261005/ctest.log",
+    "bytes": 675,
+    "sha256": "eefb1766f4af49d839ec86816dd379349cd45975421a60c73feb97bac730139d"
+  },
+  {
+    "path": "adaptation-layer-20261005/gpu-resume.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "adaptation-layer-20261005/gpu-resume2.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/arena-fallback-input.json",
+    "bytes": 6001,
+    "sha256": "a4f4a78cdc41924809fbbbcbabf4d733a627245682d32abf61800c1c06d9cb9d"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/arena-fallback.log",
+    "bytes": 3496,
+    "sha256": "39e095c8ce66af62869b45938cead6e64f45e3b7193a4d97bf1b13b608598c77"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/combined-cancel-input.json",
+    "bytes": 47978,
+    "sha256": "9c66c266a776c468f264eab49610b9686b37fd12e00275cd221b4ba412ad964a"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/combined-cancel.log",
+    "bytes": 6037,
+    "sha256": "8008c61ebfe5a92c3876084ad8e535f9788427eb6313fbab68d05fbf7ed231b1"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/combined-flags-off-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/combined-flags-off.log",
+    "bytes": 4367,
+    "sha256": "6975eedec3772a7f8574a5d6094d983197ff239aa6e0d7d743ca8d108a660500"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/layer-disabled-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/layer-disabled.log",
+    "bytes": 4959,
+    "sha256": "f914305edcb685d780732914078c4740ed5a457f75b06c8de62a19e4e1503b99"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/layer-enabled-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/layer-enabled-nonmtp-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/layer-enabled-nonmtp.log",
+    "bytes": 4988,
+    "sha256": "6622e25fd4ef1bd752806309deb60d33f9a701aa04743297b22fa8e3febc03de"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/layer-enabled.log",
+    "bytes": 5066,
+    "sha256": "23e233a00c5eb1d3d734328b680af29c1e54e4889ab3e0376d2bcb6575955407"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/reference-flags-off-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/reference-flags-off.log",
+    "bytes": 4367,
+    "sha256": "b2f702e4ede18f04444e69483ac1b1cb46c458e96ced96ff3be4df49ff13c1c9"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate/result.json",
+    "bytes": 279516,
+    "sha256": "31d62677554b0ebec25fb5de6df17b53b9eb20dd071bad0b2b27e42d2b8460cd"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate-plan.json",
+    "bytes": 7536,
+    "sha256": "4b9bdc425bea85c4549119de084df2bf8119dd4c03aaddb55d56ed1df162477c"
+  },
+  {
+    "path": "adaptation-layer-20261005/q2-gate.log",
+    "bytes": 3790,
+    "sha256": "9e3adeb7c2b102eb68d22b9832b4117174b58205f1596c959187f75ab71bf5ec"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r0-layer0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r0-layer0.log",
+    "bytes": 5141,
+    "sha256": "2367ef088ae869acbb9c17014a57f6528d94d5a5a8e71dea4fc46eefd802d591"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r0-layer1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r0-layer1.log",
+    "bytes": 5249,
+    "sha256": "3bda4cdfcb9125a7e7c5df2aa4f97ccf76d1b8e35eb2931c52a978e3ed27d4f4"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r1-layer0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r1-layer0.log",
+    "bytes": 5142,
+    "sha256": "f888bd8519464b861b0142b93d65d44163184fdd0a63fd24fc8720b4e391b6d0"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r1-layer1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/q8-32k-r1-layer1.log",
+    "bytes": 5249,
+    "sha256": "94bbe0898abe26604a888727eba819fa365251309200b3c63921cdbf82ac1c80"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen/result.json",
+    "bytes": 187071,
+    "sha256": "e8b19fb30cb22eab0c38c4521555c2aaca47a2a98fab30e668290bb00e1524b8"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen-plan.json",
+    "bytes": 5829,
+    "sha256": "62464b9d99d384be82136f2845f05a11b40ef62dc9540da9697cf58dbe6dfb25"
+  },
+  {
+    "path": "adaptation-layer-20261005/q8-screen.log",
+    "bytes": 3398,
+    "sha256": "c419ea462702ee539e71b69a340271a899cbb7de68cc305f073baef122e1c451"
+  },
+  {
+    "path": "adaptation-layer-20261005/resume_gpu.py",
+    "bytes": 2818,
+    "sha256": "8aa5874d4aba63be523c5633da553cd230abdde81f054871bfc47e167b53793e"
+  },
+  {
+    "path": "adaptation-layer-20261005/run_combined.py",
+    "bytes": 3854,
+    "sha256": "22367eb3a66c88a96975ceca652eb195edc1296e6255a3a46c06b4d9df03e665"
+  },
+  {
+    "path": "adaptation-layer-20261005/status.json",
+    "bytes": 903,
+    "sha256": "a2490f7ef0d1b5ee26372b3a528cc01eb4764c0b198b2ffe30d4579cccc75d74"
+  },
+  {
+    "path": "adaptation-layer-20261005/source.tar.gz",
+    "included": false,
+    "note": "Source is retained in the implementation commit history.",
+    "sha256": "400c6979185a0666b5583756c80120267c4947b12a015219356130aec660c1de"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/bench_combined.py",
+    "bytes": 12218,
+    "sha256": "95b2ea8a278f17eb9df572b744667af2fac8a2d313b43ccbe3ee6010f005d62f"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/build.log",
+    "bytes": 37625,
+    "sha256": "8d6d943ae18ed17297209b8ee35518fac4f93ccd5303a06f8483ab9f7585d938"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/configure.log",
+    "bytes": 1907,
+    "sha256": "60268d6a87a909606de32db7d87d39ebe37ce214133f8bbbeb6beab4ff892389"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/coordinator.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/ctest.log",
+    "bytes": 687,
+    "sha256": "2443693d4a718b90bb401d30fe5f55f99c1a1265a580b2c768a1b9c939ad4348"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/arena-fallback-input.json",
+    "bytes": 6001,
+    "sha256": "a4f4a78cdc41924809fbbbcbabf4d733a627245682d32abf61800c1c06d9cb9d"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/arena-fallback.log",
+    "bytes": 3492,
+    "sha256": "476edb1e0e6c8393adc24ea31a1e707799a139a38e46fc9020adac0b63c64acd"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/combined-cancel-input.json",
+    "bytes": 47978,
+    "sha256": "9c66c266a776c468f264eab49610b9686b37fd12e00275cd221b4ba412ad964a"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/combined-cancel.log",
+    "bytes": 5729,
+    "sha256": "db0c74f9c42f134dac626a00867fbaac2e63ced9b2d97cc6b9383be0fdc93000"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/combined-flags-off-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/combined-flags-off.log",
+    "bytes": 4373,
+    "sha256": "844292b6926614f512a25cdc9b41e5aa408308273a076c30259d882082e3fcd4"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/layer-disabled-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/layer-disabled.log",
+    "bytes": 4754,
+    "sha256": "e47741e17a939c8c76440d081df2e1b86030870455bfb01ba66595da31b93524"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/layer-enabled-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/layer-enabled-nonmtp-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/layer-enabled-nonmtp.log",
+    "bytes": 4782,
+    "sha256": "88471abdbfb46113480ae396b6db0a7ed0496efe5276239e8b3a69c88667a5c6"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/layer-enabled.log",
+    "bytes": 4861,
+    "sha256": "5d0a8fd2700bed28cdeac8d9030a1bfd3787d8565ccea313f5bee73a0ed23654"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/reference-flags-off-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/reference-flags-off.log",
+    "bytes": 4373,
+    "sha256": "0557e051ff0a1b8d36e7478b4eaf818748e5ec7873ead442c63548cdb10f1385"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/result.json",
+    "bytes": 353258,
+    "sha256": "b8ed1dbcc71f3532fbcc4f9c5a6a78dd31f17ecf0b34c90159bd6f6a210715c4"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/rotating-layer-candidate-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/rotating-layer-candidate.log",
+    "bytes": 5072,
+    "sha256": "4cef69549bb266b2a74411045b5f6522357e6b73875741943ced398e7859e310"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/rotating-layer-reference-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate/rotating-layer-reference.log",
+    "bytes": 5072,
+    "sha256": "66ee2ba743ec055bfda2f06ff93c9bebb94767b14e33a383eebd46c249d02a63"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate-plan.json",
+    "bytes": 9165,
+    "sha256": "17addbd99046c719496bafb08439fd19b7dc80fe71083064630a5de136752370"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q2-gate.log",
+    "bytes": 4920,
+    "sha256": "0e61c878301dc992adfa5bb5e5c2ca9616ed2f791f72333eee9cd387e9dfab0c"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r0-rot0-layer0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r0-rot0-layer0.log",
+    "bytes": 4935,
+    "sha256": "35c891e88698da8bba5be4d843725ec15480c3e10206b903b16410ce5e6d39fe"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r0-rot0-layer1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r0-rot0-layer1.log",
+    "bytes": 5043,
+    "sha256": "930cd9c4e1282692780995e8c8100ade8320388f0224c750759c3b91f65c7cb1"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r0-rot1-layer1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r0-rot1-layer1.log",
+    "bytes": 5255,
+    "sha256": "053fac857d60b99fefd8f82f8b61db5ef68b132f8166c1167ece6abcde461775"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r1-rot0-layer0-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r1-rot0-layer0.log",
+    "bytes": 4936,
+    "sha256": "273dd99c9f5b44ba4b1453e1ea137fba770a4ee07e51b22729c19ee6b359bf77"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r1-rot0-layer1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r1-rot0-layer1.log",
+    "bytes": 5043,
+    "sha256": "d65cad6ad94fbdc8ddd02139f4360e5d1770b5983f6f2da440f3d03f6b1d9c06"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r1-rot1-layer1-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/q8-32k-r1-rot1-layer1.log",
+    "bytes": 5255,
+    "sha256": "d7e757ee8f973ca94eda886c2d53b76ac63f96e6a384c96962a61cd5e004a0cc"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen/result.json",
+    "bytes": 279583,
+    "sha256": "76c376a05fb5967e18d6ae76ad6fb4908a889ad3be9c861b9cc3b37504a12d84"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen-plan.json",
+    "bytes": 7931,
+    "sha256": "8488f8f3d314e4597e5c50e897f8c8a071433adfd4b54128bffb21cc11ea0f95"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/q8-screen.log",
+    "bytes": 5139,
+    "sha256": "8da1086e5361b6f12368f1caa407a2c3344a6b3bdbb9d307b89525ed8ffae4fc"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/run_combined.py",
+    "bytes": 3562,
+    "sha256": "10ea98057a0ebf1d3124d0156ad129756bc9a911977ae0899c6a1bb51547270e"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/source-ownership-gpu.log",
+    "bytes": 1731,
+    "sha256": "7060f18c392944de2de25cf535f0205784a0c8afead103f4bea8c5e812a12aab"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/status.json",
+    "bytes": 924,
+    "sha256": "596546995f44205e95cad41d34cab34065365c286dde1fc57675206003f79de7"
+  },
+  {
+    "path": "adaptation-no-rotation-20261005/source.tar.gz",
+    "included": false,
+    "note": "Source is retained in the implementation commit history.",
+    "sha256": "89257685683d59ba40e877265c93ca5e3c287f30f207e26849bc6b8cd8b57ec8"
+  },
+  {
+    "path": "adaptation-publication-20261005/bench_combined.py",
+    "bytes": 12218,
+    "sha256": "95b2ea8a278f17eb9df572b744667af2fac8a2d313b43ccbe3ee6010f005d62f"
+  },
+  {
+    "path": "adaptation-publication-20261005/collect.py",
+    "bytes": 1786,
+    "sha256": "3906a5164f8ed1623b9ac8b367c0ebdc905a32f7cbf9788c970a89c8b8dbda59"
+  },
+  {
+    "path": "adaptation-publication-20261005/launcher.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "adaptation-publication-20261005/memcheck-duplex_exchange_test.log",
+    "bytes": 137,
+    "sha256": "d1ca70c9c58603c13654b697b3729ea35b1fd92e8878eb998ff19556a0664035"
+  },
+  {
+    "path": "adaptation-publication-20261005/memcheck-file_expert_source_test.log",
+    "bytes": 1793,
+    "sha256": "1db33fa9707b7c3d7d49cda47956cb2ca88b6c44af93655c2d6bc73c250a2ea5"
+  },
+  {
+    "path": "adaptation-publication-20261005/memcheck-layer_exchange_test.log",
+    "bytes": 882,
+    "sha256": "88c08fcc65583bac4c0c30b0d5b649e3a8aa5e2a18f018e9683cb7aa57383ce4"
+  },
+  {
+    "path": "adaptation-publication-20261005/q2-gate/default-off-candidate-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-publication-20261005/q2-gate/default-off-candidate.log",
+    "bytes": 4373,
+    "sha256": "f3fcbcf3f5473edd992cc7ab2d3d15e4e327929826ddd20f678c7263c77e8cf5"
+  },
+  {
+    "path": "adaptation-publication-20261005/q2-gate/default-off-reference-input.json",
+    "bytes": 47985,
+    "sha256": "42611d6c677a114990396b56a5072fdcb469c89ade37b229abdcdd8e08b390f9"
+  },
+  {
+    "path": "adaptation-publication-20261005/q2-gate/default-off-reference.log",
+    "bytes": 4373,
+    "sha256": "8f97ba404f3e0a4f246c8879d8e7343316cd31fab46318bb97aef47e47de69c7"
+  },
+  {
+    "path": "adaptation-publication-20261005/q2-gate/result.json",
+    "bytes": 77555,
+    "sha256": "4d7a3f89f48ae5a243732dd4c6f4d3e6c316c55c3de7f6343c7ba51756a6c768"
+  },
+  {
+    "path": "adaptation-publication-20261005/q2-gate-plan.json",
+    "bytes": 4585,
+    "sha256": "e2842e058b158c9e413c27ebcc3f77f88d87be3e2bc5957a24cd39da4c94b472"
+  },
+  {
+    "path": "adaptation-publication-20261005/q2-gate.log",
+    "bytes": 1178,
+    "sha256": "d7a3caeb6ce0d545f0912bb76faf982a0b0eeae4e5174289294254a0d4501aaf"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r0-candidate-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r0-candidate.log",
+    "bytes": 5255,
+    "sha256": "436fb07b405159994cf547c97adb8a73c0193959d4fcc68d01fa88fc239c0159"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r0-reference-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r0-reference.log",
+    "bytes": 4555,
+    "sha256": "9b5cc7df61effb3e8814df176d6941ca8a14ac9652db311a5717c9f88615cc6a"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r1-candidate-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r1-candidate.log",
+    "bytes": 5255,
+    "sha256": "6020f992cccb22728a1dce1551b94cbac18429230f89f04be08e3d986cc6b30d"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r1-reference-input.json",
+    "bytes": 191927,
+    "sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/q8-32k-r1-reference.log",
+    "bytes": 4554,
+    "sha256": "e794cdad335d7f4c845a78470e81fb4a7bb631acba3fef31213f9986bfc35ff3"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen/result.json",
+    "bytes": 186562,
+    "sha256": "693627db550a132be192b1bf053b10df7ccdb5c4056cddd26d146493a086e886"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen-plan.json",
+    "bytes": 5836,
+    "sha256": "4946a2c9bb93428cf38b380cb03eca383b47dbe59878ea7afce086553b58a6dc"
+  },
+  {
+    "path": "adaptation-publication-20261005/q8-screen.log",
+    "bytes": 3456,
+    "sha256": "462afe21a72b210be4666811ba6ac17531a5f279a05ddad8d072f6200a329392"
+  },
+  {
+    "path": "adaptation-publication-20261005/run.py",
+    "bytes": 3048,
+    "sha256": "113c4fdfb60bf282896a057ba14bbae32ec98614148cb3ba671c0d06972600cb"
+  },
+  {
+    "path": "adaptation-publication-20261005/status.json",
+    "bytes": 1124,
+    "sha256": "fd01f9b307f63e7fd2924978d4b4153700b2f3b3922e45f71197de189e591bd8"
+  }
+]

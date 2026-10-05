@@ -1,0 +1,3638 @@
+{
+  "source": "07ff95bed2889453d4fca3d45cd86765234d0b29",
+  "upstream": "6f32ec070f23ced9f50e704d854d775da52591ab",
+  "raw_archive_sha256": "2e6261a21f6266b56c5c5c65f20e1448ce8f159f54056ec023c6a86554ca19f7",
+  "studies": {
+    "async-locked-20261005/model/result.json": {
+      "completed": true,
+      "source_commits": {
+        "candidate": "a9daa44e7f7f6921664cf0db1440f24e3463e26d",
+        "upstream": "6f32ec070f23ced9f50e704d854d775da52591ab",
+        "reference": "21b5487a6615b49daafff1bf3c06f55f7525e19c",
+        "pr876": "7d188aa59d4277734496069fb03e9675893c398e",
+        "q8_reader": "18d3da487f82c8e7b5d8e91f6fdd8c75972182f1"
+      },
+      "engine_sha256": {
+        "reference": "987ef4bd4e1908dcc3a059219d4c0ef10462fd80f113f4b88335901912b05981",
+        "candidate": "866cb2bc71ad890e4925a134c2047b63a11a307c1845166721f40c856821e11a"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "q8-reference-reader",
+            "q8-async-off-parity"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": true,
+          "require_work_equality": true,
+          "comparison_scope": "default-path parity",
+          "first_difference": null,
+          "decode_gain_pct": -1.6699870073624834,
+          "total_time_reduction_pct": -0.515334506177112,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "q8-code-32768-t4-r0-async0",
+            "q8-code-32768-t4-r0-async1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Async scheduling: compare committed throughput and first divergence; differing work is not suppressed.",
+          "first_difference": 625,
+          "decode_gain_pct": 7.324485867693253,
+          "total_time_reduction_pct": 1.0366193362789988,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-code-32768-t4-r1-async0",
+            "q8-code-32768-t4-r1-async1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Async scheduling: compare committed throughput and first divergence; differing work is not suppressed.",
+          "first_difference": 625,
+          "decode_gain_pct": 5.827030582045389,
+          "total_time_reduction_pct": 0.8322824811341833,
+          "work_identical": false
+        }
+      ],
+      "runs": [
+        {
+          "label": "q8-reference-reader",
+          "case": {
+            "label": "q8-reference-reader",
+            "engine": "reference",
+            "async_adapt": null,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 139264
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 12815.4,
+                "decode_ms": 5676.1,
+                "finish": "length",
+                "drafts_accepted": 351,
+                "drafts_offered": 422,
+                "reused": 0,
+                "hits": 266285,
+                "lookups": 275898,
+                "ram_blobs": 14716,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 4902
+              },
+              "wall_seconds": 18.49959489601315,
+              "decode_tok_s": 90.20278007787036,
+              "effective_tok_s": 27.688397371765404,
+              "ttft_seconds": 12.857669613993494,
+              "cancel_requested": false,
+              "output_token_sha256": "463c5c453592cb9fe967b8a55869b719038e803f3e4663281c7b176c120ea614"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            2390
+          ]
+        },
+        {
+          "label": "q8-async-off-parity",
+          "case": {
+            "label": "q8-async-off-parity",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 139264
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 12815.3,
+                "decode_ms": 5772.5,
+                "finish": "length",
+                "drafts_accepted": 351,
+                "drafts_offered": 422,
+                "reused": 0,
+                "hits": 266285,
+                "lookups": 275898,
+                "ram_blobs": 14716,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 4902
+              },
+              "wall_seconds": 18.594929692015285,
+              "decode_tok_s": 88.69640537029017,
+              "effective_tok_s": 27.544948837409486,
+              "ttft_seconds": 12.857570163003402,
+              "cancel_requested": false,
+              "output_token_sha256": "463c5c453592cb9fe967b8a55869b719038e803f3e4663281c7b176c120ea614"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            2390
+          ]
+        },
+        {
+          "label": "q8-code-32768-t4-r0-async0",
+          "case": {
+            "label": "q8-code-32768-t4-r0-async0",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52922.0,
+                "decode_ms": 9534.6,
+                "finish": "length",
+                "drafts_accepted": 698,
+                "drafts_offered": 858,
+                "reused": 0,
+                "hits": 548250,
+                "lookups": 562213,
+                "ram_blobs": 21418,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6587
+              },
+              "wall_seconds": 62.47133931599092,
+              "decode_tok_s": 107.39831770603905,
+              "effective_tok_s": 16.39538495531297,
+              "ttft_seconds": 52.97156632898259,
+              "cancel_requested": false,
+              "output_token_sha256": "652d719f99cbd29c6d65a74fa3cfc20227952ae5083edb812a703dd4519f7850"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3453
+          ]
+        },
+        {
+          "label": "q8-code-32768-t4-r0-async1",
+          "case": {
+            "label": "q8-code-32768-t4-r0-async1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52925.7,
+                "decode_ms": 8883.9,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 863,
+                "reused": 0,
+                "hits": 547477,
+                "lookups": 563491,
+                "ram_blobs": 20208,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 7709
+              },
+              "wall_seconds": 61.82374933300889,
+              "decode_tok_s": 115.26469230855818,
+              "effective_tok_s": 16.567005772566073,
+              "ttft_seconds": 52.97379416698823,
+              "cancel_requested": false,
+              "output_token_sha256": "04505648888214a718dafd6d53098ce0ac86e5522c52cc73550902eedd01e56c"
+            }
+          ],
+          "async_counters": [
+            [
+              80,
+              3469
+            ]
+          ],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3469
+          ]
+        },
+        {
+          "label": "q8-code-32768-t4-r1-async1",
+          "case": {
+            "label": "q8-code-32768-t4-r1-async1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52924.7,
+                "decode_ms": 9123.0,
+                "finish": "length",
+                "drafts_accepted": 696,
+                "drafts_offered": 867,
+                "reused": 0,
+                "hits": 549669,
+                "lookups": 565782,
+                "ram_blobs": 20400,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 7818
+              },
+              "wall_seconds": 62.063407078007,
+              "decode_tok_s": 112.24377945851145,
+              "effective_tok_s": 16.50343203696511,
+              "ttft_seconds": 52.97536022699205,
+              "cancel_requested": false,
+              "output_token_sha256": "04505648888214a718dafd6d53098ce0ac86e5522c52cc73550902eedd01e56c"
+            }
+          ],
+          "async_counters": [
+            [
+              79,
+              3520
+            ]
+          ],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3457
+          ]
+        },
+        {
+          "label": "q8-code-32768-t4-r1-async0",
+          "case": {
+            "label": "q8-code-32768-t4-r1-async0",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52915.6,
+                "decode_ms": 9654.6,
+                "finish": "length",
+                "drafts_accepted": 698,
+                "drafts_offered": 858,
+                "reused": 0,
+                "hits": 548250,
+                "lookups": 562213,
+                "ram_blobs": 21418,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6587
+              },
+              "wall_seconds": 62.58428511899547,
+              "decode_tok_s": 106.06343090340356,
+              "effective_tok_s": 16.365618137707727,
+              "ttft_seconds": 52.96429289999651,
+              "cancel_requested": false,
+              "output_token_sha256": "652d719f99cbd29c6d65a74fa3cfc20227952ae5083edb812a703dd4519f7850"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3453
+          ]
+        }
+      ]
+    },
+    "adaptation-combined-20261005/q2-gate/result.json": {
+      "completed": true,
+      "source_commits": {
+        "candidate": "d5ec4f1d779c221ef48701aa811c63acb270adb1",
+        "reference": "a9daa44e7f7f6921664cf0db1440f24e3463e26d"
+      },
+      "engine_sha256": {
+        "reference": "866cb2bc71ad890e4925a134c2047b63a11a307c1845166721f40c856821e11a",
+        "candidate": "e1ad400340be155c5bf8ebc0ce68d3df3566f2b5c28860144bbffa8224207f88"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "reference-flags-off",
+            "combined-flags-off"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": true,
+          "require_work_equality": true,
+          "comparison_scope": "default-path parity",
+          "first_difference": null,
+          "decode_gain_pct": -0.558454156943955,
+          "total_time_reduction_pct": -0.6830249985769754,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "async-rotation",
+            "async-rotation-duplex"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Async scheduling changes placement; exploratory complete-request throughput.",
+          "first_difference": null,
+          "decode_gain_pct": -2.9423209314855314,
+          "total_time_reduction_pct": -0.198958435220975,
+          "work_identical": true
+        }
+      ],
+      "runs": [
+        {
+          "label": "reference-flags-off",
+          "case": {
+            "label": "reference-flags-off",
+            "engine": "reference",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0"
+            },
+            "expect_rotation": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4980.2,
+                "decode_ms": 3792.8,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.77455512000597,
+              "decode_tok_s": 134.99261759122547,
+              "effective_tok_s": 58.36087997264334,
+              "ttft_seconds": 5.001986267016036,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        },
+        {
+          "label": "combined-flags-off",
+          "case": {
+            "label": "combined-flags-off",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0"
+            },
+            "expect_rotation": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 5018.7,
+                "decode_ms": 3814.1,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.834487524989527,
+              "decode_tok_s": 134.2387457067198,
+              "effective_tok_s": 57.965763970654834,
+              "ttft_seconds": 5.04038884700276,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        },
+        {
+          "label": "async-rotation",
+          "case": {
+            "label": "async-rotation",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 5070.6,
+                "decode_ms": 3242.6,
+                "finish": "length",
+                "drafts_accepted": 237,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 239926,
+                "lookups": 255223,
+                "ram_blobs": 21521,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8297
+              },
+              "wall_seconds": 8.3146170550026,
+              "decode_tok_s": 157.8979830999815,
+              "effective_tok_s": 61.58879853726603,
+              "ttft_seconds": 5.096029724023538,
+              "cancel_requested": false,
+              "output_token_sha256": "21af1b32046cea67f9b71fe3f4db7b320fec019038ed053f4cb772c3fd0ac3cc"
+            }
+          ],
+          "async_counters": [
+            [
+              68,
+              3342
+            ]
+          ],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3342
+          ]
+        },
+        {
+          "label": "async-rotation-duplex",
+          "case": {
+            "label": "async-rotation-duplex",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4989.0,
+                "decode_ms": 3340.9,
+                "finish": "length",
+                "drafts_accepted": 237,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 239926,
+                "lookups": 255223,
+                "ram_blobs": 21521,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8297
+              },
+              "wall_seconds": 8.33115968698985,
+              "decode_tok_s": 153.25211769283726,
+              "effective_tok_s": 61.46532371336991,
+              "ttft_seconds": 5.016245987004368,
+              "cancel_requested": false,
+              "output_token_sha256": "21af1b32046cea67f9b71fe3f4db7b320fec019038ed053f4cb772c3fd0ac3cc"
+            }
+          ],
+          "async_counters": [
+            [
+              68,
+              3342
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3342,
+              9239961600
+            ]
+          ],
+          "resident_exchanges": [
+            3342
+          ]
+        },
+        {
+          "label": "combined-cancel",
+          "case": {
+            "label": "combined-cancel",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "count",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true,
+            "requests": [
+              {
+                "tokens": 4096,
+                "cancel_after": 128
+              },
+              {
+                "tokens": 512
+              }
+            ]
+          },
+          "requests": [
+            {
+              "output_tokens": 128,
+              "timings": {
+                "generated": 129,
+                "prompt_tokens": 8192,
+                "prompt_ms": 5075.0,
+                "decode_ms": 969.9,
+                "finish": "cancel",
+                "drafts_accepted": 64,
+                "drafts_offered": 64,
+                "reused": 0,
+                "hits": 52105,
+                "lookups": 57914,
+                "ram_blobs": 9357,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 4006
+              },
+              "wall_seconds": 6.047253869008273,
+              "decode_tok_s": 131.97236828539025,
+              "effective_tok_s": 21.174874687753313,
+              "ttft_seconds": 5.0984470330004115,
+              "cancel_requested": true,
+              "output_token_sha256": "60f6abaf6dd951560de090949d1f0c3d8afe93d793404626edff27ccff906ebf"
+            },
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4867.9,
+                "decode_ms": 2668.9,
+                "finish": "length",
+                "drafts_accepted": 251,
+                "drafts_offered": 260,
+                "reused": 0,
+                "hits": 240193,
+                "lookups": 247238,
+                "ram_blobs": 9513,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 2842
+              },
+              "wall_seconds": 7.538216871005716,
+              "decode_tok_s": 191.83933455730823,
+              "effective_tok_s": 67.93334040972296,
+              "ttft_seconds": 4.878294160997029,
+              "cancel_requested": false,
+              "output_token_sha256": "0c8d5c8be01d864519a9d152cf3872c28d2c9bb5ef6d2dc406ec8510855d7098"
+            }
+          ],
+          "async_counters": [
+            [
+              16,
+              1310
+            ],
+            [
+              81,
+              2626
+            ]
+          ],
+          "duplex_counters": [
+            [
+              1310,
+              3621888000
+            ],
+            [
+              2626,
+              7260364800
+            ]
+          ],
+          "resident_exchanges": [
+            1310,
+            2626
+          ]
+        },
+        {
+          "label": "arena-fallback",
+          "case": {
+            "label": "arena-fallback",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": false,
+            "resident_gib": 0,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 1024,
+            "output": 256,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": false
+          },
+          "requests": [
+            {
+              "output_tokens": 256,
+              "timings": {
+                "generated": 256,
+                "prompt_tokens": 1024,
+                "prompt_ms": 585.7,
+                "decode_ms": 1553.3,
+                "finish": "length",
+                "drafts_accepted": 118,
+                "drafts_offered": 138,
+                "reused": 0,
+                "hits": 123028,
+                "lookups": 129743,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 1024,
+                "offloaded": 3217
+              },
+              "wall_seconds": 2.1395302320015617,
+              "decode_tok_s": 164.81040365673084,
+              "effective_tok_s": 119.68209443665265,
+              "ttft_seconds": 0.6056093779916409,
+              "cancel_requested": false,
+              "output_token_sha256": "578154805a9325ad52958f0ae5213c51ffccdbe70eafac30c0c2d443f14dc8ad"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": []
+        }
+      ]
+    },
+    "adaptation-combined-20261005/q8-screen/result.json": {
+      "completed": true,
+      "source_commits": {
+        "candidate": "d5ec4f1d779c221ef48701aa811c63acb270adb1",
+        "reference": "a9daa44e7f7f6921664cf0db1440f24e3463e26d"
+      },
+      "engine_sha256": {
+        "reference": "866cb2bc71ad890e4925a134c2047b63a11a307c1845166721f40c856821e11a",
+        "candidate": "e1ad400340be155c5bf8ebc0ce68d3df3566f2b5c28860144bbffa8224207f88"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "q8-code-32768-r0-mode0",
+            "q8-code-32768-r0-mode1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Blocking rotation+duplex versus async combination; report differing work.",
+          "first_difference": 511,
+          "decode_gain_pct": -0.5903014276747109,
+          "total_time_reduction_pct": -0.06370502894474939,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-code-32768-r0-mode0",
+            "q8-code-32768-r0-mode2"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Blocking rotation+duplex versus async combination; report differing work.",
+          "first_difference": 218,
+          "decode_gain_pct": -7.3211728817779935,
+          "total_time_reduction_pct": -0.9950200987671076,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-code-32768-r0-mode1",
+            "q8-code-32768-r0-mode2"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Async rotation versus async rotation+duplex; final drains included.",
+          "first_difference": 218,
+          "decode_gain_pct": -6.770839818215768,
+          "total_time_reduction_pct": -0.9307221530053811,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-code-32768-r1-mode0",
+            "q8-code-32768-r1-mode1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Blocking rotation+duplex versus async combination; report differing work.",
+          "first_difference": 511,
+          "decode_gain_pct": -0.3630371878684091,
+          "total_time_reduction_pct": -0.04863902125722408,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-code-32768-r1-mode0",
+            "q8-code-32768-r1-mode2"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Blocking rotation+duplex versus async combination; report differing work.",
+          "first_difference": 218,
+          "decode_gain_pct": -6.547469467758971,
+          "total_time_reduction_pct": -0.97597356283321,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-code-32768-r1-mode1",
+            "q8-code-32768-r1-mode2"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Async rotation versus async rotation+duplex; final drains included.",
+          "first_difference": 218,
+          "decode_gain_pct": -6.206965874252401,
+          "total_time_reduction_pct": -0.9268837144091213,
+          "work_identical": false
+        }
+      ],
+      "runs": [
+        {
+          "label": "q8-code-32768-r0-mode0",
+          "case": {
+            "label": "q8-code-32768-r0-mode0",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52921.9,
+                "decode_ms": 7443.5,
+                "finish": "length",
+                "drafts_accepted": 698,
+                "drafts_offered": 858,
+                "reused": 0,
+                "hits": 548250,
+                "lookups": 562213,
+                "ram_blobs": 21418,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6587
+              },
+              "wall_seconds": 60.38026606000494,
+              "decode_tok_s": 137.56969167730233,
+              "effective_tok_s": 16.963359805451468,
+              "ttft_seconds": 52.97126390799531,
+              "cancel_requested": false,
+              "output_token_sha256": "652d719f99cbd29c6d65a74fa3cfc20227952ae5083edb812a703dd4519f7850"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [
+            [
+              3453,
+              36065894400
+            ]
+          ],
+          "resident_exchanges": [
+            3453
+          ]
+        },
+        {
+          "label": "q8-code-32768-r0-mode1",
+          "case": {
+            "label": "q8-code-32768-r0-mode1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52917.7,
+                "decode_ms": 7487.7,
+                "finish": "length",
+                "drafts_accepted": 705,
+                "drafts_offered": 865,
+                "reused": 0,
+                "hits": 545440,
+                "lookups": 561808,
+                "ram_blobs": 20775,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 7952
+              },
+              "wall_seconds": 60.418731325975386,
+              "decode_tok_s": 136.75761582328352,
+              "effective_tok_s": 16.9521267966109,
+              "ttft_seconds": 52.96562942897435,
+              "cancel_requested": false,
+              "output_token_sha256": "b64235355d8ab348f9e835cc1299fa00ce1fa08cca8f5ada5288d0d5285fc49f"
+            }
+          ],
+          "async_counters": [
+            [
+              80,
+              3696
+            ]
+          ],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3696
+          ]
+        },
+        {
+          "label": "q8-code-32768-r0-mode2",
+          "case": {
+            "label": "q8-code-32768-r0-mode2",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52935.5,
+                "decode_ms": 8031.5,
+                "finish": "length",
+                "drafts_accepted": 699,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 550157,
+                "lookups": 566830,
+                "ram_blobs": 21374,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 8210
+              },
+              "wall_seconds": 60.98106184299104,
+              "decode_tok_s": 127.49797671667808,
+              "effective_tok_s": 16.795971591188675,
+              "ttft_seconds": 52.987541111011524,
+              "cancel_requested": false,
+              "output_token_sha256": "20dee8411d7762a83d9bcf4fba8c24b929e2de7dff3910fc172b1c0d0e8b6ab4"
+            }
+          ],
+          "async_counters": [
+            [
+              81,
+              3806
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3806,
+              39752908800
+            ]
+          ],
+          "resident_exchanges": [
+            3806
+          ]
+        },
+        {
+          "label": "q8-code-32768-r1-mode2",
+          "case": {
+            "label": "q8-code-32768-r1-mode2",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52977.7,
+                "decode_ms": 7958.8,
+                "finish": "length",
+                "drafts_accepted": 699,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 550157,
+                "lookups": 566830,
+                "ram_blobs": 21374,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 8210
+              },
+              "wall_seconds": 60.9511171640188,
+              "decode_tok_s": 128.6626124541388,
+              "effective_tok_s": 16.804378328259745,
+              "ttft_seconds": 53.0279265960271,
+              "cancel_requested": false,
+              "output_token_sha256": "20dee8411d7762a83d9bcf4fba8c24b929e2de7dff3910fc172b1c0d0e8b6ab4"
+            }
+          ],
+          "async_counters": [
+            [
+              81,
+              3806
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3806,
+              39752908800
+            ]
+          ],
+          "resident_exchanges": [
+            3806
+          ]
+        },
+        {
+          "label": "q8-code-32768-r1-mode1",
+          "case": {
+            "label": "q8-code-32768-r1-mode1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52913.2,
+                "decode_ms": 7464.8,
+                "finish": "length",
+                "drafts_accepted": 705,
+                "drafts_offered": 865,
+                "reused": 0,
+                "hits": 545440,
+                "lookups": 561808,
+                "ram_blobs": 20775,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 7952
+              },
+              "wall_seconds": 60.39135948801413,
+              "decode_tok_s": 137.17715143071482,
+              "effective_tok_s": 16.959819801914605,
+              "ttft_seconds": 52.961257721995935,
+              "cancel_requested": false,
+              "output_token_sha256": "b64235355d8ab348f9e835cc1299fa00ce1fa08cca8f5ada5288d0d5285fc49f"
+            }
+          ],
+          "async_counters": [
+            [
+              80,
+              3696
+            ]
+          ],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3696
+          ]
+        },
+        {
+          "label": "q8-code-32768-r1-mode0",
+          "case": {
+            "label": "q8-code-32768-r1-mode0",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1"
+            },
+            "expect_rotation": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52909.3,
+                "decode_ms": 7437.7,
+                "finish": "length",
+                "drafts_accepted": 698,
+                "drafts_offered": 858,
+                "reused": 0,
+                "hits": 548250,
+                "lookups": 562213,
+                "ram_blobs": 21418,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6587
+              },
+              "wall_seconds": 60.36200000200188,
+              "decode_tok_s": 137.676970031058,
+              "effective_tok_s": 16.968531989991217,
+              "ttft_seconds": 52.95846504002111,
+              "cancel_requested": false,
+              "output_token_sha256": "652d719f99cbd29c6d65a74fa3cfc20227952ae5083edb812a703dd4519f7850"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [
+            [
+              3453,
+              36065894400
+            ]
+          ],
+          "resident_exchanges": [
+            3453
+          ]
+        }
+      ]
+    },
+    "adaptation-layer-20261005/q2-gate/result.json": {
+      "completed": true,
+      "source_commits": {
+        "reference": "d5ec4f1d779c221ef48701aa811c63acb270adb1",
+        "candidate": "fb62dbeb64329bba64be5987ff8fa2b6609880c6"
+      },
+      "engine_sha256": {
+        "reference": "e1ad400340be155c5bf8ebc0ce68d3df3566f2b5c28860144bbffa8224207f88",
+        "candidate": "88c6e3d741d1d1b32960daf86e9659788152c7c4e0f6a303a13d508f4f26903f"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "reference-flags-off",
+            "combined-flags-off"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": true,
+          "require_work_equality": true,
+          "comparison_scope": "default-path parity",
+          "first_difference": null,
+          "decode_gain_pct": 0.3136862083509051,
+          "total_time_reduction_pct": 0.11656184356357846,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "layer-disabled",
+            "layer-enabled"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "default-path parity",
+          "first_difference": 154,
+          "decode_gain_pct": 3.150953373355292,
+          "total_time_reduction_pct": 1.2141409224540878,
+          "work_identical": false
+        }
+      ],
+      "runs": [
+        {
+          "label": "reference-flags-off",
+          "case": {
+            "label": "reference-flags-off",
+            "engine": "reference",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4979.4,
+                "decode_ms": 3805.5,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.786691863002488,
+              "decode_tok_s": 134.54211010379714,
+              "effective_tok_s": 58.281824494302725,
+              "ttft_seconds": 5.001816874020733,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        },
+        {
+          "label": "combined-flags-off",
+          "case": {
+            "label": "combined-flags-off",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4981.1,
+                "decode_ms": 3793.6,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.776449932978721,
+              "decode_tok_s": 134.96415014761703,
+              "effective_tok_s": 58.349573204781926,
+              "ttft_seconds": 5.003414594975766,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        },
+        {
+          "label": "layer-disabled",
+          "case": {
+            "label": "layer-disabled",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4981.8,
+                "decode_ms": 3316.2,
+                "finish": "length",
+                "drafts_accepted": 237,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 239926,
+                "lookups": 255223,
+                "ram_blobs": 21521,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8297
+              },
+              "wall_seconds": 8.299652629997581,
+              "decode_tok_s": 154.3935830167059,
+              "effective_tok_s": 61.701614846951074,
+              "ttft_seconds": 5.003198129998054,
+              "cancel_requested": false,
+              "output_token_sha256": "21af1b32046cea67f9b71fe3f4db7b320fec019038ed053f4cb772c3fd0ac3cc"
+            }
+          ],
+          "async_counters": [
+            [
+              68,
+              3342
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3342,
+              9239961600
+            ]
+          ],
+          "resident_exchanges": [
+            3342
+          ]
+        },
+        {
+          "label": "layer-enabled",
+          "case": {
+            "label": "layer-enabled",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4982.7,
+                "decode_ms": 3214.9,
+                "finish": "length",
+                "drafts_accepted": 236,
+                "drafts_offered": 276,
+                "reused": 0,
+                "hits": 242221,
+                "lookups": 257284,
+                "ram_blobs": 21319,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8156
+              },
+              "wall_seconds": 8.198883150995243,
+              "decode_tok_s": 159.25845282901489,
+              "effective_tok_s": 62.45730457694935,
+              "ttft_seconds": 5.00341902198852,
+              "cancel_requested": false,
+              "output_token_sha256": "13f14c91b6a7422d9cf0af4b2a6a51d25ddbde9ab0f5bb45d5cf7be606790dc3"
+            }
+          ],
+          "async_counters": [
+            [
+              69,
+              3475
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3475,
+              9607680000
+            ]
+          ],
+          "resident_exchanges": [
+            3475
+          ]
+        },
+        {
+          "label": "combined-cancel",
+          "case": {
+            "label": "combined-cancel",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "count",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": true,
+            "requests": [
+              {
+                "tokens": 4096,
+                "cancel_after": 128
+              },
+              {
+                "tokens": 512
+              }
+            ],
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 128,
+              "timings": {
+                "generated": 129,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4978.4,
+                "decode_ms": 907.8,
+                "finish": "cancel",
+                "drafts_accepted": 64,
+                "drafts_offered": 64,
+                "reused": 0,
+                "hits": 52610,
+                "lookups": 58142,
+                "ram_blobs": 8903,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 3778
+              },
+              "wall_seconds": 5.887347282987321,
+              "decode_tok_s": 141.00022031284425,
+              "effective_tok_s": 21.745778261017296,
+              "ttft_seconds": 4.999659945984604,
+              "cancel_requested": true,
+              "output_token_sha256": "60f6abaf6dd951560de090949d1f0c3d8afe93d793404626edff27ccff906ebf"
+            },
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4864.9,
+                "decode_ms": 2890.6,
+                "finish": "length",
+                "drafts_accepted": 243,
+                "drafts_offered": 269,
+                "reused": 0,
+                "hits": 243041,
+                "lookups": 253725,
+                "ram_blobs": 14705,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 4995
+              },
+              "wall_seconds": 7.757026798994048,
+              "decode_tok_s": 177.1258562236214,
+              "effective_tok_s": 66.01766488298627,
+              "ttft_seconds": 4.875344660016708,
+              "cancel_requested": false,
+              "output_token_sha256": "cc04372e18eb36551d75677b1a7b540f828bf8e47270f783bf3c971951bd40ef"
+            }
+          ],
+          "async_counters": [
+            [
+              16,
+              1298
+            ],
+            [
+              83,
+              3716
+            ]
+          ],
+          "duplex_counters": [
+            [
+              1298,
+              3588710400
+            ],
+            [
+              3716,
+              10273996800
+            ]
+          ],
+          "resident_exchanges": [
+            1298,
+            3716
+          ]
+        },
+        {
+          "label": "arena-fallback",
+          "case": {
+            "label": "arena-fallback",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": false,
+            "resident_gib": 0,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 1024,
+            "output": 256,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 256,
+              "timings": {
+                "generated": 256,
+                "prompt_tokens": 1024,
+                "prompt_ms": 586.1,
+                "decode_ms": 1556.4,
+                "finish": "length",
+                "drafts_accepted": 118,
+                "drafts_offered": 138,
+                "reused": 0,
+                "hits": 123028,
+                "lookups": 129743,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 1024,
+                "offloaded": 3217
+              },
+              "wall_seconds": 2.1432131070178,
+              "decode_tok_s": 164.48213826779747,
+              "effective_tok_s": 119.48658109684948,
+              "ttft_seconds": 0.6059866300201975,
+              "cancel_requested": false,
+              "output_token_sha256": "578154805a9325ad52958f0ae5213c51ffccdbe70eafac30c0c2d443f14dc8ad"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": []
+        },
+        {
+          "label": "layer-enabled-nonmtp",
+          "case": {
+            "label": "layer-enabled-nonmtp",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 1,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4981.8,
+                "decode_ms": 4617.2,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 223244,
+                "lookups": 238808,
+                "ram_blobs": 22516,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 6952
+              },
+              "wall_seconds": 9.600343555008294,
+              "decode_tok_s": 110.88971671142684,
+              "effective_tok_s": 53.33888946765288,
+              "ttft_seconds": 5.0033400430111215,
+              "cancel_requested": false,
+              "output_token_sha256": "36c1561aaa844e2282d3f1979f66273b58d918020c56b5365106c1e394966011"
+            }
+          ],
+          "async_counters": [
+            [
+              128,
+              2889
+            ]
+          ],
+          "duplex_counters": [
+            [
+              2889,
+              7987507200
+            ]
+          ],
+          "resident_exchanges": [
+            2889
+          ]
+        }
+      ]
+    },
+    "adaptation-layer-20261005/q8-screen/result.json": {
+      "completed": true,
+      "source_commits": {
+        "reference": "d5ec4f1d779c221ef48701aa811c63acb270adb1",
+        "candidate": "fb62dbeb64329bba64be5987ff8fa2b6609880c6"
+      },
+      "engine_sha256": {
+        "reference": "e1ad400340be155c5bf8ebc0ce68d3df3566f2b5c28860144bbffa8224207f88",
+        "candidate": "88c6e3d741d1d1b32960daf86e9659788152c7c4e0f6a303a13d508f4f26903f"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "q8-32k-r0-layer0",
+            "q8-32k-r0-layer1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "default-path parity",
+          "first_difference": 218,
+          "decode_gain_pct": 10.417268960200454,
+          "total_time_reduction_pct": 1.2385328586284716,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-32k-r1-layer0",
+            "q8-32k-r1-layer1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "default-path parity",
+          "first_difference": 218,
+          "decode_gain_pct": 9.25149618025869,
+          "total_time_reduction_pct": 1.2080783776755477,
+          "work_identical": false
+        }
+      ],
+      "runs": [
+        {
+          "label": "q8-32k-r0-layer0",
+          "case": {
+            "label": "q8-32k-r0-layer0",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52942.8,
+                "decode_ms": 8020.6,
+                "finish": "length",
+                "drafts_accepted": 699,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 550157,
+                "lookups": 566830,
+                "ram_blobs": 21374,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 8210
+              },
+              "wall_seconds": 60.97978231002344,
+              "decode_tok_s": 127.67124654015909,
+              "effective_tok_s": 16.79696342395601,
+              "ttft_seconds": 52.9932796760113,
+              "cancel_requested": false,
+              "output_token_sha256": "20dee8411d7762a83d9bcf4fba8c24b929e2de7dff3910fc172b1c0d0e8b6ab4"
+            }
+          ],
+          "async_counters": [
+            [
+              81,
+              3806
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3806,
+              39752908800
+            ]
+          ],
+          "resident_exchanges": [
+            3806
+          ]
+        },
+        {
+          "label": "q8-32k-r0-layer1",
+          "case": {
+            "label": "q8-32k-r0-layer1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52947.4,
+                "decode_ms": 7263.9,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 60.22452766899369,
+              "decode_tok_s": 140.97110367708808,
+              "effective_tok_s": 17.006774475887415,
+              "ttft_seconds": 52.99490845098626,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r1-layer1",
+          "case": {
+            "label": "q8-32k-r1-layer1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52931.9,
+                "decode_ms": 7251.8,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 60.19970918499166,
+              "decode_tok_s": 141.206321189222,
+              "effective_tok_s": 17.01457371348056,
+              "ttft_seconds": 52.98167148101493,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r1-layer0",
+          "case": {
+            "label": "q8-32k-r1-layer0",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52997.9,
+                "decode_ms": 7922.7,
+                "finish": "length",
+                "drafts_accepted": 699,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 550157,
+                "lookups": 566830,
+                "ram_blobs": 21374,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 8210
+              },
+              "wall_seconds": 60.93586215999676,
+              "decode_tok_s": 129.24886717911824,
+              "effective_tok_s": 16.808764194705898,
+              "ttft_seconds": 53.04658219899284,
+              "cancel_requested": false,
+              "output_token_sha256": "20dee8411d7762a83d9bcf4fba8c24b929e2de7dff3910fc172b1c0d0e8b6ab4"
+            }
+          ],
+          "async_counters": [
+            [
+              81,
+              3806
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3806,
+              39752908800
+            ]
+          ],
+          "resident_exchanges": [
+            3806
+          ]
+        }
+      ]
+    },
+    "adaptation-no-rotation-20261005/q2-gate/result.json": {
+      "completed": true,
+      "source_commits": {
+        "reference": "fb62dbeb64329bba64be5987ff8fa2b6609880c6",
+        "candidate": "07ff95bed2889453d4fca3d45cd86765234d0b29"
+      },
+      "engine_sha256": {
+        "reference": "88c6e3d741d1d1b32960daf86e9659788152c7c4e0f6a303a13d508f4f26903f",
+        "candidate": "b791cefe332068c0ab3dab8c7c429c9d16ac2347898754a371bc19a38163996a"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "reference-flags-off",
+            "combined-flags-off"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": true,
+          "require_work_equality": true,
+          "comparison_scope": "default-path parity",
+          "first_difference": null,
+          "decode_gain_pct": 1.6714485009607705,
+          "total_time_reduction_pct": 1.1123652773011528,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "layer-disabled",
+            "layer-enabled"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Rotation disabled; per-layer admission off versus on. Enabled schedules can change placement and output.",
+          "first_difference": 118,
+          "decode_gain_pct": 1.603868958168242,
+          "total_time_reduction_pct": 0.6542938525369912,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "rotating-layer-reference",
+            "rotating-layer-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Prior rotating path retained; asynchronous scheduling.",
+          "first_difference": null,
+          "decode_gain_pct": 0.06541240966857487,
+          "total_time_reduction_pct": 0.03306600773903545,
+          "work_identical": true
+        }
+      ],
+      "runs": [
+        {
+          "label": "reference-flags-off",
+          "case": {
+            "label": "reference-flags-off",
+            "engine": "reference",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 5015.6,
+                "decode_ms": 3862.6,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.879538317007245,
+              "decode_tok_s": 132.55320250608398,
+              "effective_tok_s": 57.66934739023675,
+              "ttft_seconds": 5.040646148001542,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        },
+        {
+          "label": "combined-flags-off",
+          "case": {
+            "label": "combined-flags-off",
+            "engine": "candidate",
+            "async_adapt": 0,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4980.2,
+                "decode_ms": 3799.1,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.780765415984206,
+              "decode_tok_s": 134.7687610223474,
+              "effective_tok_s": 58.31900037588419,
+              "ttft_seconds": 5.001117499981774,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        },
+        {
+          "label": "layer-disabled",
+          "case": {
+            "label": "layer-disabled",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4981.1,
+                "decode_ms": 3718.6,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 239353,
+                "lookups": 255002,
+                "ram_blobs": 22016,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8518
+              },
+              "wall_seconds": 8.70118766700034,
+              "decode_tok_s": 137.6862259990319,
+              "effective_tok_s": 58.85260411278549,
+              "ttft_seconds": 5.001956394000445,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [
+            [
+              68,
+              3466
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3466,
+              9582796800
+            ]
+          ],
+          "resident_exchanges": [
+            3466
+          ]
+        },
+        {
+          "label": "layer-enabled",
+          "case": {
+            "label": "layer-enabled",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": false,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4982.8,
+                "decode_ms": 3659.9,
+                "finish": "length",
+                "drafts_accepted": 236,
+                "drafts_offered": 276,
+                "reused": 0,
+                "hits": 242221,
+                "lookups": 257284,
+                "ram_blobs": 21319,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8156
+              },
+              "wall_seconds": 8.64425633099745,
+              "decode_tok_s": 139.89453263750374,
+              "effective_tok_s": 59.24074652596989,
+              "ttft_seconds": 5.003940806986066,
+              "cancel_requested": false,
+              "output_token_sha256": "13f14c91b6a7422d9cf0af4b2a6a51d25ddbde9ab0f5bb45d5cf7be606790dc3"
+            }
+          ],
+          "async_counters": [
+            [
+              69,
+              3475
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3475,
+              9607680000
+            ]
+          ],
+          "resident_exchanges": [
+            3475
+          ]
+        },
+        {
+          "label": "combined-cancel",
+          "case": {
+            "label": "combined-cancel",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "count",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": false,
+            "requests": [
+              {
+                "tokens": 4096,
+                "cancel_after": 128
+              },
+              {
+                "tokens": 512
+              }
+            ],
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 128,
+              "timings": {
+                "generated": 129,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4976.6,
+                "decode_ms": 1072.1,
+                "finish": "cancel",
+                "drafts_accepted": 64,
+                "drafts_offered": 64,
+                "reused": 0,
+                "hits": 52610,
+                "lookups": 58142,
+                "ram_blobs": 8903,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 3778
+              },
+              "wall_seconds": 6.049916306976229,
+              "decode_tok_s": 119.3918477753941,
+              "effective_tok_s": 21.16157190801329,
+              "ttft_seconds": 4.997874247987056,
+              "cancel_requested": true,
+              "output_token_sha256": "60f6abaf6dd951560de090949d1f0c3d8afe93d793404626edff27ccff906ebf"
+            },
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4863.8,
+                "decode_ms": 3177.6,
+                "finish": "length",
+                "drafts_accepted": 243,
+                "drafts_offered": 269,
+                "reused": 0,
+                "hits": 243041,
+                "lookups": 253725,
+                "ram_blobs": 14705,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 4995
+              },
+              "wall_seconds": 8.042998305987567,
+              "decode_tok_s": 161.12789526686808,
+              "effective_tok_s": 63.67050513592161,
+              "ttft_seconds": 4.8742121729883365,
+              "cancel_requested": false,
+              "output_token_sha256": "cc04372e18eb36551d75677b1a7b540f828bf8e47270f783bf3c971951bd40ef"
+            }
+          ],
+          "async_counters": [
+            [
+              16,
+              1298
+            ],
+            [
+              83,
+              3716
+            ]
+          ],
+          "duplex_counters": [
+            [
+              1298,
+              3588710400
+            ],
+            [
+              3716,
+              10273996800
+            ]
+          ],
+          "resident_exchanges": [
+            1298,
+            3716
+          ]
+        },
+        {
+          "label": "arena-fallback",
+          "case": {
+            "label": "arena-fallback",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": false,
+            "resident_gib": 0,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 1024,
+            "output": 256,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 256,
+              "timings": {
+                "generated": 256,
+                "prompt_tokens": 1024,
+                "prompt_ms": 585.4,
+                "decode_ms": 1553.1,
+                "finish": "length",
+                "drafts_accepted": 118,
+                "drafts_offered": 138,
+                "reused": 0,
+                "hits": 123028,
+                "lookups": 129743,
+                "ram_blobs": 0,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 1024,
+                "offloaded": 3217
+              },
+              "wall_seconds": 2.1390614549745806,
+              "decode_tok_s": 164.83162706844377,
+              "effective_tok_s": 119.71007715688567,
+              "ttft_seconds": 0.605242282996187,
+              "cancel_requested": false,
+              "output_token_sha256": "578154805a9325ad52958f0ae5213c51ffccdbe70eafac30c0c2d443f14dc8ad"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": []
+        },
+        {
+          "label": "layer-enabled-nonmtp",
+          "case": {
+            "label": "layer-enabled-nonmtp",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 1,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": false,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4983.1,
+                "decode_ms": 5271.8,
+                "finish": "length",
+                "drafts_accepted": 0,
+                "drafts_offered": 0,
+                "reused": 0,
+                "hits": 223244,
+                "lookups": 238808,
+                "ram_blobs": 22516,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 6952
+              },
+              "wall_seconds": 10.256195722002303,
+              "decode_tok_s": 97.1205280928715,
+              "effective_tok_s": 49.92735180255292,
+              "ttft_seconds": 5.00513610598864,
+              "cancel_requested": false,
+              "output_token_sha256": "36c1561aaa844e2282d3f1979f66273b58d918020c56b5365106c1e394966011"
+            }
+          ],
+          "async_counters": [
+            [
+              128,
+              2889
+            ]
+          ],
+          "duplex_counters": [
+            [
+              2889,
+              7987507200
+            ]
+          ],
+          "resident_exchanges": [
+            2889
+          ]
+        },
+        {
+          "label": "rotating-layer-reference",
+          "case": {
+            "label": "rotating-layer-reference",
+            "engine": "reference",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4982.6,
+                "decode_ms": 3212.5,
+                "finish": "length",
+                "drafts_accepted": 236,
+                "drafts_offered": 276,
+                "reused": 0,
+                "hits": 242221,
+                "lookups": 257284,
+                "ram_blobs": 21319,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8156
+              },
+              "wall_seconds": 8.196713807003107,
+              "decode_tok_s": 159.3774319066148,
+              "effective_tok_s": 62.4763578235775,
+              "ttft_seconds": 5.003830465982901,
+              "cancel_requested": false,
+              "output_token_sha256": "13f14c91b6a7422d9cf0af4b2a6a51d25ddbde9ab0f5bb45d5cf7be606790dc3"
+            }
+          ],
+          "async_counters": [
+            [
+              69,
+              3475
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3475,
+              9607680000
+            ]
+          ],
+          "resident_exchanges": [
+            3475
+          ]
+        },
+        {
+          "label": "rotating-layer-candidate",
+          "case": {
+            "label": "rotating-layer-candidate",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 32,
+            "duplex": 1,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4981.8,
+                "decode_ms": 3210.4,
+                "finish": "length",
+                "drafts_accepted": 236,
+                "drafts_offered": 276,
+                "reused": 0,
+                "hits": 242221,
+                "lookups": 257284,
+                "ram_blobs": 21319,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 8156
+              },
+              "wall_seconds": 8.194003480981337,
+              "decode_tok_s": 159.4816845252928,
+              "effective_tok_s": 62.498474158345736,
+              "ttft_seconds": 5.003113665996352,
+              "cancel_requested": false,
+              "output_token_sha256": "13f14c91b6a7422d9cf0af4b2a6a51d25ddbde9ab0f5bb45d5cf7be606790dc3"
+            }
+          ],
+          "async_counters": [
+            [
+              69,
+              3475
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3475,
+              9607680000
+            ]
+          ],
+          "resident_exchanges": [
+            3475
+          ]
+        }
+      ]
+    },
+    "adaptation-no-rotation-20261005/q8-screen/result.json": {
+      "completed": true,
+      "source_commits": {
+        "reference": "fb62dbeb64329bba64be5987ff8fa2b6609880c6",
+        "candidate": "07ff95bed2889453d4fca3d45cd86765234d0b29"
+      },
+      "engine_sha256": {
+        "reference": "88c6e3d741d1d1b32960daf86e9659788152c7c4e0f6a303a13d508f4f26903f",
+        "candidate": "b791cefe332068c0ab3dab8c7c429c9d16ac2347898754a371bc19a38163996a"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "q8-32k-r0-rot0-layer0",
+            "q8-32k-r0-rot0-layer1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same build and fixed 32K/1K T4 FP16 configuration; enabled scheduling can alter output/work.",
+          "first_difference": 625,
+          "decode_gain_pct": 4.607474568774883,
+          "total_time_reduction_pct": 0.7527681699959987,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-32k-r0-rot0-layer1",
+            "q8-32k-r0-rot1-layer1"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same build and fixed 32K/1K T4 FP16 configuration; enabled scheduling can alter output/work.",
+          "first_difference": null,
+          "decode_gain_pct": 24.512975838094576,
+          "total_time_reduction_pct": 2.88408299344467,
+          "work_identical": true
+        },
+        {
+          "labels": [
+            "q8-32k-r1-rot0-layer0",
+            "q8-32k-r1-rot0-layer1"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same build and fixed 32K/1K T4 FP16 configuration; enabled scheduling can alter output/work.",
+          "first_difference": 511,
+          "decode_gain_pct": 2.816425699748315,
+          "total_time_reduction_pct": 0.49109312682250605,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-32k-r1-rot0-layer1",
+            "q8-32k-r1-rot1-layer1"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Same build and fixed 32K/1K T4 FP16 configuration; enabled scheduling can alter output/work.",
+          "first_difference": null,
+          "decode_gain_pct": 28.150961310230226,
+          "total_time_reduction_pct": 3.1933081477090064,
+          "work_identical": true
+        }
+      ],
+      "runs": [
+        {
+          "label": "q8-32k-r0-rot0-layer0",
+          "case": {
+            "label": "q8-32k-r0-rot0-layer0",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52972.0,
+                "decode_ms": 9460.7,
+                "finish": "length",
+                "drafts_accepted": 696,
+                "drafts_offered": 869,
+                "reused": 0,
+                "hits": 551080,
+                "lookups": 566950,
+                "ram_blobs": 20010,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 7610
+              },
+              "wall_seconds": 62.450058696005726,
+              "decode_tok_s": 108.23723403130846,
+              "effective_tok_s": 16.40166130889742,
+              "ttft_seconds": 53.024278122000396,
+              "cancel_requested": false,
+              "output_token_sha256": "04505648888214a718dafd6d53098ce0ac86e5522c52cc73550902eedd01e56c"
+            }
+          ],
+          "async_counters": [
+            [
+              80,
+              3607
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3607,
+              37674393600
+            ]
+          ],
+          "resident_exchanges": [
+            3607
+          ]
+        },
+        {
+          "label": "q8-32k-r0-rot0-layer1",
+          "case": {
+            "label": "q8-32k-r0-rot0-layer1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52921.4,
+                "decode_ms": 9044.0,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 61.979954531998374,
+              "decode_tok_s": 113.22423706324635,
+              "effective_tok_s": 16.525351244404135,
+              "ttft_seconds": 52.96968786299112,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r0-rot1-layer1",
+          "case": {
+            "label": "q8-32k-r0-rot1-layer1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52915.3,
+                "decode_ms": 7263.5,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 60.19240120399627,
+              "decode_tok_s": 140.97886693742686,
+              "effective_tok_s": 17.015959108523266,
+              "ttft_seconds": 52.9638580789906,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r1-rot1-layer1",
+          "case": {
+            "label": "q8-32k-r1-rot1-layer1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52948.4,
+                "decode_ms": 7162.1,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 60.124448818998644,
+              "decode_tok_s": 142.97482581924297,
+              "effective_tok_s": 17.035293334775123,
+              "ttft_seconds": 52.99710569699528,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r1-rot0-layer1",
+          "case": {
+            "label": "q8-32k-r1-rot0-layer1",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52915.8,
+                "decode_ms": 9178.3,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 62.10774035201757,
+              "decode_tok_s": 111.56750160705143,
+              "effective_tok_s": 16.491099798531582,
+              "ttft_seconds": 52.96414969902253,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r1-rot0-layer0",
+          "case": {
+            "label": "q8-32k-r1-rot0-layer0",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52963.9,
+                "decode_ms": 9436.8,
+                "finish": "length",
+                "drafts_accepted": 699,
+                "drafts_offered": 852,
+                "reused": 0,
+                "hits": 541786,
+                "lookups": 557825,
+                "ram_blobs": 19975,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 7615
+              },
+              "wall_seconds": 62.41425245598657,
+              "decode_tok_s": 108.5113597829773,
+              "effective_tok_s": 16.410072322906636,
+              "ttft_seconds": 53.01256565700169,
+              "cancel_requested": false,
+              "output_token_sha256": "30cd1066305c4fc0021b054d9155e5242a1dd41f174c1864c9ce21f377e3d9c7"
+            }
+          ],
+          "async_counters": [
+            [
+              79,
+              3545
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3545,
+              37026816000
+            ]
+          ],
+          "resident_exchanges": [
+            3545
+          ]
+        }
+      ]
+    },
+    "adaptation-publication-20261005/q2-gate/result.json": {
+      "completed": true,
+      "source_commits": {
+        "reference": "18d3da487f82c8e7b5d8e91f6fdd8c75972182f1",
+        "candidate": "07ff95bed2889453d4fca3d45cd86765234d0b29"
+      },
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "b791cefe332068c0ab3dab8c7c429c9d16ac2347898754a371bc19a38163996a"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "default-off-reference",
+            "default-off-candidate"
+          ],
+          "tokens_identical": true,
+          "require_token_equality": true,
+          "require_work_equality": true,
+          "comparison_scope": "Upstream plus reader versus integration with new features disabled.",
+          "first_difference": null,
+          "decode_gain_pct": 2.7199409625217497,
+          "total_time_reduction_pct": 0.8620804904799662,
+          "work_identical": true
+        }
+      ],
+      "runs": [
+        {
+          "label": "default-off-reference",
+          "case": {
+            "label": "default-off-reference",
+            "engine": "reference",
+            "async_adapt": null,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 4986.2,
+                "decode_ms": 3897.4,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.885087049013237,
+              "decode_tok_s": 131.36963103607533,
+              "effective_tok_s": 57.63429240398037,
+              "ttft_seconds": 5.044570005004061,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        },
+        {
+          "label": "default-off-candidate",
+          "case": {
+            "label": "default-off-candidate",
+            "engine": "candidate",
+            "async_adapt": null,
+            "expect_async": false,
+            "resident_gib": 32,
+            "duplex": 0,
+            "mtp_t": 2,
+            "task": "code",
+            "input": 8192,
+            "output": 512,
+            "context": 40960,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 512,
+              "timings": {
+                "generated": 512,
+                "prompt_tokens": 8192,
+                "prompt_ms": 5012.7,
+                "decode_ms": 3794.2,
+                "finish": "length",
+                "drafts_accepted": 238,
+                "drafts_offered": 274,
+                "reused": 0,
+                "hits": 241180,
+                "lookups": 255708,
+                "ram_blobs": 24082,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 8192,
+                "offloaded": 7812
+              },
+              "wall_seconds": 8.808490447001532,
+              "decode_tok_s": 134.94280744293923,
+              "effective_tok_s": 58.13623408918008,
+              "ttft_seconds": 5.034529443975771,
+              "cancel_requested": false,
+              "output_token_sha256": "95e5419672af476761c2cb336297f1bf9518c1d32a14fa59027d0e2a83e5537e"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3422
+          ]
+        }
+      ]
+    },
+    "adaptation-publication-20261005/q8-screen/result.json": {
+      "completed": true,
+      "source_commits": {
+        "reference": "18d3da487f82c8e7b5d8e91f6fdd8c75972182f1",
+        "candidate": "07ff95bed2889453d4fca3d45cd86765234d0b29"
+      },
+      "engine_sha256": {
+        "reference": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1",
+        "candidate": "b791cefe332068c0ab3dab8c7c429c9d16ac2347898754a371bc19a38163996a"
+      },
+      "comparisons": [
+        {
+          "labels": [
+            "q8-32k-r0-reference",
+            "q8-32k-r0-candidate"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Upstream plus Q8 reader versus opt-in combined stack; report any token/work differences.",
+          "first_difference": 906,
+          "decode_gain_pct": 33.728999016606885,
+          "total_time_reduction_pct": 3.8808019375142777,
+          "work_identical": false
+        },
+        {
+          "labels": [
+            "q8-32k-r1-reference",
+            "q8-32k-r1-candidate"
+          ],
+          "tokens_identical": false,
+          "require_token_equality": false,
+          "require_work_equality": false,
+          "comparison_scope": "Upstream plus Q8 reader versus opt-in combined stack; report any token/work differences.",
+          "first_difference": 906,
+          "decode_gain_pct": 32.68262313226342,
+          "total_time_reduction_pct": 3.915127918985273,
+          "work_identical": false
+        }
+      ],
+      "runs": [
+        {
+          "label": "q8-32k-r0-reference",
+          "case": {
+            "label": "q8-32k-r0-reference",
+            "engine": "reference",
+            "async_adapt": null,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52911.1,
+                "decode_ms": 9655.1,
+                "finish": "length",
+                "drafts_accepted": 698,
+                "drafts_offered": 858,
+                "reused": 0,
+                "hits": 548250,
+                "lookups": 562213,
+                "ram_blobs": 21418,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6587
+              },
+              "wall_seconds": 62.58093822101364,
+              "decode_tok_s": 106.05793829168005,
+              "effective_tok_s": 16.366664429036764,
+              "ttft_seconds": 52.96170799899846,
+              "cancel_requested": false,
+              "output_token_sha256": "652d719f99cbd29c6d65a74fa3cfc20227952ae5083edb812a703dd4519f7850"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3453
+          ]
+        },
+        {
+          "label": "q8-32k-r0-candidate",
+          "case": {
+            "label": "q8-32k-r0-candidate",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52918.2,
+                "decode_ms": 7219.9,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 60.15229595801793,
+              "decode_tok_s": 141.83021925511434,
+              "effective_tok_s": 17.027475094823416,
+              "ttft_seconds": 52.96696308100945,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r1-candidate",
+          "case": {
+            "label": "q8-32k-r1-candidate",
+            "engine": "candidate",
+            "async_adapt": 1,
+            "expect_async": true,
+            "resident_gib": 56,
+            "duplex": 1,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "1",
+              "STRATA_ASYNC_LAYER_ADMIT": "1",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": true,
+            "expect_layer": true
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52911.1,
+                "decode_ms": 7228.0,
+                "finish": "length",
+                "drafts_accepted": 697,
+                "drafts_offered": 872,
+                "reused": 0,
+                "hits": 555439,
+                "lookups": 570047,
+                "ram_blobs": 18559,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6913
+              },
+              "wall_seconds": 60.153092581022065,
+              "decode_tok_s": 141.67127836192586,
+              "effective_tok_s": 17.027191959972797,
+              "ttft_seconds": 52.959013072017115,
+              "cancel_requested": false,
+              "output_token_sha256": "f903bf55fc55a552194598609f8ecdbf7e01ae2a8b4fa12349412775363c2f2e"
+            }
+          ],
+          "async_counters": [
+            [
+              82,
+              3449
+            ]
+          ],
+          "duplex_counters": [
+            [
+              3449,
+              36024115200
+            ]
+          ],
+          "resident_exchanges": [
+            3449
+          ]
+        },
+        {
+          "label": "q8-32k-r1-reference",
+          "case": {
+            "label": "q8-32k-r1-reference",
+            "engine": "reference",
+            "async_adapt": null,
+            "expect_async": false,
+            "resident_gib": 56,
+            "duplex": 0,
+            "mtp_t": 4,
+            "task": "code",
+            "input": 32768,
+            "output": 1024,
+            "context": 139264,
+            "environment": {
+              "STRATA_EXCHANGE_ROTATE": "0",
+              "STRATA_ASYNC_LAYER_ADMIT": "0",
+              "STRATA_VERIFY_DEVICE_PLAN": "0"
+            },
+            "expect_rotation": false,
+            "expect_layer": false
+          },
+          "requests": [
+            {
+              "output_tokens": 1024,
+              "timings": {
+                "generated": 1024,
+                "prompt_tokens": 32768,
+                "prompt_ms": 52993.8,
+                "decode_ms": 9590.3,
+                "finish": "length",
+                "drafts_accepted": 698,
+                "drafts_offered": 858,
+                "reused": 0,
+                "hits": 548250,
+                "lookups": 562213,
+                "ram_blobs": 21418,
+                "file_blobs": 0,
+                "file_mb": 0.0,
+                "prompt_read": 32768,
+                "offloaded": 6587
+              },
+              "wall_seconds": 62.604124122997746,
+              "decode_tok_s": 106.77455345505355,
+              "effective_tok_s": 16.361983315250995,
+              "ttft_seconds": 53.04810822100262,
+              "cancel_requested": false,
+              "output_token_sha256": "652d719f99cbd29c6d65a74fa3cfc20227952ae5083edb812a703dd4519f7850"
+            }
+          ],
+          "async_counters": [],
+          "duplex_counters": [],
+          "resident_exchanges": [
+            3453
+          ]
+        }
+      ]
+    }
+  }
+}
