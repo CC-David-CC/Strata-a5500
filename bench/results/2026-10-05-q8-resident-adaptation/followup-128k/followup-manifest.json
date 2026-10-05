@@ -1,0 +1,67 @@
+[
+  {
+    "path": "bench_combined.py",
+    "bytes": 12218,
+    "sha256": "95b2ea8a278f17eb9df572b744667af2fac8a2d313b43ccbe3ee6010f005d62f"
+  },
+  {
+    "path": "launcher.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "q8-validation/q8-128k-code-input.json",
+    "bytes": 767710,
+    "sha256": "68ff970f8e7b187f24078d80aa28bec56b1becccc856acb93cae25f56988d47c"
+  },
+  {
+    "path": "q8-validation/q8-128k-code.log",
+    "bytes": 5259,
+    "sha256": "d3893686655d4334202d5c060e71bb6a094b41286063494f9e97c7e3ac10e455"
+  },
+  {
+    "path": "q8-validation/q8-4k-editing-cancel-recovery-input.json",
+    "bytes": 23983,
+    "sha256": "e19177e956d5a44737c09cb20049951010f26e53e17c485d6d5d751bd56307cc"
+  },
+  {
+    "path": "q8-validation/q8-4k-editing-cancel-recovery.log",
+    "bytes": 6215,
+    "sha256": "edcbcd36043473711160f917b5947978993a03a1c66ce2d0ad1ac7f54cc5089f"
+  },
+  {
+    "path": "q8-validation/q8-4k-editing-fresh-input.json",
+    "bytes": 23983,
+    "sha256": "e19177e956d5a44737c09cb20049951010f26e53e17c485d6d5d751bd56307cc"
+  },
+  {
+    "path": "q8-validation/q8-4k-editing-fresh.log",
+    "bytes": 5248,
+    "sha256": "cc092127a1f32a3993539d1c295cf851e15410c2408b8fcdce8c5b9b55f6882d"
+  },
+  {
+    "path": "q8-validation/result.json",
+    "bytes": 148878,
+    "sha256": "95cb82dd7ca77c8c6f708e4721c1a62b529a062f8c39606de9ee6bb7becfa87b"
+  },
+  {
+    "path": "q8-validation-plan.json",
+    "bytes": 5000,
+    "sha256": "849ef83cf98907c2405f9009375d10b2d0e80f606b1d38f55d623c7672dc4e4b"
+  },
+  {
+    "path": "q8-validation.log",
+    "bytes": 2692,
+    "sha256": "0c39141f87d1cd9b8a9a7eaf3883f50d1a5a3f1bdaff6dbacc49ea83e90baffb"
+  },
+  {
+    "path": "run.py",
+    "bytes": 3544,
+    "sha256": "da8a72f27888256252fc2c60b24aa0c2381ac4a7d3337519e2c10cb8a9c539b0"
+  },
+  {
+    "path": "status.json",
+    "bytes": 954,
+    "sha256": "1d2054b2ca98f0bb16517d642a3ff3e1a4e4f32aabfa178a4a0e3a0d251c81de"
+  }
+]

@@ -1,0 +1,229 @@
+{
+  "source_commit": "07ff95bed2889453d4fca3d45cd86765234d0b29",
+  "tested_publication_head": "3d0d38d24bf80be3747afdb1cc08df401c724605",
+  "archive_sha256": "95ea294760268e8ce2652053377742568ba6be1ac2eab71481d418b706138bb4",
+  "status": {
+    "phase": "complete",
+    "started_unix": 1791182356.1819549,
+    "commands": [
+      {
+        "label": "q8-validation",
+        "exit_code": 0,
+        "seconds": 628.796582873998
+      }
+    ],
+    "verified_binaries": {
+      "/home/dflanag3/fleet-downloads/adaptation-no-rotation-20261005/build/strata": "b791cefe332068c0ab3dab8c7c429c9d16ac2347898754a371bc19a38163996a",
+      "/home/dflanag3/fleet-downloads/strata-q8-ple-reader-18d3da4/build/strata": "eb064c6c2b1a6681ff8e4e6ff26c0e72577f675306c362b53617c331c532fea1"
+    },
+    "memlock_before": [
+      16764923904,
+      16764923904
+    ],
+    "memlock_after": [
+      -1,
+      -1
+    ],
+    "recovery_comparison": {
+      "tokens_identical": false,
+      "first_difference": 43,
+      "work_identical": false,
+      "qualification": "Fresh versus post-cancellation smoke check; asynchronous placement can differ. This is not a full recurrent/KV state differential trace."
+    },
+    "completed": true,
+    "finished_unix": 1791182985.1032376
+  },
+  "runs": [
+    {
+      "label": "q8-128k-code",
+      "case": {
+        "label": "q8-128k-code",
+        "engine": "candidate",
+        "async_adapt": 1,
+        "expect_async": true,
+        "resident_gib": 56,
+        "duplex": 1,
+        "mtp_t": 4,
+        "task": "code",
+        "input": 131072,
+        "output": 1024,
+        "context": 139264,
+        "environment": {
+          "STRATA_EXCHANGE_ROTATE": "1",
+          "STRATA_ASYNC_LAYER_ADMIT": "1",
+          "STRATA_VERIFY_DEVICE_PLAN": "0"
+        },
+        "expect_rotation": true,
+        "expect_layer": true
+      },
+      "startup_seconds": 122.3444260119868,
+      "requests": [
+        {
+          "output_tokens": 1024,
+          "timings": {
+            "generated": 1024,
+            "prompt_tokens": 131072,
+            "prompt_ms": 213194.8,
+            "decode_ms": 7256.5,
+            "finish": "length",
+            "drafts_accepted": 700,
+            "drafts_offered": 858,
+            "reused": 0,
+            "hits": 546669,
+            "lookups": 561299,
+            "ram_blobs": 18660,
+            "file_blobs": 0,
+            "file_mb": 0.0,
+            "prompt_read": 131072,
+            "offloaded": 7021
+          },
+          "wall_seconds": 220.48721176901017,
+          "decode_tok_s": 141.11486253703575,
+          "effective_tok_s": 4.645016835917956,
+          "cancel_requested": false,
+          "wall_effective_tok_s": 4.6442602806042865,
+          "output_token_sha256": "999974fb8021e574a7e75b37d2fb812d03ceb471d21a8a60e2cd9e2151ccd370"
+        }
+      ]
+    },
+    {
+      "label": "q8-4k-editing-cancel-recovery",
+      "case": {
+        "label": "q8-4k-editing-cancel-recovery",
+        "engine": "candidate",
+        "async_adapt": 1,
+        "expect_async": true,
+        "resident_gib": 56,
+        "duplex": 1,
+        "mtp_t": 4,
+        "task": "editing",
+        "input": 4096,
+        "output": 512,
+        "context": 139264,
+        "environment": {
+          "STRATA_EXCHANGE_ROTATE": "1",
+          "STRATA_ASYNC_LAYER_ADMIT": "1",
+          "STRATA_VERIFY_DEVICE_PLAN": "0"
+        },
+        "expect_rotation": true,
+        "expect_layer": true,
+        "requests": [
+          {
+            "tokens": 1024,
+            "cancel_after": 128
+          },
+          {
+            "tokens": 512
+          }
+        ]
+      },
+      "startup_seconds": 112.96422709099716,
+      "requests": [
+        {
+          "output_tokens": 128,
+          "timings": {
+            "generated": 135,
+            "prompt_tokens": 4096,
+            "prompt_ms": 6559.5,
+            "decode_ms": 1124.8,
+            "finish": "cancel",
+            "drafts_accepted": 77,
+            "drafts_offered": 102,
+            "reused": 0,
+            "hits": 74195,
+            "lookups": 76077,
+            "ram_blobs": 2261,
+            "file_blobs": 0,
+            "file_mb": 0.0,
+            "prompt_read": 4096,
+            "offloaded": 723
+          },
+          "wall_seconds": 7.691656175011303,
+          "decode_tok_s": 113.79800853485064,
+          "effective_tok_s": 16.657340291243184,
+          "cancel_requested": true,
+          "wall_effective_tok_s": 16.64140948159476,
+          "output_token_sha256": "84e38332c317f9ebe350e899dee49077717f2a49fa6c0210afdf187bcfc1e532"
+        },
+        {
+          "output_tokens": 512,
+          "timings": {
+            "generated": 512,
+            "prompt_tokens": 4096,
+            "prompt_ms": 5953.0,
+            "decode_ms": 3820.3,
+            "finish": "length",
+            "drafts_accepted": 303,
+            "drafts_offered": 420,
+            "reused": 0,
+            "hits": 292822,
+            "lookups": 299193,
+            "ram_blobs": 7829,
+            "file_blobs": 0,
+            "file_mb": 0.0,
+            "prompt_read": 4096,
+            "offloaded": 2727
+          },
+          "wall_seconds": 9.774792090000119,
+          "decode_tok_s": 134.02088841190482,
+          "effective_tok_s": 52.3876275157828,
+          "cancel_requested": false,
+          "wall_effective_tok_s": 52.37963071601186,
+          "output_token_sha256": "0de4f5c99583a2a1375e17f1cefdb026ae920bd41665d7ea9181987c2db9548e"
+        }
+      ]
+    },
+    {
+      "label": "q8-4k-editing-fresh",
+      "case": {
+        "label": "q8-4k-editing-fresh",
+        "engine": "candidate",
+        "async_adapt": 1,
+        "expect_async": true,
+        "resident_gib": 56,
+        "duplex": 1,
+        "mtp_t": 4,
+        "task": "editing",
+        "input": 4096,
+        "output": 512,
+        "context": 139264,
+        "environment": {
+          "STRATA_EXCHANGE_ROTATE": "1",
+          "STRATA_ASYNC_LAYER_ADMIT": "1",
+          "STRATA_VERIFY_DEVICE_PLAN": "0"
+        },
+        "expect_rotation": true,
+        "expect_layer": true
+      },
+      "startup_seconds": 121.73578754402115,
+      "requests": [
+        {
+          "output_tokens": 512,
+          "timings": {
+            "generated": 512,
+            "prompt_tokens": 4096,
+            "prompt_ms": 6106.7,
+            "decode_ms": 4032.4,
+            "finish": "length",
+            "drafts_accepted": 286,
+            "drafts_offered": 443,
+            "reused": 0,
+            "hits": 312495,
+            "lookups": 318707,
+            "ram_blobs": 7459,
+            "file_blobs": 0,
+            "file_mb": 0.0,
+            "prompt_read": 4096,
+            "offloaded": 2413
+          },
+          "wall_seconds": 10.144992793007987,
+          "decode_tok_s": 126.9715306021228,
+          "effective_tok_s": 50.4975786805535,
+          "cancel_requested": false,
+          "wall_effective_tok_s": 50.468246793913416,
+          "output_token_sha256": "7f0437c06dc49281d7692298ba805086d63f81ca59484754d164ed8e581d77e6"
+        }
+      ]
+    }
+  ]
+}
