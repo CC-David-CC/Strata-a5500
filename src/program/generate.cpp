@@ -24,6 +24,7 @@
 #include "strata/core/conversation_memory.hpp"
 #include "strata/core/coupled_draft.hpp"
 #include "strata/core/expert_source.hpp"
+#include "strata/core/duplex_exchange.hpp"
 #include "strata/core/pinned.hpp"
 #include "strata/core/remote_experts.hpp"
 #include "strata/core/on_device.hpp"
@@ -260,8 +261,41 @@ struct SwapHome {
 };
 template <class Swap, class Locate>
 bool resident_stage_swaps(strata::core::FileExpertSource& src, const std::vector<int32_t>& host_res,
-                          int64_t n_expert, std::vector<Swap>& swaps, Locate locate) {
+                          int64_t n_expert, std::vector<Swap>& swaps, Locate locate,
+                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr) {
+    if (fills_queued) *fills_queued = false;
     if (!src.complement_ready() || swaps.empty()) return true;
+    // An entire eligible batch takes the duplex path. Mixed/lent/pageable
+    // batches retain the sequential path, including its selection and limits.
+    if (duplex && fills_queued && src.exchange_capacity() > 0 &&
+        std::all_of(swaps.begin(), swaps.end(), [&](const Swap& s) {
+            return src.has_resident(s.layer, s.in) && !src.has_resident(s.layer, s.out) &&
+                   src.pinned(s.layer, s.in) &&
+                   host_res[(size_t) s.layer * (size_t) n_expert + (size_t) s.out] >= 0;
+        })) {
+        if (swaps.size() > (size_t) src.exchange_capacity()) swaps.resize((size_t) src.exchange_capacity());
+        const SwapHome home = locate(swaps.front().layer);
+        strata::core::ExpertCache& cache = *home.cache;
+        const cudaStream_t stream = home.stream;
+        std::vector<strata::core::DuplexExchange::Copy> copies;
+        copies.reserve(swaps.size());
+        for (size_t q = 0; q < swaps.size(); ++q) {
+            const Swap& s = swaps[q];
+            const int32_t slot = host_res[(size_t) s.layer * (size_t) n_expert + (size_t) s.out];
+            copies.push_back({cache.device_slot(slot), src.blob(s.layer, s.in), src.exchange_buffer((int64_t) q),
+                              (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer)});
+        }
+        if (duplex->enqueue(copies.data(), copies.size(), stream) != cudaSuccess ||
+            duplex->wait_evictions() != cudaSuccess) return false;
+        for (size_t q = 0; q < swaps.size(); ++q) {
+            const Swap& s = swaps[q];
+            if (!src.stage_exchange(s.layer, s.in, s.out, (int64_t) q)) return false;
+        }
+        // The evicted bytes are now readable by the CPU. The existing adapt_ev
+        // still guards H2D completion and commit_exchanges' RAM ownership change.
+        *fills_queued = true;
+        return true;
+    }
     struct Staged { int32_t layer, in, out; int64_t q; };
     std::vector<Staged> staged;
     std::vector<SwapHome> used;
@@ -6685,6 +6719,24 @@ int main(int argc, char** argv) {
             return 1;
         }
         // plan v0.3 P6: swaps in flight - (residency index, slot) admitted when adapt_ev has completed
+        strata::core::DuplexExchange duplex;
+        strata::core::DuplexExchange* duplex_active = nullptr;
+        if (const char* v = std::getenv("STRATA_EXCHANGE_DUPLEX"); v && std::strcmp(v, "1") == 0) {
+            bool supported = !multi_gpu && !peer.valid() && !remote_opt && drive.d.remote_count == 0 &&
+                !o.vram_elastic && srcp == &src && o.batch <= 1 && o.pipeline_windows == 0 &&
+                src.complement_ready() && src.complement_pinned() && src.pinned_bytes() == src.resident_bytes() &&
+                src.exchange_pinned() && src.exchange_capacity() > 0;
+#if defined(STRATA_USE_HIP) || defined(STRATA_HIP_GFX906)
+            supported = false; // CUDA-only experiment; other backends retain the original path.
+#endif
+            if (supported && duplex.open((size_t) src.exchange_capacity()) == cudaSuccess) {
+                duplex_active = &duplex;
+                std::fprintf(stderr, "strata serve: duplex resident exchanges enabled\n");
+            } else {
+                (void) cudaGetLastError();
+                std::fprintf(stderr, "strata serve: duplex resident exchanges unavailable; using sequential copies\n");
+            }
+        }
         std::vector<std::pair<int32_t, int32_t>> pending;
         int pending_age = 0;   // the windows the pending swaps have waited (adapt_lag)
         std::vector<void*> pin_live;   // the swaps' locked arena pages (pin_blob), unlocked once they have landed
@@ -6759,7 +6811,9 @@ int main(int argc, char** argv) {
                 }
                 return {&xcache, adapt_stream, -1};
             };
-            if (!resident_stage_swaps(src, host_res, g.n_expert, swaps, home_of)) return false;
+            bool fills_queued = false;
+            if (!resident_stage_swaps(src, host_res, g.n_expert, swaps, home_of,
+                                      duplex_active, &fills_queued)) return false;
             if (pin_blobs_on()) {   // lock the batch's source pages (a file-backed arena on AMD; see pin_blobs)
                 std::vector<std::pair<uintptr_t, uintptr_t>> spans;
                 for (const Swap& s : swaps)
@@ -6792,11 +6846,11 @@ int main(int argc, char** argv) {
                 const Swap& s = swaps[si];
                 const size_t in = (size_t) s.layer * g.n_expert + s.in, out = (size_t) s.layer * g.n_expert + s.out;
                 const int32_t slot = fenced_slots.empty() ? host_res[out] : fenced_slots[si];
-                const uint8_t* b = srcp->blob(s.layer, s.in);
+                const uint8_t* b = fills_queued ? nullptr : srcp->blob(s.layer, s.in);
                 const int stn = multi_gpu ? stage_of(s.layer) : 0;   // the swap stays in the layer's own cache
                 GpuStage* gs = stn > 0 ? stages[(size_t) stn - 1].get() : nullptr;
                 const strata::core::OnDevice on(gs ? gs->dev : -1);
-                if (dma_mode != 0 && slot >= 0 && b != nullptr) {
+                if (!fills_queued && dma_mode != 0 && slot >= 0 && b != nullptr) {
                     cp_dst.push_back(xcache.device_slot(slot));
                     cp_src.push_back(b);
                     cp_bytes.push_back((size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer));
@@ -6806,10 +6860,10 @@ int main(int argc, char** argv) {
                     pending.emplace_back((int32_t) in, slot);
                     continue;
                 }
-                if (slot < 0 || b == nullptr ||
+                if (!fills_queued && (slot < 0 || b == nullptr ||
                     adapt_copy_h2d(gs ? gs->cache.device_slot(slot) : xcache.device_slot(slot), b,
                                    (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer),
-                                   gs ? gs->adapt_stream : adapt_stream) != cudaSuccess) {
+                                   gs ? gs->adapt_stream : adapt_stream) != cudaSuccess)) {
                     std::fprintf(stderr, "strata serve: adaptive swap copy failed (layer %d, slot %d, pinned %d): %s\n",
                                  (int) s.layer, (int) slot, pin_live.empty() ? 0 : 1, cudaGetErrorString(cudaGetLastError()));
                     return false;
@@ -10037,6 +10091,9 @@ int main(int argc, char** argv) {
                              (unsigned long long)src.rotated_exchanges(),
                              (unsigned long long)src.avoided_exchange_copy_bytes());
             // CS-T: the tiers, cumulative - GPU cache hits (the decode lookups above), RAM copy, files (SSD / OS cache)
+            if (duplex_active)
+                std::fprintf(stderr, "strata serve: duplex exchanges: %llu copies, %llu D2H+H2D payload bytes\n",
+                             (unsigned long long) duplex.copies(), (unsigned long long) duplex.payload_bytes());
             if (srcp == &src)
                 std::fprintf(stderr, "strata serve: expert tiers: GPU %lld hits this request; since the start RAM %lld blobs, files %lld blobs "
                                      "%.1f MB read%s\n", (long long) req_hits, (long long) src.ram_reads(),
