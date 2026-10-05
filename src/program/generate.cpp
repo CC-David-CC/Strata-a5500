@@ -621,7 +621,7 @@ void usage() {
                  "                       default 512), so the command `VRAM <reserve_mib>` (the server's POST /v1/vram) can\n"
                  "                       give VRAM back to other programs between requests and take it back later\n"
                  "  --batch N / --slots N  --serve (opt-in): up to N requests decode together in batch slots (2..8\n"
-                 "                       normally; MULTI_CONCURRENCY=TRUE waves more through eight-row windows),\n"
+                 "                       normally; MULTI_CONCURRENCY=TRUE or STRATA_BATCH_WAVES=1 allows more slots),\n"
                  "                       each slot with its own session (VRAM like the main one); docs/BATCHING.md\n"
                  "  --batch-groups G     --batch with a layer split: the slots in G groups pipelined through the GPUs\n"
                  "  --trim-stage-weights an explicit --layer-split: each GPU loads only its own layers' dense weights\n"
@@ -2933,6 +2933,12 @@ int main(int argc, char** argv) {
     // engine still starts and serves one request at a time.
     const char* multi_concurrency = std::getenv("MULTI_CONCURRENCY");
     const bool batch_mtp_requested = multi_concurrency != nullptr && std::strcmp(multi_concurrency, "TRUE") == 0;
+    const char* waves_env = std::getenv("STRATA_BATCH_WAVES");
+    const bool batch_waves = waves_env != nullptr && std::strcmp(waves_env, "1") == 0;
+    if (batch_waves && multi_gpu) {
+        std::fprintf(stderr, "strata generate: STRATA_BATCH_WAVES=1 currently needs one GPU\n");
+        return 2;
+    }
     std::vector<std::vector<std::unique_ptr<strata::core::SessionState>>> bslot_ss;
     if (o.batch != 0) {
         const int cap = strata::kernels::kVerifyMaxT;
@@ -2941,7 +2947,7 @@ int main(int argc, char** argv) {
         if (off != nullptr) {
             std::fprintf(stderr, "strata generate: WARNING: --batch %d is off: %s\n", o.batch, off);
             o.batch = 0;
-        } else if (o.batch > cap && !batch_mtp_requested) {
+        } else if (o.batch > cap && !batch_mtp_requested && !batch_waves) {
             std::fprintf(stderr, "strata generate: WARNING: --batch %d: a batch window holds at most %d rows, so %d "
                                  "slots\n", o.batch, cap, cap);
             o.batch = cap;
@@ -5155,8 +5161,12 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "strata serve: layer split: layers %s, one hand-off per window\n", plan_s.c_str());
         }
         ver.set_remote_expert_opt(remote_opt.get());
+        // Logical slots can exceed the physical window; the scheduler rotates them.
+        // Keep each verifier allocation bounded by the kernel's row capacity.
+        const int serve_verify_rows = (batch_mtp || batch_waves)
+            ? strata::kernels::kVerifyMaxT : std::max(o.spec, o.batch);
         if (!ver.init(wt, g, ss, vh, native_head.loaded() ? &native_head : nullptr,
-                      batch_mtp ? strata::kernels::kVerifyMaxT : std::max(o.spec, o.batch), err) ||
+                      serve_verify_rows, err) ||
             !mtp.bind(last_st ? last_st->wt : wt, last_st ? &last_st->head : &native_head, ver.final_R_all(), err)) {
             std::fprintf(stderr, "strata serve: %s\n", err.c_str());
             return 1;
@@ -5926,6 +5936,7 @@ int main(int argc, char** argv) {
             int32_t x = 0;                 ///< the token the next window feeds (not yet in the slot's state)
             std::array<int32_t, strata::kernels::kVerifyMaxT> draft{}; ///< the slot's next MTP proposal
             bool draft_ready = false;
+            int64_t draft_proposed = 0, draft_accepted = 0;
             int64_t p = 0;                 ///< its position
             int64_t produced = 0, max_new = 0;
             Clock::time_point t0;
@@ -6075,7 +6086,8 @@ int main(int argc, char** argv) {
                     }
                 }
             }
-            if (batch_mtp && A > 0) next_slot = ((size_t) active[A - 1] + 1) % bs.size();
+            if ((batch_mtp || (batch_waves && bs.size() > strata::kernels::kVerifyMaxT)) && A > 0)
+                next_slot = ((size_t) active[A - 1] + 1) % bs.size();
             if (S == 0) return true;
             const bool was_busy = strata::core::progress().busy.load();
             strata::core::progress().busy.store(true);
@@ -6116,6 +6128,10 @@ int main(int argc, char** argv) {
             for (int t = 0; t < A; ++t) {
                 const int b = active[t];
                 BSlot& sl = bs[(size_t) b];
+                if (batch_mtp) {
+                    ++sl.draft_proposed;
+                    sl.draft_accepted += keep[b] - 1;
+                }
                 for (int j = 0; j < keep[b]; ++j) {
                     const int32_t y = outb[first[t] + j];
                     sl.ids.push_back(tok[first[t] + j]);
@@ -6127,6 +6143,10 @@ int main(int argc, char** argv) {
                     if (fin != nullptr) {
                         const double ms = std::chrono::duration<double, std::milli>(Clock::now() - sl.t0).count();
                         std::printf("BDONE %d %lld %s %.1f\n", b, (long long) sl.produced, fin, ms);
+                        if (batch_mtp)
+                            std::fprintf(stderr, "strata batch MTP: slot %d proposed=%lld accepted=%lld generated=%lld finish=%s\n",
+                                         b, (long long) sl.draft_proposed, (long long) sl.draft_accepted,
+                                         (long long) sl.produced, fin);
                         sl.active = false;
                         sl.cached = o.prompt_cache > 0 && !sl.img;
                         break;
@@ -7482,6 +7502,7 @@ int main(int argc, char** argv) {
                     sl.t0 = Clock::now();
                     sl.ids = live;
                     if (batch_mtp) {
+                        sl.draft_proposed = sl.draft_accepted = 0;
                         if (!slot_mtp[(size_t) admit_slot]->draft_first(1, ver.final_R_all(), sl.x,
                                                                         sl.p - 1, sl.draft.data(), err)) {
                             std::fprintf(stderr, "strata batch: MTP admission for slot %d failed: %s\n",

@@ -22,9 +22,17 @@ asked, with a note when it is more than setup would recommend.
 On one GPU with MTP enabled, set `MULTI_CONCURRENCY=TRUE` in the server's
 environment to let batch slots use one MTP proposal each. It is opt-in; without
 it, the batch behavior described below is unchanged. The grouped path has only
-been tested on an AMD R9700. It needs additional VRAM per slot for draft state
+been tested upstream on an AMD R9700; this integration adds an experimental
+NVIDIA test path. It needs additional VRAM per slot for draft state
 and buffers, so check the engine's free-memory log before using it on a smaller
-card. It has not been validated on NVIDIA or with a layer split.
+card. A layer split is unsupported for grouped MTP.
+
+This draft also adds `STRATA_BATCH_WAVES=1` for non-MTP requests on one GPU.
+Logical slots above eight rotate through the existing eight-row verifier;
+the flag does not enlarge any kernel or verifier buffer. Each slot still needs
+its own context state. Leave the flag unset for the existing eight-slot limit.
+Grouped MTP uses two rows per selected request and rotates above four requests.
+Neither flag promises higher throughput just because more slots fit.
 
 With a layer split, the engine options go into the config's `args`:
 
