@@ -2050,7 +2050,9 @@ bool Verifier::stage_batch(const int* rows, int S, int hbase, const int32_t* tok
         for (int64_t j = 3; j < CB; ++j) c[j] = -1;
     }
     *(volatile uint32_t*) h_seq_ = 0;
-    *(volatile uint32_t*) h_flag_ = 0;
+    // Batch PLE rows were gathered above. The fully resident graph's layer-1 PLE gate can proceed;
+    // unlike the solo path there is no pending lookup to overlap, nor a CPU expert doorbell to ring.
+    *(volatile uint32_t*) h_flag_ = all_resident_ ? 1 : 0;
     *(volatile uint32_t*) h_flagA_ = 0;
     *(volatile uint32_t*) h_flagB_ = 0;
     std::atomic_thread_fence(std::memory_order_seq_cst);
@@ -2081,7 +2083,7 @@ bool Verifier::run_slot_rows(const int* rows, int S, const int32_t* tokens, cons
     (void) cudaStreamQuery(cs_);
     volatile uint32_t* const seq = h_seq_;
     volatile uint32_t* const flag = h_flag_;
-    const int64_t steps = le_ - lb_;
+    const int64_t steps = all_resident_ ? 0 : le_ - lb_;
     for (int64_t k = 0; k < steps; ++k) {
         const int64_t l = lb_ + k;
         const uint32_t want = (uint32_t) (k + 1);
@@ -2195,7 +2197,7 @@ bool Verifier::batch_launch(int base, int S, const int32_t* tokens, const int64_
         }
     b_running_ = true;
     b_k_ = 0;
-    b_steps_ = le_ - lb_;
+    b_steps_ = all_resident_ ? 0 : le_ - lb_;
     b_last_ = Clock::now();
     return true;
 }
