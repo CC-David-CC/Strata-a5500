@@ -44,6 +44,47 @@ and issue/collect reads, malformed shapes and file lengths, out-of-range reads,
 and close/reopen. The real-table command compares 1,059 row probes and batch
 results with ggml. Size arithmetic and tensor extents are checked before use.
 
+## Recorded validation
+
+The independent reader commit `18d3da487f82c8e7b5d8e91f6fdd8c75972182f1` was freshly
+built and tested on 2026-10-05 (UTC), based on upstream
+`6f32ec070f23ced9f50e704d854d775da52591ab`. It contains no buffer rotation code.
+Hardware: RTX PRO 6000 Blackwell 96GB, Ryzen 9 7950X, 128GB RAM;
+Release build with GCC 13.3 and CUDA 13.2.
+
+Both CTest checks passed. On the model's Q8 PLE table, all 1,059 row probes and
+batch/issue-collect results matched ggml bit-for-bit. A fresh native engine
+generated exactly 1,024 tokens after the retained 1,024-token input. All output
+IDs matched the earlier combined build's rotation-off baseline. The fresh run
+offered zero speculative drafts and reused zero prompt tokens.
+
+The model uses Q8_0 experts and PLE, compatibility BF16 small projections and a
+Q5_K output head. The smoke run uses FP16 KV, 16,400 GPU expert slots and a
+39.77 GiB pinned expert complement. PLE was prefaulted but not mlocked. The EOS
+sentinel forces the exact output length. This verifies the reader in a native
+run; it is not an answer-quality evaluation or a timed performance comparison.
+AMD and Windows GPU execution remain untested.
+
+The [receipt](../bench/results/q8-ple-reader-validation.json) records source,
+binary/model/profile hashes, arguments and test results. The
+[token arrays](../bench/results/q8-ple-reader-token-ids.json) retain the input,
+fresh output and reference output. To check them without a GPU:
+
+```bash
+python - <<'PY'
+import hashlib, json
+from pathlib import Path
+root = Path('bench/results')
+r = json.loads((root / 'q8-ple-reader-validation.json').read_text())
+raw = (root / r['token_ids_file']).read_bytes()
+assert hashlib.sha256(raw).hexdigest() == r['token_ids_file_sha256']
+ids = json.loads(raw)
+assert len(ids['input']) == len(ids['output']) == len(ids['reference']) == 1024
+assert ids['output'] == ids['reference']
+print('1,024 matching native output token IDs')
+PY
+```
+
 ## Relationship to rotation
 
 This reader has no dependency on the resident-buffer rotation contribution
