@@ -5313,8 +5313,12 @@ int main(int argc, char** argv) {
             std::fprintf(stderr, "strata serve: layer split: layers %s, one hand-off per window\n", plan_s.c_str());
         }
         ver.set_remote_expert_opt(remote_opt.get());
+        // Logical slots can exceed the physical window; the scheduler rotates them.
+        // Keep each verifier allocation bounded by the kernel's row capacity.
+        const int serve_verify_rows = (batch_mtp || batch_waves)
+            ? strata::kernels::kVerifyMaxT : std::max(o.spec, o.batch);
         if (!ver.init(wt, g, ss, vh, native_head.loaded() ? &native_head : nullptr,
-                      batch_mtp ? strata::kernels::kVerifyMaxT : std::max(o.spec, o.batch), err) ||
+                      serve_verify_rows, err) ||
             !mtp.bind(last_st ? last_st->wt : wt, last_st ? &last_st->head : &native_head, ver.final_R_all(), err)) {
             std::fprintf(stderr, "strata serve: %s\n", err.c_str());
             return 1;
