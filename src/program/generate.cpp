@@ -5785,10 +5785,10 @@ int main(int argc, char** argv) {
                                  "a round every %d windows\n", (long long) a_cap, o.adapt_every);
         }
         if (const char* v = std::getenv("STRATA_ASYNC_LAYER_ADMIT"); v && std::strcmp(v, "1") == 0) {
-            a_layer_enabled = ajob && duplex_active && src.exchange_rotation() && !ver.device_plan_enabled();
+            a_layer_enabled = ajob && duplex_active && !ver.device_plan_enabled();
             if (a_layer_enabled && a_layer_events.open((size_t)g.n_layers) != cudaSuccess) return 1;
             std::fprintf(stderr, "strata serve: async per-layer admission %s\n",
-                         a_layer_enabled ? "enabled" : "unavailable: requires async, rotation, duplex and host planning");
+                         a_layer_enabled ? "enabled" : "unavailable: requires async, duplex and host planning");
         }
         auto a_flush = [&]() {   // the job's copies: an event after them on every stream used, submitted now (WDDM)
             for (AHome& h : ahomes)
@@ -5907,12 +5907,14 @@ int main(int argc, char** argv) {
             if (!range) return true;
             if (a_layer_events.wait((size_t)layer) != cudaSuccess || range->end > aswaps.size()) return false;
             // The layer's final H2D event proves both directions complete.
-            // Publish only this layer's outgoing RAM views, then rotate them.
+            // Publish only this layer's outgoing RAM views. Both transfers are
+            // done, so either rotate owners or copy back into the fixed RAM
+            // slots before admitting this layer. Other layers remain pending.
             for (size_t q = range->begin; q < range->end; ++q) {
                 const ASwap& w = aswaps[q];
                 if (w.layer != layer || !src.stage_exchange(w.layer, w.in, w.out, w.j)) return false;
             }
-            if (src.commit_flip() != (int64_t)(range->end-range->begin)) return false;
+            if (src.commit_exchanges() != (int64_t)(range->end-range->begin)) return false;
             for (size_t q = range->begin; q < range->end; ++q) {
                 const ASwap& w = aswaps[q];
                 host_res[(size_t)w.layer*g.n_expert+w.in] = w.slot;
