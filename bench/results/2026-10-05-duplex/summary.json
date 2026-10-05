@@ -1,0 +1,431 @@
+{
+  "gate-v2": {
+    "requests": 14,
+    "comparisons": 7,
+    "engine_sha256": {
+      "upstream": "d660b8d2613fe0baa66ce848fe15cf3c629ed9ef5ebb16a26755ecae6afa0c07",
+      "candidate": "af9a24a8a52e156c6e393ff6a1d13c400fe5a2ebc3fe4e79fc33cabc683f5ed3"
+    },
+    "all_tokens_and_work_identical": true,
+    "pairs": [
+      {
+        "labels": [
+          "arena-upstream",
+          "arena-default"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -0.20591538749532567,
+        "total_time_reduction_pct": -0.0750171961316548,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "arena-default",
+          "arena-flag-fallback"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.07493443237167607,
+        "total_time_reduction_pct": 0.032059483960178436,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "resident-upstream",
+          "resident-default"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -0.15017388555168543,
+        "total_time_reduction_pct": -0.011167425329361436,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "resident-default",
+          "resident-duplex"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 3.478735005452549,
+        "total_time_reduction_pct": 1.3952966928223565,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "target-control",
+          "target-duplex"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 5.535458737478138,
+        "total_time_reduction_pct": 2.705541760838859,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "pageable-control",
+          "pageable-fallback"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.0,
+        "total_time_reduction_pct": -0.3081735725641188,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "lifecycle-control",
+          "lifecycle-duplex"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.8703179467983047,
+        "total_time_reduction_pct": 0.7432815317945707,
+        "work_identical": true
+      }
+    ]
+  },
+  "performance-v2": {
+    "requests": 32,
+    "comparisons": 16,
+    "engine_sha256": {
+      "upstream": "d660b8d2613fe0baa66ce848fe15cf3c629ed9ef5ebb16a26755ecae6afa0c07",
+      "candidate": "af9a24a8a52e156c6e393ff6a1d13c400fe5a2ebc3fe4e79fc33cabc683f5ed3"
+    },
+    "all_tokens_and_work_identical": true,
+    "pairs": [
+      {
+        "labels": [
+          "8192-t1-code-r0-duplex0",
+          "8192-t1-code-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.0283506967118337,
+        "total_time_reduction_pct": 1.3356921704817282,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "8192-t1-code-r1-duplex0",
+          "8192-t1-code-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.128802641277038,
+        "total_time_reduction_pct": 0.7498901197821706,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "8192-t1-editing-r0-duplex0",
+          "8192-t1-editing-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.9008809842262933,
+        "total_time_reduction_pct": 0.600794265240634,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "8192-t1-editing-r1-duplex0",
+          "8192-t1-editing-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.0024371684733913,
+        "total_time_reduction_pct": 0.6432308805451092,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "8192-t2-code-r0-duplex0",
+          "8192-t2-code-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.973666837819988,
+        "total_time_reduction_pct": 1.695707820867054,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "8192-t2-code-r1-duplex0",
+          "8192-t2-code-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.5801063689508075,
+        "total_time_reduction_pct": 1.4893144342366438,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "8192-t2-editing-r0-duplex0",
+          "8192-t2-editing-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.7634115350048107,
+        "total_time_reduction_pct": 0.9709048736569192,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "8192-t2-editing-r1-duplex0",
+          "8192-t2-editing-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.705733806373666,
+        "total_time_reduction_pct": 0.9739479927803996,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t1-code-r0-duplex0",
+          "32768-t1-code-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -1.7652557880499575,
+        "total_time_reduction_pct": -0.6010293547975998,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t1-code-r1-duplex0",
+          "32768-t1-code-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.4267968145894363,
+        "total_time_reduction_pct": 0.12773012609798018,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t1-editing-r0-duplex0",
+          "32768-t1-editing-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -2.8252695431788433,
+        "total_time_reduction_pct": -0.9342713055805918,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t1-editing-r1-duplex0",
+          "32768-t1-editing-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.41656611019591505,
+        "total_time_reduction_pct": 0.13177015768572886,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t2-code-r0-duplex0",
+          "32768-t2-code-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.5300247262451503,
+        "total_time_reduction_pct": 0.6358352044138482,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t2-code-r1-duplex0",
+          "32768-t2-code-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.5316828331297003,
+        "total_time_reduction_pct": 0.6473600994238771,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t2-editing-r0-duplex0",
+          "32768-t2-editing-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.104245124042037,
+        "total_time_reduction_pct": 0.49249014252720213,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "32768-t2-editing-r1-duplex0",
+          "32768-t2-editing-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.9853770751219857,
+        "total_time_reduction_pct": 0.5090239495353255,
+        "work_identical": true
+      }
+    ]
+  },
+  "q8-model": {
+    "requests": 18,
+    "comparisons": 8,
+    "engine_sha256": {
+      "integration": "987ef4bd4e1908dcc3a059219d4c0ef10462fd80f113f4b88335901912b05981"
+    },
+    "all_tokens_and_work_identical": true,
+    "pairs": [
+      {
+        "labels": [
+          "q8-32768-t2-code-rotate1-r0-duplex0",
+          "q8-32768-t2-code-rotate1-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 70.37705405290646,
+        "total_time_reduction_pct": 9.84160761747701,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t2-editing-rotate1-r0-duplex0",
+          "q8-32768-t2-editing-rotate1-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 84.77961667519764,
+        "total_time_reduction_pct": 11.221004762512688,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t2-code-rotate1-r1-duplex0",
+          "q8-32768-t2-code-rotate1-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -2.6795118206756174,
+        "total_time_reduction_pct": -0.4608729186122762,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t2-editing-rotate1-r1-duplex0",
+          "q8-32768-t2-editing-rotate1-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 16.583098700196718,
+        "total_time_reduction_pct": 4.201969642956449,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t1-code-rotate1-r0-duplex0",
+          "q8-32768-t1-code-rotate1-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 37.141107782467046,
+        "total_time_reduction_pct": 7.200138314871496,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t2-code-rotate0-r0-duplex0",
+          "q8-32768-t2-code-rotate0-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 53.43492985002418,
+        "total_time_reduction_pct": 8.979339782567909,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-131072-t2-code-rotate1-r0-duplex0",
+          "q8-131072-t2-code-rotate1-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.619679989635282,
+        "total_time_reduction_pct": 0.16543892332890886,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-8192-t2-count-rotate1-r0-duplex0-cancel",
+          "q8-8192-t2-count-rotate1-r0-duplex1-cancel"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 28.064722552335674,
+        "total_time_reduction_pct": 6.721921569832057,
+        "work_identical": true
+      }
+    ]
+  },
+  "q8-t4-model": {
+    "requests": 8,
+    "comparisons": 4,
+    "engine_sha256": {
+      "integration": "987ef4bd4e1908dcc3a059219d4c0ef10462fd80f113f4b88335901912b05981"
+    },
+    "all_tokens_and_work_identical": true,
+    "pairs": [
+      {
+        "labels": [
+          "q8-32768-t4-code-rotate1-r0-duplex0",
+          "q8-32768-t4-code-rotate1-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -0.8450230524530755,
+        "total_time_reduction_pct": -0.2147955658383216,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t4-code-rotate1-r1-duplex0",
+          "q8-32768-t4-code-rotate1-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 94.68414491937752,
+        "total_time_reduction_pct": 10.77366676223872,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t4-editing-rotate1-r0-duplex0",
+          "q8-32768-t4-editing-rotate1-r0-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -10.556755582254373,
+        "total_time_reduction_pct": -2.7498983929772347,
+        "work_identical": true
+      },
+      {
+        "labels": [
+          "q8-32768-t4-editing-rotate1-r1-duplex0",
+          "q8-32768-t4-editing-rotate1-r1-duplex1"
+        ],
+        "tokens_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.2181313415077435,
+        "total_time_reduction_pct": -0.022666430711071328,
+        "work_identical": true
+      }
+    ]
+  },
+  "raw_archive_sha256": "16117e88e417c00bd608e80a8ecbfeeec58ff218e651f1eed123a22fa0dbc016",
+  "interpretation": "Q2/copy timings reported with limits. Q8 exact-token checks passed, but timing is confounded by run-to-run variability and unlocked PLE memory; no large Q8 speed claim."
+}

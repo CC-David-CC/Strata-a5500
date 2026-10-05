@@ -1,0 +1,66 @@
+[
+  {
+    "blob_bytes": 1382400,
+    "slots": 1,
+    "control_ms": 0.1238605,
+    "duplex_ms": 0.1226285,
+    "reduction_pct": 0.9946673879081658,
+    "repeats": 8
+  },
+  {
+    "blob_bytes": 1382400,
+    "slots": 4,
+    "control_ms": 0.41585150000000004,
+    "duplex_ms": 0.315781,
+    "reduction_pct": 24.06399880726655,
+    "repeats": 8
+  },
+  {
+    "blob_bytes": 1382400,
+    "slots": 16,
+    "control_ms": 1.579446,
+    "duplex_ms": 1.0761625000000001,
+    "reduction_pct": 31.864558838985303,
+    "repeats": 8
+  },
+  {
+    "blob_bytes": 1382400,
+    "slots": 96,
+    "control_ms": 9.3642975,
+    "duplex_ms": 5.9306725,
+    "reduction_pct": 36.667192600405954,
+    "repeats": 8
+  },
+  {
+    "blob_bytes": 5222400,
+    "slots": 1,
+    "control_ms": 0.392362,
+    "duplex_ms": 0.381,
+    "reduction_pct": 2.8957952095258976,
+    "repeats": 8
+  },
+  {
+    "blob_bytes": 5222400,
+    "slots": 4,
+    "control_ms": 1.4834735000000001,
+    "duplex_ms": 1.0830965,
+    "reduction_pct": 26.989157541405373,
+    "repeats": 8
+  },
+  {
+    "blob_bytes": 5222400,
+    "slots": 16,
+    "control_ms": 5.858435,
+    "duplex_ms": 3.86724,
+    "reduction_pct": 33.988513997338885,
+    "repeats": 8
+  },
+  {
+    "blob_bytes": 5222400,
+    "slots": 96,
+    "control_ms": 35.0377095,
+    "duplex_ms": 22.208061999999998,
+    "reduction_pct": 36.61668437544412,
+    "repeats": 8
+  }
+]

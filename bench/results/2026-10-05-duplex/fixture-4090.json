@@ -1,0 +1,10 @@
+{
+  "files": {
+    "duplex_exchange_test.cpp": "5c3bd7d37562ceac2193e0547e77329799c80c14e4337fa3cda2e401e8d43a9b",
+    "include/strata/core/duplex_exchange.hpp": "f7f0c334996e60167ea595d79139ac6f71392aa7d4686508eee7357c42dd7948",
+    "duplex-test": "390cd5964f28d145bef51dda5fe14b8ab69003489582c92c85d2eb0e122a3ffc",
+    "fixture.log": "84fdd2580b25750f62045a363f927871a9dbcffd5dff6f25d9fa69dce5b98b61"
+  },
+  "gpu": "name, driver_version, memory.total [MiB]\nNVIDIA GeForce RTX 4090, 595.91.07, 24564 MiB\n",
+  "fixture": "duplex exchanges: byte parity, counters, validation and early close passed\n"
+}
