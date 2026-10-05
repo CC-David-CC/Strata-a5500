@@ -1,0 +1,22 @@
+Internal ctest changing into directory: /home/dflanag3/fleet-downloads/q8-pdl-branches-20261005/build
+Test project /home/dflanag3/fleet-downloads/q8-pdl-branches-20261005/build
+    Start  4: exchange_storage_test
+1/8 Test  #4: exchange_storage_test ............   Passed    0.33 sec
+    Start  5: file_expert_source_test
+2/8 Test  #5: file_expert_source_test ..........   Passed    0.01 sec
+    Start  6: duplex_exchange_test
+3/8 Test  #6: duplex_exchange_test .............   Passed    4.74 sec
+    Start  7: layer_exchange_test
+4/8 Test  #7: layer_exchange_test ..............   Passed    0.49 sec
+    Start 15: mmvq_multi_parity
+5/8 Test #15: mmvq_multi_parity ................   Passed    0.43 sec
+    Start 16: pdl_parity
+6/8 Test #16: pdl_parity .......................   Passed    0.45 sec
+    Start 35: bf16_gemv_parity
+7/8 Test #35: bf16_gemv_parity .................   Passed    0.31 sec
+    Start 43: kv_q4_parity
+8/8 Test #43: kv_q4_parity .....................   Passed    0.23 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   6.99 sec

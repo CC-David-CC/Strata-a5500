@@ -1,0 +1,213 @@
+[
+  {
+    "suite": "initial-pr904/q2-gate/result.json",
+    "runs": 5,
+    "comparisons": [
+      {
+        "labels": [
+          "prior-off",
+          "new-off"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -1.1988237955213643,
+        "request_time_reduction_pct": 0.07882862518167055
+      },
+      {
+        "labels": [
+          "new-off",
+          "new-on"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 3.3366446561093888,
+        "request_time_reduction_pct": 2.126929380385234
+      },
+      {
+        "labels": [
+          "target-off",
+          "target-on"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.351711279797585,
+        "request_time_reduction_pct": 0.7436058319738148
+      }
+    ]
+  },
+  {
+    "suite": "initial-pr904/q8-screen/result.json",
+    "runs": 7,
+    "comparisons": [
+      {
+        "labels": [
+          "q8-32k-published",
+          "q8-32k-off"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.5742287252398448,
+        "request_time_reduction_pct": 0.02292568107495896
+      },
+      {
+        "labels": [
+          "q8-32k-off",
+          "q8-32k-pdl"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.5412532093539646,
+        "request_time_reduction_pct": 0.10396899300930684
+      },
+      {
+        "labels": [
+          "q8-32k-off",
+          "q8-32k-branches"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.644381462826039,
+        "request_time_reduction_pct": 0.24150460616528813
+      },
+      {
+        "labels": [
+          "q8-32k-off",
+          "q8-32k-ple"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -0.7439579108894812,
+        "request_time_reduction_pct": -0.09916724043788072
+      },
+      {
+        "labels": [
+          "q8-32k-off",
+          "q8-32k-all"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.705741962656182,
+        "request_time_reduction_pct": 0.2678254703261773
+      },
+      {
+        "labels": [
+          "q8-32k-all",
+          "q8-32k-single-edge-all"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.428615740349092,
+        "request_time_reduction_pct": -0.045010609568163495
+      }
+    ]
+  },
+  {
+    "suite": "focused/q2-gate/result.json",
+    "runs": 5,
+    "comparisons": [
+      {
+        "labels": [
+          "prior-off",
+          "new-off"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -3.241770462633442,
+        "request_time_reduction_pct": -1.722299488605028
+      },
+      {
+        "labels": [
+          "new-off",
+          "new-on"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 3.7378864790032162,
+        "request_time_reduction_pct": 2.2445414008429476
+      },
+      {
+        "labels": [
+          "target-off",
+          "target-on"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.0721460610272135,
+        "request_time_reduction_pct": 1.1290934319558188
+      }
+    ]
+  },
+  {
+    "suite": "focused/q8-screen/result.json",
+    "runs": 6,
+    "comparisons": [
+      {
+        "labels": [
+          "q8-32k-r0-off",
+          "q8-32k-r0-both"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.6947014297729268,
+        "request_time_reduction_pct": 0.2169303013103807
+      },
+      {
+        "labels": [
+          "q8-32k-r1-off",
+          "q8-32k-r1-both"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 2.4496715405806224,
+        "request_time_reduction_pct": 0.2552075457232683
+      },
+      {
+        "labels": [
+          "q8-32k-r0-off",
+          "q8-32k-branches"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 1.4217413185707128,
+        "request_time_reduction_pct": 0.17298384566233338
+      },
+      {
+        "labels": [
+          "q8-32k-r0-off",
+          "q8-32k-pdl"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": -0.1816155528955421,
+        "request_time_reduction_pct": -0.001073108798332889
+      },
+      {
+        "labels": [
+          "q8-32k-r0-off",
+          "q8-32k-r1-off"
+        ],
+        "tokens_identical": true,
+        "recorded_work_including_transfers_identical": true,
+        "first_difference": null,
+        "decode_gain_pct": 0.041368468952973636,
+        "request_time_reduction_pct": 0.0048057227058584395
+      }
+    ]
+  }
+]

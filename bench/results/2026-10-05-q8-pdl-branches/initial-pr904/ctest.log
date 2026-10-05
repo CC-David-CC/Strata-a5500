@@ -1,0 +1,24 @@
+Internal ctest changing into directory: /home/dflanag3/fleet-downloads/adaptation-pr904-20261005/build
+Test project /home/dflanag3/fleet-downloads/adaptation-pr904-20261005/build
+    Start  4: exchange_storage_test
+1/9 Test  #4: exchange_storage_test ............   Passed    0.31 sec
+    Start  5: file_expert_source_test
+2/9 Test  #5: file_expert_source_test ..........   Passed    0.00 sec
+    Start  6: duplex_exchange_test
+3/9 Test  #6: duplex_exchange_test .............   Passed    4.74 sec
+    Start  7: layer_exchange_test
+4/9 Test  #7: layer_exchange_test ..............   Passed    0.49 sec
+    Start 15: mmvq_multi_parity
+5/9 Test #15: mmvq_multi_parity ................   Passed    0.41 sec
+    Start 16: pdl_parity
+6/9 Test #16: pdl_parity .......................   Passed    0.45 sec
+    Start 35: bf16_gemv_parity
+7/9 Test #35: bf16_gemv_parity .................   Passed    0.30 sec
+    Start 43: kv_q4_parity
+8/9 Test #43: kv_q4_parity .....................   Passed    0.22 sec
+    Start 44: verify_batch_parity
+9/9 Test #44: verify_batch_parity ..............   Passed    0.22 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =   7.16 sec

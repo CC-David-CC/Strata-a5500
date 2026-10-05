@@ -1,0 +1,31 @@
+========= COMPUTE-SANITIZER
+verify_batch_parity: NVIDIA RTX PRO 6000 Blackwell Workstation Edition (sm_120)
+kv_append_q4_step_multi, 2 tokens from cell 5                    bitwise equal
+kv_append_q4_step_multi, 2 tokens from cell 60                   bitwise equal
+kv_append_q4_step_multi, 2 tokens from cell 189                  bitwise equal
+kv_append_q4_step_multi, 3 tokens from cell 5                    bitwise equal
+kv_append_q4_step_multi, 3 tokens from cell 60                   bitwise equal
+kv_append_q4_step_multi, 3 tokens from cell 189                  bitwise equal
+kv_append_q4_step_multi, 4 tokens from cell 5                    bitwise equal
+kv_append_q4_step_multi, 4 tokens from cell 60                   bitwise equal
+kv_append_q4_step_multi, 4 tokens from cell 189                  bitwise equal
+kv_append_q4_step_multi, 8 tokens from cell 5                    bitwise equal
+kv_append_q4_step_multi, 8 tokens from cell 60                   bitwise equal
+kv_append_q4_step_multi, 8 tokens from cell 189                  bitwise equal
+native_gr_post_multi, 2 tokens (in place)                        bitwise equal
+native_gr_post_multi, 4 tokens (in place)                        bitwise equal
+native_gr_post_multi, 8 tokens (in place)                        bitwise equal
+native_ple_postops_batch_snap, 2 tokens: results                 bitwise equal
+native_ple_postops_batch_snap, 2 tokens: history                 bitwise equal
+native_ple_postops_batch_snap, 2 tokens: snapshots               bitwise equal
+native_ple_postops_batch_snap, 3 tokens: results                 bitwise equal
+native_ple_postops_batch_snap, 3 tokens: history                 bitwise equal
+native_ple_postops_batch_snap, 3 tokens: snapshots               bitwise equal
+native_ple_postops_batch_snap, 4 tokens: results                 bitwise equal
+native_ple_postops_batch_snap, 4 tokens: history                 bitwise equal
+native_ple_postops_batch_snap, 4 tokens: snapshots               bitwise equal
+native_ple_postops_batch_snap, 8 tokens: results                 bitwise equal
+native_ple_postops_batch_snap, 8 tokens: history                 bitwise equal
+native_ple_postops_batch_snap, 8 tokens: snapshots               bitwise equal
+verify_batch_parity: PASS
+========= ERROR SUMMARY: 0 errors

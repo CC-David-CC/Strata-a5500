@@ -1,0 +1,358 @@
+[1/147] Building CXX object CMakeFiles/strata_core.dir/src/platform/memory.cpp.o
+[2/147] Building CXX object CMakeFiles/strata_core.dir/src/core/graph.cpp.o
+[3/147] Building CUDA object CMakeFiles/strata_core.dir/src/core/device.cu.o
+[4/147] Building CUDA object CMakeFiles/strata_core.dir/src/core/pinned.cu.o
+[5/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/dequant_s2.cu.o
+[6/147] Building CXX object CMakeFiles/strata_core.dir/src/core/layout.cpp.o
+[7/147] Building CXX object CMakeFiles/strata_core.dir/src/core/weights.cpp.o
+../source/src/core/weights.cpp: In member function ‘bool strata::core::WeightTable::load(const std::string&, void*, uint64_t, std::string&, const std::set<std::__cxx11::basic_string<char> >*)’:
+../source/src/core/weights.cpp:167:51: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 6 has type ‘uint64_t*’ {aka ‘long unsigned int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                ~~~^
+      |                                                   |
+      |                                                   long long unsigned int*
+      |                                                %lu
+  168 |                                   name, &r.file, &kind, &r.src_off, &r.src_bytes, &r.dst_off, &r.dst_bytes,
+      |                                                         ~~~~~~~~~~
+      |                                                         |
+      |                                                         uint64_t* {aka long unsigned int*}
+../source/src/core/weights.cpp:167:56: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 7 has type ‘uint64_t*’ {aka ‘long unsigned int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                     ~~~^
+      |                                                        |
+      |                                                        long long unsigned int*
+      |                                                     %lu
+  168 |                                   name, &r.file, &kind, &r.src_off, &r.src_bytes, &r.dst_off, &r.dst_bytes,
+      |                                                                     ~~~~~~~~~~~~
+      |                                                                     |
+      |                                                                     uint64_t* {aka long unsigned int*}
+../source/src/core/weights.cpp:167:61: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 8 has type ‘uint64_t*’ {aka ‘long unsigned int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                          ~~~^
+      |                                                             |
+      |                                                             long long unsigned int*
+      |                                                          %lu
+  168 |                                   name, &r.file, &kind, &r.src_off, &r.src_bytes, &r.dst_off, &r.dst_bytes,
+      |                                                                                   ~~~~~~~~~~
+      |                                                                                   |
+      |                                                                                   uint64_t* {aka long unsigned int*}
+../source/src/core/weights.cpp:167:66: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 9 has type ‘uint64_t*’ {aka ‘long unsigned int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                               ~~~^
+      |                                                                  |
+      |                                                                  long long unsigned int*
+      |                                                               %lu
+  168 |                                   name, &r.file, &kind, &r.src_off, &r.src_bytes, &r.dst_off, &r.dst_bytes,
+      |                                                                                               ~~~~~~~~~~~~
+      |                                                                                               |
+      |                                                                                               uint64_t* {aka long unsigned int*}
+../source/src/core/weights.cpp:167:71: warning: format ‘%lld’ expects argument of type ‘long long int*’, but argument 10 has type ‘int64_t*’ {aka ‘long int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                                    ~~~^
+      |                                                                       |
+      |                                                                       long long int*
+      |                                                                    %ld
+  168 |                                   name, &r.file, &kind, &r.src_off, &r.src_bytes, &r.dst_off, &r.dst_bytes,
+  169 |                                   &r.ne0, &r.ne1, &r.code_bits, &r.code_bias, &r.group_elems, &r.codebook,
+      |                                   ~~~~~~                               
+      |                                   |
+      |                                   int64_t* {aka long int*}
+../source/src/core/weights.cpp:167:76: warning: format ‘%lld’ expects argument of type ‘long long int*’, but argument 11 has type ‘int64_t*’ {aka ‘long int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                                         ~~~^
+      |                                                                            |
+      |                                                                            long long int*
+      |                                                                         %ld
+  168 |                                   name, &r.file, &kind, &r.src_off, &r.src_bytes, &r.dst_off, &r.dst_bytes,
+  169 |                                   &r.ne0, &r.ne1, &r.code_bits, &r.code_bias, &r.group_elems, &r.codebook,
+      |                                           ~~~~~~                            
+      |                                           |
+      |                                           int64_t* {aka long int*}
+../source/src/core/weights.cpp:167:96: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 17 has type ‘uint64_t*’ {aka ‘long unsigned int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                                                             ~~~^
+      |                                                                                                |
+      |                                                                                                long long unsigned int*
+      |                                                                                             %lu
+......
+  170 |                                   &r.has_offset, &r.codes_bytes, &r.scales_bytes, &r.offset_bytes,
+      |                                                  ~~~~~~~~~~~~~~                                 
+      |                                                  |
+      |                                                  uint64_t* {aka long unsigned int*}
+../source/src/core/weights.cpp:167:101: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 18 has type ‘uint64_t*’ {aka ‘long unsigned int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                                                                  ~~~^
+      |                                                                                                     |
+      |                                                                                                     long long unsigned int*
+      |                                                                                                  %lu
+......
+  170 |                                   &r.has_offset, &r.codes_bytes, &r.scales_bytes, &r.offset_bytes,
+      |                                                                  ~~~~~~~~~~~~~~~                     
+      |                                                                  |
+      |                                                                  uint64_t* {aka long unsigned int*}
+../source/src/core/weights.cpp:167:106: warning: format ‘%llu’ expects argument of type ‘long long unsigned int*’, but argument 19 has type ‘uint64_t*’ {aka ‘long unsigned int*’} [-Wformat=]
+  167 |                                   "%255s %d %d %llu %llu %llu %llu %lld %lld %d %d %d %d %d %llu %llu %llu %d %d",
+      |                                                                                                       ~~~^
+      |                                                                                                          |
+      |                                                                                                          long long unsigned int*
+      |                                                                                                       %lu
+......
+  170 |                                   &r.has_offset, &r.codes_bytes, &r.scales_bytes, &r.offset_bytes,
+      |                                                                                   ~~~~~~~~~~~~~~~         
+      |                                                                                   |
+      |                                                                                   uint64_t* {aka long unsigned int*}
+[8/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/s2_gemv.cu.o
+[9/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/s2_gemv_quads.cu.o
+../source/src/kernels/cuda/s2_gemv_quads.cu(31): warning #177-D: variable "strata::kernels::<unnamed>::CODES_PER_BYTE_S2" was declared but never referenced
+  constexpr int CODES_PER_BYTE_S2 = 4;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[10/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/s_gemv.cu.o
+[11/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/s2_gemv_fast.cu.o
+[12/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/quantize_act.cu.o
+[13/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/router_top10.cu.o
+[14/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/rope.cu.o
+[15/147] Linking CXX static library libstrata_core.a
+[16/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/s2_gemv_q8.cu.o
+[17/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/sampler.cu.o
+[18/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/s2_expert_grouped.cu.o
+[19/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/shared_expert.cu.o
+../source/src/kernels/cuda/shared_expert.cu(72): warning #177-D: function "strata::kernels::<unnamed>::to_f16_kernel" was declared but never referenced
+            void to_f16_kernel(const float* __restrict__ in, uint16_t* __restrict__ out, int n) {
+                 ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+../source/src/kernels/cuda/shared_expert.cu(139): warning #177-D: function "strata::kernels::<unnamed>::native_scalar_sigmoid_multi_kernel" was declared but never referenced
+            void native_scalar_sigmoid_multi_kernel(float* gate) {
+                 ^
+
+[20/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/gr.cu.o
+../source/src/kernels/cuda/gr.cu(112): warning #177-D: function "strata::kernels::<unnamed>::block_sum" was declared but never referenced
+            double block_sum(double v, double* scratch) {
+                   ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[21/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/gdn.cu.o
+../source/src/kernels/cuda/gdn.cu(35): warning #177-D: function "strata::kernels::<unnamed>::softplus_f" was declared but never referenced
+                            float softplus_f(float x) { return x > 20.0f ? x : log1pf(expf(x)); }
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[22/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/qsa.cu.o
+[23/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/elementwise.cu.o
+[24/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/bf16_gemv.cu.o
+[25/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_gr_norm.cu.o
+[26/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_moe.cu.o
+[27/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_gdn.cu.o
+[28/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_gr_postops.cu.o
+[29/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_router.cu.o
+[30/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_gdn_preprocess.cu.o
+[31/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_qsa.cu.o
+[32/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_rope.cu.o
+[33/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_flash_attn.cu.o
+[34/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_ple_postops.cu.o
+[35/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_qsa_indexer.cu.o
+[36/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_qsa_score.cu.o
+[37/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/ple.cu.o
+../source/src/kernels/cuda/ple.cu(372): warning #177-D: variable "hc" was declared but never referenced
+      const int n_embd = NG_N_EMBD, hc = NG_HC, hc_dim = NG_HC_DIM;
+                                    ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[38/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/kv_q8.cu.o
+[39/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/kv_stream.cu.o
+[40/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/kv_q4.cu.o
+[41/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/cvec.cu.o
+[42/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/fused_gr.cu.o
+../source/src/kernels/cuda/fused_gr.cu(321): warning #177-D: variable "strata::kernels::<unnamed>::TQ3" was declared but never referenced
+  constexpr int TQ3 = N / 8 / 32;
+                ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[43/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/qsa_decode_attn.cu.o
+[44/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/qsa_prompt_attn.cu.o
+[45/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/fused_gdn.cu.o
+[46/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/dequant_bf16.cu.o
+[47/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/qsa_select.cu.o
+[48/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/iq_kernels.cu.o
+[49/147] Building CXX object CMakeFiles/strata_kernels.dir/src/kernels/ngram.cpp.o
+[50/147] Building CXX object CMakeFiles/strata_kernels.dir/src/ngram/ple_reader.cpp.o
+[51/147] Building CXX object CMakeFiles/strata_kernels.dir/src/platform/direct_file.cpp.o
+[52/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/layer.cpp.o
+../source/src/core/layer.cpp: In function ‘bool strata::core::moe_layer(const WeightTable&, const ModelGeometry&, int64_t, int64_t, const MoEBuffers&, const float*, const float*, float*, void*, std::string&, const Doorbell*)’:
+../source/src/core/layer.cpp:500:1: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  500 | if (!moe_route(tables, g, layer, k, b, x, stream, err, db)) return false;    return moe_finish(tables, g, layer, k, b, x, parts, out, stream, err);}
+      | ^~
+../source/src/core/layer.cpp:500:78: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  500 | if (!moe_route(tables, g, layer, k, b, x, stream, err, db)) return false;    return moe_finish(tables, g, layer, k, b, x, parts, out, stream, err);}
+      |                                                                              ^~~~~~
+../source/src/core/layer.cpp: In function ‘bool strata::core::qsa_layer(const WeightTable&, const ModelGeometry&, int64_t, int64_t, int32_t, const QsaState&, const QsaBuffers&, const float*, float*, void*, std::string&, float*)’:
+../source/src/core/layer.cpp:924:1: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+  924 | if (!gemv_quantized(*w_attnk, p_k, f_k, b.x_q8_0, b.x_q8k, b.kcur, g.n_embd, g.n_head_kv * g.head_dim,                        v.name("attn_k.weight"), stream, err, x)) return false;    if (!gemv_quantized(*w_attnv, p_v, f_v, b.x_q8_0, b.x_q8k, b.vcur, g.n_embd, g.n_head_kv * g.head_dim,                        v.name("attn_v.weight"), stream, err, x, w_attnk->native_data && w_attnv->native_data)) return false;    dump_slot(dump, g, layer, b.vcur,                            (uint64_t) 2 * g.n_embd + 2 * g.hc + (uint64_t) g.n_head * g.head_dim,                            (uint64_t) g.n_head_kv * g.head_dim, stream);    if (!normalize_rotate(b.kcur, w_kn, (int) g.n_head_kv, (int) g.head_dim)) return false;
+      | ^~
+../source/src/core/layer.cpp:924:186: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  924 | if (!gemv_quantized(*w_attnk, p_k, f_k, b.x_q8_0, b.x_q8k, b.kcur, g.n_embd, g.n_head_kv * g.head_dim,                        v.name("attn_k.weight"), stream, err, x)) return false;    if (!gemv_quantized(*w_attnv, p_v, f_v, b.x_q8_0, b.x_q8k, b.vcur, g.n_embd, g.n_head_kv * g.head_dim,                        v.name("attn_v.weight"), stream, err, x, w_attnk->native_data && w_attnv->native_data)) return false;    dump_slot(dump, g, layer, b.vcur,                            (uint64_t) 2 * g.n_embd + 2 * g.hc + (uint64_t) g.n_head * g.head_dim,                            (uint64_t) g.n_head_kv * g.head_dim, stream);    if (!normalize_rotate(b.kcur, w_kn, (int) g.n_head_kv, (int) g.head_dim)) return false;
+      |                                                                                                                                                                                          ^~
+../source/src/core/layer.cpp:989:5: warning: this ‘else’ clause does not guard... [-Wmisleading-indentation]
+  989 |     else if (st.kv_int8) kv_gather_q8_step(st.k_q, st.v_q, st.k_scale, st.v_scale, st.page_table, b.ids, st.step, cap, s,                                 b.k_scratch, b.v_scratch, stream);    else kv_gather_step(st.k_pool, st.v_pool, st.page_table, b.ids, st.step, cap, s, b.k_scratch, b.v_scratch,                   stream);    if (native_flash_attn_short) {
+      |     ^~~~
+../source/src/core/layer.cpp:989:330: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘else’
+  989 |     else if (st.kv_int8) kv_gather_q8_step(st.k_q, st.v_q, st.k_scale, st.v_scale, st.page_table, b.ids, st.step, cap, s,                                 b.k_scratch, b.v_scratch, stream);    else kv_gather_step(st.k_pool, st.v_pool, st.page_table, b.ids, st.step, cap, s, b.k_scratch, b.v_scratch,                   stream);    if (native_flash_attn_short) {
+      |                                                                                                                                                                                                                                                                                                                                          ^~
+../source/src/core/layer.cpp:1013:5: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 1013 |     if (!w_attno->native_data) quantize_q8_K(b.attn32, b.attn_q8k, g.n_head * g.head_dim, stream);    if (w_attno->native_data) {
+      |     ^~
+../source/src/core/layer.cpp:1013:103: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 1013 |     if (!w_attno->native_data) quantize_q8_K(b.attn32, b.attn_q8k, g.n_head * g.head_dim, stream);    if (w_attno->native_data) {
+      |                                                                                                       ^~
+../source/src/core/layer.cpp:876:774: warning: unused variable ‘n_bid’ [-Wunused-variable]
+  876 | bool qsa_layer(const WeightTable& tables, const ModelGeometry& g, int64_t layer, int64_t pos, int32_t pos_base,               const QsaState& st, const QsaBuffers& b, const float* x, float* out, void* stream,               std::string& err, float* dump) {    using namespace strata::kernels;    const QsaShapes s = qsa_shapes(g);    const LayerView v(tables, layer);    const int64_t n_kv = pos + 1;    /* P7 audit: RoPE reads cos/sin row pos_base + pos, and the table holds max_cells rows. */    if ((int64_t) pos_base + pos >= st.max_cells || pos_base < 0) {        err = "qsa_layer: position " + std::to_string((long long) pos_base + pos) + " is outside the RoPE table (" + std::to_string((long long) st.max_cells) + " rows)";        return false;    }    const int64_t n_bid = n_kv / s.idx_block;    const int64_t width = qsa_selection_width(n_kv, s);    const int64_t cap = qsa_selection_width(kTopkMaxCells, s);
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ^~~~~
+../source/src/core/layer.cpp:876:819: warning: unused variable ‘width’ [-Wunused-variable]
+  876 | bool qsa_layer(const WeightTable& tables, const ModelGeometry& g, int64_t layer, int64_t pos, int32_t pos_base,               const QsaState& st, const QsaBuffers& b, const float* x, float* out, void* stream,               std::string& err, float* dump) {    using namespace strata::kernels;    const QsaShapes s = qsa_shapes(g);    const LayerView v(tables, layer);    const int64_t n_kv = pos + 1;    /* P7 audit: RoPE reads cos/sin row pos_base + pos, and the table holds max_cells rows. */    if ((int64_t) pos_base + pos >= st.max_cells || pos_base < 0) {        err = "qsa_layer: position " + std::to_string((long long) pos_base + pos) + " is outside the RoPE table (" + std::to_string((long long) st.max_cells) + " rows)";        return false;    }    const int64_t n_bid = n_kv / s.idx_block;    const int64_t width = qsa_selection_width(n_kv, s);    const int64_t cap = qsa_selection_width(kTopkMaxCells, s);
+      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^~~~~
+../source/src/core/layer.cpp: In function ‘bool strata::core::block_layer_pre(const WeightTable&, const ModelGeometry&, int64_t, int64_t, int32_t, const GdnBuffers&, const QsaState&, const QsaBuffers&, const MoEBuffers&, int64_t, const BlockBuffers&, void*, std::string&, const Doorbell*, const PleRun*, int, int)’:
+../source/src/core/layer.cpp:1198:23: warning: unused variable ‘hcd’ [-Wunused-variable]
+ 1198 |         const int64_t hcd = strata::kernels::NG_HC_DIM;
+      |                       ^~~
+../source/src/core/layer.cpp: In function ‘bool strata::core::block_layer(const WeightTable&, const ModelGeometry&, int64_t, int64_t, int32_t, const GdnBuffers&, const QsaState&, const QsaBuffers&, const MoEBuffers&, int64_t, const BlockBuffers&, const float*, void*, std::string&, const Doorbell*, const PleRun*)’:
+../source/src/core/layer.cpp:1348:1: warning: this ‘if’ clause does not guard... [-Wmisleading-indentation]
+ 1348 | if (!block_layer_pre(tables, g, layer, pos, pos_base, gb, qst, qb, mb, k, bb, stream, err, db, ple))        return false;    return block_layer_post(tables, g, layer, k, mb, bb, parts, stream, err);}}
+      | ^~
+../source/src/core/layer.cpp:1348:126: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+ 1348 | if (!block_layer_pre(tables, g, layer, pos, pos_base, gb, qst, qb, mb, k, bb, stream, err, db, ple))        return false;    return block_layer_post(tables, g, layer, k, mb, bb, parts, stream, err);}}
+      |                                                                                                                              ^~~~~~
+[53/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/session.cpp.o
+[54/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/expert_source.cpp.o
+[55/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/remote_experts.cpp.o
+[56/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_bf16.cu.o
+[57/147] Building CUDA object CMakeFiles/strata_engine.dir/src/core/remote_expert_opt.cu.o
+../source/include/strata/core/expert_source.hpp(415): warning #611-D: overloaded virtual function "strata::core::ExpertSource::prefetch" is only partially overridden in class "strata::core::FileExpertSource"
+  class FileExpertSource : public ExpertSource {
+        ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+../source/include/strata/core/expert_source.hpp(670): warning #611-D: overloaded virtual function "strata::core::ExpertSource::prefetch" is only partially overridden in class "strata::core::ArenaExpertSource"
+  class ArenaExpertSource : public ExpertSource {
+        ^
+
+../source/include/strata/core/expert_source.hpp(415): warning #611-D: overloaded virtual function "strata::core::ExpertSource::prefetch" is only partially overridden in class "strata::core::FileExpertSource"
+  class FileExpertSource : public ExpertSource {
+        ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+../source/include/strata/core/expert_source.hpp(670): warning #611-D: overloaded virtual function "strata::core::ExpertSource::prefetch" is only partially overridden in class "strata::core::ArenaExpertSource"
+  class ArenaExpertSource : public ExpertSource {
+        ^
+
+[58/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/expert_cache.cpp.o
+[59/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/native_head.cpp.o
+[60/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/native_dense.cpp.o
+[61/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/native_mmvq.cu.o
+[62/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/conversation_snapshot.cpp.o
+[63/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/conversation_state.cpp.o
+[64/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/conversation_memory.cpp.o
+[65/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/peer_experts.cpp.o
+[66/147] Building CXX object CMakeFiles/exchange_storage_test.dir/tests/core/exchange_storage_test.cpp.o
+[67/147] Linking CXX executable exchange_storage_test
+[68/147] Building CXX object CMakeFiles/file_expert_source_test.dir/tests/core/file_expert_source_test.cpp.o
+[69/147] Building CXX object CMakeFiles/duplex_exchange_test.dir/tests/core/duplex_exchange_test.cpp.o
+[70/147] Linking CXX executable duplex_exchange_test
+[71/147] Building CUDA object CMakeFiles/layer_exchange_test.dir/tools/layer_exchange_fixture.cu.o
+[72/147] Linking CUDA executable layer_exchange_test
+[73/147] Building CUDA object CMakeFiles/strata_prefill.dir/src/prefill/gemm.cu.o
+[74/147] Building CUDA object CMakeFiles/strata_prefill.dir/src/prefill/kernels.cu.o
+[75/147] Building CUDA object CMakeFiles/strata_kernels.dir/src/kernels/cuda/verify_kernels.cu.o
+[76/147] Linking CXX static library libstrata_kernels.a
+[77/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/mtp.cpp.o
+[78/147] Building CXX object CMakeFiles/mmvq_multi_parity.dir/src/kernels/mmvq_multi_parity.cpp.o
+[79/147] Linking CXX executable mmvq_multi_parity
+[80/147] Building CXX object CMakeFiles/pdl_parity.dir/src/kernels/pdl_parity.cpp.o
+[81/147] Linking CXX executable pdl_parity
+[82/147] Building CXX object CMakeFiles/bf16_gemv_parity.dir/src/kernels/bf16_gemv_parity.cpp.o
+[83/147] Linking CXX executable bf16_gemv_parity
+[84/147] Building CXX object CMakeFiles/kv_q4_parity.dir/src/kernels/kv_q4_parity.cpp.o
+[85/147] Linking CXX executable kv_q4_parity
+[86/147] Building CXX object CMakeFiles/strata_spec.dir/src/spec/suffix_drafter.cpp.o
+[87/147] Building CXX object CMakeFiles/strata_spec.dir/src/spec/controller.cpp.o
+[88/147] Building CXX object CMakeFiles/strata_spec.dir/src/spec/draft_policy.cpp.o
+[89/147] Linking CXX static library libstrata_spec.a
+[90/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/expert.cpp.o
+[91/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/pool.cpp.o
+[92/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/expert_layout.cpp.o
+[93/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/q2_avx2.cpp.o
+[94/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/native_expert.cpp.o
+[95/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/iq_avx512.cpp.o
+[96/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/iq_avx2.cpp.o
+[97/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/kq_avx2.cpp.o
+[98/147] Building CXX object CMakeFiles/strata_kernels_cpu.dir/src/kernels/cpu/kq_avx1.cpp.o
+[99/147] Building CUDA object CMakeFiles/strata_mmq.dir/src/prefill/moe_mmq.cu.o
+[100/147] Building CUDA object CMakeFiles/strata_mmq.dir/src/prefill/moe_fused.cu.o
+[101/147] Building CUDA object CMakeFiles/strata_mmq.dir/src/prefill/moe_fused_iq.cu.o
+[102/147] Building CUDA object CMakeFiles/strata_mmq.dir/src/prefill/ggml_cuda_host.cu.o
+[103/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/quantize.cu.o
+[104/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-q2_0.cu.o
+[105/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-iq2_xxs.cu.o
+[106/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-iq2_xs.cu.o
+[107/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-iq2_s.cu.o
+[108/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-iq3_xxs.cu.o
+[109/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-iq3_s.cu.o
+[110/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-iq4_nl.cu.o
+[111/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-iq4_xs.cu.o
+[112/147] Building CUDA object CMakeFiles/strata_mmq.dir/home/dflanag3/fleet-downloads/strata-rotation-mvp-ab-20261004/ggml-3cf03257/ggml/src/ggml-cuda/template-instances/mmq-instance-q8_0.cu.o
+[113/147] Building CXX object CMakeFiles/strata_engine.dir/src/core/verify.cpp.o
+../source/src/core/verify.cpp: In static member function ‘static void strata::core::Verifier::raise_flag(uint32_t*, uint32_t)’:
+../source/src/core/verify.cpp:1719:20: warning: unused variable ‘f’ [-Wunused-variable]
+ 1719 |     volatile long* f = (volatile long*) flag;
+      |                    ^
+[114/147] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml.cpp.o
+[115/147] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml-alloc.c.o
+[116/147] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-backend.cpp.o
+[117/147] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-backend-meta.cpp.o
+[118/147] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-opt.cpp.o
+[119/147] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-threading.cpp.o
+[120/147] Building CXX object CMakeFiles/strata_prefill.dir/src/prefill/prefill.cpp.o
+[121/147] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/gguf.cpp.o
+[122/147] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o
+[123/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/ggml-cpu.cpp.o
+[124/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/repack.cpp.o
+[125/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/iqp.cpp.o
+[126/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/hbm.cpp.o
+[127/147] Building C object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/ggml-cpu.c.o
+[128/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/traits.cpp.o
+[129/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/amx/amx.cpp.o
+[130/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/amx/mmq.cpp.o
+[131/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/binary-ops.cpp.o
+[132/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/unary-ops.cpp.o
+[133/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/vec.cpp.o
+[134/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/ops.cpp.o
+[135/147] Building C object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/quants.c.o
+[136/147] Building CXX object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/arch/x86/repack.cpp.o
+[137/147] Building C object ggml/src/CMakeFiles/ggml-cpu.dir/ggml-cpu/arch/x86/quants.c.o
+[138/147] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml-quants.c.o
+[139/147] Linking CXX static library ggml/src/libggml-base.a
+[140/147] Linking CXX static library ggml/src/libggml-cpu.a
+[141/147] Linking CXX static library libstrata_kernels_cpu.a
+[142/147] Linking CXX static library libstrata_engine.a
+[143/147] Linking CXX static library libstrata_mmq.a
+[144/147] Linking CXX static library libstrata_prefill.a
+[145/147] Linking CXX executable file_expert_source_test
+[146/147] Building CXX object CMakeFiles/strata.dir/src/program/generate.cpp.o
+../source/src/program/generate.cpp: In lambda function:
+../source/src/program/generate.cpp:6642:30: warning: unused variable ‘w’ [-Wunused-variable]
+ 6642 |                 const double w = (double) bt_windows, wall = std::chrono::duration<double, std::milli>(Clock::now() - bt_start).count();
+      |                              ^
+../source/src/program/generate.cpp: At global scope:
+../source/src/program/generate.cpp:1146:5: warning: ‘int {anonymous}::argmax(const std::vector<float>&)’ defined but not used [-Wunused-function]
+ 1146 | int argmax(const std::vector<float>& v) {
+      |     ^~~~~~
+[147/147] Linking CXX executable strata

@@ -1,0 +1,5 @@
+pdl_parity: NVIDIA RTX PRO 6000 Blackwell Workstation Edition (sm_120), pdl_supported() = 1
+copy_rows_strided vs cudaMemcpy2DAsync (96 rows of 256 of 512): bitwise equal
+graph edges: ordinary capture 0 programmatic; PDL capture 8 programmatic, 0 not kernel to kernel, 0 nodes with a programmatic and a non-kernel in-edge, 0 into a node with other in-edges (STRATA_DF_PDL=2: must be 0)
+PDL graph vs ordinary graph over 200 replays: 0 differ
+pdl_parity: PASS

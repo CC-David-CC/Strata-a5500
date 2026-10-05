@@ -1,0 +1,226 @@
+{
+  "python_source": "/home/dflanag3/fleet-downloads/q8-pdl-branches-20261005/source",
+  "native": "/home/dflanag3/Strata-data/models/Q2_0/Qwen3.8-Flash-Next-GSQ-RCO-Q2_0-00001-of-00002.gguf",
+  "pack": "/home/dflanag3/Strata-data/packs/q2_0-rotation-validation",
+  "engines": {
+    "reference": "/home/dflanag3/fleet-downloads/adaptation-no-rotation-20261005/build/strata",
+    "candidate": "/home/dflanag3/fleet-downloads/q8-pdl-branches-20261005/build/strata"
+  },
+  "model_manifest": "/home/dflanag3/Strata-data/models/Q2_0/download-manifest.json",
+  "source_commits": {
+    "reference": "07ff95bed2889453d4fca3d45cd86765234d0b29",
+    "candidate": "70ed61f158f0ef6364557cc1ba8d1ab03178d2f1"
+  },
+  "common_args": [
+    "--pack",
+    "/home/dflanag3/Strata-data/packs/q2_0-rotation-validation",
+    "--native",
+    "/home/dflanag3/Strata-data/models/Q2_0/Qwen3.8-Flash-Next-GSQ-RCO-Q2_0-00001-of-00002.gguf",
+    "--expert-cache",
+    "12000",
+    "--expert-profile",
+    "/home/dflanag3/fleet-downloads/q8-pdl-branches-20261005/source/data/expert-profile.bin",
+    "--adapt-every",
+    "0",
+    "--adapt-swaps",
+    "96",
+    "--adapt-decay",
+    "0.7",
+    "--pcie-frac",
+    "-1",
+    "--spec",
+    "8",
+    "--mtp",
+    "/home/dflanag3/Strata-data/mtp/rt",
+    "--suffix-draft",
+    "0",
+    "--kv",
+    "fp16",
+    "--prompt-cache",
+    "0",
+    "--conversation-cache-mib",
+    "0",
+    "--prefill",
+    "1024",
+    "--no-prefill-borrow",
+    "--vram-reserve-mib",
+    "2048",
+    "--ple-io",
+    "ram",
+    "--ple-row-cache",
+    "1048576",
+    "--eos-ids",
+    "2147483647",
+    "--stats",
+    "--native-dense-gguf",
+    "/home/dflanag3/Strata-data/models/Q2_0/Qwen3.8-Flash-Next-GSQ-RCO-Q2_0-00001-of-00002.gguf",
+    "--native-dense-gguf",
+    "/home/dflanag3/Strata-data/models/Q2_0/Qwen3.8-Flash-Next-GSQ-RCO-Q2_0-00002-of-00002.gguf",
+    "--spec-min-p",
+    "0.5"
+  ],
+  "environment": {
+    "STRATA_ADAPT_NOWAIT": "0",
+    "STRATA_EXCHANGE_DUPLEX": "0",
+    "STRATA_EXCHANGE_ROTATE": "0",
+    "STRATA_VERIFY_NODES": "1"
+  },
+  "tasks": {
+    "code": "Write a complete Python module implementing a thread-safe priority task queue with cancellation, timeouts and deterministic tests using unittest. Include the full code and tests. Do not discuss the archived notes.",
+    "editing": "Rewrite this procedure as clear numbered instructions with concrete examples and a troubleshooting section. Procedure: stop accepting new tasks; finish queued copies; check ownership; record completed work; release buffers; restart and verify the previous request cannot affect the new one. Expand each step and include an operator checklist. Do not discuss the archived notes.",
+    "count": "Count upward from 1, separated by spaces, until the output limit. No introduction or explanation."
+  },
+  "notes": [
+    "Focused extraction: PDL plus graph branches from Hardin22 PR904; no fused PLE or Q4 KV changes.",
+    "Both new flags opt-in. Omitted flags in off cases exercise the default path.",
+    "Q2 fixed-placement gates require exact tokens and recorded work; MTP and target-only.",
+    "Q8 is actual32768 input plus1024 output,FP16 KV,MTP T4,15472 cached experts,resident56GiB,lockedPLE.",
+    "Q8 combined off/on followed by on/off pairs; individual arms appear between them.",
+    "Capture token/work differences, transfer bytes and final-drain accounting. One private request at a time."
+  ],
+  "cases": [
+    {
+      "label": "prior-off",
+      "engine": "reference",
+      "async_adapt": 0,
+      "expect_async": false,
+      "resident_gib": 32,
+      "duplex": 0,
+      "mtp_t": 4,
+      "task": "code",
+      "input": 4096,
+      "output": 256,
+      "context": 40960,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "0",
+        "STRATA_VERIFY_DEVICE_PLAN": "0",
+        "STRATA_ASYNC_LAYER_ADMIT": "0"
+      },
+      "expect_rotation": false,
+      "expect_layer": false,
+      "expect_pdl": false,
+      "expect_branches": false
+    },
+    {
+      "label": "new-off",
+      "engine": "candidate",
+      "async_adapt": 0,
+      "expect_async": false,
+      "resident_gib": 32,
+      "duplex": 0,
+      "mtp_t": 4,
+      "task": "code",
+      "input": 4096,
+      "output": 256,
+      "context": 40960,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "0",
+        "STRATA_VERIFY_DEVICE_PLAN": "0",
+        "STRATA_ASYNC_LAYER_ADMIT": "0"
+      },
+      "expect_rotation": false,
+      "expect_layer": false,
+      "expect_pdl": false,
+      "expect_branches": false
+    },
+    {
+      "label": "new-on",
+      "engine": "candidate",
+      "async_adapt": 0,
+      "expect_async": false,
+      "resident_gib": 32,
+      "duplex": 0,
+      "mtp_t": 4,
+      "task": "code",
+      "input": 4096,
+      "output": 256,
+      "context": 40960,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "0",
+        "STRATA_VERIFY_DEVICE_PLAN": "0",
+        "STRATA_ASYNC_LAYER_ADMIT": "0",
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1"
+      },
+      "expect_rotation": false,
+      "expect_layer": false,
+      "expect_pdl": true,
+      "expect_branches": true
+    },
+    {
+      "label": "target-off",
+      "engine": "candidate",
+      "async_adapt": 0,
+      "expect_async": false,
+      "resident_gib": 32,
+      "duplex": 0,
+      "mtp_t": 1,
+      "task": "code",
+      "input": 4096,
+      "output": 256,
+      "context": 40960,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "0",
+        "STRATA_VERIFY_DEVICE_PLAN": "0",
+        "STRATA_ASYNC_LAYER_ADMIT": "0"
+      },
+      "expect_rotation": false,
+      "expect_layer": false,
+      "expect_pdl": false,
+      "expect_branches": false
+    },
+    {
+      "label": "target-on",
+      "engine": "candidate",
+      "async_adapt": 0,
+      "expect_async": false,
+      "resident_gib": 32,
+      "duplex": 0,
+      "mtp_t": 1,
+      "task": "code",
+      "input": 4096,
+      "output": 256,
+      "context": 40960,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "0",
+        "STRATA_VERIFY_DEVICE_PLAN": "0",
+        "STRATA_ASYNC_LAYER_ADMIT": "0",
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1"
+      },
+      "expect_rotation": false,
+      "expect_layer": false,
+      "expect_pdl": true,
+      "expect_branches": true
+    }
+  ],
+  "pairs": [
+    {
+      "labels": [
+        "prior-off",
+        "new-off"
+      ],
+      "require_token_equality": true,
+      "require_work_equality": true,
+      "scope": "Fixed placement, adaptation disabled; exact output and recorded work required."
+    },
+    {
+      "labels": [
+        "new-off",
+        "new-on"
+      ],
+      "require_token_equality": true,
+      "require_work_equality": true,
+      "scope": "Fixed placement, adaptation disabled; exact output and recorded work required."
+    },
+    {
+      "labels": [
+        "target-off",
+        "target-on"
+      ],
+      "require_token_equality": true,
+      "require_work_equality": true,
+      "scope": "Fixed placement, adaptation disabled; exact output and recorded work required."
+    }
+  ]
+}

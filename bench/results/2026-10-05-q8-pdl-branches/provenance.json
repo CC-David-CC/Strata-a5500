@@ -1,0 +1,23 @@
+{
+  "fork": "CC-David-CC/Strata-a5500",
+  "head_branch": "perf/q8-pdl-branches",
+  "base_branch": "draft/q8-resident-adaptation",
+  "base_commit": "a8802eb58b320b7f8b6ca9e173078da76a3b52da",
+  "tested_code_commit": "70ed61f158f0ef6364557cc1ba8d1ab03178d2f1",
+  "engine_sha256": "3e52d8c534b271025c50b8b301c5090685abfbf77750230cad65e9b590d8ec74",
+  "source_pr": "https://github.com/Niko1221/Strata/pull/904",
+  "author": "Francesco Albano / Hardin22",
+  "original_commits": [
+    "8e1324af3ab111e523e77ffbc5f6203458f2e90c",
+    "1d4f8330b2c7a7f9d84c1be994c81b8816810489"
+  ],
+  "changes": [
+    "Full PDL commit retained with original author",
+    "Only graph-branch portion extracted from second commit, original author retained",
+    "David: default-off integration switches, activation log and explicit PDL test enablement"
+  ],
+  "excluded": [
+    "Fused PLE post-ops",
+    "Q4 KV batching"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "phase": "complete",
+  "started_unix": 1791186724.8450658,
+  "commands": [
+    {
+      "label": "configure",
+      "exit_code": 0,
+      "seconds": 1.9459688019996975
+    },
+    {
+      "label": "build",
+      "exit_code": 0,
+      "seconds": 22.5908753949916
+    },
+    {
+      "label": "ctest",
+      "exit_code": 0,
+      "seconds": 7.169891129015014
+    },
+    {
+      "label": "pdl-single-edge",
+      "exit_code": 0,
+      "seconds": 0.449425399012398
+    },
+    {
+      "label": "memcheck-pdl_parity",
+      "exit_code": 0,
+      "seconds": 3.6567158120160457
+    },
+    {
+      "label": "memcheck-verify_batch_parity",
+      "exit_code": 0,
+      "seconds": 0.3983156039903406
+    },
+    {
+      "label": "q2-gate",
+      "exit_code": 0,
+      "seconds": 119.62643634001142
+    },
+    {
+      "label": "q8-screen",
+      "exit_code": 0,
+      "seconds": 1317.6158499090234
+    }
+  ],
+  "engine_sha256": "4b044ced8f6c905d034fc43bbf10cc244a33cb332d99841f4032e4e06a3f6970",
+  "memlock": [
+    -1,
+    -1
+  ],
+  "completed": true,
+  "finished_unix": 1791188198.5832236
+}
