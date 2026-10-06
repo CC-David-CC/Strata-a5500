@@ -1,3 +1,20 @@
+# Q8 prefill configuration on RTX PRO 6000
+
+Unmodified **Strata v0.1.40**, FP16 KV, MTP T4: changing the prefill chunk
+from **1,024 to 8,192 tokens** measured **6.70x faster prefill at 32K input**
+and **6.67x at 128K input**, with the same model and expert cache.
+
+![Q8 prefill configuration results](bench/results/2026-10-06-q8-prefill8192-rtxpro/overview.png)
+
+[Results and measured settings](bench/results/2026-10-06-q8-prefill8192-rtxpro/README.md)
+? [Native configuration](configs/rtxpro-q8-prefill8192/config.example.json)
+
+This branch is a configuration experiment based on
+[upstream Strata](https://github.com/Niko1221/Strata). Engine code is unchanged.
+Further profiling is ongoing.
+
+---
+
 <h1 align="center">Strata</h1>
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Português](README.pt-BR.md)
