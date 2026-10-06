@@ -1,0 +1,74 @@
+[
+  {
+    "layer": 0,
+    "position": 8192,
+    "tokens": 8192,
+    "ids": [
+      497,
+      508
+    ],
+    "counts": [
+      586,
+      585
+    ],
+    "experts": 2,
+    "total_rows": 1171,
+    "max_rows": 586
+  },
+  {
+    "layer": 3,
+    "position": 8192,
+    "tokens": 8192,
+    "ids": [
+      498,
+      504,
+      506,
+      507
+    ],
+    "counts": [
+      585,
+      1170,
+      767,
+      585
+    ],
+    "experts": 4,
+    "total_rows": 3107,
+    "max_rows": 1170
+  },
+  {
+    "layer": 7,
+    "position": 0,
+    "tokens": 8192,
+    "ids": [
+      499,
+      504,
+      507,
+      511
+    ],
+    "counts": [
+      1,
+      1156,
+      277,
+      30
+    ],
+    "experts": 4,
+    "total_rows": 1464,
+    "max_rows": 1156
+  },
+  {
+    "layer": 16,
+    "position": 90112,
+    "tokens": 8192,
+    "ids": [
+      510,
+      511
+    ],
+    "counts": [
+      67,
+      151
+    ],
+    "experts": 2,
+    "total_rows": 218,
+    "max_rows": 151
+  }
+]

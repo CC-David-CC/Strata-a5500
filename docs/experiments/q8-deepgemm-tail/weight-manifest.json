@@ -1,0 +1,371 @@
+{
+  "cases": [
+    {
+      "label": "tail-l0-p8192",
+      "experts": [
+        "l0-e497",
+        "l0-e508"
+      ],
+      "counts": [
+        586,
+        585
+      ],
+      "recorded_group": {
+        "layer": 0,
+        "position": 8192,
+        "tokens": 8192,
+        "ids": [
+          497,
+          508
+        ],
+        "counts": [
+          586,
+          585
+        ],
+        "experts": 2,
+        "total_rows": 1171,
+        "max_rows": 586
+      }
+    },
+    {
+      "label": "tail-l3-p8192",
+      "experts": [
+        "l3-e498",
+        "l3-e504",
+        "l3-e506",
+        "l3-e507"
+      ],
+      "counts": [
+        585,
+        1170,
+        767,
+        585
+      ],
+      "recorded_group": {
+        "layer": 3,
+        "position": 8192,
+        "tokens": 8192,
+        "ids": [
+          498,
+          504,
+          506,
+          507
+        ],
+        "counts": [
+          585,
+          1170,
+          767,
+          585
+        ],
+        "experts": 4,
+        "total_rows": 3107,
+        "max_rows": 1170
+      }
+    },
+    {
+      "label": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "recorded_group": {
+        "layer": 7,
+        "position": 0,
+        "tokens": 8192,
+        "ids": [
+          499,
+          504,
+          507,
+          511
+        ],
+        "counts": [
+          1,
+          1156,
+          277,
+          30
+        ],
+        "experts": 4,
+        "total_rows": 1464,
+        "max_rows": 1156
+      }
+    },
+    {
+      "label": "tail-l16-p90112",
+      "experts": [
+        "l16-e510",
+        "l16-e511"
+      ],
+      "counts": [
+        67,
+        151
+      ],
+      "recorded_group": {
+        "layer": 16,
+        "position": 90112,
+        "tokens": 8192,
+        "ids": [
+          510,
+          511
+        ],
+        "counts": [
+          67,
+          151
+        ],
+        "experts": 2,
+        "total_rows": 218,
+        "max_rows": 151
+      }
+    }
+  ],
+  "matrices": [
+    {
+      "key": "l0-e497",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "19ffbe9197cfe59c3a3492ce76c373e908bd3ae6deb4a4ec43f04516410be20b",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l0-e497",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "eb882b0f9dcd113c1e1450b7449c87e589411199cd72c4603e59e0a1656068bc",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l0-e508",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "5a3ef7f167c7c089e4ad607302efc53b066d8d9cdb0e5df44b80576479233261",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l0-e508",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "ea7504bf2a0d83ec6cdf4968dc65d43cdbae948f760e4bdbb8e111baf116c6ee",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e498",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "6c83874ec24e74834509ececb5f68ace8b199b688abd2073b0256a4466d063b0",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e498",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "0ab4f62883a6a1b0e0b033f336f5b51c5698c4084a7be20a71776e90b649e119",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e504",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "89a8ea5fcd603b2d0ed05f20cababc1364af2a199da66ff4441a9bdcfb0d6b28",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e504",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "34c2bfa0d9898ae90a0bd5cf57f1f238bff815e2ec049ff80e9244938238bc9b",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e506",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "ddb96be17daf97dd0d479dfa2e7dc74497ae4fdfbea1a8773e5d7ad00083292a",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e506",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "9476249b2f78afd49afa331d91c0d15f372b402e901ed4c20c6aa44ea99e3f9f",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e507",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "837cebc8b5251b70eb236c4fb234c43ac392efcbb80cb81e96f3017989f71f2e",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l3-e507",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "12e4768ae73a55d2f0572ab0cb206e880b8445a3aec2072d81b08a0e4089b9ef",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e499",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "56b7753867c9e4526d1504459255746a54c4ddee96d8afc6dac670df94291a36",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e499",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "e79c33c90bf5eb351f3e8e169ad0acc9cbe41be8957f65dff9401428765a3143",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e504",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "7fb64bfa58b3629cee5b06c1a7c1444afa83dac6955256d2370810028602be28",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e504",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "e3d6574fccaf97baa8133cb07ff3d2dd42d17fcf8c23b1a8ffd0b2648e34c8a9",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e507",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "159499277ce6d953b8ccfc22650c45747348d51a1a3af6a6c6dd609657d65af9",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e507",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "c89c99164dda719524051e9de09768a948c4dd230de5ac49003b58a0bf5ce544",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e511",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "21fd067ad7d48e1e508fd4e570ecf51d8df4e961f972b9739f79dd3e13bec939",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l7-e511",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "2dc3d1ecf727ba3293de4ef4986174baa21ac528554c9d8cb965065089edbf4d",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l16-e510",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "9769afd4764f923e03de74d9c0ca68b5966618801be94bfd032861a6017e18a6",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l16-e510",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "87434f34f227527f238684805841f65746ae2bfc65d1ed25ece054a4060d8aa4",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l16-e511",
+      "role": "gate_up",
+      "shape": [
+        1280,
+        2560
+      ],
+      "sha256": "457771005e498e690bc5b97d37be52dc678347a3bd905fd7be4622d5c5c2f775",
+      "scalar_oracle_exact": true
+    },
+    {
+      "key": "l16-e511",
+      "role": "down",
+      "shape": [
+        2560,
+        640
+      ],
+      "sha256": "31f381a5049563e99dd939022ae157a2084b49c4b4b6dfa7ad9459c51351176e",
+      "scalar_oracle_exact": true
+    }
+  ],
+  "oracle": "Independent Q8 scalar decoder exactly matches gguf.quants dequantize"
+}
