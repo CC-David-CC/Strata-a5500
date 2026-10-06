@@ -55,6 +55,8 @@ public:
             if (e != cudaSuccess) { drain(); return e; }
             ++copies_;
             payload_ += 2 * c.bytes;
+            if (c.incoming_kind == cudaMemcpyDeviceToDevice) d2d_ += c.bytes;
+            else h2d_ += c.bytes;
         }
         return cudaSuccess;
     }
@@ -80,13 +82,15 @@ public:
         fill_ = nullptr;
     }
     uint64_t copies() const { return copies_; }
-    uint64_t payload_bytes() const { return payload_; } // D2H + H2D, not a byte saving
+    uint64_t payload_bytes() const { return payload_; } // D2H + refill; logical payload
+    uint64_t refill_h2d_bytes() const { return h2d_; }
+    uint64_t refill_d2d_bytes() const { return d2d_; }
 
 private:
     cudaStream_t evict_ = nullptr, fill_ = nullptr;
     std::vector<cudaEvent_t> events_;
     bool submitted_ = false;
-    uint64_t copies_ = 0, payload_ = 0;
+    uint64_t copies_ = 0, payload_ = 0, h2d_ = 0, d2d_ = 0;
 };
 
 } // namespace strata::core

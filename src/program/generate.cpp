@@ -263,7 +263,8 @@ struct SwapHome {
 template <class Swap, class Locate>
 bool resident_stage_swaps(strata::core::FileExpertSource& src, const std::vector<int32_t>& host_res,
                           int64_t n_expert, std::vector<Swap>& swaps, Locate locate,
-                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr) {
+                          strata::core::DuplexExchange* duplex = nullptr, bool* fills_queued = nullptr,
+                          const strata::core::Verifier* refill_cache = nullptr) {
     if (fills_queued) *fills_queued = false;
     if (!src.complement_ready() || swaps.empty()) return true;
     // An entire eligible batch takes the duplex path. Mixed/lent/pageable
@@ -283,8 +284,18 @@ bool resident_stage_swaps(strata::core::FileExpertSource& src, const std::vector
         for (size_t q = 0; q < swaps.size(); ++q) {
             const Swap& s = swaps[q];
             const int32_t slot = host_res[(size_t) s.layer * (size_t) n_expert + (size_t) s.out];
-            copies.push_back({cache.device_slot(slot), src.blob(s.layer, s.in), src.exchange_buffer((int64_t) q),
-                              (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer)});
+            const size_t bytes = (size_t) strata::kernels::cpu::expert_layout().blob_bytes(s.layer);
+            const uint8_t* incoming = src.blob(s.layer, s.in);
+            cudaMemcpyKind kind = cudaMemcpyHostToDevice;
+            if (refill_cache) {
+                if (bytes > refill_cache->cached_refill_bytes()) return false;
+                if (const uint8_t* cached = refill_cache->cached_refill_source(s.layer, s.in)) {
+                    incoming = cached;
+                    kind = cudaMemcpyDeviceToDevice;
+                }
+            }
+            copies.push_back({cache.device_slot(slot), incoming, src.exchange_buffer((int64_t) q),
+                              bytes, nullptr, kind});
         }
         if (duplex->enqueue(copies.data(), copies.size(), stream) != cudaSuccess ||
             duplex->wait_evictions() != cudaSuccess) return false;
@@ -1894,6 +1905,18 @@ int main(int argc, char** argv) {
         else (void) cudaGetLastError();
     }
 #endif
+    bool gpu_refills = false;
+    if (const char* flag = std::getenv("STRATA_Q8_GPU_REFILL")) {
+        if (std::strcmp(flag, "0") != 0 && std::strcmp(flag, "1") != 0) {
+            std::fprintf(stderr, "strata: STRATA_Q8_GPU_REFILL must be 0 or 1\n");
+            return 2;
+        }
+        gpu_refills = *flag == '1';
+        if (gpu_refills && (!o.serve || o.adapt_async)) {
+            std::fprintf(stderr, "strata: GPU refills currently require --serve and blocking adaptation\n");
+            return 2;
+        }
+    }
     strata::core::set_coupled_draft(o.coupled_draft);
     {   // --host-core / STRATA_HOST_CORE, before the pool and the session pin any thread
         std::string hc = o.host_core;
@@ -6749,6 +6772,14 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "strata serve: duplex resident exchanges unavailable; using sequential copies\n");
             }
         }
+        if (gpu_refills) {
+            if (!duplex_active || !src.exchange_rotation() || !ver.miss_cache_snapshot_enabled() ||
+                o.spec_split || ver.device_plan_enabled() || drive.d.lookahead) {
+                std::fprintf(stderr, "strata: GPU refills need snapshot, duplex rotation, unsplit host planning and no lookahead\n");
+                return 2;
+            }
+            std::fprintf(stderr, "strata: GPU refills enabled; immutable secondary sources, primary victim D2H retained\n");
+        }
         std::vector<std::pair<int32_t, int32_t>> pending;
         int pending_age = 0;   // the windows the pending swaps have waited (adapt_lag)
         std::vector<void*> pin_live;   // the swaps' locked arena pages (pin_blob), unlocked once they have landed
@@ -6825,7 +6856,7 @@ int main(int argc, char** argv) {
             };
             bool fills_queued = false;
             if (!resident_stage_swaps(src, host_res, g.n_expert, swaps, home_of,
-                                      duplex_active, &fills_queued)) return false;
+                                      duplex_active, &fills_queued, gpu_refills ? &ver : nullptr)) return false;
             if (pin_blobs_on()) {   // lock the batch's source pages (a file-backed arena on AMD; see pin_blobs)
                 std::vector<std::pair<uintptr_t, uintptr_t>> spans;
                 for (const Swap& s : swaps)
@@ -10219,6 +10250,10 @@ int main(int argc, char** argv) {
                              (unsigned long long)src.rotated_exchanges(),
                              (unsigned long long)src.avoided_exchange_copy_bytes());
             // CS-T: the tiers, cumulative - GPU cache hits (the decode lookups above), RAM copy, files (SSD / OS cache)
+            if (gpu_refills)
+                std::fprintf(stderr, "strata GPU refill payload: H2D=%llu D2D=%llu victim_D2H=%llu (cumulative logical bytes)\n",
+                    (unsigned long long)duplex.refill_h2d_bytes(), (unsigned long long)duplex.refill_d2d_bytes(),
+                    (unsigned long long)(duplex.payload_bytes() / 2));
             if (duplex_active)
                 std::fprintf(stderr, "strata serve: duplex exchanges: %llu copies, %llu D2H+H2D payload bytes\n",
                              (unsigned long long) duplex.copies(), (unsigned long long) duplex.payload_bytes());
