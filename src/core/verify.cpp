@@ -11,6 +11,7 @@
 #include "strata/core/peer_experts.hpp"
 #include "strata/kernels/iq_kernels.hpp"
 #include "strata/kernels/cpu/expert_layout.hpp"
+#include "strata/kernels/captured_branch.hpp"
 #include "strata/kernels/bf16_gemv.hpp"
 #include "strata/kernels/native_router.hpp"
 #include "strata/kernels/native_moe.hpp"
@@ -242,7 +243,7 @@ bool Verifier::release_gpu_waits(int timeout_ms) {
     _mm_sfence();
     const OnDevice on_device(device_);
     const Clock::time_point t0 = Clock::now();
-    for (cudaStream_t s : {cs_, copy_}) {
+    for (cudaStream_t s : {cs_, copy_, miss_fetch_}) {
         if (s == nullptr) continue;
         while (cudaStreamQuery(s) == cudaErrorNotReady) {
             if (ms_since(t0) > timeout_ms) {
@@ -351,6 +352,9 @@ Verifier::~Verifier() {
     if (cs_ && cs_ != ext_stream_) cudaStreamDestroy(cs_);   // set_stream: the stage's stream, shared, not ours
     if (sh_cs_) cudaStreamDestroy(sh_cs_);
     if (copy_) { cudaStreamSynchronize(copy_); cudaStreamDestroy(copy_); }
+    if (miss_fetch_) { cudaStreamSynchronize(miss_fetch_); cudaStreamDestroy(miss_fetch_); }
+    if (miss_plan_ready_) cudaEventDestroy(miss_plan_ready_);
+    if (miss_fill_done_) cudaEventDestroy(miss_fill_done_);
     if (commit_done_) cudaEventDestroy(commit_done_);
     if (ev_done_) cudaEventDestroy(ev_done_);
     if (ev_commit_) cudaEventDestroy(ev_commit_);
@@ -424,7 +428,14 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         }
         miss_cache_ways_ = (int)ways;
     }
-    if (miss_cache_ways_) {
+    if (const char* value = std::getenv("STRATA_Q8_MISS_FETCH_OVERLAP")) {
+        if (std::strcmp(value, "0") != 0 && std::strcmp(value, "1") != 0) {
+            err = "verify: STRATA_Q8_MISS_FETCH_OVERLAP must be 0 or 1";
+            return false;
+        }
+        miss_fetch_overlap_ = *value == '1';
+    }
+    if (miss_cache_ways_ || miss_fetch_overlap_) {
         const auto& lay = strata::kernels::cpu::expert_layout();
         bool supported = lay.native && lb_ == 0 && le_ == g.n_layers &&
                          lay.fmt.size() == (size_t)g.n_layers && lay.max_blob % 16 == 0;
@@ -435,7 +446,7 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         supported = false; // this experimental path has CUDA-only gates
 #endif
         if (!supported) {
-            err = "verify: read-only miss cache requires uniform native Q8_0 and a whole-model CUDA verifier";
+            err = "verify: miss cache/overlap requires uniform native Q8_0 and a whole-model CUDA verifier";
             return false;
         }
     }
@@ -665,6 +676,16 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
             }
             all_resident_ = all_ok;
         }
+    }
+    if (miss_fetch_overlap_) {
+        if (cudaStreamCreateWithFlags(&miss_fetch_, cudaStreamNonBlocking) != cudaSuccess ||
+            cudaEventCreateWithFlags(&miss_plan_ready_, cudaEventDisableTiming) != cudaSuccess ||
+            cudaEventCreateWithFlags(&miss_fill_done_, cudaEventDisableTiming) != cudaSuccess) {
+            err = "verify: miss overlap stream/event creation failed";
+            return false;
+        }
+        std::fprintf(stderr, "strata miss fetch overlap: enabled; captured plan/fill dependencies, "
+                             "resident computation overlaps immutable miss staging\n");
     }
     // E-6: a layer whose routed experts are all resident is planned on the device (STRATA_VERIFY_DEVICE_PLAN=1: on;
     // exact, but neutral on RIBPC 1-2 GPUs: off by default)
@@ -1406,11 +1427,10 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
                 copy_i32_from_mapped(pl, m_plan_ + (size_t) grp * (size_t) plan_i32_, plan_i32_, cs);
             }
             stamp(l, 19, grp);
-            grouped(p_ptr, p_start, p_counts, 0, hit_out);
-            stamp(l, 20, grp);
-            if (device_plan_) wait_flag_ge_or(m_flagB_, ring, skip_ + grp, cs);
-            else wait_flag_ge(m_flagB_, ring, cs);                 // the PCIe share is in staging (DMA) or mapped
-            if (sink_.pcie_mode == 2) {                            // stage it with a copy kernel, then point at staging
+        auto stage_misses = [&](cudaStream_t stage_stream) {
+            if (device_plan_) wait_flag_ge_or(m_flagB_, ring, skip_ + grp, stage_stream);
+            else wait_flag_ge(m_flagB_, ring, stage_stream);  // DMA or mapped PCIe share
+            if (sink_.pcie_mode == 2) {                        // copy kernel then staging pointers
                 const int64_t per = G == 2 ? kStagingBlobs / 2 : kStagingBlobs;
                 uint8_t* stage = staging_ + (size_t) (grp * per) * lay.max_blob;
                 if (miss_cache_ways_) {
@@ -1420,11 +1440,36 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
                         miss_cache_counts_ + l * 4, miss_cache_ways_, (int64_t)lay.max_blob};
                     fetch_readonly_misses((unsigned long long*)p_ptr2, p_counts + 2, p_start2, p_dst,
                         ids_ + (size_t)tb*K, stage, (int64_t)lay.blob_bytes(l), (int)per,
-                        bank, miss_cache_plan_, cs);
+                        bank, miss_cache_plan_, stage_stream);
                 } else {
-                    fetch_blobs(p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), (int) per, cs);
-                    rebase_ptrs((unsigned long long*) p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), cs);
+                    fetch_blobs(p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), (int) per, stage_stream);
+                    rebase_ptrs((unsigned long long*) p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), stage_stream);
                 }
+            }
+        };
+        // The copied plan and routes precede this fork. Staging reads the RAM
+        // blobs and writes only ptr2/staging/cache, disjoint from the resident
+        // group's weights, ptr/start table, scratch and output. Rejoin before
+        // consuming misses; the join also orders all later plan/buffer reuse.
+        if (miss_fetch_overlap_) {
+            const cudaError_t forked = begin_captured_branch(cs, miss_fetch_, miss_plan_ready_);
+            if (forked != cudaSuccess) {
+                err = std::string("verify: miss overlap fork: ") + cudaGetErrorString(forked);
+                return false;
+            }
+            stage_misses(miss_fetch_);
+        }
+        grouped(p_ptr, p_start, p_counts, 0, hit_out);
+        stamp(l, 20, grp);
+        if (pcie_enabled_) {
+            if (miss_fetch_overlap_) {
+                const cudaError_t joined = join_captured_branch(cs, miss_fetch_, miss_fill_done_);
+                if (joined != cudaSuccess) {
+                    err = std::string("verify: miss overlap join: ") + cudaGetErrorString(joined);
+                    return false;
+                }
+            } else {
+                stage_misses(cs);
             }
             stamp(l, 21, grp);
             // the PCIe share is pcie_frac of the misses: a few groups when the cache is cold, usually none (always none at
@@ -1884,8 +1929,8 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
     using namespace strata::kernels;
     const OnDevice on_device(device_);
     last_batch_ = false;
-    if (miss_cache_ways_ && (split_ || sink_.pcie_mode != 2)) {
-        err = "verify: read-only miss cache requires unsplit verification and mapped RAM kernel copies";
+    if ((miss_cache_ways_ || miss_fetch_overlap_) && (split_ || sink_.pcie_mode != 2)) {
+        err = "verify: miss cache/overlap requires unsplit verification and mapped RAM kernel copies";
         return false;
     }
     if (T < 1 || T > max_t_) { err = "verify: window size out of range"; return false; }
