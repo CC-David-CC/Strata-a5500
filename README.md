@@ -13,8 +13,9 @@ all prefill costs are in the table. They are not speedup percentages over stock.
 
 The existing focused contribution is [PR #969](https://github.com/Niko1221/Strata/pull/969)
 on `contrib/concurrent-mtp-waves`. This research archive adds evidence without
-changing the engine. The 128K and longer-output exploration continues; no repeat
-validation is scheduled in this roofline branch. Partially resident Q4/Q8 token
+changing the engine. The [128K snapshot](bench/concurrency-20261005/128k/README.md) is saved.
+Testing stopped at the user time limit after the current Q8 four-request point;
+remaining longer-output workloads are deferred. No repeat validation is scheduled in this branch. Partially resident Q4/Q8 token
 differences remain recorded and unclassified.
 
 Concurrent MTP comes from [rkcth #846](https://github.com/Niko1221/Strata/pull/846),
