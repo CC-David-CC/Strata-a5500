@@ -554,26 +554,54 @@ void test_rotating_source(bool rotate, bool pin) {
     std::vector<uint8_t> actual(bytes);
     double commit_ms = 0;
     for (int round = 0; round < 32; ++round) {
+        const bool early_admission = round % 3 == 2;
         const uint8_t* prior[2]{};
         uint8_t* eviction[2]{};
         for (int q = 0; q < 2; ++q) {
             prior[q] = src.blob(0, incoming[q]); eviction[q] = src.exchange_buffer(q);
             require(prior[q] && !std::memcmp(prior[q], truth[incoming[q]].data(), bytes), "wrong incoming bytes");
+            require(src.resident_blob(0, incoming[q]) == prior[q], "async reader used stale physical ownership");
             require(cudaMemcpy(eviction[q], cache.device_slot(q), bytes, cudaMemcpyDeviceToHost) == cudaSuccess,
                     "D2H eviction failed");
             require(src.stage_exchange(0, incoming[q], outgoing[q], q), "stage rejected");
             require(!std::memcmp(src.blob(0, outgoing[q]), truth[outgoing[q]].data(), bytes), "staged override wrong");
             require(cache.fill_slot_blocking(q, prior[q], err), err); // H2D completed before commit
+            if (early_admission) {
+                // One ready range may be admitted while a later range still
+                // owns its original CPU/GPU bytes. Exercise fixed and rotating
+                // storage with the same readiness contract.
+                require(src.commit_exchanges() == 1, "early commit count wrong");
+                if (q == 0) {
+                    require(!std::memcmp(src.resident_blob(0, incoming[1]), truth[incoming[1]].data(), bytes),
+                            "early commit changed later incoming bytes");
+                    require(cache.verify_slot(1, truth[outgoing[1]].data(), err), err);
+                }
+            }
         }
         require(!src.stage_exchange(0, incoming[0], outgoing[0], 0), "duplicate stage accepted");
         require(!src.stage_exchange(0, incoming[0], 5, 0), "invalid expert accepted");
         const auto t0 = std::chrono::steady_clock::now();
-        require(src.commit_exchanges() == 2, "commit count wrong");
+        if (early_admission) {
+            require(src.commit_exchanges() == 0, "early ranges left staged ownership");
+        } else if (round % 2) {
+            src.commit_copies();
+            for (int q = 0; q < 2; ++q) {
+                require(!std::memcmp(src.blob(0, outgoing[q]), truth[outgoing[q]].data(), bytes),
+                        "split commit lost the outgoing override");
+                if (rotate && pin)
+                    require(!std::memcmp(prior[q], truth[incoming[q]].data(), bytes),
+                            "rotation copy phase overwrote the incoming buffer");
+            }
+            require(src.commit_flip() == 2, "split commit count wrong");
+            require(src.commit_flip() == 0, "empty split commit not empty");
+        } else require(src.commit_exchanges() == 2, "commit count wrong");
         commit_ms += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
         require(src.commit_exchanges() == 0, "empty commit not empty");
         for (int q = 0; q < 2; ++q) {
             require(!src.has_resident(0, incoming[q]) && src.has_resident(0, outgoing[q]), "residency wrong");
             const uint8_t* held = src.blob(0, outgoing[q]);
+            require(src.resident_blob(0, outgoing[q]) == held, "async reader missed rotated resident");
+            require(!src.resident_blob(0, incoming[q]), "async reader returned GPU-only expert");
             require(!std::memcmp(held, truth[outgoing[q]].data(), bytes), "evicted bytes corrupted");
             require(held == ((rotate && pin) ? eviction[q] : prior[q]), "wrong storage selected");
             if (rotate && pin) require(src.exchange_buffer(q) == prior[q], "old input not recycled");

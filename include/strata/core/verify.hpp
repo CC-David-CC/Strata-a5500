@@ -24,9 +24,11 @@
 #include <cstdio>
 
 #include "strata/core/expert_source.hpp"
+#include "strata/core/readonly_cache_snapshot.hpp"
 #include "strata/core/layer.hpp"
 #include "strata/core/session.hpp"
 #include "strata/kernels/sampler.hpp"
+#include "strata/kernels/readonly_miss_cache.hpp"
 
 #include <cuda_runtime.h>
 
@@ -255,6 +257,14 @@ public:
     /// STRATA_VERIFY_PROFILE=1 - GPU stage times of the windows since the last call (ms per
     /// window), as one line; empty when off.
     std::string profile_report();
+    /// Cumulative completed miss-cache groups; call outside timed decoding.
+    std::string miss_cache_report();
+    bool miss_cache_snapshot_enabled() const { return miss_cache_snapshot_.enabled(); }
+    const uint8_t* cached_refill_source(int64_t layer, int64_t expert) const {
+        return miss_cache_snapshot_.find(layer, expert);
+    }
+    size_t cached_refill_bytes() const { return miss_cache_snapshot_.stride(); }
+    bool device_plan_enabled() const { return device_plan_; }
 
 private:
     RemoteExpertOpt* remote_opt_ = nullptr;
@@ -376,6 +386,12 @@ private:
     cudaStream_t cs_ = nullptr;
     cudaStream_t sh_cs_ = nullptr;
     cudaEvent_t ev_fork_ = nullptr, ev_join_ = nullptr;
+    // STRATA_DF_BRANCH: a layer's mixer work that reads only the layer's input, captured as parallel graph branches
+    // on these side streams (record_window); the same kernels on the same inputs, only their order is freer
+    bool df_branch_ = false;
+    cudaStream_t df_side_[2] = {};
+    cudaEvent_t df_fork_ = nullptr;
+    cudaEvent_t df_join_[2] = {};
     cudaGraphExec_t exec_[9] = {};
     cudaGraphExec_t exec_nr_[9] = {};   // #871: the doorbell variant of a stage that is all-resident otherwise
     cudaGraphExec_t commit_exec_ = nullptr;
@@ -397,6 +413,9 @@ private:
     cudaEvent_t commit_done_ = nullptr;   // recorded after an async commit (set_commit_async); see wait_commit
     bool commit_pending_ = false;
     cudaStream_t copy_ = nullptr;                                 // the copy engine's stream (DMA of missed experts)
+    bool miss_fetch_overlap_ = false;  // experimental captured fork, default off
+    cudaStream_t miss_fetch_ = nullptr;
+    cudaEvent_t miss_plan_ready_ = nullptr, miss_fill_done_ = nullptr;
     struct FlagSet { uint32_t* flag; uint32_t value; };
     FlagSet flag_sets_[2 * 64 * 2] = {};                          // host-function arguments, one per (layer, group)
     static void fetch_dma(void* ctx, const uint8_t* const* src, int n, size_t bytes);
@@ -428,6 +447,12 @@ private:
     int32_t *ids_ = nullptr, *hit_slot_ = nullptr, *hit_dst_ = nullptr, *hit_count_ = nullptr;
     int32_t* plan_ = nullptr;                                     // device copy of the plan block
     uint8_t* staging_ = nullptr;                                  // VRAM slots for the PCIe share of the misses
+    int miss_cache_ways_ = 0;  // opt-in immutable secondary copies, per layer
+    uint8_t* miss_cache_data_ = nullptr;
+    int32_t* miss_cache_tags_ = nullptr;
+    uint64_t *miss_cache_ages_ = nullptr, *miss_cache_clock_ = nullptr, *miss_cache_counts_ = nullptr;
+    strata::kernels::ReadonlyMissCachePlan* miss_cache_plan_ = nullptr;
+    ReadonlyCacheSnapshot miss_cache_snapshot_;
     static constexpr int64_t kStagingBlobs = 16;
     static constexpr int64_t kPcieGroupRows = 4;                  // the PCIe call's groups side by side (of <= 16)
     uint8_t* hit_xq_ = nullptr;

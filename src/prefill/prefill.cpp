@@ -29,6 +29,9 @@
 #include "strata/prefill/moe_fused.hpp"
 #include "strata/prefill/moe_fused_iq.hpp"
 #include "strata/prefill/moe_mmq.hpp"
+#ifdef STRATA_DEEPGEMM_TAIL
+#include "strata/prefill/dg_tail.hpp"
+#endif
 #include "strata/core/peer_experts.hpp"
 #include "strata/prefill/kernels.hpp"
 
@@ -583,6 +586,9 @@ struct Prefill::Impl {
     uint8_t *grp_gu = nullptr, *grp_d = nullptr;
     std::vector<int32_t> bounds_host;
     std::unique_ptr<mmq::Context> mmq_ctx;
+#ifdef STRATA_DEEPGEMM_TAIL
+    std::unique_ptr<dg_tail::Context> dg_tail_ctx;
+#endif
     std::vector<int32_t> ids_host, slot_host, src_host, cnt, off;
     // The grouping tables in mapped pinned memory, [ids | slot | src] of T_max * K each, then the MMQ bounds: kernels
     // read and write them in place.  A cudaMemcpyAsync of them queues behind the expert blobs the copy stream already
@@ -683,6 +689,9 @@ void Prefill::release() {
     if (impl_->cs) cudaStreamSynchronize(impl_->cs);
     if (impl_->copy) cudaStreamSynchronize(impl_->copy);
     if (impl_->kv_copy) cudaStreamSynchronize(impl_->kv_copy);
+#ifdef STRATA_DEEPGEMM_TAIL
+    impl_->dg_tail_ctx.reset();
+#endif
     for (int i = 0; i < RING_MAX; ++i) {
         if (impl_->copied[i]) cudaEventDestroy(impl_->copied[i]);
         if (impl_->used[i]) cudaEventDestroy(impl_->used[i]);
@@ -820,6 +829,12 @@ bool Prefill::init(const core::WeightTable& wt, const core::ModelGeometry& g, co
         err = "prefill: geometry differs from the artifact's"; return false;
     }
     cudaGetDevice(&m.device);
+#ifdef STRATA_DEEPGEMM_TAIL
+    if (!m.dg_tail_ctx) {
+        try { m.dg_tail_ctx = std::make_unique<dg_tail::Context>(); }
+        catch (const std::exception& e) { err = std::string("prefill DeepGEMM: ") + e.what(); return false; }
+    }
+#endif
     if (stage_le_ < 0) stage_le_ = g.n_layers;
     if (stage_lb_ < 0 || stage_lb_ >= stage_le_ || stage_le_ > g.n_layers || (stage_le_ < g.n_layers) != (next_ != nullptr)) {
         err = "prefill: the stage's layer range is wrong";
@@ -3025,6 +3040,16 @@ bool Prefill::run_impl(const int64_t* tokens, int64_t n, int64_t pos0, std::stri
                                 m.mmq_ctx->run(gu, m.cs);
                                 mmq::swiglu(m.GU + r0 * 1280, m.H + r0 * 640, nr, 640, !lay.native, m.cs);
                                 pt.mark(kPfGemmD, cs);
+#ifdef STRATA_DEEPGEMM_TAIL
+                                if (m.dg_tail_ctx && m.dg_tail_ctx->selected(mmq_dt, ngx, maxr, nr)) {
+                                    int32_t counts[4];
+                                    for (int i = 0; i < 4; ++i) counts[i] = m.cnt[(size_t) order[j0 + i]];
+                                    if (!m.dg_tail_ctx->run(m.grp_d, m.H + r0 * 640, counts, m.Dm + r0 * N, m.cs)) {
+                                        err = "prefill: native DeepGEMM down product failed"; return false;
+                                    }
+                                    return true;
+                                }
+#endif
                                 mmq::quantize(m.H + r0 * 640, nullptr, m.Hq, mmq_dt, 640, 640, nr, m.cs);
                                 mmq::Product dn;
                                 dn.w = m.grp_d; dn.type = mmq_dt; dn.w_rows = N; dn.w_cols = 640; dn.expert_bytes = mmq_db;
