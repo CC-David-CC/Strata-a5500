@@ -22,6 +22,10 @@ and their limits. Report what you actually measured and label estimates separate
   the SYCL port at `6f32ec0` with two fixes, Coder IQ1_M and Flash-Next IQ2_XS, 8,192-token context, layer split across both cards;
   short prompts and 2K-token prompts, plus one run on a single B60. Intel's SYCL engine, no 4,096/32,768/128,000-token sweep.
 
+- [2026-10-06: RTX PRO 6000 Blackwell 96 GB, Ryzen 9 7950X, 128 GB RAM](../bench/results/2026-10-06-community-rtxpro-v0140/README.md):
+  unmodified Strata 0.1.39 versus 0.1.40, Unsloth Q4_K_XL/Q8_0, FP16 KV,
+  8K input + 512 output; Q4 MTP/non-MTP timing and native Q8 PLE support checks.
+
 ## What to record
 
 Include enough information for someone else to repeat your run:
