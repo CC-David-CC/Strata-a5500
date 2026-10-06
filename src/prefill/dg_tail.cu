@@ -108,12 +108,15 @@ Context::~Context() = default;
 bool Context::ready() const { return impl_ != nullptr; }
 bool Context::selected(int type, int experts, int64_t max_rows, int64_t total_rows) const {
     return enabled_ && ready() && type == 8 && experts == Groups && max_rows >= 512 && max_rows <= 1536 &&
-        total_rows > 0 && Groups * max_rows >= 3 * total_rows;
+        total_rows >= max_rows && total_rows <= Groups * max_rows &&
+        Groups * max_rows >= 3 * total_rows &&
+        // Almost single-expert large tails lose to native MMQ in the actual-route sweep.
+        !(max_rows >= 1024 && 10 * max_rows > 9 * total_rows);
 }
 bool Context::run(const void* raw, const float* h, const int32_t counts[4], float* dst, void* stream) {
     if (!ready() || !raw || !h || !dst || !counts) return false;
     int packed = 0;
-    for (int e = 0; e < Groups; ++e) { if (counts[e] <= 0) return false; packed += ((counts[e] + 31) / 32) * 32; }
+    for (int e = 0; e < Groups; ++e) { if (counts[e] <= 0 || counts[e] > Capacity) return false; packed += ((counts[e] + 31) / 32) * 32; }
     if (packed > Capacity) return false;
     auto s = static_cast<cudaStream_t>(stream);
     Impl& c = *impl_;

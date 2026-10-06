@@ -79,7 +79,18 @@ native_lib=ctypes.CDLL(str(ROOT/'native-tail.so'))
 native_lib.dg_create.argtypes=[];native_lib.dg_create.restype=P
 native_lib.dg_run.argtypes=[P,P,P,P,P,P];native_lib.dg_run.restype=I
 native_lib.dg_destroy.argtypes=[P];native_lib.dg_destroy.restype=None
+native_lib.dg_selected.argtypes=[P,I,I,L,L];native_lib.dg_selected.restype=I
 dg_context=native_lib.dg_create();assert dg_context
+dispatch_cases=[(8,4,1156,1464,True),(8,4,1170,3107,False),
+                (8,2,128,256,False),(7,4,1156,1464,False),
+                (8,4,511,600,False),(8,4,1537,1600,False),
+                (8,4,1200,1600,True),(8,4,1200,1601,False),
+                (8,4,1102,1167,False),(8,4,1397,1548,False),
+                (8,4,646,667,True),(8,4,1200,1333,False),
+                (8,4,1200,1334,True),(8,4,1200,2**63-1,False)]
+for dtype,groups,maximum,total,expected in dispatch_cases:
+    assert bool(native_lib.dg_selected(dg_context,dtype,groups,maximum,total))==expected
+state['dispatch_cases_passed']=len(dispatch_cases)
 context=lib.context_create()
 try:
     # Matched group sizes and actual nonuniform row counts. Small decode-like
@@ -90,6 +101,7 @@ try:
         state['profiled_timings_not_headline']=True
     for label, experts, counts in cases:
         groups=len(experts);rows=sum(counts);cap=(max(counts)+31)//32*32
+        state.setdefault('dispatch',{})[label]=bool(native_lib.dg_selected(dg_context,8,groups,max(counts),rows))
         wgu=load(experts,'gate_up','f32');wd=load(experts,'down','f32')
         raw_gu=load(experts,'gate_up','q8');raw_dn=load(experts,'down','q8')
         # Native MMQ allows a read tail after its last expert, as the real path.
