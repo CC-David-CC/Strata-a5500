@@ -22,6 +22,10 @@ and their limits. Report what you actually measured and label estimates separate
   the SYCL port at `6f32ec0` with two fixes, Coder IQ1_M and Flash-Next IQ2_XS, 8,192-token context, layer split across both cards;
   short prompts and 2K-token prompts, plus one run on a single B60. Intel's SYCL engine, no 4,096/32,768/128,000-token sweep.
 
+- [2026-10-05/06: RTX PRO 6000 Blackwell 96 GB, Ryzen 9 7950X, 128 GB RAM](../bench/results/2026-10-06-community-rtx-pro-6000-concurrency/README.md):
+  experimental fork `cd9fcca`, seven Flash-Next variants, FP16 KV, 64K/128K actual inputs
+  and concurrent MTP/non-MTP; compact CSV and linked external evidence.
+
 ## What to record
 
 Include enough information for someone else to repeat your run:
