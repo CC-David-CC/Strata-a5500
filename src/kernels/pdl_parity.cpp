@@ -299,8 +299,22 @@ int main(int argc, char** argv) {
     std::printf("PDL graph vs ordinary graph over %d replays: %d differ\n", replays, bad_replays);
     if (bad_replays) ++g_fail;
 
-    cudaGraphExecDestroy(plain);
-    cudaGraphExecDestroy(pdl);
+    ck(cudaStreamSynchronize(s), "cleanup main stream");
+    ck(cudaStreamSynchronize(side), "cleanup side stream");
+    ck(cudaGraphExecDestroy(plain), "destroy ordinary graph");
+    ck(cudaGraphExecDestroy(pdl), "destroy PDL graph");
+    ck(cudaEventDestroy(ef), "destroy fork event");
+    ck(cudaEventDestroy(ej), "destroy join event");
+    ck(cudaStreamDestroy(side), "destroy side stream");
+    ck(cudaStreamDestroy(s), "destroy main stream");
+    ck(cudaFree(w_q8), "free Q8 weights");
+    ck(cudaFree(w_iq4), "free IQ4 weights");
+    ck(cudaFree(w_b1), "free first BF16 weights");
+    ck(cudaFree(w_b2), "free second BF16 weights");
+    ck(cudaFree(b.x0), "free input");
+    for (int i = 0; i < NOUT; ++i) ck(cudaFree(*outs[i]), "free output");
+    ck(cudaFree(b.q), "free first activation quantization");
+    ck(cudaFree(b.q2), "free second activation quantization");
     std::printf("pdl_parity: %s\n", g_fail ? "FAIL" : "PASS");
     return g_fail ? 1 : 0;
 }
