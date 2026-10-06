@@ -24,6 +24,7 @@
 #include <cstdio>
 
 #include "strata/core/expert_source.hpp"
+#include "strata/core/readonly_cache_snapshot.hpp"
 #include "strata/core/layer.hpp"
 #include "strata/core/session.hpp"
 #include "strata/kernels/sampler.hpp"
@@ -259,6 +260,12 @@ public:
     std::string profile_report();
     /// Cumulative completed miss-cache groups; call outside timed decoding.
     std::string miss_cache_report();
+    bool miss_cache_snapshot_enabled() const { return miss_cache_snapshot_.enabled(); }
+    const uint8_t* cached_refill_source(int64_t layer, int64_t expert) const {
+        return miss_cache_snapshot_.find(layer, expert);
+    }
+    size_t cached_refill_bytes() const { return miss_cache_snapshot_.stride(); }
+    bool device_plan_enabled() const { return device_plan_; }
 
 private:
     RemoteExpertOpt* remote_opt_ = nullptr;
@@ -443,6 +450,7 @@ private:
     int32_t* miss_cache_tags_ = nullptr;
     uint64_t *miss_cache_ages_ = nullptr, *miss_cache_clock_ = nullptr, *miss_cache_counts_ = nullptr;
     strata::kernels::ReadonlyMissCachePlan* miss_cache_plan_ = nullptr;
+    ReadonlyCacheSnapshot miss_cache_snapshot_;
     static constexpr int64_t kStagingBlobs = 16;
     static constexpr int64_t kPcieGroupRows = 4;                  // the PCIe call's groups side by side (of <= 16)
     uint8_t* hit_xq_ = nullptr;

@@ -1295,6 +1295,7 @@ bool pdl_launch_ok(const void* kernel, cudaStream_t stream) {
     (void) kernel; (void) stream;
     return false;
 #else
+    if (!pdl_supported()) return false; // scope alone cannot enable an explicitly disabled feature
     // the kernel's own code is sm_90+ (each kernel checked once per device: its PTX, or a JIT from older PTX, decides)
     {
         static std::mutex mu;
@@ -1316,7 +1317,7 @@ bool pdl_launch_ok(const void* kernel, cudaStream_t stream) {
     // every node the next captured node will depend on is a kernel (CUDA allows a programmatic edge only between two
     // kernel nodes): never after a memcpy, memset, host or event node.  A join of branches gives several kernels, a
     // programmatic edge from each; STRATA_DF_PDL=2 allows a single predecessor only.
-    static const int mode = [] { const char* v = std::getenv("STRATA_DF_PDL"); return v ? std::atoi(v) : 1; }();
+    static const int mode = [] { const char* v = std::getenv("STRATA_DF_PDL"); return v ? std::atoi(v) : 0; }();
     cudaStreamCaptureStatus status = cudaStreamCaptureStatusNone;
     const cudaGraphNode_t* deps = nullptr;
     const cudaGraphEdgeData* edges = nullptr;

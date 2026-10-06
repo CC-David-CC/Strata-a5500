@@ -15,7 +15,8 @@ class DuplexExchange {
 public:
     struct Copy {
         void* slot; const void* incoming; void* outgoing; size_t bytes;
-        cudaEvent_t filled = nullptr; // optional: recorded only after this H2D
+        cudaEvent_t filled = nullptr; // optional: recorded only after the refill
+        cudaMemcpyKind incoming_kind = cudaMemcpyHostToDevice;
     };
     DuplexExchange() = default;
     DuplexExchange(const DuplexExchange&) = delete;
@@ -38,7 +39,8 @@ public:
         if (!evict_ || count > events_.size() || (count && !copies)) return cudaErrorInvalidValue;
         // Reject an invalid list before submitting any work.
         for (size_t i = 0; i < count; ++i)
-            if (!copies[i].slot || !copies[i].incoming || !copies[i].outgoing || !copies[i].bytes)
+            if (!copies[i].slot || !copies[i].incoming || !copies[i].outgoing || !copies[i].bytes ||
+                (copies[i].incoming_kind != cudaMemcpyHostToDevice && copies[i].incoming_kind != cudaMemcpyDeviceToDevice))
                 return cudaErrorInvalidValue;
         if (!count) return cudaSuccess;
         fill_ = fill;
@@ -48,7 +50,7 @@ public:
             cudaError_t e = cudaMemcpyAsync(c.outgoing, c.slot, c.bytes, cudaMemcpyDeviceToHost, evict_);
             if (e == cudaSuccess) e = cudaEventRecord(events_[i], evict_);
             if (e == cudaSuccess) e = cudaStreamWaitEvent(fill, events_[i], 0);
-            if (e == cudaSuccess) e = cudaMemcpyAsync(c.slot, c.incoming, c.bytes, cudaMemcpyHostToDevice, fill);
+            if (e == cudaSuccess) e = cudaMemcpyAsync(c.slot, c.incoming, c.bytes, c.incoming_kind, fill);
             if (e == cudaSuccess && c.filled) e = cudaEventRecord(c.filled, fill);
             if (e != cudaSuccess) { drain(); return e; }
             ++copies_;
