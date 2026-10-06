@@ -7224,6 +7224,7 @@ int main(int argc, char** argv) {
                         // The GPU fill and old CPU readers are finished here.
                         // No host copy remains to overlap with another window.
                         src.commit_flip();
+                        a_ms += std::chrono::duration<double, std::milli>(Clock::now() - a_t0).count();
                         aswaps.clear();
                         astate = AState::Idle;
                         continue;
@@ -7247,6 +7248,7 @@ int main(int argc, char** argv) {
                         if (!a_admit_layer(layer)) return false;
                     if (!a_layer_events.finish()) return false;
                     res_upload();
+                    a_ms += std::chrono::duration<double, std::milli>(Clock::now() - a_t0).count();
                     aswaps.clear();
                     astate = AState::Idle;
                     continue;
