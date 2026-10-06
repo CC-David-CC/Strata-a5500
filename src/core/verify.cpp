@@ -1461,7 +1461,6 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
         }
         grouped(p_ptr, p_start, p_counts, 0, hit_out);
         stamp(l, 20, grp);
-        if (pcie_enabled_) {
             if (miss_fetch_overlap_) {
                 const cudaError_t joined = join_captured_branch(cs, miss_fetch_, miss_fill_done_);
                 if (joined != cudaSuccess) {

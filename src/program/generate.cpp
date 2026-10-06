@@ -9881,7 +9881,8 @@ int main(int argc, char** argv) {
                 // #463: the previous adapt round's copies land first - with a non-blocking query, whether a swapped-in
                 // expert ran on the GPU or the CPU (they round differently) depended on the copy's timing
                 // (STRATA_ADAPT_NOWAIT=1: 0.1.37's non-blocking query, the A/B)
-                if (adapt_nowait()) apply_pending(false);
+                if (gpu_refills) apply_pending(true); // secondary sources must finish before this window mutates them
+                else if (adapt_nowait()) apply_pending(false);
                 else if (pending.empty() || ++pending_age >= adapt_lag()) apply_pending(true);
                 if (!adapt_tick(false)) {   // --adapt-async: the round in flight moves on a step when it can
                     std::printf("ERR an adaptive refill failed\n");
@@ -9980,6 +9981,7 @@ int main(int argc, char** argv) {
             }
             // Experimental combinations finish ownership at STOP/EOS/length,
             // charging the final drain to this request, before checkpointing.
+            if (gpu_refills) apply_pending(true); // include the final refill and ownership retirement in request time
             if (ajob && (duplex_active || src.exchange_rotation()) && !adapt_tick(true)) {
                 std::printf("ERR draining combined adaptive exchanges\n");
                 return 1;
