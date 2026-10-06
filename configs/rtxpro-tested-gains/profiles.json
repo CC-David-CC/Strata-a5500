@@ -1,0 +1,133 @@
+{
+  "scope": {
+    "hardware": "RTX PRO 6000 Blackwell Workstation Edition 96GB",
+    "models": [
+      "UD-Q4_K_XL",
+      "GSQ-RCO IQ3_S",
+      "Q8_0"
+    ],
+    "engine": "Experimental current-main integration;48code and37followup observations complete;publicationgates passed on this GPU",
+    "kv": "fp16",
+    "public_listener": false,
+    "tested_source_commit": "55563d3f3b51d2c59a008932c9f004029948bcd8",
+    "validated_fixture_source_commit": "431aa9d2570989461cba35c2b8e2190e448a3575",
+    "publication_code_commit": "22748a729af7c52a6b3df1ff531050a2933fe835",
+    "limitations": [
+      "Single observations perarm;no quality score or confidence interval.",
+      "Q8 changed arithmetic/trajectory;Q4/IQ3 matched output streams.",
+      "Async/per-layer admission with GPU-refill route remains unsupported.",
+      "No full-model sanitizer/state-digest or cross-hardware proof."
+    ]
+  },
+  "common_arguments": {
+    "--spec": "8",
+    "--spec-min-p": "0.5",
+    "--mtp-max-t": "4",
+    "--kv": "fp16",
+    "--prompt-cache": "0",
+    "--conversation-cache-mib": "0",
+    "--pcie-frac": "-1",
+    "--vram-reserve-mib": "2048",
+    "--ple-io": "ram",
+    "--ple-row-cache": "1048576"
+  },
+  "profiles": {
+    "q8-code-screen": {
+      "status": "All 8 stock/candidate pairs completed at32K/128K acrossplain,MTP,ngram,combined. MTP156.21/154.83tok/s. Outputs differ fromstock; no exact-trajectory claim. Editing32K MTP133.99->139.82 andcombined128.67->139.35tok/s;changedtrajectory.",
+      "arguments": {
+        "--expert-cache": "15472",
+        "--resident-budget-gib": "56",
+        "--adapt-async": "1",
+        "--adapt-every": "4",
+        "--adapt-swaps": "96",
+        "--adapt-decay": "0.7",
+        "--prefill": "8192"
+      },
+      "switches": [
+        "--no-prefill-borrow"
+      ],
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1",
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_DEEPGEMM_TAIL": "1",
+        "STRATA_DEEPGEMM_TAIL_RESERVE": "1"
+      }
+    },
+    "fully-resident-code-screen": {
+      "models": [
+        "UD-Q4_K_XL",
+        "GSQ-RCO IQ3_S"
+      ],
+      "status": "All 16 pairs completed; Q4 and IQ3_S exact1024-token outputs across32K/128K/all4paths. IQ3_S has3ngram-related workcounter differences. Editing32K MTPQ4 188.84->210.87,IQ3_S227.40->233.80tok/s;exacttokens/work.",
+      "arguments": {
+        "--expert-cache": "24576",
+        "--adapt-every": "0",
+        "--prefill": "8192"
+      },
+      "switches": [
+        "--mmap-experts",
+        "--no-prefill-borrow"
+      ],
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_DEEPGEMM_TAIL": "0"
+      }
+    },
+    "q8-prefill-16384": {
+      "inherits": "q8-code-screen",
+      "status": "Combined source measured:5.1437s at32K,20.8331s at128K;34.85%/34.82% less prefill time than8192chunks.",
+      "arguments": {
+        "--prefill": "16384"
+      },
+      "environment": {
+        "STRATA_PREFILL_RING": "384"
+      },
+      "notes": [
+        "Default ring384 at32K/128K. Ring512 at32K was0.72%slower;128K ring512 was previouslyOOM and excluded.",
+        "Changing chunk size changes arithmetic and token trajectory. Decode150.98/153.71tok/s;request11.93/27.51s in these initial observations."
+      ]
+    },
+    "q8-refill-bandwidth": {
+      "status": "Current32K code/editing pairs exacttokens/work. Logical primary refillH2D replaced62.58%/53.33%; decode+2.81%/+0.30%. Not totalPCIe/DRAM saving.",
+      "arguments": {
+        "--expert-cache": "14704",
+        "--resident-budget-gib": "56",
+        "--adapt-async": "0",
+        "--adapt-every": "4",
+        "--adapt-swaps": "96",
+        "--adapt-decay": "0.7",
+        "--prefill": "8192"
+      },
+      "switches": [
+        "--no-prefill-borrow"
+      ],
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_Q8_MISS_CACHE_WAYS": "16",
+        "STRATA_Q8_CACHE_TAG_SNAPSHOT": "1",
+        "STRATA_Q8_GPU_REFILL": "1",
+        "STRATA_ADAPT_LAG": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_DEEPGEMM_TAIL": "0",
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1"
+      },
+      "notes": [
+        "Use same14704primary/16secondary/snapshot settings for H2D control,onlyGPU_REFILL=0.",
+        "14704+48*16=15472totalexpert slots;primary residency differs from the fast profile.",
+        "Async/layer-admission plus GPU-refill lifetime is not yet validated;runtime rejects that combination.",
+        "Primary victimD2H remains. Warm-request counters subtracted; codeH2D7.609GB+D2D12.727GB,editingH2D9.594GB+D2D10.962GB."
+      ]
+    }
+  }
+}

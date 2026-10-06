@@ -1,0 +1,11 @@
+{
+  "timing_client_files_sha256": {
+    "serve/server.py": "b90e873308e5b5be74aecd2032e71dd4db1c83d0895d83a77e1c1d9d9c704dfc",
+    "serve/frontend.py": "1eaedd0f69cb59366060bff7fb782b64bcbc1d3721705be4013249730c1644e9",
+    "tools/strata_tokenizer.py": "37d33503b3d3fc794b2de829744685db3444a6f75c7780457553d36f5eb40611"
+  },
+  "expert_profile_sha256": "8f59b4aa8873209dff11c11e37bcda9529a1335b724a1afeea37bf6388975baf",
+  "expert_profile_bytes": 196632,
+  "current_source_expert_profile_identical": true,
+  "timing_client_note": "Timing matrix used frozen earlier Python client. Publication gates use combined-branch client. Client transport is private native stdin/stdout, not HTTP."
+}

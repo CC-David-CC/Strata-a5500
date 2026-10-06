@@ -1,0 +1,44 @@
+[
+  {
+    "input_tokens": 32768,
+    "first_difference_zero_based": 7,
+    "rows": [
+      {
+        "label": "q8-i32768-mtp-dg-off",
+        "prefill_s": 7.8958,
+        "decode_tps": 147.15603713390624,
+        "total_s": 14.859657010994852,
+        "cpu_s": 119.39
+      },
+      {
+        "label": "q8-i32768-mtp-dg-on",
+        "prefill_s": 7.8953,
+        "decode_tps": 149.0733866154227,
+        "total_s": 14.769415780028794,
+        "cpu_s": 117.94
+      }
+    ],
+    "single_observation_per_arm": true
+  },
+  {
+    "input_tokens": 131072,
+    "first_difference_zero_based": 84,
+    "rows": [
+      {
+        "label": "q8-i131072-mtp-dg-off",
+        "prefill_s": 31.963099999999997,
+        "decode_tps": 143.38122042062224,
+        "total_s": 39.12340437696548,
+        "cpu_s": 146.3
+      },
+      {
+        "label": "q8-i131072-mtp-dg-on",
+        "prefill_s": 31.9764,
+        "decode_tps": 148.1888829394654,
+        "total_s": 38.90363369497936,
+        "cpu_s": 142.49
+      }
+    ],
+    "single_observation_per_arm": true
+  }
+]

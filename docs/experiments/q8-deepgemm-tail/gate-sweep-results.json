@@ -1,0 +1,4119 @@
+{
+  "scope": "Actual production tail groups at recorded layers; real Q8 weights and counts; synthetic activations",
+  "excluded": "Routing, incoming PCIe upload, common gather and final route-weighted combine are excluded from both arms. This is not request throughput.",
+  "release_commit": "1cbcacbcae2953f3be9edc46369f0c875bc6ab8b",
+  "deepgemm_commit": "b64107f2b9599ca76445b7f62eedf66bae1d095b",
+  "hardware": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+  "rows": [
+    {
+      "case": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1536,
+      "active_rows": 1464,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00031176069751381874,
+        "rms_abs": 4.7870220441836864e-05,
+        "relative_rms": 0.010420119389891624
+      },
+      "us_median": 173.60399663448334,
+      "us_samples": [
+        175.85399746894836,
+        173.80200326442719,
+        173.60399663448334,
+        173.5060065984726,
+        173.38800430297852
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 198.65599274635315,
+        "us_samples": [
+          200.6720006465912,
+          198.68800044059753,
+          198.62399995326996,
+          198.65599274635315,
+          196.6399997472763
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1536,
+      "active_rows": 1464,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00016250275075435638,
+        "rms_abs": 2.1418973119580187e-05,
+        "relative_rms": 0.004662361461669207
+      },
+      "us_median": 145.35999298095703,
+      "us_samples": [
+        147.55800366401672,
+        145.35999298095703,
+        145.41800320148468,
+        145.2219933271408,
+        145.2600061893463
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 194.5600062608719,
+        "us_samples": [
+          199.68000054359436,
+          194.5600062608719,
+          194.20799612998962,
+          194.5600062608719,
+          192.51200556755066
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1536,
+      "active_rows": 1464,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00016250275075435638,
+        "rms_abs": 2.1418973119580187e-05,
+        "relative_rms": 0.004662361461669207
+      },
+      "us_median": 109.44800078868866,
+      "us_samples": [
+        112.32999712228775,
+        109.49400067329407,
+        109.16399955749512,
+        109.29600149393082,
+        109.44800078868866
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 145.4399973154068,
+        "us_samples": [
+          146.464005112648,
+          143.36000382900238,
+          143.36000382900238,
+          147.48799800872803,
+          145.4399973154068
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1536,
+      "active_rows": 1464,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00022654421627521515,
+        "rms_abs": 3.5232904338045046e-05,
+        "relative_rms": 0.007669299840927124
+      },
+      "us_median": 157.52799808979034,
+      "us_samples": [
+        160.70200502872467,
+        157.39400684833527,
+        157.52799808979034,
+        157.55599737167358,
+        157.43599832057953
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 186.36800348758698,
+        "us_samples": [
+          187.391996383667,
+          186.36800348758698,
+          186.36800348758698,
+          186.36800348758698,
+          188.4160041809082
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1536,
+      "active_rows": 1464,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00022654421627521515,
+        "rms_abs": 3.5232904338045046e-05,
+        "relative_rms": 0.007669299840927124
+      },
+      "us_median": 156.22399747371674,
+      "us_samples": [
+        159.50000286102295,
+        156.22399747371674,
+        156.17400407791138,
+        156.37600421905518,
+        155.9540033340454
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 184.32000279426575,
+        "us_samples": [
+          188.4160041809082,
+          184.35199558734894,
+          184.32000279426575,
+          184.32000279426575,
+          184.32000279426575
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "arm": "native_gu_component",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00439782440662384,
+        "rms_abs": 0.000872782664373517,
+        "relative_rms": 0.00534627353772521
+      },
+      "us_median": 99.0080013871193,
+      "us_samples": [
+        100.5920022726059,
+        99.07799959182739,
+        99.0080013871193,
+        98.94400089979172,
+        98.94999861717224
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 122.8799968957901,
+        "us_samples": [
+          123.90399724245071,
+          122.8799968957901,
+          120.54400146007538,
+          120.80000340938568,
+          124.89599734544754
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0031748414039611816,
+        "rms_abs": 0.0004556373751256615,
+        "relative_rms": 0.0027910294011235237
+      },
+      "us_median": 97.62799739837646,
+      "us_samples": [
+        99.41200166940689,
+        97.56200015544891,
+        97.62799739837646,
+        97.64000028371811,
+        97.58400171995163
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 141.34399592876434,
+        "us_samples": [
+          145.4399973154068,
+          141.34399592876434,
+          141.31200313568115,
+          141.34399592876434,
+          139.26400244235992
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "arm": "native_down_component",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00025686435401439667,
+        "rms_abs": 3.4733595384750515e-05,
+        "relative_rms": 0.007560613099485636
+      },
+      "us_median": 73.38999956846237,
+      "us_samples": [
+        75.14200359582901,
+        73.38999956846237,
+        73.3259990811348,
+        73.29799979925156,
+        73.45599681138992
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 86.01599931716919,
+        "us_samples": [
+          86.01599931716919,
+          86.01599931716919,
+          86.01599931716919,
+          83.96799862384796,
+          86.04799956083298
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00011686980724334717,
+        "rms_abs": 1.2606510608748067e-05,
+        "relative_rms": 0.002744114026427269
+      },
+      "us_median": 54.82799932360649,
+      "us_samples": [
+        56.634001433849335,
+        54.82799932360649,
+        54.698001593351364,
+        54.78199943900108,
+        54.83400076627731
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 75.77600330114365,
+        "us_samples": [
+          75.77600330114365,
+          75.77600330114365,
+          75.77600330114365,
+          75.77600330114365,
+          75.45600086450577
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00011686980724334717,
+        "rms_abs": 1.2606510608748067e-05,
+        "relative_rms": 0.002744114026427269
+      },
+      "us_median": 53.22999879717827,
+      "us_samples": [
+        55.51600083708763,
+        53.42999845743179,
+        53.22999879717827,
+        53.15599963068962,
+        53.16799879074097
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 69.63200122117996,
+        "us_samples": [
+          69.66400146484375,
+          67.58400052785873,
+          69.63200122117996,
+          69.63200122117996,
+          69.66400146484375
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00020847551058977842,
+          "rms_abs": 3.034858309547417e-05,
+          "relative_rms": 0.01035927701741457
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 9.93870198726654e-05,
+          "rms_abs": 1.3649597349285614e-05,
+          "relative_rms": 0.004659194499254227
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.0001652892678976059,
+          "rms_abs": 2.2467143935500644e-05,
+          "relative_rms": 0.007669002283364534
+        }
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 928,
+      "active_rows": 856,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00026172026991844177,
+        "rms_abs": 4.7096600610530004e-05,
+        "relative_rms": 0.010729309171438217
+      },
+      "us_median": 111.74199730157852,
+      "us_samples": [
+        114.73800241947174,
+        111.80000007152557,
+        111.63999885320663,
+        111.62199825048447,
+        111.74199730157852
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 133.12000036239624,
+        "us_samples": [
+          137.1839940547943,
+          131.1040073633194,
+          133.12000036239624,
+          131.071999669075,
+          135.16800105571747
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 928,
+      "active_rows": 856,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00013109669089317322,
+        "rms_abs": 2.0959152607247233e-05,
+        "relative_rms": 0.004774808418005705
+      },
+      "us_median": 108.69400203227997,
+      "us_samples": [
+        111.59200221300125,
+        108.89200121164322,
+        108.69400203227997,
+        108.67200046777725,
+        108.63400250673294
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 150.52799880504608,
+        "us_samples": [
+          150.52799880504608,
+          153.56799960136414,
+          149.50400590896606,
+          149.50400590896606,
+          151.19999647140503
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 928,
+      "active_rows": 856,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00013109669089317322,
+        "rms_abs": 2.0959152607247233e-05,
+        "relative_rms": 0.004774808418005705
+      },
+      "us_median": 72.16200232505798,
+      "us_samples": [
+        74.69800114631653,
+        72.33600318431854,
+        72.16200232505798,
+        72.13199883699417,
+        71.90000265836716
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 98.30400347709656,
+        "us_samples": [
+          96.25600278377533,
+          98.30400347709656,
+          96.28800302743912,
+          98.33600372076035,
+          98.33600372076035
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 928,
+      "active_rows": 856,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021177320741117,
+        "rms_abs": 3.4729317121673375e-05,
+        "relative_rms": 0.007911857217550278
+      },
+      "us_median": 106.33400082588196,
+      "us_samples": [
+        108.72600227594376,
+        105.99000006914139,
+        106.33400082588196,
+        106.23999685049057,
+        106.40999674797058
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 128.9920061826706,
+        "us_samples": [
+          133.12000036239624,
+          128.9920061826706,
+          128.9920061826706,
+          130.0159990787506,
+          128.9920061826706
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 928,
+      "active_rows": 856,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021177320741117,
+        "rms_abs": 3.4729317121673375e-05,
+        "relative_rms": 0.007911857217550278
+      },
+      "us_median": 105.6400015950203,
+      "us_samples": [
+        108.43399912118912,
+        105.6400015950203,
+        105.50200194120407,
+        105.47400265932083,
+        105.64199835062027
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 126.97599828243256,
+        "us_samples": [
+          127.96799838542938,
+          124.92799758911133,
+          126.97599828243256,
+          126.97599828243256,
+          127.00800597667694
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "arm": "native_gu_component",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.004175782203674316,
+        "rms_abs": 0.0008624402689747512,
+        "relative_rms": 0.005345013923943043
+      },
+      "us_median": 63.614003360271454,
+      "us_samples": [
+        64.26399946212769,
+        63.642002642154694,
+        63.55799734592438,
+        63.614003360271454,
+        63.49799782037735
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 81.88799768686295,
+        "us_samples": [
+          79.8719972372055,
+          82.91199803352356,
+          81.56800270080566,
+          81.88799768686295,
+          83.96799862384796
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0026687979698181152,
+        "rms_abs": 0.0004513647290877998,
+        "relative_rms": 0.0027973540127277374
+      },
+      "us_median": 71.44200056791306,
+      "us_samples": [
+        72.43599742650986,
+        71.44200056791306,
+        71.40800356864929,
+        71.41999900341034,
+        71.45799696445465
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 106.46399855613708,
+        "us_samples": [
+          109.56799983978271,
+          106.46399855613708,
+          104.41599786281586,
+          104.47999835014343,
+          106.52799904346466
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "arm": "native_down_component",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021779746748507023,
+        "rms_abs": 3.391298741917126e-05,
+        "relative_rms": 0.007725885137915611
+      },
+      "us_median": 46.073999255895615,
+      "us_samples": [
+        47.171998769044876,
+        46.00200057029724,
+        46.07199877500534,
+        46.13000154495239,
+        46.073999255895615
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 57.312000542879105,
+        "us_samples": [
+          57.312000542879105,
+          57.312000542879105,
+          61.43999844789505,
+          55.26399984955788,
+          55.296000093221664
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.990243077278137e-05,
+        "rms_abs": 1.2245373909536283e-05,
+        "relative_rms": 0.002789679216220975
+      },
+      "us_median": 39.2879992723465,
+      "us_samples": [
+        40.64200073480606,
+        39.659999310970306,
+        39.2879992723465,
+        39.156001061201096,
+        39.14399817585945
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 55.26399984955788,
+        "us_samples": [
+          57.34400078654289,
+          54.9440011382103,
+          54.9440011382103,
+          55.26399984955788,
+          55.26399984955788
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l12-p98304",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l12-e501",
+        "l12-e508",
+        "l12-e509",
+        "l12-e511"
+      ],
+      "counts": [
+        100,
+        47,
+        689,
+        20
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.990243077278137e-05,
+        "rms_abs": 1.2245373909536283e-05,
+        "relative_rms": 0.002789679216220975
+      },
+      "us_median": 38.62399980425835,
+      "us_samples": [
+        39.59399834275246,
+        38.84600102901459,
+        38.62399980425835,
+        38.58000040054321,
+        38.46200183033943
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 52.83199995756149,
+        "us_samples": [
+          56.28800019621849,
+          52.83199995756149,
+          53.21599915623665,
+          51.19999870657921,
+          51.16799846291542
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00016946857795119286,
+          "rms_abs": 2.9831606298102997e-05,
+          "relative_rms": 0.010658325627446175
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 8.916482329368591e-05,
+          "rms_abs": 1.33713956529391e-05,
+          "relative_rms": 0.004777372349053621
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.0001362113980576396,
+          "rms_abs": 2.2154154066811316e-05,
+          "relative_rms": 0.00791530217975378
+        }
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 667,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00025427620857954025,
+        "rms_abs": 4.630123657989316e-05,
+        "relative_rms": 0.01060902513563633
+      },
+      "us_median": 101.30999982357025,
+      "us_samples": [
+        104.58199679851532,
+        101.28799825906754,
+        101.30999982357025,
+        101.40399634838104,
+        101.23000293970108
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 122.84799665212631,
+        "us_samples": [
+          126.94400548934937,
+          120.28799951076508,
+          122.52800166606903,
+          122.91199713945389,
+          122.84799665212631
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 667,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00013489089906215668,
+        "rms_abs": 2.0696883439086378e-05,
+        "relative_rms": 0.00474228709936142
+      },
+      "us_median": 96.63800150156021,
+      "us_samples": [
+        100.11599957942963,
+        96.94799780845642,
+        96.63800150156021,
+        96.47200256586075,
+        96.51000052690506
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 135.16800105571747,
+        "us_samples": [
+          138.2399946451187,
+          134.8160058259964,
+          135.13599336147308,
+          136.19199395179749,
+          135.16800105571747
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 667,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00013489089906215668,
+        "rms_abs": 2.0696883439086378e-05,
+        "relative_rms": 0.00474228709936142
+      },
+      "us_median": 60.88000163435936,
+      "us_samples": [
+        63.45000118017197,
+        60.96800044178963,
+        60.5119988322258,
+        60.88000163435936,
+        60.759998857975006
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 86.01599931716919,
+        "us_samples": [
+          86.04799956083298,
+          86.01599931716919,
+          86.04799956083298,
+          83.96799862384796,
+          83.61600339412689
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 667,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00018097669817507267,
+        "rms_abs": 3.412457590457052e-05,
+        "relative_rms": 0.007818981073796749
+      },
+      "us_median": 95.19200026988983,
+      "us_samples": [
+        98.15599769353867,
+        95.1400026679039,
+        95.19200026988983,
+        95.19200026988983,
+        95.09799629449844
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 120.80000340938568,
+        "us_samples": [
+          120.83200365304947,
+          120.83200365304947,
+          120.80000340938568,
+          118.78400295972824,
+          120.4800009727478
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 667,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00018097669817507267,
+        "rms_abs": 3.412457590457052e-05,
+        "relative_rms": 0.007818981073796749
+      },
+      "us_median": 94.43999826908112,
+      "us_samples": [
+        97.46599942445755,
+        94.50999647378922,
+        94.43999826908112,
+        94.43400055170059,
+        94.42999958992004
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 118.78400295972824,
+        "us_samples": [
+          119.77600306272507,
+          118.75200271606445,
+          118.78400295972824,
+          118.78400295972824,
+          118.43200027942657
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "arm": "native_gu_component",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.004187028855085373,
+        "rms_abs": 0.0008588096825405955,
+        "relative_rms": 0.005345670040696859
+      },
+      "us_median": 58.34000185132027,
+      "us_samples": [
+        60.047999024391174,
+        58.400001376867294,
+        58.34000185132027,
+        58.33199992775917,
+        58.295998722314835
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 75.77600330114365,
+        "us_samples": [
+          77.82399654388428,
+          75.77600330114365,
+          75.77600330114365,
+          75.74400305747986,
+          75.77600330114365
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0029262304306030273,
+        "rms_abs": 0.0004491438448894769,
+        "relative_rms": 0.0027957006823271513
+      },
+      "us_median": 64.84399735927582,
+      "us_samples": [
+        66.78999960422516,
+        64.85199928283691,
+        64.84399735927582,
+        64.6739974617958,
+        64.68799710273743
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 96.25600278377533,
+        "us_samples": [
+          98.30400347709656,
+          96.25600278377533,
+          96.25600278377533,
+          96.25600278377533,
+          96.22400254011154
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "arm": "native_down_component",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0002341759391129017,
+        "rms_abs": 3.3456701203249395e-05,
+        "relative_rms": 0.007665950804948807
+      },
+      "us_median": 41.70599952340126,
+      "us_samples": [
+        43.327998369932175,
+        41.760001331567764,
+        41.6640006005764,
+        41.68999940156937,
+        41.70599952340126
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 53.21599915623665,
+        "us_samples": [
+          53.21599915623665,
+          53.21599915623665,
+          53.247999399900436,
+          52.89600044488907,
+          53.21599915623665
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 9.451247751712799e-05,
+        "rms_abs": 1.2090965356037486e-05,
+        "relative_rms": 0.0027704089879989624
+      },
+      "us_median": 34.81600061058998,
+      "us_samples": [
+        36.80400177836418,
+        34.94400158524513,
+        34.779999405145645,
+        34.81600061058998,
+        34.65399891138077
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 53.21599915623665,
+        "us_samples": [
+          53.21599915623665,
+          53.247999399900436,
+          52.89600044488907,
+          53.247999399900436,
+          52.928000688552856
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l24-p90112",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l24-e501",
+        "l24-e502",
+        "l24-e506",
+        "l24-e510"
+      ],
+      "counts": [
+        1,
+        646,
+        17,
+        3
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 9.451247751712799e-05,
+        "rms_abs": 1.2090965356037486e-05,
+        "relative_rms": 0.0027704089879989624
+      },
+      "us_median": 34.30800139904022,
+      "us_samples": [
+        36.396000534296036,
+        34.32999923825264,
+        34.30800139904022,
+        34.16600078344345,
+        34.262001514434814
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 46.78399860858917,
+        "us_samples": [
+          47.07200080156326,
+          47.07200080156326,
+          46.751998364925385,
+          46.78399860858917,
+          44.704001396894455
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.0001906635006889701,
+          "rms_abs": 2.9373048164416105e-05,
+          "relative_rms": 0.01055195927619934
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 7.699895650148392e-05,
+          "rms_abs": 1.314836299570743e-05,
+          "relative_rms": 0.0047234115190804005
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.00011746515519917011,
+          "rms_abs": 2.177425085392315e-05,
+          "relative_rms": 0.007822171784937382
+        }
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 864,
+      "active_rows": 789,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0003042616881430149,
+        "rms_abs": 4.368218287709169e-05,
+        "relative_rms": 0.010605956427752972
+      },
+      "us_median": 110.4779988527298,
+      "us_samples": [
+        111.91000044345856,
+        110.52999645471573,
+        110.4779988527298,
+        110.47600209712982,
+        110.4080006480217
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 128.9920061826706,
+        "us_samples": [
+          131.04000687599182,
+          131.04000687599182,
+          128.9920061826706,
+          128.9920061826706,
+          126.97599828243256
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 864,
+      "active_rows": 789,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0001476607285439968,
+        "rms_abs": 1.9769540813285857e-05,
+        "relative_rms": 0.004800009075552225
+      },
+      "us_median": 100.22799670696259,
+      "us_samples": [
+        101.75599902868271,
+        100.25600343942642,
+        100.11400282382965,
+        100.22799670696259,
+        100.01599788665771
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 139.23199474811554,
+        "us_samples": [
+          142.33599603176117,
+          139.23199474811554,
+          139.26400244235992,
+          139.23199474811554,
+          138.2399946451187
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 864,
+      "active_rows": 789,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0001476607285439968,
+        "rms_abs": 1.9769540813285857e-05,
+        "relative_rms": 0.004800009075552225
+      },
+      "us_median": 63.847996294498444,
+      "us_samples": [
+        65.68200141191483,
+        63.854001462459564,
+        63.847996294498444,
+        63.71399760246277,
+        63.66799771785736
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 86.01599931716919,
+        "us_samples": [
+          86.04799956083298,
+          86.01599931716919,
+          83.96799862384796,
+          86.04799956083298,
+          86.01599931716919
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 864,
+      "active_rows": 789,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021910853683948517,
+        "rms_abs": 3.268994623795152e-05,
+        "relative_rms": 0.007937060669064522
+      },
+      "us_median": 103.01399976015091,
+      "us_samples": [
+        104.15200144052505,
+        103.07399928569794,
+        103.01399976015091,
+        102.90200263261795,
+        102.99000144004822
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 123.90399724245071,
+        "us_samples": [
+          123.90399724245071,
+          122.84799665212631,
+          124.60800260305405,
+          122.8799968957901,
+          124.89599734544754
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 864,
+      "active_rows": 789,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021910853683948517,
+        "rms_abs": 3.268994623795152e-05,
+        "relative_rms": 0.007937060669064522
+      },
+      "us_median": 102.122001349926,
+      "us_samples": [
+        103.52200269699097,
+        102.18600183725357,
+        102.122001349926,
+        102.10199654102325,
+        102.06200182437897
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 122.3360002040863,
+        "us_samples": [
+          124.92799758911133,
+          122.3360002040863,
+          120.80000340938568,
+          121.8239963054657,
+          122.91199713945389
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "arm": "native_gu_component",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.004708094988018274,
+        "rms_abs": 0.0008466427098028362,
+        "relative_rms": 0.005334735382348299
+      },
+      "us_median": 63.36600333452225,
+      "us_samples": [
+        64.00399655103683,
+        63.398003578186035,
+        63.30200284719467,
+        63.36600333452225,
+        63.21399658918381
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 79.83999699354172,
+        "us_samples": [
+          82.91199803352356,
+          79.8719972372055,
+          79.55200225114822,
+          79.83999699354172,
+          77.47200131416321
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.002647876739501953,
+        "rms_abs": 0.0004442071949597448,
+        "relative_rms": 0.002798970090225339
+      },
+      "us_median": 65.43000042438507,
+      "us_samples": [
+        66.12200289964676,
+        65.43000042438507,
+        65.5059963464737,
+        65.420001745224,
+        65.31599909067154
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 98.30400347709656,
+        "us_samples": [
+          100.35199671983719,
+          98.30400347709656,
+          97.98400104045868,
+          100.38399696350098,
+          96.28800302743912
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "arm": "native_down_component",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0001967339776456356,
+        "rms_abs": 3.1159448553808033e-05,
+        "relative_rms": 0.007565458305180073
+      },
+      "us_median": 45.876000076532364,
+      "us_samples": [
+        46.92000150680542,
+        45.837998390197754,
+        45.876000076532364,
+        45.777998864650726,
+        45.94000056385994
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 55.296000093221664,
+        "us_samples": [
+          57.312000542879105,
+          55.26399984955788,
+          55.296000093221664,
+          55.26399984955788,
+          57.312000542879105
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.326396346092224e-05,
+        "rms_abs": 1.1444523806858342e-05,
+        "relative_rms": 0.00277870986610651
+      },
+      "us_median": 37.06600144505501,
+      "us_samples": [
+        38.10400143265724,
+        37.25599870085716,
+        37.05599904060364,
+        37.03000023961067,
+        37.06600144505501
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 53.21599915623665,
+        "us_samples": [
+          57.312000542879105,
+          55.296000093221664,
+          52.76799947023392,
+          53.21599915623665,
+          53.21599915623665
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l27-p90112",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l27-e507",
+        "l27-e508",
+        "l27-e510",
+        "l27-e511"
+      ],
+      "counts": [
+        2,
+        50,
+        681,
+        56
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.326396346092224e-05,
+        "rms_abs": 1.1444523806858342e-05,
+        "relative_rms": 0.00277870986610651
+      },
+      "us_median": 36.41799837350845,
+      "us_samples": [
+        37.28000074625015,
+        36.531999707221985,
+        36.3599993288517,
+        36.41799837350845,
+        36.281999200582504
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 49.15200173854828,
+        "us_samples": [
+          52.22399905323982,
+          49.15200173854828,
+          49.12000149488449,
+          49.15200173854828,
+          47.10400104522705
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00015103351324796677,
+          "rms_abs": 2.781928014883306e-05,
+          "relative_rms": 0.010587934404611588
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 7.965927943587303e-05,
+          "rms_abs": 1.2630693163373508e-05,
+          "relative_rms": 0.004807204008102417
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.00015139160677790642,
+          "rms_abs": 2.083153412968386e-05,
+          "relative_rms": 0.00792841985821724
+        }
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 624,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0002397731877863407,
+        "rms_abs": 3.9430302422260866e-05,
+        "relative_rms": 0.01072688028216362
+      },
+      "us_median": 99.28400069475174,
+      "us_samples": [
+        101.17600113153458,
+        99.50199723243713,
+        99.28400069475174,
+        99.26000237464905,
+        99.21199828386307
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 118.81600320339203,
+        "us_samples": [
+          121.85599654912949,
+          120.83200365304947,
+          118.81600320339203,
+          118.78400295972824,
+          118.81600320339203
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 624,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00012710830196738243,
+        "rms_abs": 1.7845943148131482e-05,
+        "relative_rms": 0.004854928236454725
+      },
+      "us_median": 94.95200216770172,
+      "us_samples": [
+        96.62999957799911,
+        94.93199735879898,
+        95.22999823093414,
+        94.95200216770172,
+        94.75799649953842
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 133.12000036239624,
+        "us_samples": [
+          135.16800105571747,
+          133.12000036239624,
+          133.12000036239624,
+          133.15199315547943,
+          131.04000687599182
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 624,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00012710830196738243,
+        "rms_abs": 1.7845943148131482e-05,
+        "relative_rms": 0.004854928236454725
+      },
+      "us_median": 59.314001351594925,
+      "us_samples": [
+        60.82800030708313,
+        59.314001351594925,
+        59.324000030756,
+        58.9819997549057,
+        58.9199997484684
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 77.79199630022049,
+        "us_samples": [
+          78.87999713420868,
+          79.9039974808693,
+          77.53600180149078,
+          77.79199630022049,
+          77.37600058317184
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 624,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00016561895608901978,
+        "rms_abs": 2.9627266485476866e-05,
+        "relative_rms": 0.008059997111558914
+      },
+      "us_median": 91.08000248670578,
+      "us_samples": [
+        92.56599843502045,
+        91.08000248670578,
+        90.98599851131439,
+        90.9779965877533,
+        91.11200273036957
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 114.68800157308578,
+        "us_samples": [
+          115.68000167608261,
+          114.68800157308578,
+          114.68800157308578,
+          114.33599889278412,
+          114.656001329422
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 624,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00016561895608901978,
+        "rms_abs": 2.9627266485476866e-05,
+        "relative_rms": 0.008059997111558914
+      },
+      "us_median": 90.37400037050247,
+      "us_samples": [
+        91.78400039672852,
+        90.47800302505493,
+        90.32399952411652,
+        90.34200012683868,
+        90.37400037050247
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 112.64000087976456,
+        "us_samples": [
+          114.72000181674957,
+          114.656001329422,
+          112.64000087976456,
+          112.28799819946289,
+          112.60800063610077
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "arm": "native_gu_component",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0041252970695495605,
+        "rms_abs": 0.0008213392575271428,
+        "relative_rms": 0.005352416541427374
+      },
+      "us_median": 55.7980015873909,
+      "us_samples": [
+        56.96399882435799,
+        55.78000098466873,
+        55.80399930477142,
+        55.782001465559006,
+        55.7980015873909
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 73.72800260782242,
+        "us_samples": [
+          75.77600330114365,
+          75.77600330114365,
+          73.69600236415863,
+          73.72800260782242,
+          71.68000191450119
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0026986002922058105,
+        "rms_abs": 0.0004305342154111713,
+        "relative_rms": 0.0028056595474481583
+      },
+      "us_median": 63.96599858999252,
+      "us_samples": [
+        65.13600051403046,
+        63.8979971408844,
+        64.21399861574173,
+        63.85199725627899,
+        63.96599858999252
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 96.22400254011154,
+        "us_samples": [
+          96.22400254011154,
+          94.2080020904541,
+          96.22400254011154,
+          96.25600278377533,
+          94.2080020904541
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "arm": "native_down_component",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00017290888354182243,
+        "rms_abs": 2.7903259251615964e-05,
+        "relative_rms": 0.007590986788272858
+      },
+      "us_median": 42.53799840807915,
+      "us_samples": [
+        43.494001030921936,
+        42.53799840807915,
+        42.465999722480774,
+        42.61000081896782,
+        42.4639992415905
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 51.19999870657921,
+        "us_samples": [
+          51.16799846291542,
+          51.231998950242996,
+          50.84799975156784,
+          51.19999870657921,
+          51.19999870657921
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 6.77499920129776e-05,
+        "rms_abs": 1.0293892046320252e-05,
+        "relative_rms": 0.002800418296828866
+      },
+      "us_median": 33.385999500751495,
+      "us_samples": [
+        34.887999296188354,
+        33.695999532938,
+        33.385999500751495,
+        33.38000178337097,
+        33.31400081515312
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 51.16799846291542,
+        "us_samples": [
+          51.16799846291542,
+          51.16799846291542,
+          51.16799846291542,
+          51.16799846291542,
+          51.16799846291542
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l28-p32768",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l28-e508",
+        "l28-e509",
+        "l28-e510",
+        "l28-e511"
+      ],
+      "counts": [
+        36,
+        2,
+        582,
+        4
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 6.77499920129776e-05,
+        "rms_abs": 1.0293892046320252e-05,
+        "relative_rms": 0.002800418296828866
+      },
+      "us_median": 32.77000039815903,
+      "us_samples": [
+        34.05399993062019,
+        32.802000641822815,
+        32.749999314546585,
+        32.59599953889847,
+        32.77000039815903
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 45.024000108242035,
+        "us_samples": [
+          45.024000108242035,
+          47.07200080156326,
+          44.704001396894455,
+          44.704001396894455,
+          46.78399860858917
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00014312088023871183,
+          "rms_abs": 2.5014662242028862e-05,
+          "relative_rms": 0.01066679134964943
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 7.012113928794861e-05,
+          "rms_abs": 1.1360027201590128e-05,
+          "relative_rms": 0.004844160750508308
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.00010448740795254707,
+          "rms_abs": 1.889425220724661e-05,
+          "relative_rms": 0.008056916296482086
+        }
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 655,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00024960748851299286,
+        "rms_abs": 4.515618638833985e-05,
+        "relative_rms": 0.010594269260764122
+      },
+      "us_median": 98.87400269508362,
+      "us_samples": [
+        100.72200000286102,
+        98.99800270795822,
+        98.87400269508362,
+        98.8439992070198,
+        98.64600002765656
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 120.80000340938568,
+        "us_samples": [
+          120.83200365304947,
+          120.80000340938568,
+          120.83200365304947,
+          118.75200271606445,
+          118.75200271606445
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 655,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00013722479343414307,
+        "rms_abs": 2.0326961021055467e-05,
+        "relative_rms": 0.0047689881175756454
+      },
+      "us_median": 94.84399855136871,
+      "us_samples": [
+        96.57400101423264,
+        94.760000705719,
+        95.06800025701523,
+        94.84399855136871,
+        94.80199962854385
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 133.15199315547943,
+        "us_samples": [
+          135.13599336147308,
+          133.15199315547943,
+          133.08799266815186,
+          135.16800105571747,
+          133.12000036239624
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 655,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00013722479343414307,
+        "rms_abs": 2.0326961021055467e-05,
+        "relative_rms": 0.0047689881175756454
+      },
+      "us_median": 59.172000735998154,
+      "us_samples": [
+        60.77200174331665,
+        59.172000735998154,
+        59.195999056100845,
+        59.13599953055382,
+        59.101998805999756
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 79.8719972372055,
+        "us_samples": [
+          79.9039974808693,
+          79.8719972372055,
+          79.55200225114822,
+          79.52000200748444,
+          79.8719972372055
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 655,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021595414727926254,
+        "rms_abs": 3.375092273927294e-05,
+        "relative_rms": 0.007918436080217361
+      },
+      "us_median": 90.71999788284302,
+      "us_samples": [
+        93.81400048732758,
+        90.66200256347656,
+        90.71999788284302,
+        90.70000052452087,
+        90.97599983215332
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 116.70400202274323,
+        "us_samples": [
+          120.83200365304947,
+          114.656001329422,
+          118.75200271606445,
+          116.70400202274323,
+          114.68800157308578
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 736,
+      "active_rows": 655,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021595414727926254,
+        "rms_abs": 3.375092273927294e-05,
+        "relative_rms": 0.007918436080217361
+      },
+      "us_median": 89.83000367879868,
+      "us_samples": [
+        91.38999879360199,
+        89.85999971628189,
+        89.83000367879868,
+        89.81800079345703,
+        89.72799777984619
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 112.64000087976456,
+        "us_samples": [
+          115.7120019197464,
+          114.656001329422,
+          112.64000087976456,
+          112.64000087976456,
+          112.64000087976456
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "arm": "native_gu_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.004255324602127075,
+        "rms_abs": 0.0008671126561239362,
+        "relative_rms": 0.005349759478121996
+      },
+      "us_median": 55.14200031757355,
+      "us_samples": [
+        56.262001395225525,
+        55.05799874663353,
+        55.031999945640564,
+        55.14800176024437,
+        55.14200031757355
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 75.74400305747986,
+        "us_samples": [
+          77.82399654388428,
+          75.77600330114365,
+          71.68000191450119,
+          75.74400305747986,
+          73.69600236415863
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.002954244613647461,
+        "rms_abs": 0.0004535602929536253,
+        "relative_rms": 0.0027982965111732483
+      },
+      "us_median": 64.12199884653091,
+      "us_samples": [
+        65.26599824428558,
+        64.14999812841415,
+        64.05799835920334,
+        64.12199884653091,
+        64.09800052642822
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 96.25600278377533,
+        "us_samples": [
+          99.35999661684036,
+          96.25600278377533,
+          94.17600184679031,
+          96.28800302743912,
+          96.22400254011154
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "arm": "native_down_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021962635219097137,
+        "rms_abs": 3.2282918255077675e-05,
+        "relative_rms": 0.007574022281914949
+      },
+      "us_median": 42.72399842739105,
+      "us_samples": [
+        43.407998979091644,
+        42.805999517440796,
+        42.72399842739105,
+        42.663998901844025,
+        42.70799830555916
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 51.16799846291542,
+        "us_samples": [
+          52.191998809576035,
+          51.16799846291542,
+          51.19999870657921,
+          51.16799846291542,
+          51.16799846291542
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.600763976573944e-05,
+        "rms_abs": 1.1825062756543048e-05,
+        "relative_rms": 0.002774324268102646
+      },
+      "us_median": 33.63800048828125,
+      "us_samples": [
+        34.5660001039505,
+        33.70799869298935,
+        33.63800048828125,
+        33.42000022530556,
+        33.5099995136261
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 51.16799846291542,
+        "us_samples": [
+          54.27199974656105,
+          51.16799846291542,
+          50.81599950790405,
+          51.16799846291542,
+          48.79999905824661
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p40960",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        27,
+        577,
+        37,
+        14
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.600763976573944e-05,
+        "rms_abs": 1.1825062756543048e-05,
+        "relative_rms": 0.002774324268102646
+      },
+      "us_median": 32.83600136637688,
+      "us_samples": [
+        34.088000655174255,
+        33.00600126385689,
+        32.83600136637688,
+        32.82200172543526,
+        32.74000063538551
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 47.10400104522705,
+        "us_samples": [
+          50.175998359918594,
+          47.10400104522705,
+          47.13600128889084,
+          47.10400104522705,
+          46.78399860858917
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.0001683511072769761,
+          "rms_abs": 2.8737675165757537e-05,
+          "relative_rms": 0.010569894686341286
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 7.969513535499573e-05,
+          "rms_abs": 1.294491630687844e-05,
+          "relative_rms": 0.004761220421642065
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.0001341039314866066,
+          "rms_abs": 2.1520314476219937e-05,
+          "relative_rms": 0.007915304973721504
+        }
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 683,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00027605617651715875,
+        "rms_abs": 4.4922457163920626e-05,
+        "relative_rms": 0.010593094862997532
+      },
+      "us_median": 89.70200270414352,
+      "us_samples": [
+        91.42400324344635,
+        89.76200222969055,
+        89.69999849796295,
+        89.70200270414352,
+        89.63199704885483
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 112.64000087976456,
+        "us_samples": [
+          113.69600147008896,
+          112.64000087976456,
+          112.60800063610077,
+          110.55999994277954,
+          112.67200112342834
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 683,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00014183670282363892,
+        "rms_abs": 2.034363387792837e-05,
+        "relative_rms": 0.004797200672328472
+      },
+      "us_median": 96.38199955224991,
+      "us_samples": [
+        98.11799973249435,
+        96.41599655151367,
+        96.37200087308884,
+        96.3200032711029,
+        96.38199955224991
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 135.13599336147308,
+        "us_samples": [
+          137.2160017490387,
+          135.16800105571747,
+          135.13599336147308,
+          134.8160058259964,
+          134.8160058259964
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 683,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00014183670282363892,
+        "rms_abs": 2.034363387792837e-05,
+        "relative_rms": 0.004797200672328472
+      },
+      "us_median": 60.401998460292816,
+      "us_samples": [
+        61.87799945473671,
+        60.453999787569046,
+        60.401998460292816,
+        60.3800006210804,
+        60.36600098013878
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 83.96799862384796,
+        "us_samples": [
+          83.99999886751175,
+          83.99999886751175,
+          83.96799862384796,
+          81.91999793052673,
+          80.89599758386612
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 683,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021059077698737383,
+        "rms_abs": 3.366974488017149e-05,
+        "relative_rms": 0.007939610630273819
+      },
+      "us_median": 86.52400225400925,
+      "us_samples": [
+        87.49999850988388,
+        86.59400045871735,
+        86.34199947118759,
+        86.5200012922287,
+        86.52400225400925
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 112.64000087976456,
+        "us_samples": [
+          114.656001329422,
+          112.64000087976456,
+          112.60800063610077,
+          112.64000087976456,
+          114.68800157308578
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 768,
+      "active_rows": 683,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00021059077698737383,
+        "rms_abs": 3.366974488017149e-05,
+        "relative_rms": 0.007939610630273819
+      },
+      "us_median": 85.6420025229454,
+      "us_samples": [
+        86.83399856090546,
+        85.54799854755402,
+        85.56400239467621,
+        85.74999868869781,
+        85.6420025229454
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 108.5439994931221,
+        "us_samples": [
+          113.63200098276138,
+          108.5439994931221,
+          108.51199924945831,
+          112.03200370073318,
+          108.5439994931221
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "arm": "native_gu_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.004417126066982746,
+        "rms_abs": 0.0008648760849609971,
+        "relative_rms": 0.005340033210813999
+      },
+      "us_median": 49.83000084757805,
+      "us_samples": [
+        51.0299988090992,
+        49.83000084757805,
+        49.89200085401535,
+        49.79600012302399,
+        49.73600059747696
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 69.60000097751617,
+        "us_samples": [
+          69.60000097751617,
+          71.68000191450119,
+          69.2799985408783,
+          69.60000097751617,
+          69.60000097751617
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.003130197525024414,
+        "rms_abs": 0.000452541426056996,
+        "relative_rms": 0.002794141648337245
+      },
+      "us_median": 64.4960030913353,
+      "us_samples": [
+        65.65599888563156,
+        64.4960030913353,
+        64.26999717950821,
+        64.32200223207474,
+        64.77600336074829
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 96.22400254011154,
+        "us_samples": [
+          98.30400347709656,
+          95.8079993724823,
+          96.22400254011154,
+          96.28800302743912,
+          96.22400254011154
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "arm": "native_down_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00022551999427378178,
+        "rms_abs": 3.1994521123124287e-05,
+        "relative_rms": 0.007544578053057194
+      },
+      "us_median": 38.270000368356705,
+      "us_samples": [
+        39.32600095868111,
+        38.52799907326698,
+        38.242001086473465,
+        38.24999928474426,
+        38.270000368356705
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 49.15200173854828,
+        "us_samples": [
+          49.15200173854828,
+          49.18399825692177,
+          49.12000149488449,
+          51.16799846291542,
+          49.12000149488449
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.982047438621521e-05,
+        "rms_abs": 1.1731907761713956e-05,
+        "relative_rms": 0.002766482997685671
+      },
+      "us_median": 34.91000086069107,
+      "us_samples": [
+        36.22199967503548,
+        34.94799882173538,
+        34.91000086069107,
+        34.742001444101334,
+        34.710001200437546
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 51.16799846291542,
+        "us_samples": [
+          53.21599915623665,
+          51.16799846291542,
+          51.19999870657921,
+          51.16799846291542,
+          51.16799846291542
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l32-p65536",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l32-e508",
+        "l32-e509",
+        "l32-e510",
+        "l32-e511"
+      ],
+      "counts": [
+        44,
+        531,
+        101,
+        7
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 8.982047438621521e-05,
+        "rms_abs": 1.1731907761713956e-05,
+        "relative_rms": 0.002766482997685671
+      },
+      "us_median": 33.969998359680176,
+      "us_samples": [
+        35.13000160455704,
+        33.9680016040802,
+        33.890001475811005,
+        34.30600091814995,
+        33.969998359680176
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 47.07200080156326,
+        "us_samples": [
+          47.07200080156326,
+          47.07200080156326,
+          47.10400104522705,
+          46.751998364925385,
+          47.13600128889084
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00017711776308715343,
+          "rms_abs": 2.8520255000330508e-05,
+          "relative_rms": 0.01054464839398861
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 7.694680243730545e-05,
+          "rms_abs": 1.2896381122118328e-05,
+          "relative_rms": 0.004768113140016794
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.0001491963630542159,
+          "rms_abs": 2.1455285605043173e-05,
+          "relative_rms": 0.007932553067803383
+        }
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1248,
+      "active_rows": 1167,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0003468218492344022,
+        "rms_abs": 5.899149618926458e-05,
+        "relative_rms": 0.010709085501730442
+      },
+      "us_median": 76.41000300645828,
+      "us_samples": [
+        78.00199836492538,
+        76.44200325012207,
+        76.31999999284744,
+        76.41000300645828,
+        76.36799663305283
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 102.4319976568222,
+        "us_samples": [
+          102.4319976568222,
+          102.4319976568222,
+          100.0640019774437,
+          102.4319976568222,
+          100.35199671983719
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1248,
+      "active_rows": 1167,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00018779374659061432,
+        "rms_abs": 2.6437748601892963e-05,
+        "relative_rms": 0.004799405578523874
+      },
+      "us_median": 127.68000364303589,
+      "us_samples": [
+        129.41400706768036,
+        127.64200568199158,
+        127.6479959487915,
+        127.69199907779694,
+        127.68000364303589
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 172.03199863433838,
+        "us_samples": [
+          174.04800653457642,
+          172.03199863433838,
+          172.0000058412552,
+          172.0000058412552,
+          172.03199863433838
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1248,
+      "active_rows": 1167,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00018779374659061432,
+        "rms_abs": 2.6437748601892963e-05,
+        "relative_rms": 0.004799405578523874
+      },
+      "us_median": 90.89600294828415,
+      "us_samples": [
+        92.56400167942047,
+        91.11800044775009,
+        90.89600294828415,
+        90.86800366640091,
+        90.79399704933167
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 122.8799968957901,
+        "us_samples": [
+          122.8799968957901,
+          122.8799968957901,
+          120.51200121641159,
+          122.8799968957901,
+          122.3360002040863
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1248,
+      "active_rows": 1167,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0002683475613594055,
+        "rms_abs": 4.395367795950733e-05,
+        "relative_rms": 0.007979178801178932
+      },
+      "us_median": 92.59399771690369,
+      "us_samples": [
+        94.27999705076218,
+        92.59399771690369,
+        92.5379991531372,
+        92.50800311565399,
+        92.65399724245071
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 120.83200365304947,
+        "us_samples": [
+          128.9920061826706,
+          120.80000340938568,
+          122.8799968957901,
+          120.83200365304947,
+          120.80000340938568
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1248,
+      "active_rows": 1167,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0002683475613594055,
+        "rms_abs": 4.395367795950733e-05,
+        "relative_rms": 0.007979178801178932
+      },
+      "us_median": 91.82599931955338,
+      "us_samples": [
+        93.50600093603134,
+        91.82599931955338,
+        91.75000339746475,
+        91.88400208950043,
+        91.56599640846252
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 118.75200271606445,
+        "us_samples": [
+          118.81600320339203,
+          118.75200271606445,
+          118.43200027942657,
+          116.22399836778641,
+          118.75200271606445
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "arm": "native_gu_component",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.005477555096149445,
+        "rms_abs": 0.0009330951143056154,
+        "relative_rms": 0.005345833022147417
+      },
+      "us_median": 43.946001678705215,
+      "us_samples": [
+        45.419998466968536,
+        43.946001678705215,
+        43.95199939608574,
+        43.82399842143059,
+        43.855998665094376
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 65.5680000782013,
+        "us_samples": [
+          66.56000018119812,
+          65.5680000782013,
+          65.5680000782013,
+          65.50399959087372,
+          63.48799914121628
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0030536651611328125,
+        "rms_abs": 0.00048601088928990066,
+        "relative_rms": 0.0027844246942549944
+      },
+      "us_median": 84.04800295829773,
+      "us_samples": [
+        85.36999672651291,
+        84.04800295829773,
+        84.10599827766418,
+        83.92199873924255,
+        84.03199911117554
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 122.8799968957901,
+        "us_samples": [
+          122.8799968957901,
+          124.95999783277512,
+          124.95999783277512,
+          122.56000190973282,
+          120.51200121641159
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "arm": "native_down_component",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0003297021612524986,
+        "rms_abs": 4.218757021590136e-05,
+        "relative_rms": 0.007658566348254681
+      },
+      "us_median": 30.710000544786453,
+      "us_samples": [
+        32.12200105190277,
+        30.726000666618347,
+        30.659999698400497,
+        30.710000544786453,
+        30.64800053834915
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 40.991999208927155,
+        "us_samples": [
+          42.97599941492081,
+          42.97599941492081,
+          40.991999208927155,
+          40.608000010252,
+          40.92799872159958
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00018606334924697876,
+        "rms_abs": 1.5265266483766027e-05,
+        "relative_rms": 0.0027711966540664434
+      },
+      "us_median": 47.0380000770092,
+      "us_samples": [
+        48.43999817967415,
+        47.10200056433678,
+        47.0380000770092,
+        46.93400114774704,
+        46.99999839067459
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 65.50399959087372,
+        "us_samples": [
+          65.50399959087372,
+          65.50399959087372,
+          65.50399959087372,
+          63.1679967045784,
+          63.519999384880066
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l42-p49152",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l42-e508",
+        "l42-e509",
+        "l42-e510",
+        "l42-e511"
+      ],
+      "counts": [
+        50,
+        1102,
+        3,
+        12
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00018606334924697876,
+        "rms_abs": 1.5265266483766027e-05,
+        "relative_rms": 0.0027711966540664434
+      },
+      "us_median": 46.05799913406372,
+      "us_samples": [
+        47.331999987363815,
+        46.098001301288605,
+        46.05799913406372,
+        46.00200057029724,
+        46.01600021123886
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 61.43999844789505,
+        "us_samples": [
+          61.47199869155884,
+          61.47199869155884,
+          59.039998799562454,
+          61.43999844789505,
+          59.07199904322624
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.0002366495318710804,
+          "rms_abs": 3.7471003452083096e-05,
+          "relative_rms": 0.010669967159628868
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 0.00011660903692245483,
+          "rms_abs": 1.67903726833174e-05,
+          "relative_rms": 0.004781103227287531
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.00017323996871709824,
+          "rms_abs": 2.8020371246384457e-05,
+          "relative_rms": 0.007978874258697033
+        }
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1632,
+      "active_rows": 1548,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00030694459564983845,
+        "rms_abs": 4.610864561982453e-05,
+        "relative_rms": 0.010686216875910759
+      },
+      "us_median": 150.5959928035736,
+      "us_samples": [
+        152.75800228118896,
+        150.39600431919098,
+        150.5959928035736,
+        150.64799785614014,
+        150.5099982023239
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 174.0799993276596,
+        "us_samples": [
+          175.10400712490082,
+          173.0560064315796,
+          174.0799993276596,
+          175.135999917984,
+          174.04800653457642
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "arm": "deepgemm_bf16_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1632,
+      "active_rows": 1548,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00012801866978406906,
+        "rms_abs": 2.0803199731744826e-05,
+        "relative_rms": 0.004821383859962225
+      },
+      "us_median": 154.26400303840637,
+      "us_samples": [
+        156.32599592208862,
+        154.1679948568344,
+        154.26400303840637,
+        154.21999990940094,
+        154.26599979400635
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 204.44799959659576,
+        "us_samples": [
+          205.82400262355804,
+          202.7519941329956,
+          204.83200252056122,
+          204.44799959659576,
+          202.7519941329956
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "arm": "deepgemm_bf16_preconverted",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1632,
+      "active_rows": 1548,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00012801866978406906,
+        "rms_abs": 2.0803199731744826e-05,
+        "relative_rms": 0.004821383859962225
+      },
+      "us_median": 117.70600080490112,
+      "us_samples": [
+        119.92000043392181,
+        117.65000224113464,
+        117.6299974322319,
+        117.70600080490112,
+        117.87600070238113
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 149.50400590896606,
+        "us_samples": [
+          152.5759994983673,
+          149.50400590896606,
+          149.47199821472168,
+          149.50400590896606,
+          149.53599870204926
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "arm": "native_gu_deepgemm_down_streamed_conversion",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1632,
+      "active_rows": 1548,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00022286362946033478,
+        "rms_abs": 3.4448603400960565e-05,
+        "relative_rms": 0.007983865216374397
+      },
+      "us_median": 175.98800361156464,
+      "us_samples": [
+        177.69600450992584,
+        175.96399784088135,
+        176.28200352191925,
+        175.98800361156464,
+        175.93400180339813
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 203.77600193023682,
+        "us_samples": [
+          202.78400182724,
+          203.77600193023682,
+          203.77600193023682,
+          204.79999482631683,
+          202.78400182724
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1632,
+      "active_rows": 1548,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00022286362946033478,
+        "rms_abs": 3.4448603400960565e-05,
+        "relative_rms": 0.007983865216374397
+      },
+      "us_median": 174.69599843025208,
+      "us_samples": [
+        176.89600586891174,
+        174.6000051498413,
+        174.69599843025208,
+        174.93599653244019,
+        174.02000725269318
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 197.63199985027313,
+        "us_samples": [
+          197.63199985027313,
+          197.63199985027313,
+          200.73600113391876,
+          197.63199985027313,
+          195.6160068511963
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "arm": "native_gu_component",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.004603356122970581,
+        "rms_abs": 0.0008591163787059486,
+        "relative_rms": 0.005342281423509121
+      },
+      "us_median": 115.28000235557556,
+      "us_samples": [
+        116.65000021457672,
+        115.17799645662308,
+        115.28000235557556,
+        115.1999980211258,
+        115.37999659776688
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 138.20800185203552,
+        "us_samples": [
+          138.20800185203552,
+          145.37599682807922,
+          135.8720064163208,
+          137.92000710964203,
+          138.2399946451187
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "arm": "deepgemm_gu_component",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0029301047325134277,
+        "rms_abs": 0.00044962880201637745,
+        "relative_rms": 0.0027959467843174934
+      },
+      "us_median": 104.66200113296509,
+      "us_samples": [
+        106.11200332641602,
+        104.71600294113159,
+        104.66200113296509,
+        104.55600172281265,
+        104.63400185108185
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 147.45600521564484,
+        "us_samples": [
+          147.45600521564484,
+          147.45600521564484,
+          147.48799800872803,
+          147.45600521564484,
+          147.45600521564484
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "arm": "native_down_component",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0002794519532471895,
+        "rms_abs": 3.2925279811024666e-05,
+        "relative_rms": 0.007630817126482725
+      },
+      "us_median": 32.01000019907951,
+      "us_samples": [
+        33.15399959683418,
+        32.01000019907951,
+        31.984001398086548,
+        32.030001282691956,
+        31.980000436306
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 45.05600035190582,
+        "us_samples": [
+          47.13600128889084,
+          45.05600035190582,
+          43.007999658584595,
+          47.10400104522705,
+          45.024000108242035
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "arm": "deepgemm_down_component",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 9.966269135475159e-05,
+        "rms_abs": 1.2046267329424154e-05,
+        "relative_rms": 0.0027918629348278046
+      },
+      "us_median": 55.87799847126007,
+      "us_samples": [
+        57.43600055575371,
+        55.87799847126007,
+        55.70400133728981,
+        56.04200065135956,
+        55.74199929833412
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 75.80800354480743,
+        "us_samples": [
+          78.87999713420868,
+          75.80800354480743,
+          77.34400033950806,
+          75.45600086450577,
+          75.45600086450577
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l45-p106496",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l45-e507",
+        "l45-e508",
+        "l45-e510",
+        "l45-e511"
+      ],
+      "counts": [
+        1397,
+        66,
+        4,
+        81
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 9.966269135475159e-05,
+        "rms_abs": 1.2046267329424154e-05,
+        "relative_rms": 0.0027918629348278046
+      },
+      "us_median": 54.25599962472916,
+      "us_samples": [
+        55.59999868273735,
+        54.58199977874756,
+        54.25599962472916,
+        54.12999913096428,
+        54.03599888086319
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 69.60000097751617,
+        "us_samples": [
+          69.63200122117996,
+          69.60000097751617,
+          69.31199878454208,
+          67.58400052785873,
+          69.63200122117996
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00019933097064495087,
+          "rms_abs": 2.9285281925695017e-05,
+          "relative_rms": 0.01064207311719656
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 7.71938357502222e-05,
+          "rms_abs": 1.3243639841675758e-05,
+          "relative_rms": 0.004812648985534906
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.0002118237316608429,
+          "rms_abs": 2.1937878045719117e-05,
+          "relative_rms": 0.007972076535224915
+        }
+      }
+    }
+  ],
+  "started_unix": 1791313514.5527256,
+  "dispatch_cases_passed": 8,
+  "dispatch": {
+    "tail-l7-p0": true,
+    "tail-l12-p98304": true,
+    "tail-l24-p90112": true,
+    "tail-l27-p90112": true,
+    "tail-l28-p32768": true,
+    "tail-l32-p40960": true,
+    "tail-l32-p65536": true,
+    "tail-l42-p49152": true,
+    "tail-l45-p106496": true
+  },
+  "completed": true,
+  "finished_unix": 1791313516.2548063
+}

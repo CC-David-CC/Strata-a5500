@@ -1,0 +1,110 @@
+[
+  {
+    "case": "tail-l7-p0",
+    "counts": [
+      1,
+      1156,
+      277,
+      30
+    ],
+    "native_cold_us": 198.65599274635315,
+    "adapter_cold_us": 184.32000279426575,
+    "selected": true
+  },
+  {
+    "case": "tail-l12-p98304",
+    "counts": [
+      100,
+      47,
+      689,
+      20
+    ],
+    "native_cold_us": 133.12000036239624,
+    "adapter_cold_us": 126.97599828243256,
+    "selected": true
+  },
+  {
+    "case": "tail-l24-p90112",
+    "counts": [
+      1,
+      646,
+      17,
+      3
+    ],
+    "native_cold_us": 122.84799665212631,
+    "adapter_cold_us": 118.78400295972824,
+    "selected": true
+  },
+  {
+    "case": "tail-l27-p90112",
+    "counts": [
+      2,
+      50,
+      681,
+      56
+    ],
+    "native_cold_us": 128.9920061826706,
+    "adapter_cold_us": 122.3360002040863,
+    "selected": true
+  },
+  {
+    "case": "tail-l28-p32768",
+    "counts": [
+      36,
+      2,
+      582,
+      4
+    ],
+    "native_cold_us": 118.81600320339203,
+    "adapter_cold_us": 112.64000087976456,
+    "selected": true
+  },
+  {
+    "case": "tail-l32-p40960",
+    "counts": [
+      27,
+      577,
+      37,
+      14
+    ],
+    "native_cold_us": 120.80000340938568,
+    "adapter_cold_us": 112.64000087976456,
+    "selected": true
+  },
+  {
+    "case": "tail-l32-p65536",
+    "counts": [
+      44,
+      531,
+      101,
+      7
+    ],
+    "native_cold_us": 112.64000087976456,
+    "adapter_cold_us": 108.5439994931221,
+    "selected": true
+  },
+  {
+    "case": "tail-l42-p49152",
+    "counts": [
+      50,
+      1102,
+      3,
+      12
+    ],
+    "native_cold_us": 102.4319976568222,
+    "adapter_cold_us": 118.75200271606445,
+    "selected": false
+  },
+  {
+    "case": "tail-l45-p106496",
+    "counts": [
+      1397,
+      66,
+      4,
+      81
+    ],
+    "native_cold_us": 174.0799993276596,
+    "adapter_cold_us": 197.63199985027313,
+    "selected": false
+  }
+]

@@ -1,3 +1,29 @@
+# Experimental RTX PRO integration fork
+
+Built on [Niko1221/Strata](https://github.com/Niko1221/Strata), with upstream
+contributors credited. This branch combines opt-in transfer, cache and kernel
+experiments measured on an **RTX PRO 6000 Blackwell Workstation Edition 96GB**,
+Ryzen 9 7950X and 128GB RAM. The listed component, default-off and recovery checks passed on this GPU.
+
+**48/48 initial code requests passed**, across Q8_0, UD-Q4_K_XL and GSQ-RCO IQ3_S,
+32K/128K actual input, and plain/MTP/ngram/MTP+ngram.
+At 128K, MTP Q8 decode was **143.4 -> 154.8 tok/s**. Q8 outputs differ with the
+BF16 DeepGEMM path; Q4 and IQ3_S matched every output token in their comparisons.
+Q8 32K MTP used **49% less aggregate engine CPU time**.
+
+![Stock and combined results on RTX PRO](docs/experiments/rtxpro-tested-gains/three-model-decode.png)
+
+[Full matrix, CPU chart, refill-byte savings and limitations](docs/experiments/rtxpro-tested-gains/README.md).
+Q4 editing MTP improved **188.8 -> 210.9 tok/s**, with identical tokens and work.
+Results are initial observations; the linked report states their scope and limitations.
+
+---
+
+## Upstream documentation
+
+The original project documentation below includes upstream's measurements on
+other hardware; those are separate from this fork's RTX PRO measurements.
+
 <h1 align="center">Strata</h1>
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Português](README.pt-BR.md)

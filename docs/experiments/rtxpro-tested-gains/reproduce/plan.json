@@ -1,0 +1,979 @@
+{
+  "release_commit": "1cbcacbcae2953f3be9edc46369f0c875bc6ab8b",
+  "python": "${PYTHON_BIN}",
+  "client_source": "${STRATA_CLIENT_SOURCE}",
+  "engines": {
+    "stock": "${STOCK_ENGINE}",
+    "combined": "${COMBINED_ENGINE}"
+  },
+  "models": {
+    "q8": {
+      "native": "${HOME}/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00001-of-00006.gguf",
+      "pack": "${HOME}/fleet-downloads/q8-ple-prototype-2be5cf1/pack-q8",
+      "args": [
+        "--pack",
+        "${HOME}/fleet-downloads/q8-ple-prototype-2be5cf1/pack-q8",
+        "--native",
+        "${HOME}/models/qwen38-flash-next-unsloth-gguf/Q8_0/Qwen3.8-Flash-Next-Q8_0-00001-of-00006.gguf",
+        "--expert-cache",
+        "15472",
+        "--expert-profile",
+        "${STRATA_CLIENT_SOURCE}/data/expert-profile.bin",
+        "--adapt-every",
+        "4",
+        "--adapt-swaps",
+        "96",
+        "--adapt-decay",
+        "0.7",
+        "--pcie-frac",
+        "-1",
+        "--spec",
+        "8",
+        "--mtp",
+        "${HOME}/Strata-data/mtp/rt",
+        "--suffix-draft",
+        "0",
+        "--kv",
+        "fp16",
+        "--prompt-cache",
+        "0",
+        "--conversation-cache-mib",
+        "0",
+        "--prefill",
+        "1024",
+        "--no-prefill-borrow",
+        "--vram-reserve-mib",
+        "2048",
+        "--ple-io",
+        "ram",
+        "--ple-row-cache",
+        "1048576",
+        "--eos-ids",
+        "2147483647",
+        "--stats",
+        "--spec-min-p",
+        "0.5"
+      ]
+    },
+    "q4": {
+      "native": "${HOME}/models/qwen38-flash-next-unsloth-gguf/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+      "pack": "${HOME}/fleet-downloads/q4-strata-0134-llm60/pack-ud-q4-k-xl",
+      "args": [
+        "--pack",
+        "${HOME}/fleet-downloads/q4-strata-0134-llm60/pack-ud-q4-k-xl",
+        "--native",
+        "${HOME}/models/qwen38-flash-next-unsloth-gguf/UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+        "--mmap-experts",
+        "--expert-cache",
+        "24576",
+        "--expert-profile",
+        "${STRATA_CLIENT_SOURCE}/data/expert-profile.bin",
+        "--adapt-every",
+        "0",
+        "--pcie-frac",
+        "-1",
+        "--spec",
+        "8",
+        "--mtp",
+        "${HOME}/Strata-data/mtp/rt",
+        "--suffix-draft",
+        "0",
+        "--kv",
+        "fp16",
+        "--prompt-cache",
+        "0",
+        "--conversation-cache-mib",
+        "0",
+        "--prefill",
+        "1024",
+        "--no-prefill-borrow",
+        "--vram-reserve-mib",
+        "2048",
+        "--ple-io",
+        "ram",
+        "--ple-row-cache",
+        "1048576",
+        "--eos-ids",
+        "2147483647",
+        "--stats",
+        "--spec-min-p",
+        "0.5"
+      ]
+    },
+    "iq3_s": {
+      "native": "${HOME}/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf",
+      "pack": "${HOME}/Strata-data/packs/iq3_s",
+      "args": [
+        "--pack",
+        "${HOME}/Strata-data/packs/iq3_s",
+        "--native",
+        "${HOME}/Strata-data/models/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_S-00001-of-00002.gguf",
+        "--mmap-experts",
+        "--expert-cache",
+        "24576",
+        "--expert-profile",
+        "${STRATA_CLIENT_SOURCE}/data/expert-profile.bin",
+        "--adapt-every",
+        "0",
+        "--pcie-frac",
+        "-1",
+        "--spec",
+        "8",
+        "--mtp",
+        "${HOME}/Strata-data/mtp/rt",
+        "--suffix-draft",
+        "0",
+        "--kv",
+        "fp16",
+        "--prompt-cache",
+        "0",
+        "--conversation-cache-mib",
+        "0",
+        "--prefill",
+        "1024",
+        "--no-prefill-borrow",
+        "--vram-reserve-mib",
+        "2048",
+        "--ple-io",
+        "ram",
+        "--ple-row-cache",
+        "1048576",
+        "--eos-ids",
+        "2147483647",
+        "--stats",
+        "--spec-min-p",
+        "0.5"
+      ]
+    }
+  },
+  "task": "Write a complete Python module implementing a thread-safe priority task queue with cancellation, timeouts and deterministic tests using unittest. Include the full code and tests. Do not discuss the archived notes.",
+  "cases": [
+    {
+      "label": "q8-i32768-mtp-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i32768-mtp-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q4-i32768-mtp-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i32768-mtp-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i32768-mtp-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i32768-mtp-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "q8-i32768-plain-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i32768-plain-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q8-i32768-ngram-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i32768-ngram-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q8-i32768-combined-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i32768-combined-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-mtp-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-mtp-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-plain-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-plain-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-ngram-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-ngram-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-combined-stock",
+      "model": "q8",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_EXCHANGE_ROTATE": "1"
+      },
+      "argument_overrides": {
+        "--adapt-async": "1"
+      }
+    },
+    {
+      "label": "q8-i131072-combined-combined",
+      "model": "q8",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 1,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100",
+        "STRATA_EXCHANGE_DUPLEX": "1",
+        "STRATA_MISS_FETCH_BLOCKS": "32",
+        "STRATA_Q8_MISS_FETCH_OVERLAP": "1",
+        "STRATA_ASYNC_LAYER_ADMIT": "1"
+      }
+    },
+    {
+      "label": "q4-i32768-plain-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i32768-plain-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "q4-i32768-ngram-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i32768-ngram-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "q4-i32768-combined-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i32768-combined-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "q4-i131072-mtp-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i131072-mtp-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "q4-i131072-plain-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i131072-plain-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "q4-i131072-ngram-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i131072-ngram-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "q4-i131072-combined-stock",
+      "model": "q4",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0
+    },
+    {
+      "label": "q4-i131072-combined-combined",
+      "model": "q4",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i32768-plain-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i32768-plain-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i32768-ngram-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i32768-ngram-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i32768-combined-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i32768-combined-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 32768,
+      "context": 40960,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i131072-mtp-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i131072-mtp-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i131072-plain-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i131072-plain-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i131072-ngram-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i131072-ngram-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    },
+    {
+      "label": "iq3_s-i131072-combined-stock",
+      "model": "iq3_s",
+      "build": "stock",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0
+    },
+    {
+      "label": "iq3_s-i131072-combined-combined",
+      "model": "iq3_s",
+      "build": "combined",
+      "input_tokens": 131072,
+      "context": 139264,
+      "output_tokens": 1024,
+      "prefill_chunk": 8192,
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "dg_tail": 0,
+      "environment": {
+        "STRATA_DF_PDL": "1",
+        "STRATA_DF_BRANCH": "1",
+        "STRATA_POOL_SPIN_US": "100"
+      }
+    }
+  ],
+  "scope": "Three confirmed models;32K/128K actual input;plain,MTP,ngram,combined;1024outputs. Same8192 chunks for engine comparisons. Fast configuration and bandwidth-refill alternatives measured separately.",
+  "baseline_note": "Two unchanged stock32K observations reused from first queue; partial-stack candidates preserved separately and rerun with corrected async layer-admit flag.",
+  "reproduction_note": "Edit asset paths; choose an idle GPU. Fresh replay points; published matrix marks its two reused stock observations separately."
+}

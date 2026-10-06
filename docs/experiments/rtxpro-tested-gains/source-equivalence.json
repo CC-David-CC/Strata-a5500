@@ -1,0 +1,22 @@
+{
+  "base": "82f46a8c8f475f001ad76d92f58f4a4f8ffb0253",
+  "publication_worktree": "C:\\Users\\dflanag3\\Documents\\fleet\\strata-q8-tested-gains-publish",
+  "publication_branch": "publish/q8-tested-gains",
+  "publication_code_commit": "22748a729af7c52a6b3df1ff531050a2933fe835",
+  "measured_source_commit": "55563d3f3b51d2c59a008932c9f004029948bcd8",
+  "source_paths": [
+    "CMakeLists.txt",
+    "include",
+    "src",
+    "tests",
+    "tools"
+  ],
+  "git_diff_empty": true,
+  "source_commits": 1,
+  "publication_status": "Local code-only clean extraction; documentation and remaining validation pending;not pushed",
+  "validated_research_source_commit": "431aa9d2570989461cba35c2b8e2190e448a3575",
+  "test_fixture_fix": "Only pdl_parity resource teardown changed after runtime timings; native engine code unchanged. Failed sanitizer leak record preserved.",
+  "public_remote_branch": "perf/q8-tested-gains",
+  "public_validation_history_branch": "research/q8-tested-gains-validation",
+  "native_runtime_binary_sha256": "3be87ef04cae694aa8edc01cb566f4b364c2124161cdb8f6d61342debaa63281"
+}

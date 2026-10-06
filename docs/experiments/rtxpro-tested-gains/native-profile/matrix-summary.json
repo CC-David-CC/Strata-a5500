@@ -1,0 +1,743 @@
+[
+  {
+    "case": {
+      "label": "q8-i131072-combined-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "input_tokens": 131072,
+      "output_tokens": 1024,
+      "context": 139264,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "68ff970f8e7b187f24078d80aa28bec56b1becccc856acb93cae25f56988d47c",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 39139,
+    "discarded_initial_sample": {
+      "start_ns": 1791309936060688711,
+      "end_ns": 1791309904196576964,
+      "metrics": {
+        "dram__bytes_op_write.sum": 821248,
+        "dram__bytes_op_read.sum": 157696
+      }
+    },
+    "timestamp_gaps": [],
+    "request_timestamp_gap_ns": 0,
+    "median_interval_ns": 999991.0,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 32.127277229,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 6298607436288,
+          "dram__bytes_op_write.sum": 6434613486592
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 6299621211904,
+          "dram__bytes_op_write.sum": 6434629345280
+        },
+        "total_lower_bytes": 12733220922880,
+        "total_upper_bytes": 12734250557184.0,
+        "fully_inside_samples": 32126,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.22115426950672432,
+          0.2211721524935773
+        ]
+      },
+      "decode": {
+        "seconds": 6.992145926,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 3985299931136,
+          "dram__bytes_op_write.sum": 149163447296
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 3986740961792,
+          "dram__bytes_op_write.sum": 149241735936
+        },
+        "total_lower_bytes": 4134463378432,
+        "total_upper_bytes": 4135982697728.0,
+        "fully_inside_samples": 6991,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.3299435484203441,
+          0.3300647950136314
+        ],
+        "bytes_per_committed_token_bounds": [
+          4037561893.0,
+          4039045603.25
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          443.70085808339775,
+          443.8639078467249
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 617.516,
+      "prefill": 54.714,
+      "decode": 108.246,
+      "end": 93.749,
+      "stop": 26.761
+    }
+  },
+  {
+    "case": {
+      "label": "q8-i131072-mtp-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "input_tokens": 131072,
+      "output_tokens": 1024,
+      "context": 139264,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "68ff970f8e7b187f24078d80aa28bec56b1becccc856acb93cae25f56988d47c",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 39358,
+    "discarded_initial_sample": {
+      "start_ns": 1791309720855963963,
+      "end_ns": 1791309688992515944,
+      "metrics": {
+        "dram__bytes_op_write.sum": 401664,
+        "dram__bytes_op_read.sum": 47104
+      }
+    },
+    "timestamp_gaps": [],
+    "request_timestamp_gap_ns": 0,
+    "median_interval_ns": 999991,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 32.168731427,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 6298008897536,
+          "dram__bytes_op_write.sum": 6434318183680
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 6299047560960,
+          "dram__bytes_op_write.sum": 6434325699584
+        },
+        "total_lower_bytes": 12732327081216,
+        "total_upper_bytes": 12733373260544.0,
+        "fully_inside_samples": 32167,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.2208537748215568,
+          0.22087192175198478
+        ]
+      },
+      "decode": {
+        "seconds": 7.17011987,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 4029697367040,
+          "dram__bytes_op_write.sum": 153972198912
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 4030736075520,
+          "dram__bytes_op_write.sum": 153979788544
+        },
+        "total_lower_bytes": 4183669565952,
+        "total_upper_bytes": 4184715864064.0,
+        "fully_inside_samples": 7170,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.3255831602566789,
+          0.32566458567532286
+        ],
+        "bytes_per_committed_token_bounds": [
+          4085614810.5,
+          4086636586.0
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          438.5337336183678,
+          438.643406959032
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 557.812,
+      "prefill": 55.736,
+      "decode": 87.055,
+      "end": 96.363,
+      "stop": 25.489
+    }
+  },
+  {
+    "case": {
+      "label": "q8-i131072-ngram-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "input_tokens": 131072,
+      "output_tokens": 1024,
+      "context": 139264,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "68ff970f8e7b187f24078d80aa28bec56b1becccc856acb93cae25f56988d47c",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 44076,
+    "discarded_initial_sample": {
+      "start_ns": 1791309833608704973,
+      "end_ns": 1791309793744122197,
+      "metrics": {
+        "dram__bytes_op_write.sum": 133376,
+        "dram__bytes_op_read.sum": 18176
+      }
+    },
+    "timestamp_gaps": [],
+    "request_timestamp_gap_ns": 0,
+    "median_interval_ns": 999991,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 32.161554023,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 6291336824576,
+          "dram__bytes_op_write.sum": 6423929035520
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 6292388602624,
+          "dram__bytes_op_write.sum": 6423935341312
+        },
+        "total_lower_bytes": 12715265860096,
+        "total_upper_bytes": 12716323943936.0,
+        "fully_inside_samples": 32160,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.22060705372296455,
+          0.22062541124384558
+        ]
+      },
+      "decode": {
+        "seconds": 11.895039755,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 8172299314432,
+          "dram__bytes_op_write.sum": 196222844928
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 8174223586560,
+          "dram__bytes_op_write.sum": 196235233792
+        },
+        "total_lower_bytes": 8368522159360,
+        "total_upper_bytes": 8370458820352.0,
+        "fully_inside_samples": 11894,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.3925670526527214,
+          0.3926579013453746
+        ],
+        "bytes_per_committed_token_bounds": [
+          8172384921.25,
+          8174276191.75
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          219.23996179731847,
+          219.2906987702051
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 567.229,
+      "prefill": 63.951,
+      "decode": 79.872,
+      "end": 95.251,
+      "stop": 26.41
+    }
+  },
+  {
+    "case": {
+      "label": "q8-i131072-plain-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "input_tokens": 131072,
+      "output_tokens": 1024,
+      "context": 139264,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "68ff970f8e7b187f24078d80aa28bec56b1becccc856acb93cae25f56988d47c",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 44131,
+    "discarded_initial_sample": {
+      "start_ns": 1791309618879396925,
+      "end_ns": 1791309579015989215,
+      "metrics": {
+        "dram__bytes_op_write.sum": 0,
+        "dram__bytes_op_read.sum": 16128
+      }
+    },
+    "timestamp_gaps": [],
+    "request_timestamp_gap_ns": 0,
+    "median_interval_ns": 999990.0,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 32.130806396,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 6300204111616,
+          "dram__bytes_op_write.sum": 6434928206848
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 6301072958976,
+          "dram__bytes_op_write.sum": 6434943485184
+        },
+        "total_lower_bytes": 12735132318464,
+        "total_upper_bytes": 12736016444160.0,
+        "fully_inside_samples": 32130,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.22116317250356857,
+          0.22117852656813025
+        ]
+      },
+      "decode": {
+        "seconds": 11.980854625,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 8245174193408,
+          "dram__bytes_op_write.sum": 195210696704
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 8246891538432,
+          "dram__bytes_op_write.sum": 195231886080
+        },
+        "total_lower_bytes": 8440384890112,
+        "total_upper_bytes": 8442123424512.0,
+        "fully_inside_samples": 11979,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.39310215767442824,
+          0.3931831281079723
+        ],
+        "bytes_per_committed_token_bounds": [
+          8242563369.25,
+          8244261156.75
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          217.37884886539442,
+          217.42362414655815
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 596.816,
+      "prefill": 69.863,
+      "decode": 95.532,
+      "end": 96.884,
+      "stop": 26.721
+    }
+  },
+  {
+    "case": {
+      "label": "q8-i32768-combined-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 4,
+      "ngram": true,
+      "lookup_chain": 4,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "context": 40960,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 14910,
+    "discarded_initial_sample": {
+      "start_ns": 1791309505807258507,
+      "end_ns": 1791309497942740449,
+      "metrics": {
+        "dram__bytes_op_write.sum": 191488,
+        "dram__bytes_op_read.sum": 15616
+      }
+    },
+    "timestamp_gaps": [],
+    "request_timestamp_gap_ns": 0,
+    "median_interval_ns": 999989,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 7.928696381,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 1602916588800,
+          "dram__bytes_op_write.sum": 1634766589184
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 1603905928960,
+          "dram__bytes_op_write.sum": 1634772722176
+        },
+        "total_lower_bytes": 3237683177984,
+        "total_upper_bytes": 3238678651136.0,
+        "fully_inside_samples": 7927,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.2278576091453707,
+          0.22792766730730749
+        ]
+      },
+      "decode": {
+        "seconds": 6.961801162,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 3905908692480,
+          "dram__bytes_op_write.sum": 150261267712
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 3907692972800,
+          "dram__bytes_op_write.sum": 150272599040
+        },
+        "total_lower_bytes": 4056169960192,
+        "total_upper_bytes": 4057965571840.0,
+        "fully_inside_samples": 6961,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.3251063887329469,
+          0.32525030893949075
+        ],
+        "bytes_per_committed_token_bounds": [
+          3961103476.75,
+          3962857003.75
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          452.23130642971284,
+          452.43150312003525
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 607.657,
+      "prefill": 70.625,
+      "decode": 117.433,
+      "end": 90.893,
+      "stop": 27.262
+    }
+  },
+  {
+    "case": {
+      "label": "q8-i32768-mtp-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 4,
+      "ngram": false,
+      "lookup_chain": 0,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "context": 40960,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 14909,
+    "discarded_initial_sample": {
+      "start_ns": 1791309340459372035,
+      "end_ns": 1791309332596428950,
+      "metrics": {
+        "dram__bytes_op_write.sum": 515328,
+        "dram__bytes_op_read.sum": 176384
+      }
+    },
+    "timestamp_gaps": [],
+    "request_timestamp_gap_ns": 0,
+    "median_interval_ns": 999988.0,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 7.922497707,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 1602636333568,
+          "dram__bytes_op_write.sum": 1634460728064
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 1603586879232,
+          "dram__bytes_op_write.sum": 1634463806976
+        },
+        "total_lower_bytes": 3237097061632,
+        "total_upper_bytes": 3238050686208.0,
+        "fully_inside_samples": 7921,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.22799460691820184,
+          0.2280617724236572
+        ]
+      },
+      "decode": {
+        "seconds": 6.967683982,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 3923478785024,
+          "dram__bytes_op_write.sum": 149688018944
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 3924548830720,
+          "dram__bytes_op_write.sum": 149751803392
+        },
+        "total_lower_bytes": 4073166803968,
+        "total_upper_bytes": 4074300634112.0,
+        "fully_inside_samples": 6967,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.32619306632486067,
+          0.326283867303353
+        ],
+        "bytes_per_committed_token_bounds": [
+          3977701957.0,
+          3978809213.0
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          450.4181789226193,
+          450.5435599181068
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 568.221,
+      "prefill": 54.554,
+      "decode": 85.543,
+      "end": 89.711,
+      "stop": 25.308
+    }
+  },
+  {
+    "case": {
+      "label": "q8-i32768-ngram-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 1,
+      "ngram": true,
+      "lookup_chain": 0,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "context": 40960,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 19838,
+    "discarded_initial_sample": {
+      "start_ns": 1791309424947359081,
+      "end_ns": 1791309413082654193,
+      "metrics": {
+        "dram__bytes_op_write.sum": 353024,
+        "dram__bytes_op_read.sum": 65536
+      }
+    },
+    "timestamp_gaps": [
+      [
+        1791309430467616188,
+        1791309430467616650
+      ]
+    ],
+    "request_timestamp_gap_ns": 462,
+    "median_interval_ns": 999989,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 7.913186233,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 1595188547328,
+          "dram__bytes_op_write.sum": 1625873923584
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 1596288261632,
+          "dram__bytes_op_write.sum": 1625886257920
+        },
+        "total_lower_bytes": 3221062470912,
+        "total_upper_bytes": 3222174519552.0,
+        "fully_inside_samples": 7912,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.22713221481190105,
+          0.22721063057466964
+        ]
+      },
+      "decode": {
+        "seconds": 11.905616133,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 7971586825472,
+          "dram__bytes_op_write.sum": 197547168256
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 7972686570496,
+          "dram__bytes_op_write.sum": 197559533568
+        },
+        "total_lower_bytes": 8169133993728,
+        "total_upper_bytes": 8170246932027.136,
+        "fully_inside_samples": 11905,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 462,
+        "gap_upper_byte_allowance": 827963.136,
+        "nominal_bandwidth_utilization_bounds": [
+          0.38287333275658963,
+          0.38292549427041345
+        ],
+        "bytes_per_committed_token_bounds": [
+          7977669915.75,
+          7978756769.55775
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          224.6124367191776,
+          224.64303724347783
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 605.693,
+      "prefill": 70.644,
+      "decode": 79.251,
+      "end": 95.581,
+      "stop": 25.849
+    }
+  },
+  {
+    "case": {
+      "label": "q8-i32768-plain-pm-counters",
+      "model": "q8",
+      "build": "release",
+      "mtp_t": 1,
+      "ngram": false,
+      "lookup_chain": 0,
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "context": 40960,
+      "prefill_chunk": 8192
+    },
+    "engine_sha256": "52443d135cf6076033976bd1f83f52ee689eea1704c10ae01ffad5dd106e763d",
+    "input_sha256": "92e52318f10379fbb633a36ea37a0a465e017d8acadfda7aa33951df5d08a4f2",
+    "sampled_gpu": "RTX PRO 6000 Blackwell Workstation Edition",
+    "samples": 19835,
+    "discarded_initial_sample": {
+      "start_ns": 1791309259411068370,
+      "end_ns": 1791309247547104473,
+      "metrics": {
+        "dram__bytes_op_write.sum": 0,
+        "dram__bytes_op_read.sum": 74752
+      }
+    },
+    "timestamp_gaps": [],
+    "request_timestamp_gap_ns": 0,
+    "median_interval_ns": 999987.0,
+    "overflow": false,
+    "nominal_peak_bytes_per_second": 1792128000000,
+    "phases": {
+      "prefill": {
+        "seconds": 7.924969459,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 1603374864384,
+          "dram__bytes_op_write.sum": 1635088700672
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 1604301996800,
+          "dram__bytes_op_write.sum": 1635102340864
+        },
+        "total_lower_bytes": 3238463565056,
+        "total_upper_bytes": 3239404337664.0,
+        "fully_inside_samples": 7924,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.22801971201484073,
+          0.22808595166671217
+        ]
+      },
+      "decode": {
+        "seconds": 11.890935268,
+        "lower_bytes": {
+          "dram__bytes_op_read.sum": 8088321463808,
+          "dram__bytes_op_write.sum": 194874483968
+        },
+        "upper_bytes": {
+          "dram__bytes_op_read.sum": 8089361432832,
+          "dram__bytes_op_write.sum": 194888318208
+        },
+        "total_lower_bytes": 8283195947776,
+        "total_upper_bytes": 8284249751040.0,
+        "fully_inside_samples": 11890,
+        "boundary_samples": 2,
+        "timestamp_gap_ns": 0,
+        "gap_upper_byte_allowance": 0.0,
+        "nominal_bandwidth_utilization_bounds": [
+          0.38869852715882136,
+          0.38874797809288286
+        ],
+        "bytes_per_committed_token_bounds": [
+          8089058542.75,
+          8090087647.5
+        ],
+        "bandwidth_only_ceiling_tps_bounds": [
+          221.52145663759325,
+          221.5496390004786
+        ]
+      }
+    },
+    "semantics": "Device-wide DRAM reads+writes, including transfers. Does not directly measure PCIe bytes. Bounds cover partially overlapping 1ms bins; tiny timestamp gaps receive a nominal-peak-bandwidth upper allowance. RPC phase-marker delay is separately recorded.",
+    "ceiling_limitations": "Conditional bandwidth-only ceiling: fixed measured traffic per committed token, nominal memory bandwidth, no CPU/PCIe/compute/synchronization limit. Counter-run timings are not ordinary performance measurements.",
+    "phase_marker_rpc_us": {
+      "start": 573.632,
+      "prefill": 76.676,
+      "decode": 92.646,
+      "end": 93.939,
+      "stop": 29.767
+    }
+  }
+]

@@ -1,0 +1,57 @@
+{
+  "completed": true,
+  "device": "RTX PRO 6000 Blackwell Workstation Edition",
+  "scope": "Device-wide PM counters observing another process;64copies of256MiB;GPUsource/destination larger than128MiBL2",
+  "expected_bytes_per_direction": 17179869184,
+  "elapsed_seconds": 0.023538710025604814,
+  "events": [
+    {
+      "phase": "ready",
+      "cupti_ns": 1791308942121916277,
+      "monotonic_ns": 356723703630998
+    },
+    {
+      "phase": "start",
+      "cupti_ns": 1791308942122592864,
+      "monotonic_ns": 356723704303699
+    },
+    {
+      "phase": "end",
+      "cupti_ns": 1791308942187197007,
+      "monotonic_ns": 356723768908302
+    },
+    {
+      "phase": "done",
+      "overflow": false,
+      "incomplete_samples": 0
+    }
+  ],
+  "samples": 64,
+  "valid_samples": 64,
+  "timestamps_first_last": [
+    [
+      1791308941979082678,
+      1791308942123553072
+    ],
+    [
+      1791308942123553072,
+      1791308942124553055
+    ],
+    [
+      1791308942184552645,
+      1791308942185552629
+    ],
+    [
+      1791308942185552629,
+      1791308942186552612
+    ]
+  ],
+  "totals": {
+    "dram__bytes_op_read.sum": 17185030656,
+    "dram__bytes_op_write.sum": 17173018880
+  },
+  "ratios": {
+    "dram__bytes_op_read.sum": 1.0003004372119904,
+    "dram__bytes_op_write.sum": 0.9996012598276138
+  }
+}
