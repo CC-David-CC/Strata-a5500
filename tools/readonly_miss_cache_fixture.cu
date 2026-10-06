@@ -1,0 +1,150 @@
+#include "strata/kernels/readonly_miss_cache.hpp"
+#include <cuda_runtime.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <numeric>
+#include <random>
+#include <vector>
+
+using namespace strata::kernels;
+#define CU(call) do { auto e = (call); if (e != cudaSuccess) { \
+    std::fprintf(stderr, "%s:%d %s: %s\n", __FILE__, __LINE__, #call, cudaGetErrorString(e)); std::exit(2); } } while (0)
+#define REQUIRE(x) do { if (!(x)) { std::fprintf(stderr, "require failed at %d: %s\n", __LINE__, #x); std::exit(3); } } while (0)
+
+template<class T> struct Device {
+    T* p = nullptr;
+    explicit Device(size_t count) { CU(cudaMalloc((void**)&p, count * sizeof(T))); }
+    ~Device() { if (p) cudaFree(p); }
+};
+
+__global__ void consume(const unsigned long long* ptrs, const int32_t* n,
+                        uint4* output, int64_t per) {
+    for (int64_t i = (int64_t)blockIdx.x * blockDim.x + threadIdx.x; i < *n * per;
+         i += (int64_t)gridDim.x * blockDim.x)
+        output[i] = ((const uint4*)ptrs[i/per])[i%per];
+}
+
+void exercise(size_t bytes, int ways, int iterations) {
+    constexpr int layers = 3, experts = 23, cap = 16;
+    const size_t stride = bytes + 32;  // guard each cache slot, not only the allocation
+    uint8_t *host = nullptr, *alias = nullptr;
+    CU(cudaHostAlloc((void**)&host, layers * experts * bytes, cudaHostAllocMapped));
+    CU(cudaHostGetDevicePointer((void**)&alias, host, 0));
+    for (int l = 0; l < layers; ++l)
+        for (int e = 0; e < experts; ++e)
+            for (size_t i = 0; i < bytes; ++i)
+                host[((size_t)l * experts + e) * bytes + i] = (uint8_t)(i*37 + (i>>8) + e*101 + l*19);
+    Device<uint8_t> cache(layers * ways * stride), stage(cap * bytes + 64), output(cap * bytes);
+    Device<int32_t> tags(layers * ways), count(1), starts(cap+1), dst(cap*2), ids(64);
+    Device<uint64_t> ages(layers*ways), clocks(layers), counters(layers*4);
+    Device<unsigned long long> ptrs(cap);
+    Device<ReadonlyMissCachePlan> plan(1);
+    CU(cudaMemset(cache.p, 0xcd, layers * ways * stride));
+    CU(cudaMemset(stage.p, 0xcd, cap * bytes + 64));
+    CU(cudaMemset(tags.p, 0xff, layers * ways * sizeof(int32_t)));
+    CU(cudaMemset(ages.p, 0, layers * ways * sizeof(uint64_t)));
+    CU(cudaMemset(clocks.p, 0, layers * sizeof(uint64_t)));
+    CU(cudaMemset(counters.p, 0, layers * 4 * sizeof(uint64_t)));
+    cudaStream_t stream;
+    CU(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
+    ReadonlyMissCacheBank banks[layers];
+    cudaGraphExec_t graph[layers] = {};
+    for (int l = 0; l < layers; ++l) {
+        banks[l] = {cache.p + (size_t)l*ways*stride, tags.p+l*ways, ages.p+l*ways,
+                    clocks.p+l, counters.p+l*4, ways, (int64_t)stride};
+        CU(cudaStreamBeginCapture(stream, cudaStreamCaptureModeThreadLocal));
+        fetch_readonly_misses(ptrs.p, count.p, starts.p, dst.p, ids.p, stage.p,
+                              bytes, cap, banks[l], plan.p, stream);
+        consume<<<64,256,0,stream>>>(ptrs.p,count.p,(uint4*)output.p,bytes/16);
+        CU(cudaGetLastError());
+        cudaGraph_t g;
+        CU(cudaStreamEndCapture(stream, &g));
+        CU(cudaGraphInstantiate(&graph[l], g, nullptr, nullptr, 0));
+        CU(cudaGraphDestroy(g));
+    }
+    std::mt19937 rng(35119);
+    std::vector<uint8_t> got(cap*bytes), guard(layers*ways*stride), stage_guard(64);
+    uint64_t requested = 0, abandoned = 0, null_hit_sources = 0;
+    for (int it = 0; it < iterations; ++it) {
+        const int layer = it < 8 ? 0 : (int)(rng()%layers);
+        std::vector<int> chosen(experts);
+        std::iota(chosen.begin(), chosen.end(), 0);
+        std::shuffle(chosen.begin(), chosen.end(), rng);
+        chosen.resize(rng()%(cap+1));
+        if (it == 0) chosen = {};
+        if (it == 1) chosen = {0,1,2,3};
+        if (it == 2) chosen = {3,2,1,0};
+        if (it == 3) chosen = {4,3,2,1};  // miss before hits: must reserve every hit
+        if (it == 4) chosen = {0,4,3,2};
+        if (it == 5) { chosen.resize(cap); std::iota(chosen.begin(),chosen.end(),0); }
+        const int n = (int)chosen.size();
+        std::vector<int32_t> htags(ways), hstarts(cap+1,0), hdst(cap*2,0), hids(64,-1);
+        std::vector<unsigned long long> hptrs(cap,0);
+        CU(cudaMemcpy(htags.data(),banks[layer].tags,ways*sizeof(int32_t),cudaMemcpyDeviceToHost));
+        for (int q = 0; q < n; ++q) {
+            hstarts[q] = q*2; hdst[q*2] = (q*7)%64; hids[hdst[q*2]] = chosen[q];
+            bool hit = std::find(htags.begin(),htags.end(),chosen[q]) != htags.end();
+            // A hit must not even read its RAM source. A wrongly labelled hit
+            // still fails the independent full-byte check of the consumer.
+            hptrs[q] = hit ? 0 : (unsigned long long)(alias + ((size_t)layer*experts+chosen[q])*bytes);
+            if (hit) ++null_hit_sources;
+        }
+        hstarts[n] = 2*n;
+        CU(cudaMemcpyAsync(count.p,&n,sizeof(n),cudaMemcpyHostToDevice,stream));
+        CU(cudaMemcpyAsync(starts.p,hstarts.data(),hstarts.size()*4,cudaMemcpyHostToDevice,stream));
+        CU(cudaMemcpyAsync(dst.p,hdst.data(),hdst.size()*4,cudaMemcpyHostToDevice,stream));
+        CU(cudaMemcpyAsync(ids.p,hids.data(),hids.size()*4,cudaMemcpyHostToDevice,stream));
+        CU(cudaMemcpyAsync(ptrs.p,hptrs.data(),hptrs.size()*8,cudaMemcpyHostToDevice,stream));
+        if (it > 8 && it % 11 == 0) {
+            plan_readonly_misses(count.p, starts.p, dst.p, ids.p, stage.p, bytes, cap, banks[layer],plan.p,stream);
+            if (it % 22 == 0) fill_readonly_misses(ptrs.p,bytes,plan.p,stream);
+            CU(cudaStreamSynchronize(stream));
+            std::vector<int32_t> after(ways);
+            CU(cudaMemcpy(after.data(),banks[layer].tags,ways*4,cudaMemcpyDeviceToHost));
+            for (int e : chosen)
+                if (std::find(htags.begin(),htags.end(),e) == htags.end())
+                    REQUIRE(std::find(after.begin(),after.end(),e) == after.end());
+            ++abandoned; // before or after fill, without publication: next graph must recover
+            continue;
+        }
+        CU(cudaGraphLaunch(graph[layer],stream));
+        CU(cudaMemcpyAsync(got.data(),output.p,n*bytes,cudaMemcpyDeviceToHost,stream));
+        CU(cudaStreamSynchronize(stream));
+        for (int q = 0; q < n; ++q)
+            REQUIRE(std::memcmp(got.data()+q*bytes,host+((size_t)layer*experts+chosen[q])*bytes,bytes)==0);
+        requested += n;
+    }
+    uint64_t stats[layers*4];
+    CU(cudaMemcpy(stats,counters.p,sizeof(stats),cudaMemcpyDeviceToHost));
+    uint64_t total=0,hits=0,fills=0,bypasses=0;
+    for(int l=0;l<layers;++l) {total+=stats[l*4];hits+=stats[l*4+1];fills+=stats[l*4+2];bypasses+=stats[l*4+3];}
+    REQUIRE(total==requested && hits+fills==total && bypasses<=fills && hits>0 && null_hit_sources>0);
+    if (ways < cap) REQUIRE(bypasses>0);
+    REQUIRE(abandoned>0);
+    CU(cudaMemcpy(guard.data(),cache.p,guard.size(),cudaMemcpyDeviceToHost));
+    for(int s=0;s<layers*ways;++s)
+        for(size_t i=bytes;i<stride;++i) REQUIRE(guard[(size_t)s*stride+i]==0xcd);
+    CU(cudaMemcpy(stage_guard.data(),stage.p+cap*bytes,64,cudaMemcpyDeviceToHost));
+    for(auto v:stage_guard) REQUIRE(v==0xcd);
+    // Cache use never mutates authoritative host weights.
+    for(int l=0;l<layers;++l) for(int e=0;e<experts;++e) for(size_t i=0;i<bytes;++i)
+        REQUIRE(host[((size_t)l*experts+e)*bytes+i]==(uint8_t)(i*37+(i>>8)+e*101+l*19));
+    std::printf("PASS bytes=%zu ways=%d requests=%llu hits=%llu fills=%llu bypasses=%llu abandoned=%llu\n",
+        bytes,ways,(unsigned long long)total,(unsigned long long)hits,(unsigned long long)fills,
+        (unsigned long long)bypasses,(unsigned long long)abandoned);
+    for(auto g:graph) CU(cudaGraphExecDestroy(g));
+    CU(cudaStreamDestroy(stream));
+    CU(cudaFreeHost(host));
+}
+
+int main(int argc,char** argv) {
+    bool quick = argc>1 && std::strcmp(argv[1],"--quick")==0;
+    for(int ways : {1,4,16}) {
+        exercise(16,ways,quick?32:160);
+        exercise(144,ways,quick?32:160);
+    }
+    exercise(5222400,4,quick?24:80); // this model's actual Q8 expert payload
+    std::puts("PASS readonly miss cache: complete bytes, source immutability, graph replay, guards, abandoned fills");
+}

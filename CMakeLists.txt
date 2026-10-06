@@ -348,11 +348,18 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
                           src/kernels/cuda/dequant_bf16.cu
                           src/kernels/cuda/qsa_select.cu
                           src/kernels/cuda/verify_kernels.cu
+                          src/kernels/cuda/readonly_miss_cache.cu
                           src/kernels/cuda/iq_kernels.cu
                           src/kernels/ngram.cpp
                           src/ngram/ple_reader.cpp
                           src/platform/direct_file.cpp)
   target_link_libraries(strata_kernels PUBLIC strata_core strata_artifact)
+  if(STRATA_ENABLE_CUDA AND STRATA_BUILD_TESTS)
+    add_executable(readonly_miss_cache_fixture tools/readonly_miss_cache_fixture.cu)
+    target_include_directories(readonly_miss_cache_fixture PRIVATE include)
+    target_link_libraries(readonly_miss_cache_fixture PRIVATE strata_kernels CUDA::cudart)
+    add_test(NAME readonly_miss_cache COMMAND readonly_miss_cache_fixture --quick)
+  endif()
   # perf-review D-1: the tensor-core prompt attention vs the FP32 kernel and FP64 (GPU, synthetic, no model); with
   # the tests, or alone with -DSTRATA_PARITY_PROMPT_ATTN=ON.  CUDA only: HIP compiles the tensor-core kernel out.
   if((STRATA_BUILD_TESTS OR STRATA_PARITY_PROMPT_ATTN) AND STRATA_ENABLE_CUDA)

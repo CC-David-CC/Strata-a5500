@@ -414,6 +414,30 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         err = "verify: the stage's layer range or its hand-off buffers are wrong";
         return false;
     }
+    if (const char* value = std::getenv("STRATA_Q8_MISS_CACHE_WAYS")) {
+        char* end = nullptr;
+        const long ways = std::strtol(value, &end, 10);
+        if (!*value || *end || ways < 0 || ways > strata::kernels::kMissCacheMaxWays) {
+            err = "verify: STRATA_Q8_MISS_CACHE_WAYS must be an integer from 0 to 16";
+            return false;
+        }
+        miss_cache_ways_ = (int)ways;
+    }
+    if (miss_cache_ways_) {
+        const auto& lay = strata::kernels::cpu::expert_layout();
+        bool supported = lay.native && lb_ == 0 && le_ == g.n_layers &&
+                         lay.fmt.size() == (size_t)g.n_layers && lay.max_blob % 16 == 0;
+        for (int64_t l = 0; supported && l < g.n_layers; ++l)
+            supported = lay.fmt[(size_t)l].gu_type == 8 && lay.fmt[(size_t)l].d_type == 8 &&
+                        lay.blob_bytes(l) == lay.max_blob; // GGML Q8_0; uniform expert payload
+#if defined(STRATA_USE_HIP)
+        supported = false; // this experimental path has CUDA-only gates
+#endif
+        if (!supported) {
+            err = "verify: read-only miss cache requires uniform native Q8_0 and a whole-model CUDA verifier";
+            return false;
+        }
+    }
     const WeightRef* wo = wt.find("output.weight");
     if (wo == nullptr) { err = "verify: output.weight is missing"; return false; }
     n_vocab_ = wo->ne1;
@@ -497,6 +521,15 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
         hit_slot_ = b.take<int32_t>(T * K); hit_dst_ = b.take<int32_t>(T * K); hit_count_ = b.take<int32_t>(4);
         plan_ = b.take<int32_t>(2 * ((uint64_t) plan_i32_ + 16));
         staging_ = b.take<uint8_t>((uint64_t) kStagingBlobs * strata::kernels::cpu::expert_layout().max_blob);
+        if (miss_cache_ways_) {
+            const uint64_t slots = (uint64_t)g.n_layers * miss_cache_ways_;
+            miss_cache_data_ = b.take<uint8_t>(slots * strata::kernels::cpu::expert_layout().max_blob);
+            miss_cache_tags_ = b.take<int32_t>(slots);
+            miss_cache_ages_ = b.take<uint64_t>(slots);
+            miss_cache_clock_ = b.take<uint64_t>(g.n_layers);
+            miss_cache_counts_ = b.take<uint64_t>(g.n_layers * 4);
+            miss_cache_plan_ = b.take<strata::kernels::ReadonlyMissCachePlan>(1);
+        }
         hit_xq_ = b.take<uint8_t>(T * (N / 32) * 34); hit_xs_ = b.take<float>(T * (N / 32));
         nat_xq_ = b.take<uint8_t>(T * (N / 32) * 36);
         hit_scratch_ = b.take<uint8_t>(std::max<uint64_t>(
@@ -550,6 +583,16 @@ bool Verifier::init(const WeightTable& wt, const ModelGeometry& g, SessionState&
             err = "verify: the arena could not be set";
             return false;
         }
+    }
+    if (miss_cache_ways_) {
+        if (cudaMemset(miss_cache_tags_, 0xff, (size_t)g.n_layers * miss_cache_ways_ * sizeof(int32_t)) != cudaSuccess ||
+            cudaStreamSynchronize(nullptr) != cudaSuccess) {
+            err = "verify: cannot initialize miss cache tags";
+            return false;
+        }
+        std::fprintf(stderr, "strata readonly miss cache: enabled, ways=%d layers=%lld bytes=%llu; "
+                             "immutable secondary copies, no writebacks\n", miss_cache_ways_, (long long)g.n_layers,
+                     (unsigned long long)((uint64_t)g.n_layers * miss_cache_ways_ * strata::kernels::cpu::expert_layout().max_blob));
     }
     sink_.staging = (unsigned long long) staging_;
     sink_.staging_cap = kStagingBlobs;
@@ -1352,8 +1395,18 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
             if (sink_.pcie_mode == 2) {                            // stage it with a copy kernel, then point at staging
                 const int64_t per = G == 2 ? kStagingBlobs / 2 : kStagingBlobs;
                 uint8_t* stage = staging_ + (size_t) (grp * per) * lay.max_blob;
-                fetch_blobs(p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), (int) per, cs);
-                rebase_ptrs((unsigned long long*) p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), cs);
+                if (miss_cache_ways_) {
+                    const size_t slot0 = (size_t)l * miss_cache_ways_;
+                    ReadonlyMissCacheBank bank{miss_cache_data_ + slot0 * lay.max_blob,
+                        miss_cache_tags_ + slot0, miss_cache_ages_ + slot0, miss_cache_clock_ + l,
+                        miss_cache_counts_ + l * 4, miss_cache_ways_, (int64_t)lay.max_blob};
+                    fetch_readonly_misses((unsigned long long*)p_ptr2, p_counts + 2, p_start2, p_dst,
+                        ids_ + (size_t)tb*K, stage, (int64_t)lay.blob_bytes(l), (int)per,
+                        bank, miss_cache_plan_, cs);
+                } else {
+                    fetch_blobs(p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), (int) per, cs);
+                    rebase_ptrs((unsigned long long*) p_ptr2, p_counts + 2, stage, (int64_t) lay.blob_bytes(l), cs);
+                }
             }
             stamp(l, 21, grp);
             // the PCIe share is pcie_frac of the misses: a few groups when the cache is cold, usually none (always none at
@@ -1516,6 +1569,22 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
     }
     stamp(g.n_layers, 1, 0);
     return true;
+}
+
+std::string Verifier::miss_cache_report() {
+    if (!miss_cache_ways_) return {};
+    const OnDevice on_device(device_);
+    std::vector<uint64_t> counts((size_t)g_->n_layers * 4);
+    if (cudaMemcpyAsync(counts.data(), miss_cache_counts_, counts.size()*sizeof(uint64_t),
+                        cudaMemcpyDeviceToHost, cs_) != cudaSuccess || cudaStreamSynchronize(cs_) != cudaSuccess)
+        return "counter read failed";
+    uint64_t sum[4] = {};
+    for (size_t i = 0; i < counts.size(); ++i) sum[i%4] += counts[i];
+    const uint64_t bytes = strata::kernels::cpu::expert_layout().max_blob;
+    return "cumulative groups=" + std::to_string(sum[0]) + " hits=" + std::to_string(sum[1]) +
+           " uploads=" + std::to_string(sum[2]) + " bypasses=" + std::to_string(sum[3]) +
+           " avoided_upload_bytes=" + std::to_string(sum[1]*bytes) +
+           " uploaded_bytes=" + std::to_string(sum[2]*bytes);
 }
 
 std::string Verifier::profile_report() {
@@ -1728,6 +1797,10 @@ bool Verifier::capture_commit(std::string& err) {
 
 void Verifier::stage_inputs(int T, const int32_t* tokens, int64_t pos0) {
     using namespace strata::kernels;
+    if (miss_cache_ways_ && (split_ || sink_.pcie_mode != 2 || !pcie_enabled_)) {
+        err = "verify: read-only miss cache requires unsplit verification and --pcie-mode auto/kernel with mapped RAM";
+        return false;
+    }
     const ModelGeometry& g = *g_;
     const QsaShapes s = shapes_of(g);
     int32_t* const pk = h_pos_ + (size_t) max_t_ * g.n_head;
