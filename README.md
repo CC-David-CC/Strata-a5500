@@ -1,3 +1,5 @@
+> **Experimental Q8 DeepGEMM prefill tails:** measured **200.7 ? 181.9 ?s (9.4% less time)** for one skewed expert stage on an RTX PRO 6000 Blackwell 96GB. Opt-in, SM120/188-SM pilot; no whole-request speedup claim. [Results, chart and reproduction](docs/experiments/q8-deepgemm-tail/README.md). Built on [upstream Strata](https://github.com/Niko1221/Strata).
+
 <h1 align="center">Strata</h1>
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Português](README.pt-BR.md)

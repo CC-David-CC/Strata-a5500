@@ -1,0 +1,416 @@
+{
+  "scope": "Actual production tail groups at recorded layers; real Q8 weights and counts; synthetic activations",
+  "excluded": "Routing, incoming PCIe upload, common gather and final route-weighted combine are excluded from both arms. This is not request throughput.",
+  "release_commit": "1cbcacbcae2953f3be9edc46369f0c875bc6ab8b",
+  "deepgemm_commit": "b64107f2b9599ca76445b7f62eedf66bae1d095b",
+  "hardware": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+  "rows": [
+    {
+      "case": "tail-l3-p8192",
+      "experts": [
+        "l3-e498",
+        "l3-e504",
+        "l3-e506",
+        "l3-e507"
+      ],
+      "counts": [
+        585,
+        1170,
+        767,
+        585
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 3168,
+      "active_rows": 3107,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00031515583395957947,
+        "rms_abs": 5.006864739698358e-05,
+        "relative_rms": 0.010434186086058617
+      },
+      "us_median": 188.08799982070923,
+      "us_samples": [
+        190.51200151443481,
+        188.08799982070923,
+        188.0200058221817,
+        187.96800076961517,
+        188.13200294971466
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 223.1999933719635,
+        "us_samples": [
+          226.30399465560913,
+          221.15199267864227,
+          223.1999933719635,
+          223.23200106620789,
+          221.18400037288666
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l3-p8192",
+      "experts": [
+        "l3-e498",
+        "l3-e504",
+        "l3-e506",
+        "l3-e507"
+      ],
+      "counts": [
+        585,
+        1170,
+        767,
+        585
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 3168,
+      "active_rows": 3107,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00030092429369688034,
+        "rms_abs": 3.644300522864796e-05,
+        "relative_rms": 0.0075946347787976265
+      },
+      "us_median": 255.95200061798096,
+      "us_samples": [
+        253.80200147628784,
+        252.14999914169312,
+        255.95200061798096,
+        260.2039873600006,
+        260.6860101222992
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 251.93598866462708,
+        "us_samples": [
+          250.88000297546387,
+          251.93598866462708,
+          249.88800287246704,
+          253.63200902938843,
+          256.03199005126953
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l3-p8192",
+      "arm": "native_down_component",
+      "experts": [
+        "l3-e498",
+        "l3-e504",
+        "l3-e506",
+        "l3-e507"
+      ],
+      "counts": [
+        585,
+        1170,
+        767,
+        585
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.0002540478017181158,
+        "rms_abs": 3.6802972317673266e-05,
+        "relative_rms": 0.007669650949537754
+      },
+      "us_median": 82.26600289344788,
+      "us_samples": [
+        83.85200053453445,
+        82.4740007519722,
+        82.26600289344788,
+        82.1399986743927,
+        80.01799881458282
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 96.25600278377533,
+        "us_samples": [
+          96.22400254011154,
+          98.30400347709656,
+          98.30400347709656,
+          96.25600278377533,
+          94.24000233411789
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l3-p8192",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l3-e498",
+        "l3-e504",
+        "l3-e506",
+        "l3-e507"
+      ],
+      "counts": [
+        585,
+        1170,
+        767,
+        585
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00011366605758666992,
+        "rms_abs": 1.3145778211764991e-05,
+        "relative_rms": 0.0027395484503358603
+      },
+      "us_median": 103.32000255584717,
+      "us_samples": [
+        104.13800179958344,
+        103.32000255584717,
+        103.21199893951416,
+        103.46200317144394,
+        103.2240018248558
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 112.64000087976456,
+        "us_samples": [
+          112.64000087976456,
+          112.64000087976456,
+          112.28799819946289,
+          111.61600053310394,
+          112.67200112342834
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00021309684962034225,
+          "rms_abs": 3.18086204060819e-05,
+          "relative_rms": 0.010397127829492092
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 0.00011696293950080872,
+          "rms_abs": 1.4105783520790283e-05,
+          "relative_rms": 0.004610688425600529
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.00018168333917856216,
+          "rms_abs": 2.322188811376691e-05,
+          "relative_rms": 0.007590424735099077
+        }
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "arm": "native_prefill_q8_mmq",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1536,
+      "active_rows": 1464,
+      "error": {
+        "finite": true,
+        "max_abs": 0.00034353695809841156,
+        "rms_abs": 4.768157305079512e-05,
+        "relative_rms": 0.01041257195174694
+      },
+      "us_median": 174.59599673748016,
+      "us_samples": [
+        178.82800102233887,
+        174.80599880218506,
+        174.59599673748016,
+        174.56400394439697,
+        174.3919998407364
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 200.70399343967438,
+        "us_samples": [
+          203.77600193023682,
+          200.70399343967438,
+          202.7519941329956,
+          200.70399343967438,
+          200.6720006465912
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "arm": "native_cpp_hybrid",
+      "layout": "compact aligned32 segments",
+      "packed_rows": 1536,
+      "active_rows": 1464,
+      "error": {
+        "finite": true,
+        "max_abs": 0.0002704095095396042,
+        "rms_abs": 3.522343104123138e-05,
+        "relative_rms": 0.007691997103393078
+      },
+      "us_median": 156.17600083351135,
+      "us_samples": [
+        159.04000401496887,
+        156.16999566555023,
+        156.19799494743347,
+        156.0799926519394,
+        156.17600083351135
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 181.92000687122345,
+        "us_samples": [
+          183.29599499702454,
+          181.92000687122345,
+          180.2240014076233,
+          182.27200210094452,
+          180.25599420070648
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "arm": "native_down_component",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.00024615228176116943,
+        "rms_abs": 3.455931800999679e-05,
+        "relative_rms": 0.007546969689428806
+      },
+      "us_median": 73.0699971318245,
+      "us_samples": [
+        74.34999942779541,
+        73.1320008635521,
+        73.0699971318245,
+        72.95399904251099,
+        73.02600145339966
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 83.96799862384796,
+        "us_samples": [
+          86.01599931716919,
+          83.96799862384796,
+          83.96799862384796,
+          86.01599931716919,
+          83.96799862384796
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      }
+    },
+    {
+      "case": "tail-l7-p0",
+      "arm": "native_cpp_down",
+      "experts": [
+        "l7-e499",
+        "l7-e504",
+        "l7-e507",
+        "l7-e511"
+      ],
+      "counts": [
+        1,
+        1156,
+        277,
+        30
+      ],
+      "error": {
+        "finite": true,
+        "max_abs": 0.000134151428937912,
+        "rms_abs": 1.2567839803523384e-05,
+        "relative_rms": 0.0027445305604487658
+      },
+      "us_median": 53.16400155425072,
+      "us_samples": [
+        55.02999946475029,
+        53.279999643564224,
+        53.102001547813416,
+        53.16400155425072,
+        53.09800058603287
+      ],
+      "cache_policy": "warm repeated graph",
+      "cold": {
+        "us_median": 67.61600077152252,
+        "us_samples": [
+          68.64000111818314,
+          67.61600077152252,
+          67.61600077152252,
+          67.58400052785873,
+          67.58400052785873
+        ],
+        "cache_policy": "400 MiB device fill before each one-stage replay, outside timing"
+      },
+      "graph_mutation_errors": {
+        "native": {
+          "finite": true,
+          "max_abs": 0.00021319789811968803,
+          "rms_abs": 3.032670429092832e-05,
+          "relative_rms": 0.010384985245764256
+        },
+        "deepgemm": {
+          "finite": true,
+          "max_abs": 0.00010598916560411453,
+          "rms_abs": 1.3558045793615747e-05,
+          "relative_rms": 0.00464277621358633
+        },
+        "native_cpp": {
+          "finite": true,
+          "max_abs": 0.00016795936971902847,
+          "rms_abs": 2.2473885110230185e-05,
+          "relative_rms": 0.007695889566093683
+        }
+      }
+    }
+  ],
+  "started_unix": 1791311376.6007931,
+  "completed": true,
+  "finished_unix": 1791311377.2762673,
+  "test_summary": {
+    "cpp_vs_torch_hybrid": {
+      "tail-l3-p8192": "bit-for-bit equal",
+      "tail-l7-p0": "bit-for-bit equal"
+    },
+    "zero_row": "passed",
+    "input_mutation_graph_replay": "passed",
+    "compute_sanitizer_memcheck": {
+      "exit_code": 0,
+      "errors": 0
+    },
+    "default_off_build": {
+      "configure_exit_code": 0,
+      "build_exit_code": 0
+    }
+  }
+}
