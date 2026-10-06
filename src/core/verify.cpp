@@ -1797,10 +1797,6 @@ bool Verifier::capture_commit(std::string& err) {
 
 void Verifier::stage_inputs(int T, const int32_t* tokens, int64_t pos0) {
     using namespace strata::kernels;
-    if (miss_cache_ways_ && (split_ || sink_.pcie_mode != 2 || !pcie_enabled_)) {
-        err = "verify: read-only miss cache requires unsplit verification and --pcie-mode auto/kernel with mapped RAM";
-        return false;
-    }
     const ModelGeometry& g = *g_;
     const QsaShapes s = shapes_of(g);
     int32_t* const pk = h_pos_ + (size_t) max_t_ * g.n_head;
@@ -1868,6 +1864,10 @@ bool Verifier::run(int T, const int32_t* tokens, int64_t pos0, PoolMultiFn pool,
     using namespace strata::kernels;
     const OnDevice on_device(device_);
     last_batch_ = false;
+    if (miss_cache_ways_ && (split_ || sink_.pcie_mode != 2)) {
+        err = "verify: read-only miss cache requires unsplit verification and mapped RAM kernel copies";
+        return false;
+    }
     if (T < 1 || T > max_t_) { err = "verify: window size out of range"; return false; }
     if (released_.load()) { err = "verify: an earlier window never finished on the GPU (#267); restart the engine"; return false; }
     const ModelGeometry& g = *g_;
