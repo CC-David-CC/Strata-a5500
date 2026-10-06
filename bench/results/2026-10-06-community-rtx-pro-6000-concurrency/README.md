@@ -9,6 +9,10 @@ Measured source is the **experimental fork at `cd9fcca`**; current unmodified
 upstream main was not benchmarked here. Engine changes are reviewed separately
 in [#969](https://github.com/Niko1221/Strata/pull/969).
 
+![Flash-Next concurrency: streaming decode and effective throughput at 64K and 128K](overview.png)
+
+[Vector graph](overview.svg) ? Regenerate with `python plot.py` (matplotlib).
+
 ## Hardware and software
 
 - RTX PRO 6000 Blackwell Workstation Edition, 96 GB VRAM, 400 W limit;
@@ -55,7 +59,6 @@ factors over upstream. Both table columns allocate eight sessions.
 | Unsloth UD-Q4_K_XL | 248.5 / 18.28 | 237.6 / 18.14 |
 | Unsloth Q8_0 | 67.9 / 3.82 | 68.4 / 3.82 |
 
-![64k measurements](https://raw.githubusercontent.com/CC-David-CC/Strata-a5500/453310bce60466301e25cb69e77a142a17880605/bench/concurrency-20261005/64k/overview.png)
 
 ### 131,072 input + 512 output; eight active requests
 
@@ -69,7 +72,6 @@ factors over upstream. Both table columns allocate eight sessions.
 | Unsloth UD-Q4_K_XL | 156.5 / 5.22 | 152.2 / 5.00 |
 | Unsloth Q8_0 | 48.4 / 1.53 | not measured |
 
-![128k measurements](https://raw.githubusercontent.com/CC-David-CC/Strata-a5500/453310bce60466301e25cb69e77a142a17880605/bench/concurrency-20261005/128k/overview.png)
 
 ## Failures and limits
 
@@ -101,8 +103,8 @@ factors over upstream. Both table columns allocate eight sessions.
 - [Harness, prompts, model plans and setup](https://github.com/CC-David-CC/Strata-a5500/blob/453310bce60466301e25cb69e77a142a17880605/bench/concurrency-20261005/README.md): use the measured
   fork source, input `65536` or `131072`, output `512`, and the archived placement.
 - [Complete archive pinned at `453310b`](https://github.com/CC-David-CC/Strata-a5500/tree/453310bce60466301e25cb69e77a142a17880605).
-  This PR stores only this summary and compact CSV; historical code, JSON, logs
-  and plots stay in the contributor fork. Images above load from that pinned fork.
+  This PR includes the summary, compact CSV, overview graph and its plot script.
+  Historical code, JSON, logs and detailed plots stay in the contributor fork.
 
 Credit: [Niko1221/Strata](https://github.com/Niko1221/Strata),
 [rkcth #846](https://github.com/Niko1221/Strata/pull/846),
