@@ -8,14 +8,14 @@ model ranking. `—` means no completed result for that suite, not a zero score.
 | Priority | Publisher / variant | Quantization | Short /100 (15 cases) | Standard /100 (69 cases) | State |
 |---|---|---|---:|---:|---|
 | Required | ISTA-DASLab | Q2_0 | **80** | **83** | Complete on RTX PRO 6000 |
-| Required | ISTA-DASLab | IQ2_XS | — | — | Verified archive; LAN staging, then RTX PRO 6000 |
-| Required | UkisAI Swift 1.5 | Q2_0 | — | — | Downloading; queued for same RTX PRO 6000 |
+| Required | ISTA-DASLab | IQ2_XS | **70** | — | Standard suite running on same RTX PRO 6000 |
+| Required | UkisAI Swift 1.5 | Q2_0 | — | — | Verified archive; LAN staging, then same RTX PRO 6000 |
 | Required | UkisAI Swift 1.5 | IQ2_XS | — | — | Downloading/queued; same RTX PRO 6000 |
 | Optional | ISTA-DASLab | IQ3_XXS | — | — | Verified archive; evaluation planned |
-| Optional | UkisAI Swift 1.5 | IQ3_XXS | — | — | Download queued; evaluation planned |
+| Optional | UkisAI Swift 1.5 | IQ3_XXS | — | — | Downloading; evaluation planned |
 | Optional | agentionai Gyro-S | TQ1_0 | — | — | Download queued; compatibility untested |
 | Optional | agentionai Gyro-M | TQ2_0 | — | — | Download queued; compatibility untested |
-| Stretch | Unsloth | Q8_0 | — | — | Standard suite running on 3 x Tesla P4; separate supporting cohort |
+| Stretch | Unsloth | Q8_0 | **93*** | — | First 15 cases complete; standard running on 3 x Tesla P4 |
 
 Swift 1.5 is a modified model, not just a different quantization. Pair Q2_0 with
 Q2_0 and IQ2_XS with IQ2_XS across ISTA and Swift. Gyro has TQ1_0/TQ2_0, not
@@ -48,6 +48,12 @@ Strata rejects structured response_format combined with tools in this revision.
 The upstream benchmark's resulting partial/failure handling is retained unchanged;
 see individual traces rather than interpreting every miss as quantization loss.
 
+## ISTA IQ2_XS: short suite complete
+
+21/30 points (**70/100**): 9 pass, 3 partial, 3 fail. Same hardware, engine and serving settings as ISTA Q2_0. The 69-case standard suite is still running. Full short-suite traces and deployment metadata are included.
+
+Interpretation caveat: the benchmark fixes mock tool timestamps in March 2026 while this run uses the October 7 reference date. IQ2_XS explicitly noticed stale weather/stock data and made extra web searches, which the unchanged benchmark penalized. Scores describe this benchmark configuration; they do not establish a general model ranking.
+
 ## Reproducibility and limits
 
 - Strata upstream: `d5ea7133741e67743c0e886bb426c0ce8d69cf6c` (0.1.40.3), no engine changes.
@@ -68,7 +74,7 @@ The unmodified benchmark rejects `--backend strata`. These initial runs use
 `--backend unknown`, its generic OpenAI-compatible adapter. Its metadata probe
 incorrectly labels Strata's compatible props as llama.cpp; the raw reports preserve
 that bug (engine_version is `Strata 0.1.40.3`). The deployment record above is
-authoritative. A separate Tool-Eval-Bench integration PR is in preparation.
+authoritative. A separate Tool-Eval-Bench integration branch is ready for review: [feat/strata-backend](https://github.com/CC-David-CC/nm-tool-eval-bench/tree/feat/strata-backend).
 
 The command JSON files capture every benchmark argument. After starting Strata
 with the recorded server settings, a portable equivalent is:
