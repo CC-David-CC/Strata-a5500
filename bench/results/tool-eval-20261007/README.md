@@ -21,6 +21,8 @@ Swift 1.5 is a modified model, not just a different quantization. Pair Q2_0 with
 Q2_0 and IQ2_XS with IQ2_XS across ISTA and Swift. Gyro has TQ1_0/TQ2_0, not
 matching Q2_0/IQ2_XS versions. File sizes in the manifest are not VRAM requirements.
 
+*Q8: 28/30 points, rounded to 93/100, calculated from TC-01 through TC-15 of the ongoing standard run. Those are exactly the short-suite scenario IDs. 13 pass, 2 partial, 0 fail; 654.24 s summed scenario time. Full-run score is still pending. The different P4 engine makes this provisional, not an isolated quantization result. See `q8-first15-progress.jsonl`.
+
 ## First completed run: ISTA Q2_0
 
 | Measurement | Short | Standard |
