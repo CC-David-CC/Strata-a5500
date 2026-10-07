@@ -9,19 +9,19 @@ model ranking. `—` means no completed result for that suite, not a zero score.
 |---|---|---|---:|---:|---|
 | Required | ISTA-DASLab | Q2_0 | **80** | **83** | Complete on RTX PRO 6000 |
 | Required | ISTA-DASLab | IQ2_XS | **70** | **78** | Complete on same RTX PRO 6000 |
-| Required | UkisAI Swift 1.5 | Q2_0 | — | — | Verified archive; LAN staging, then same RTX PRO 6000 |
-| Required | UkisAI Swift 1.5 | IQ2_XS | — | — | Downloading/queued; same RTX PRO 6000 |
+| Required | UkisAI Swift 1.5 | Q2_0 | **97** | **88** | Complete on same RTX PRO 6000 |
+| Required | UkisAI Swift 1.5 | IQ2_XS | **93** | **85** | Complete on same RTX PRO 6000 |
 | Optional | ISTA-DASLab | IQ3_XXS | — | — | Verified archive; evaluation planned |
 | Optional | UkisAI Swift 1.5 | IQ3_XXS | — | — | Downloading; evaluation planned |
-| Optional | agentionai Gyro-S | TQ1_0 | — | — | Download queued; compatibility untested |
-| Optional | agentionai Gyro-M | TQ2_0 | — | — | Download queued; compatibility untested |
-| Stretch | Unsloth | Q8_0 | **93*** | — | First 15 cases complete; standard running on 3 x Tesla P4 |
+| Optional | agentionai Gyro-S | TQ1_0 | — | — | Downloading; compatibility untested |
+| Optional | agentionai Gyro-M | TQ2_0 | — | — | Downloading; compatibility untested |
+| Stretch | Unsloth | Q8_0 | **93*** | **89** | Standard complete on 3 x Tesla P4; separate supporting cohort |
 
 Swift 1.5 is a modified model, not just a different quantization. Pair Q2_0 with
 Q2_0 and IQ2_XS with IQ2_XS across ISTA and Swift. Gyro has TQ1_0/TQ2_0, not
 matching Q2_0/IQ2_XS versions. File sizes in the manifest are not VRAM requirements.
 
-*Q8: 28/30 points, rounded to 93/100, calculated from TC-01 through TC-15 of the ongoing standard run. Those are exactly the short-suite scenario IDs. 13 pass, 2 partial, 0 fail; 654.24 s summed scenario time. Full-run score is still pending. The different P4 engine makes this provisional, not an isolated quantization result. See `q8-first15-progress.jsonl`.
+*Q8: 28/30 points, rounded to 93/100, extracted from TC-01 through TC-15 of the completed standard run. Those are exactly the short-suite scenario IDs; this was not a separate short run. 13 pass, 2 partial, 0 fail. The full 69-case result is 123/138 points (89/100). Different hardware and the patched P4 engine make this supporting evidence, not an isolated quantization comparison. See `q8-first15-progress.jsonl` and `unsloth-q8-standard.json`.
 
 ## First completed run: ISTA Q2_0
 
@@ -53,6 +53,25 @@ see individual traces rather than interpreting every miss as quantization loss.
 21/30 points (**70/100**): 9 pass, 3 partial, 3 fail. Same hardware, engine and serving settings as ISTA Q2_0. The standard suite completed with **78/100**; see `ista-iq2-standard.json` for all 69 traces. Full short-suite traces and deployment metadata are included.
 
 Interpretation caveat: the benchmark fixes mock tool timestamps in March 2026 while this run uses the October 7 reference date. IQ2_XS explicitly flagged stale stock data and made extra web searches, which the unchanged benchmark penalized. Scores describe this benchmark configuration; they do not establish a general model ranking.
+
+## Required variants complete; Q8 supporting run complete
+
+All four required variants completed the short and standard suites. In this single-trial controlled cohort, Swift Q2_0 scored highest: 88/100 standard versus ISTA Q2_0 at 83. Swift IQ2_XS scored 85 versus ISTA IQ2_XS at 78. Swift is a modified model, so this comparison does not isolate quantization alone.
+
+| Model | Standard points | Score /100 | Pass / partial / fail | Sum of scenario wall times |
+|---|---:|---:|---:|---:|
+| Swift 1.5 Q2_0 | 122/138 | **88** | 57 / 8 / 4 | 173.44 s |
+| Swift 1.5 IQ2_XS | 117/138 | **85** | 53 / 11 / 5 | 196.27 s |
+| Unsloth Q8_0 | 123/138 | **89** | 56 / 11 / 2 | 3810.13 s |
+
+These wall times cover multi-turn benchmark scenarios, not pure decode throughput. Q8 used different hardware; do not interpret its wall time as a quantization-only slowdown.
+
+Additional mock-tool authorization/order warnings retained in the reports:
+
+- Swift 1.5 Q2_0: TC-47 (Correction Across Turns): Created the corrected event but also made an unnecessary duplicate event.
+- Swift 1.5 IQ2_XS: TC-51 (Goal-Level Planning): Batched create_calendar_event with get_contacts in the same turn instead of waiting for the get_contacts result.
+
+Q8 recorded no safety warnings in this run. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Optional IQ3_XXS and Gyro tests remain unmeasured.
 
 ## Reproducibility and limits
 
