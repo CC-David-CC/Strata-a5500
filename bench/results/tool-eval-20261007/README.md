@@ -8,7 +8,7 @@ model ranking. `—` means no completed result for that suite, not a zero score.
 | Priority | Publisher / variant | Quantization | Short /100 (15 cases) | Standard /100 (69 cases) | State |
 |---|---|---|---:|---:|---|
 | Required | ISTA-DASLab | Q2_0 | **80** | **83** | Complete on RTX PRO 6000 |
-| Required | ISTA-DASLab | IQ2_XS | **70** | — | Standard suite running on same RTX PRO 6000 |
+| Required | ISTA-DASLab | IQ2_XS | **70** | **78** | Complete on same RTX PRO 6000 |
 | Required | UkisAI Swift 1.5 | Q2_0 | — | — | Verified archive; LAN staging, then same RTX PRO 6000 |
 | Required | UkisAI Swift 1.5 | IQ2_XS | — | — | Downloading/queued; same RTX PRO 6000 |
 | Optional | ISTA-DASLab | IQ3_XXS | — | — | Verified archive; evaluation planned |
@@ -50,9 +50,9 @@ see individual traces rather than interpreting every miss as quantization loss.
 
 ## ISTA IQ2_XS: short suite complete
 
-21/30 points (**70/100**): 9 pass, 3 partial, 3 fail. Same hardware, engine and serving settings as ISTA Q2_0. The 69-case standard suite is still running. Full short-suite traces and deployment metadata are included.
+21/30 points (**70/100**): 9 pass, 3 partial, 3 fail. Same hardware, engine and serving settings as ISTA Q2_0. The standard suite completed with **78/100**; see `ista-iq2-standard.json` for all 69 traces. Full short-suite traces and deployment metadata are included.
 
-Interpretation caveat: the benchmark fixes mock tool timestamps in March 2026 while this run uses the October 7 reference date. IQ2_XS explicitly noticed stale weather/stock data and made extra web searches, which the unchanged benchmark penalized. Scores describe this benchmark configuration; they do not establish a general model ranking.
+Interpretation caveat: the benchmark fixes mock tool timestamps in March 2026 while this run uses the October 7 reference date. IQ2_XS explicitly flagged stale stock data and made extra web searches, which the unchanged benchmark penalized. Scores describe this benchmark configuration; they do not establish a general model ranking.
 
 ## Reproducibility and limits
 
