@@ -13,10 +13,11 @@ from pathlib import Path
 import statistics
 
 PERCENTILES = (50, 80, 90, 95, 99)
-MODES = ['cold', 'pinned', 'ram_switch', 'disk_switch']
+MODES = ['cold', 'pinned', 'disk_restore', 'ram_switch', 'disk_switch']
 LABELS = {'cold': 'Cache disabled', 'pinned': 'Pinned prefix',
-          'ram_switch': 'Switch / RAM', 'disk_switch': 'Switch / disk'}
-COLORS = {'cold': '#D66A36', 'pinned': '#137B80', 'ram_switch': '#6D5CB5', 'disk_switch': '#B24777'}
+          'disk_restore': 'Disk restore + request', 'ram_switch': 'Switch / RAM', 'disk_switch': 'Switch / disk'}
+COLORS = {'cold': '#D66A36', 'pinned': '#137B80', 'disk_restore': '#376EB2',
+          'ram_switch': '#6D5CB5', 'disk_switch': '#B24777'}
 
 
 def quantile(values, p):
@@ -38,7 +39,9 @@ def summarize(rows):
         good = [r for r in group if not r.get('error') and r['ttft_s'] is not None]
         fixed = [r for r in good if r['usage']['output_tokens'] == 128]
         hits = [r for r in good if r['usage']['input_tokens_details']['cached_tokens'] >= prefix]
-        item = dict(build=build, mode=mode, prefix_tokens=prefix, attempted=len(group), n=len(good),
+        attempted = sum(r.get('attempted', r.get('restore', {}).get('status', 200) == 200) for r in group)
+        item = dict(build=build, mode=mode, prefix_tokens=prefix, scheduled=len(group),
+                    attempted=attempted, n=len(good), blocked=len(group)-attempted,
                     errors=len(group)-len(good), replies_128=len(fixed), full_prefix_hits=len(hits),
                     cache_hit_rate=len(hits)/len(good) if good else None,
                     input_tokens_min=min((r['usage']['input_tokens'] for r in good), default=None),
@@ -63,8 +66,10 @@ def charts(summary, out, subtitle):
                          'axes.edgecolor': '#BBC8CF', 'savefig.facecolor': '#F8FAFC'})
     builds = sorted({r['build'] for r in summary})
     targets = sorted({r['prefix_tokens'] for r in summary})
-    minimum = min(r['n'] for r in summary)
-    note = (f'n = {minimum}–{max(r["n"] for r in summary)} per cell. '
+    counts = [r['n'] for r in summary if r['n'] > 0]
+    minimum = min(counts, default=0)
+    single = bool(counts) and all(n == 1 for n in counts)
+    note = (f'n = {minimum}–{max(counts, default=0)} per successful cell. '
             'Warm-ups excluded; cache misses retained. '
             + ('PRELIMINARY: too few samples for tail estimates.' if minimum < 100
                else 'p99 is exploratory (200 samples gives about two upper-tail observations).'))
@@ -92,11 +97,17 @@ def charts(summary, out, subtitle):
             ax.grid(axis='y', alpha=.18)
             ax.set_ylim(bottom=0)
             ax.legend(frameon=False, fontsize=9)
+            failed = [r for r in summary if r['build'] == build and r['n'] == 0]
+            if failed:
+                modes = ', '.join(LABELS[m] for m in dict.fromkeys(r['mode'] for r in failed))
+                ax.text(.02, .72, modes + ': failed; no latency plotted', transform=ax.transAxes,
+                        size=9, color='#963724', wrap=True)
         axes[0][0].set_ylabel('Seconds · lower is better')
         fig.suptitle(title, x=.06, y=.99, ha='left', size=23, weight='bold')
         fig.text(.06, .905, subtitle, size=10)
         fig.text(.06, .035, note, size=9)
-        fig.text(.06, .067, 'Solid: p50' + ('   •   Dashed / shaded extent: p95' if minimum >= 100 else '   •   Tail curves withheld until ≥100 samples/cell'), size=9)
+        fig.text(.06, .067, ('Points: one observed request per cell' if single else 'Solid: p50')
+                 + ('   •   Dashed / shaded extent: p95' if minimum >= 100 else '   •   Tail curves withheld until ≥100 samples/cell'), size=9)
         fig.subplots_adjust(top=.80, bottom=.19, left=.065, right=.97, wspace=.12)
         for ext in ('png', 'svg'):
             path = out / f'{filename}.{ext}'

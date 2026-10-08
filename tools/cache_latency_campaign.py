@@ -60,6 +60,7 @@ def main():
                    '--source', build['source'], '--config', build['config'], '--output', str(folder),
                    '--source-commit', build['commit'], '--build-label', build['label'], '--mode', mode,
                    '--block', str(block), '--samples', str(args.samples_per_block),
+                   '--warmups', str(cfg.get('warmups', 3)),
                    '--trial-start', str(block * args.samples_per_block), '--targets', cfg['targets']]
             manifest['active'] = name
             save()

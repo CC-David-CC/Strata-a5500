@@ -6,7 +6,7 @@
 
 On llm-60, pinned prefix reuse reduced first-token latency at 8K from about **1.56 seconds to 0.22 seconds** in both builds: roughly **7.2x faster**. Completing all 128 output tokens fell from about **2.37 seconds to 1.03 seconds**. Reuse helped at every tested size, starting at 1K.
 
-These are three-sample medians after three warm-ups per cell, **not a tail-latency study**. The 200-sample follow-up is running. The benefit here comes from the existing pinned-prefix mechanism; this probe does not establish an additional speedup from #1489. It also does not exercise disk restores, durable Responses history, profile changes, concurrent requests or restarts.
+These are three-sample medians after three warm-ups per cell, **not a tail-latency study**. The 200-sample follow-up is paused while the initial branch is prepared for review. The benefit here comes from the existing pinned-prefix mechanism; this probe does not establish an additional speedup from #1489. It also does not exercise disk restores, durable Responses history, profile changes, concurrent requests or restarts.
 
 | Prefix | Main, no reuse | Main, pinned | #1489, no reuse | #1489, pinned |
 |---|---:|---:|---:|---:|

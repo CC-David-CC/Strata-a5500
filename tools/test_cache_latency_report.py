@@ -38,6 +38,13 @@ class StatisticsTest(unittest.TestCase):
         self.assertEqual(got['replies_128'], 1)
         self.assertEqual(got['total_128_s_p50'], 3)
 
+    def test_failed_save_does_not_count_as_generation_attempt(self):
+        failed = row(None, error='save failed')
+        failed['restore'] = {'status': 0}
+        got = summarize([failed])[0]
+        self.assertEqual((got['scheduled'], got['attempted'], got['blocked']), (1, 0, 1))
+        self.assertIsNone(got['ttft_s_p50'])
+
 
 if __name__ == '__main__':
     unittest.main()

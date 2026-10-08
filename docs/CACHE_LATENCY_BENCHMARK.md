@@ -1,14 +1,22 @@
-# Strata cache latency: 1K–8K prefixes
+# Strata cache latency: 1K–128K prefixes
 
 This benchmark separates the benefit of prefix reuse from differences between
 Strata main and the Responses/disk-cache integration in
 [#1489](https://github.com/Niko1221/Strata/pull/1489). It uses Strata's public
 Python server and native engine directly. There is no downstream profile wrapper.
 
+Results: [1K–8K preliminary medians](measurements/cache-latency-20261008/pilot/)
+and [32K–128K single examples](measurements/cache-latency-20261008/long-examples/).
+
 The first pass is deliberately small: three measured requests at each prefix
 length, after three recorded warm-ups. Its charts show preliminary medians only.
-The follow-up campaign collects 200 measured requests per cell in ten blocks of
-20. Warm-ups and requests used to switch conversations are kept in the raw logs
+An additional pass measures one request per cell at 32K, 64K and 128K after one
+warm-up, using a 256K context capacity for both builds. These are single examples,
+not latency percentiles. It keeps all other engine and sampling settings identical.
+
+The follow-up campaign is configured for 200 measured requests per cell in ten
+blocks of 20; it is paused while the initial evidence branch is prepared for review.
+Warm-ups and requests used to switch conversations are kept in the raw logs
 but excluded from the measured population. Build/mode order reverses on alternate
 blocks; prefix-length order is deterministically shuffled within each block.
 
@@ -21,11 +29,11 @@ blocks; prefix-length order is deterministically shuffled within each block.
 | Model | ISTA-DASLab Qwen3.8-Flash-Next-GSQ-RCO IQ2_XS, unchanged public files |
 | Hardware | One RTX PRO 6000 Blackwell, 96 GB VRAM; llm-60 |
 | Backend | CUDA 13.2, architecture 120; same build options and ggml source |
-| Context / KV / prefill chunk | 32,768 / FP16 / 8,192 |
+| Context / KV / prefill chunk | 32,768 for short tests, 262,144 for long examples / FP16 / 8,192 |
 | Speculation | Native IQ `--spec 2`; no MTP weights; suffix draft disabled |
 | Sampling | Temperature 0, seed 42, reasoning effort none |
 | Output | Cap 128 tokens; actual output length recorded for every request |
-| Prefix lengths | 1,024 through 8,192 in increments of 1,024; charts label these 1K–8K |
+| Prefix lengths | 1,024 through 8,192 in increments of 1,024, plus single examples at 32,768 / 65,536 / 131,072 |
 | API / load | Local HTTP SSE `/v1/responses`, one request at a time, `store: false` |
 
 Actual prompt length is the pinned prefix plus the remaining document fragment,
@@ -38,13 +46,22 @@ quality evaluation. Both builds receive the same deterministic request corpus.
 - **Cache disabled:** `--prompt-cache 0`; includes full prefill on every request.
 - **Pinned prefix:** `--prompt-cache 6`, `strata_prefix: {"tokens": N}`; repeated
   independent questions about one unchanged document, without conversation parking.
+- **Disk restore + request:** warm the document, save a session through
+  `POST /slots/0?action=save`, replace the live conversation with an unrelated
+  request, then `POST /slots/0?action=restore` before asking the next question.
+  Charted latency includes the entire restore HTTP call plus the generation
+  request. One-time SAVE and initial prefill are reported separately. This uses
+  the explicit session API on both builds, not automatic disk-only parking.
 - **Switch / RAM:** alternate with an unrelated document, with a 4 GiB RAM
   conversation-cache budget. This is a separate workload from same-prefix requests.
 - **Switch / disk:** the integration's disk-only conversation cache, with a 4 GiB
   budget and the same alternating workload. Main lacks this mode; it is marked
   unsupported rather than assigned a synthetic timing.
 
-The immediate comparison covers the first two modes. Switching is a separate
+The initial branch covers the first three modes. Disk restore has three measured
+requests per short cell and one per long cell, after one warm-up and one SAVE per
+cell. A failed SAVE blocks restore and generation: those are reported as blocked
+cases, not successful latency observations. Automatic switching is a separate
 follow-up. Cached-token counts determine observed hits; a mode's name is not proof
 of reuse. Main's non-MTP snapshot behavior may produce misses, which remain in
 the reported latency population.
