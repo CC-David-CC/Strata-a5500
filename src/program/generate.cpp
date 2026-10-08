@@ -7028,15 +7028,24 @@ int main(int argc, char** argv) {
         // reading the whole preamble again.  The file holds the K/V of the root's cells only and, as its live state,
         // the root checkpoint's own running state, so it is exactly the state the engine has after reading the root.
         auto disk_save_root = [&]() {
-            if (o.prompt_cache_root <= 0 || o.turn_token < 0) return;
-            int64_t root_len = -1;
-            for (size_t i = 1; i < live.size(); ++i)
-                if (live[i] == o.turn_token) { if ((int64_t) i >= o.prompt_cache_root) root_len = (int64_t) i; break; }
-            if (root_len < 0) return;
+            // a pinned shared prefix (a request's "strata_prefix", e.g. a coding agent's preamble that runs into its
+            // first user message) is the root when there is one: the deepest pinned checkpoint on the live path;
+            // otherwise the root rule's checkpoint at the first turn boundary
             const ConvCheckpoint* root = nullptr;
             for (const ConvCheckpoint& c : checks)
-                if ((int64_t) c.ids.size() == root_len && !c.gdn.empty()) root = &c;
+                if (c.pinned && !c.gdn.empty() && c.ids.size() < live.size() &&
+                    std::equal(c.ids.begin(), c.ids.end(), live.begin()) && (!root || c.ids.size() > root->ids.size()))
+                    root = &c;
+            if (root == nullptr && o.prompt_cache_root > 0 && o.turn_token >= 0) {
+                int64_t first_turn = -1;
+                for (size_t i = 1; i < live.size(); ++i)
+                    if (live[i] == o.turn_token) { if ((int64_t) i >= o.prompt_cache_root) first_turn = (int64_t) i; break; }
+                if (first_turn > 0)
+                    for (const ConvCheckpoint& c : checks)
+                        if ((int64_t) c.ids.size() == first_turn && !c.gdn.empty()) root = &c;
+            }
             if (root == nullptr || conversation_spill.has_prefix(root->ids, root->imgs, cvec_cached)) return;
+            const int64_t root_len = (int64_t) root->ids.size();
             const auto tr = Clock::now();
             std::string e;
             try {
@@ -9399,7 +9408,9 @@ int main(int argc, char** argv) {
                 for (const ConvCheckpoint& c : checks) deepest = std::max(deepest, c.ids.size());
                 disk_continuing = (int64_t) deepest == resume;
             }
-            if ((!from_live || incoming || disk_incoming || slot_source >= 0) && !pin_sibling &&
+            // disk-only: a sibling of a pinned prefix is another conversation (a coding agent's new session), so the
+            // one it leaves is saved like any switch
+            if ((!from_live || incoming || disk_incoming || slot_source >= 0) && (!pin_sibling || disk_only) &&
                 !park_current(incoming ? incoming->bytes() : 0)) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
