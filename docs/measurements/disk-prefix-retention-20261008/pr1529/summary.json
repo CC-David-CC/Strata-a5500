@@ -1,0 +1,38 @@
+[
+  {
+    "arm": "mtp-pinned",
+    "prefix_tokens": 8191,
+    "automatic_reused": 0,
+    "automatic_prompt_ms": 1669.5,
+    "explicit_reused": 8191,
+    "explicit_prompt_ms": 100.5,
+    "restore_ms": 329.7
+  },
+  {
+    "arm": "mtp-unpinned",
+    "prefix_tokens": 8191,
+    "automatic_reused": 0,
+    "automatic_prompt_ms": 1601.7,
+    "explicit_reused": 8191,
+    "explicit_prompt_ms": 100.7,
+    "restore_ms": 309.5
+  },
+  {
+    "arm": "off-pinned",
+    "prefix_tokens": 8191,
+    "automatic_reused": 0,
+    "automatic_prompt_ms": 1712.2,
+    "explicit_reused": 8191,
+    "explicit_prompt_ms": 126.3,
+    "restore_ms": 330.6
+  },
+  {
+    "arm": "off-unpinned",
+    "prefix_tokens": 8191,
+    "automatic_reused": 0,
+    "automatic_prompt_ms": 1665.4,
+    "explicit_reused": 8191,
+    "explicit_prompt_ms": 126.7,
+    "restore_ms": 325.1
+  }
+]

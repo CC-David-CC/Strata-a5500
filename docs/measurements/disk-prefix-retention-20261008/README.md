@@ -9,7 +9,7 @@ This reproduction calls Strata's native engine through its public Python engine
 adapter. It contains **no downstream profile wrapper**. It reproduces with MTP
 off/on and with `strata_prefix: {"tokens": 8191}` pinning off/on. This establishes
 that the observed loss does not require MTP or downstream profile handling.
-Latest upstream main and the proposed #1529 fix have not been tested here.
+The proposed #1529 patch was subsequently tested on this same base: **the disk-only miss persists in all four cases**. See the [candidate results](pr1529/README.md). Latest upstream main has not been tested here.
 
 | Configuration | Automatic return: reused tokens | Automatic prompt work | Explicit RESTORE | Prompt work after RESTORE | Reused after RESTORE |
 |---|---:|---:|---:|---:|---:|

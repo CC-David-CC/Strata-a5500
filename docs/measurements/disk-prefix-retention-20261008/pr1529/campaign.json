@@ -1,0 +1,9 @@
+{
+  "source_commit": "86ce4287",
+  "upstream_patch": "daff41701df36ff48e35c3c32bb99f2738542ef2",
+  "base": "b299af0e8fc9f7ee1792c63a155707cc166ae7e4",
+  "started": 1791495914.213416,
+  "phase": "complete",
+  "binary_sha256": "19b6a52e31dbce46ac9c413627214b9852e120694ffdffb23e824859fe752e11",
+  "finished": 1791496122.1553814
+}
