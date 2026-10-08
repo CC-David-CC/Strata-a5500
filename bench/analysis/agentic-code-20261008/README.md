@@ -1,17 +1,23 @@
 # Tool selection and recovery: a preference-weighted analysis
 
 This is a separate analysis of the completed Flash Next Tool-Eval-Bench runs,
-not a new inference run or a change to the benchmark's official scoring. It is a
+using the Q8 retest on the same RTX PRO 6000; it does not change the benchmark's official scoring. It is a
 companion to the [completed measurements in #1491](https://github.com/Niko1221/Strata/pull/1491). The
 profile prioritizes choosing the right tool and recovering from errors, gives
 less weight to multi-step chains, and gives safety and structured output zero
-weight. The recorded Q8 run is labeled **Reference** throughout the comparison.
+weight. The new hardware-matched Q8 run is labeled **Reference** throughout the comparison.
 
 Benchmark and scenario credit: **[Tool-Eval-Bench](https://github.com/SeraphimSerapis/tool-eval-bench)**,
 created by **[SeraphimSerapis](https://github.com/SeraphimSerapis)**. Existing scoring
 and traces are preserved. Examples in the figures paraphrase test expectations.
 
 ![Preference-weighted scores and category contributions](figures/weighted-ranking.png)
+
+Every category has a fixed-width section equal to its weight. Color fills only
+the earned points; the remainder stays empty before the next section. A perfect
+category fills its entire section, so category boundaries align across all models,
+including Reference. The score at the right sums the colored portions, not the
+position of the final bar edge.
 
 ## What the weights mean
 
@@ -57,26 +63,25 @@ Gyro-S improves context to 18/20 but planning is 5/6:
 ```
 
 The score is a weighted index, not a probability of completing a coding task.
-The reference is not forced to 100; its measured score is **92.5417**. Differences
+The reference is not forced to 100; its measured score is **91.2083**. Differences
 in the table are score-point differences, not speedups or relative accuracy gains.
 
 ## Result
 
 | Variant | Weighted score /100 | Difference from reference | GGUF GB |
 |---|---:|---:|---:|
-| ISTA IQ3_XXS | 97.00 | +4.46 | 75.84 |
-| Swift IQ3_XXS | 97.00 | +4.46 | 75.97 |
-| Gyro-S | 96.33 | +3.79 | 58.49 |
-| Swift Q2_0 | 95.00 | +2.46 | 66.55 |
-| AP-IQ2_S | 92.17 | -0.38 | 81.64 |
-| Gyro-M | 91.50 | -1.04 | 91.97 |
-| Swift IQ2_XS | 90.67 | -1.88 | 68.15 |
-| AP-Q4_K_XL | 87.50 | -5.04 | 101.14 |
-| AP-IQ3_XXS | 86.38 | -6.17 | 86.67 |
-| ISTA Q2_0 | 85.50 | -7.04 | 66.42 |
-| ISTA IQ2_XS | 80.50 | -12.04 | 68.03 |
-| Reference | 92.54 | +0.00 | 188.23 |
-
+| ISTA IQ3_XXS | 97.00 | +5.79 | 75.84 |
+| Swift IQ3_XXS | 97.00 | +5.79 | 75.97 |
+| Gyro-S | 96.33 | +5.12 | 58.49 |
+| Swift Q2_0 | 95.00 | +3.79 | 66.55 |
+| AP-IQ2_S | 92.17 | +0.96 | 81.64 |
+| Gyro-M | 91.50 | +0.29 | 91.97 |
+| Swift IQ2_XS | 90.67 | -0.54 | 68.15 |
+| AP-Q4_K_XL | 87.50 | -3.71 | 101.14 |
+| AP-IQ3_XXS | 86.38 | -4.83 | 86.67 |
+| ISTA Q2_0 | 85.50 | -5.71 | 66.42 |
+| ISTA IQ2_XS | 80.50 | -10.71 | 68.03 |
+| Reference | 91.21 | +0.00 | 188.23 |
 
 GGUF sizes are decimal GB from the archived file manifest, summed across shards.
 They are not required RAM, GPU memory, or a prediction of speed.
@@ -129,10 +134,21 @@ similarly named format. Our receipts use agentionai Strata rc1 with the recorded
 optional-MTP patch. They are not results from the newer upstream/Gyro merge.
 [Publisher model card](https://huggingface.co/agentionai/Qwen3.8-Flash-Next-Gyro-GGUF).
 
-**Reference** is the recorded Unsloth Q8_0 run. It anchors this comparison, but is
-neither an unquantized ground truth nor a controlled hardware baseline: it ran
-on three P4s and a different patched runtime. The other variants used an RTX PRO
-6000; AP enabled an extra existing build option and Gyro used its fork.
+**Reference** is the fresh Unsloth Q8_0 run on the same RTX PRO 6000 and identical
+mainline binary as ISTA/Swift. It replaces the earlier three-P4 reference in this
+analysis: **123/138** official points became
+**121/138**; the weighted index changed from **92.54** to **91.21**.
+The previous receipts and their original hashes remain in the benchmark report,
+and `source-data.json` retains the historical reference separately.
+
+Q8's context, FP16 KV, prefill chunk, sampling, output budget and benchmark
+revision match the earlier mainline runs. Loading differs: `--mmap-experts`
+avoids a full host expert arena, and `--compat-bf16` converts small unsupported
+projections in the separate pack. Original GGUFs and routed experts are unchanged.
+AP still enables the existing Q6 build option; Gyro still uses its fork. This is
+a better hardware match, not unquantized ground truth or proof that quantization
+alone explains the differences. A single rerun cannot separate hardware, loading,
+runtime and numerical effects or establish variance.
 
 ## How much confidence to put in the order
 
@@ -164,7 +180,7 @@ category point counts, exact model-file byte totals, receipt URLs and hashes.
 `analyze.py` uses rational arithmetic, checks the 100-point weight budget and
 common selected-category denominator, and generates `weighted-results.json`,
 `RESULTS.md`, and all three PNG/SVG figures. The inference receipts are pinned at
-[28f863fb](https://github.com/CC-David-CC/Strata-a5500/tree/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007).
+[4ac28209](https://github.com/CC-David-CC/Strata-a5500/tree/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007).
 The benchmark revision is `c8a30ff5c1fb132e395bc2d8e4bd549ef1294abd`.
 Publisher descriptions were checked on 2026-10-08; publisher quality or speed
 claims are not included as points in this analysis.

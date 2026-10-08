@@ -60,26 +60,35 @@ fig=plt.figure(figsize=(16,12),facecolor=BG)
 fig.text(.045,.948,"Pick the right tool. Recover when it fails.",fontsize=27,weight="bold",color=INK)
 fig.text(.045,.912,"A preference-weighted view of the completed Flash Next tool-use runs",fontsize=14,color=MUTED)
 ax=fig.add_axes([.235,.19,.69,.61],facecolor=BG)
-for i,r in enumerate(ranked):
+yref=len(ranked)+.75
+for i,r in list(enumerate(ranked))+[(yref,reference)]:
     left=0
     for k in ORDER:
-        val=r["contributions"][k]
-        ax.barh(i,val,left=left,height=.57,color=COLORS[k],edgecolor=BG,linewidth=.5)
-        left+=val
-    ax.text(left+1.0,i,f"{left:.2f}",va="center",weight="bold",color=INK,fontsize=12)
-yref=len(ranked)+.75
-ax.barh(yref,reference["score"],height=.57,color="#aab6c1")
-ax.text(reference["score"]+1,yref,f"{reference['score']:.2f}",va="center",weight="bold",color=INK,fontsize=12)
+        # Each category owns its full weight budget. Missed points stay empty;
+        # later categories never shift left to hide a deficit.
+        capacity=weights[k]
+        earned=r["contributions"][k]
+        assert 0 <= earned <= capacity
+        ax.barh(i,capacity,left=left,height=.57,color="white",edgecolor="#bac8d3",linewidth=.7)
+        ax.barh(i,earned,left=left,height=.57,color=COLORS[k],edgecolor=BG,linewidth=.5)
+        left+=capacity
+    assert left == 100
+    ax.text(102,i,f"{r['score']:.2f}",va="center",weight="bold",color=INK,fontsize=12)
 ax.axhline(len(ranked)-.1,color="#c5d0db",linewidth=1)
-ax.axvline(reference["score"],color="#76879a",linewidth=1,linestyle=(0,(4,4)),zorder=0)
+left=0
+for k in ORDER:
+    ax.axvline(left,color="#c5d0db",linewidth=.6,zorder=0)
+    ax.text(left+weights[k]/2,-.75,k,ha="center",va="center",fontsize=10,weight="bold",color=INK)
+    left+=weights[k]
+ax.text(102,-.75,"Score",va="center",weight="bold",fontsize=10,color=INK)
 ax.set_yticks(list(range(len(ranked)))+[yref],[r["label"] for r in ranked]+["Reference"],fontsize=12,color=INK)
-ax.set_ylim(yref+.8,-.8);ax.set_xlim(0,105);ax.set_xticks([0,20,40,60,80,100])
+ax.set_ylim(yref+.8,-1.25);ax.set_xlim(0,110);ax.set_xticks([0,25,50,70,80,90,95,100])
 ax.tick_params(length=0,pad=10,colors=MUTED);ax.set_axisbelow(True);ax.grid(axis="x",color="#e0e7ed",linewidth=.7)
 for sp in ax.spines.values():sp.set_visible(False)
-fig.legend(handles=[Patch(color=COLORS[k],label=f"{NAMES[k]} {weights[k]}%") for k in ORDER],loc="upper left",bbox_to_anchor=(.045,.873),ncol=4,frameon=False,fontsize=10)
+fig.legend(handles=[Patch(color=COLORS[k],label=f"{k}: {NAMES[k]} {weights[k]}%") for k in ORDER]+[Patch(facecolor="white",edgecolor="#bac8d3",label="Empty = unearned points")],loc="upper left",bbox_to_anchor=(.045,.873),ncol=4,frameon=False,fontsize=10)
 fig.text(.045,.122,"ISTA IQ3_XXS and Swift IQ3_XXS tie; Gyro-S is 0.67 points behind.",fontsize=13,weight="bold",color=INK)
-fig.text(.045,.087,"Custom weights, not official benchmark scores or success probabilities. Safety and structured output contribute zero.",fontsize=10,color=MUTED)
-footer(fig,"One trial per variant. Gyro uses patched rc1; reference uses three P4s. These are different serving cohorts.")
+fig.text(.045,.087,"Fixed category budgets: fill = earned points; empty = missed points. Safety and structured output contribute zero.",fontsize=10,color=MUTED)
+footer(fig,"One trial per variant. Reference: same RTX PRO 6000 + mainline, mmap loading. Gyro still uses patched rc1.")
 save(fig,"weighted-ranking")
 
 fig=plt.figure(figsize=(16,12),facecolor=BG)
@@ -128,7 +137,7 @@ for i,(title,sub,lines,color) in enumerate(family_cards):
     for n,line in enumerate(lines):fig.text(x+.018,y+.112-n*.035,line,fontsize=9.4,color=MUTED)
 fig.patches.append(FancyBboxPatch((.045,.12),.915,.105,boxstyle="round,pad=0.012",transform=fig.transFigure,facecolor="#e5ecf3",edgecolor="none"))
 fig.text(.063,.184,"REFERENCE",fontsize=15,color=INK,weight="bold")
-fig.text(.063,.151,"The recorded Q8 run anchors the comparison. It is not ground truth and used a different three-P4 runtime.",fontsize=12,color=INK)
+fig.text(.063,.151,"Q8 retested on the same RTX PRO 6000 + mainline; mmap loading and compatibility pack. Not ground truth.",fontsize=12,color=INK)
 footer(fig,"Family definitions: publisher model cards, linked in the report. Claims about training or compression are not new measurements.")
 save(fig,"model-families")
 print(table)

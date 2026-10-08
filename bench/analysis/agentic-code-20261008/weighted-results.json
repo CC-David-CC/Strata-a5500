@@ -35,7 +35,7 @@
       },
       "file_gb": 75.839998528,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/ista-iq3-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/ista-iq3-standard.json"
     },
     {
       "id": "swift-iq3",
@@ -55,7 +55,7 @@
       },
       "file_gb": 75.96607312,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/swift-iq3-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/swift-iq3-standard.json"
     },
     {
       "id": "gyro-s",
@@ -75,7 +75,7 @@
       },
       "file_gb": 58.487015808,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/gyro-s-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/gyro-s-standard.json"
     },
     {
       "id": "swift-q2",
@@ -95,7 +95,7 @@
       },
       "file_gb": 66.5499528,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/swift-q2-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/swift-q2-standard.json"
     },
     {
       "id": "ap-iq2-s",
@@ -115,7 +115,7 @@
       },
       "file_gb": 81.641739136,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/ap-iq2-s-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/ap-iq2-s-standard.json"
     },
     {
       "id": "gyro-m",
@@ -135,7 +135,7 @@
       },
       "file_gb": 91.965774272,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/gyro-m-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/gyro-m-standard.json"
     },
     {
       "id": "swift-iq2",
@@ -155,7 +155,7 @@
       },
       "file_gb": 68.152167168,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/swift-iq2-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/swift-iq2-standard.json"
     },
     {
       "id": "ap-q4-k-xl",
@@ -175,7 +175,7 @@
       },
       "file_gb": 101.142769536,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/ap-q4-k-xl-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/ap-q4-k-xl-standard.json"
     },
     {
       "id": "ap-iq3-xxs",
@@ -195,7 +195,7 @@
       },
       "file_gb": 86.672420736,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/ap-iq3-xxs-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/ap-iq3-xxs-standard.json"
     },
     {
       "id": "ista-q2",
@@ -215,7 +215,7 @@
       },
       "file_gb": 66.423878624,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/ista-q2-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/ista-q2-standard.json"
     },
     {
       "id": "ista-iq2",
@@ -235,7 +235,7 @@
       },
       "file_gb": 68.026093024,
       "selected_points_available": 58,
-      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/ista-iq2-standard.json"
+      "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/ista-iq2-standard.json"
     }
   ],
   "reference": {
@@ -243,19 +243,19 @@
     "label": "Reference",
     "family": "Reference",
     "reference": true,
-    "score": 92.54166666666667,
-    "exact_score": "2221/24",
+    "score": 91.20833333333333,
+    "exact_score": "2189/24",
     "contributions": {
       "A": 25.0,
       "E": 20.833333333333332,
-      "I": 19.0,
+      "I": 16.0,
       "B": 10.0,
-      "M": 8.333333333333334,
+      "M": 10.0,
       "C": 4.375,
       "J": 5.0
     },
     "file_gb": 188.225033248,
     "selected_points_available": 58,
-    "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/28f863fb7c539141f12f5f819b1e9b9db72d2f56/bench/results/tool-eval-20261007/unsloth-q8-standard.json"
+    "source_url": "https://github.com/CC-David-CC/Strata-a5500/blob/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007/unsloth-q8-llm60-standard.json"
   }
 }

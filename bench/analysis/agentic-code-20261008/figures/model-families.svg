@@ -162,7 +162,7 @@ z
    <text style="font-weight: 700; font-size: 15px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #183149" x="72.576" y="705.024" transform="rotate(-0 72.576 705.024)">REFERENCE</text>
   </g>
   <g id="text_24">
-   <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #183149" x="72.576" y="733.536" transform="rotate(-0 72.576 733.536)">The recorded Q8 run anchors the comparison. It is not ground truth and used a different three-P4 runtime.</text>
+   <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #183149" x="72.576" y="733.536" transform="rotate(-0 72.576 733.536)">Q8 retested on the same RTX PRO 6000 + mainline; mmap loading and compatibility pack. Not ground truth.</text>
   </g>
   <g id="text_25">
    <text style="font-size: 9px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #183149" x="51.84" y="837.216" transform="rotate(-0 51.84 837.216)">Tool-Eval-Bench by SeraphimSerapis  |  github.com/SeraphimSerapis/tool-eval-bench</text>
