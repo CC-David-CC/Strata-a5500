@@ -1,15 +1,72 @@
-# Tool selection and recovery: a preference-weighted analysis
+# Tool-use scoring: equal categories and preference weights
 
-This is a separate analysis of the completed Flash Next Tool-Eval-Bench runs,
-using the Q8 retest on the same RTX PRO 6000; it does not change the benchmark's official scoring. It is a
-companion to the [completed measurements in #1491](https://github.com/Niko1221/Strata/pull/1491). The
-profile prioritizes choosing the right tool and recovering from errors, gives
-less weight to multi-step chains, and gives safety and structured output zero
-weight. The new hardware-matched Q8 run is labeled **Reference** throughout the comparison.
+This report compares two scoring views of the completed Flash Next runs: equal
+weight for all 15 categories, and the original preference weights for tool
+selection and recovery. Both use the Q8 retest on the same RTX PRO 6000, labeled
+**Reference**. The underlying measurements remain in
+[#1491](https://github.com/Niko1221/Strata/pull/1491); no new inference or test
+rescoring is involved.
 
 Benchmark and scenario credit: **[Tool-Eval-Bench](https://github.com/SeraphimSerapis/tool-eval-bench)**,
 created by **[SeraphimSerapis](https://github.com/SeraphimSerapis)**. Existing scoring
 and traces are preserved. Examples in the figures paraphrase test expectations.
+
+## Equal weight for all 15 categories
+
+![Every category has equal weight](figures/equal-category-ranking.png)
+
+Each category receives exactly **1/15 of the score**, or **6.6667%**. All 15
+categories contribute, including safety and structured output. Within a category,
+tests retain their existing scores: pass = 2 points, partial = 1, fail = 0.
+
+```text
+category_fraction[c] = earned category points / available category points
+score = (100 / 15) * sum(category_fraction[c] for all 15 categories)
+```
+
+The calculation uses exact fractions rather than rounded category percentages or
+15 copies of a rounded 6.67. The weights therefore sum to exactly 100%. Every
+category has the same maximum influence, regardless of its test count. This is a
+category average, not the standard benchmark's overall point percentage: a test
+inside a small category carries more influence than a test inside a large one.
+For example, one lost point in tool selection costs (100/15)/6 = 1.1111 score
+points; one lost point in safety costs (100/15)/26 = 0.2564.
+
+All category sections have equal, fixed widths. Color shows the earned fraction;
+empty space shows missed credit before the next category begins. Gyro's
+instruction-following category uses four scored tests instead of five because its
+older endpoint could not enforce required tool use in TC-45. It still receives
+1/15 of the score, computed over its available tests. The category is included;
+the excluded scenario is not silently treated as a failure. Runtime and test-set
+differences remain limitations.
+
+| Variant | Score /100 | Original benchmark points | Scored scenarios |
+|---|---:|---:|---:|
+| ISTA IQ3_XXS | 93.56 | 124/138 | 69 |
+| Gyro-S | 93.05 | 121/136 | 68 |
+| Swift IQ3_XXS | 92.46 | 121/138 | 69 |
+| AP-IQ3_XXS | 90.99 | 123/138 | 69 |
+| Swift Q2_0 | 90.58 | 122/138 | 69 |
+| AP-IQ2_S | 90.27 | 121/138 | 69 |
+| AP-Q4_K_XL | 87.86 | 117/138 | 69 |
+| Gyro-M | 87.55 | 117/136 | 68 |
+| Swift IQ2_XS | 87.02 | 117/138 | 69 |
+| ISTA Q2_0 | 86.06 | 115/138 | 69 |
+| ISTA IQ2_XS | 79.82 | 107/138 | 69 |
+| Reference | 92.11 | 121/138 | 69 |
+
+ISTA IQ3_XXS leads at 93.56, followed by Gyro-S at 93.05 and Swift IQ3_XXS at
+92.46. Reference is 92.11. Small gaps from single runs do not establish a stable
+ranking; structured-output API restrictions also affect these scores. Original
+benchmark points in the table are retained for context, not used as this view's
+overall denominator.
+
+Rebuild this view with `python equal_weight.py` from this directory. The script
+uses the same pinned `source-data.json` and writes `equal-category-results.json`,
+`EQUAL-CATEGORY-RESULTS.md` and PNG/SVG figures. The result JSON records every
+category's exact 1/15 weight. The original preference weights below remain unchanged.
+
+## Original preference-weighted view
 
 ![Preference-weighted scores and category contributions](figures/weighted-ranking.png)
 
@@ -179,7 +236,7 @@ python bench/analysis/agentic-code-20261008/analyze.py
 category point counts, exact model-file byte totals, receipt URLs and hashes.
 `analyze.py` uses rational arithmetic, checks the 100-point weight budget and
 common selected-category denominator, and generates `weighted-results.json`,
-`RESULTS.md`, and all three PNG/SVG figures. The inference receipts are pinned at
+`RESULTS.md`, and the original three PNG/SVG figures. The inference receipts are pinned at
 [4ac28209](https://github.com/CC-David-CC/Strata-a5500/tree/4ac2820982044ac52b27a85fee74b0ea3288527b/bench/results/tool-eval-20261007).
 The benchmark revision is `c8a30ff5c1fb132e395bc2d8e4bd549ef1294abd`.
 Publisher descriptions were checked on 2026-10-08; publisher quality or speed
