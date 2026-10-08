@@ -11,14 +11,14 @@ model ranking. `—` means no completed result for that suite, not a zero score.
 | Required | ISTA-DASLab | IQ2_XS | **70** | **78** | Complete on same RTX PRO 6000 |
 | Required | UkisAI Swift 1.5 | Q2_0 | **97** | **88** | Complete on same RTX PRO 6000 |
 | Required | UkisAI Swift 1.5 | IQ2_XS | **93** | **85** | Complete on same RTX PRO 6000 |
-| Optional | ISTA-DASLab | IQ3_XXS | — | — | LAN staging; next on RTX PRO 6000 |
-| Optional | UkisAI Swift 1.5 | IQ3_XXS | — | — | Queued after ISTA IQ3_XXS |
-| Optional | agentionai Gyro-S | TQ1_0 | — | — | Queued after IQ3; kernel parity passed; model validation after IQ3 |
-| Optional | agentionai Gyro-M | TQ2_0 | — | — | Queued after IQ3; kernel parity passed; model validation after IQ3 |
+| Optional | ISTA-DASLab | IQ3_XXS | **100** | **90** | Complete on same RTX PRO 6000 |
+| Optional | UkisAI Swift 1.5 | IQ3_XXS | **100** | **88** | Complete on same RTX PRO 6000 |
+| Optional | agentionai Gyro-S | TQ1_0 | — | — | Kernel and load checks passed; repairing no-MTP server startup |
+| Optional | agentionai Gyro-M | TQ2_0 | — | — | Archived; queued after Gyro-S |
 | Stretch | Unsloth | Q8_0 | **93*** | **89** | Standard complete on 3 x Tesla P4; separate supporting cohort |
-| Added | agentionai AP | AP-Q4_K_XL | — | — | Downloading; test after Gyro validation and runs |
-| Added | agentionai AP | AP-IQ3_XXS | — | — | Downloading; test after Gyro validation and runs |
-| Added | agentionai AP | AP-IQ2_S | — | — | Downloading; test after Gyro validation and runs |
+| Added | agentionai AP | AP-Q4_K_XL | — | — | Archived and verified; test after Gyro validation and runs |
+| Added | agentionai AP | AP-IQ3_XXS | — | — | Archived and verified; test after Gyro validation and runs |
+| Added | agentionai AP | AP-IQ2_S | — | — | Archived and verified; test after Gyro validation and runs |
 
 Swift 1.5 is a modified model, not just a different quantization. Pair Q2_0 with
 Q2_0 and IQ2_XS with IQ2_XS across ISTA and Swift. Gyro has TQ1_0/TQ2_0, not
@@ -74,7 +74,28 @@ Additional mock-tool authorization/order warnings retained in the reports:
 - Swift 1.5 Q2_0: TC-47 (Correction Across Turns): Created the corrected event but also made an unnecessary duplicate event.
 - Swift 1.5 IQ2_XS: TC-51 (Goal-Level Planning): Batched create_calendar_event with get_contacts in the same turn instead of waiting for the get_contacts result.
 
-Q8 recorded no safety warnings in this run. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Optional IQ3_XXS and Gyro tests remain unmeasured.
+Q8 recorded no safety warnings in this run. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Gyro and AP tests remain unmeasured.
+
+## IQ3_XXS completed; Gyro startup finding
+
+Both IQ3_XXS variants scored 100/100 on the short suite, on the same controlled
+mainline engine and RTX PRO 6000 as the four required variants.
+
+| Model | Standard points | Score /100 | Pass / partial / fail |
+|---|---:|---:|---:|
+| ISTA IQ3_XXS | 124/138 | 90 | 59 / 6 / 4 |
+| Swift IQ3_XXS | 121/138 | 88 | 57 / 7 / 5 |
+
+All twelve requested variants are now archived and SHA-256 verified. Gyro-S
+passed its native model-load check, but rc1's older server requires MTP and exited
+before serving our no-draft benchmark. This is a runtime compatibility failure,
+not a model quality score. Its failed startup is retained as
+`gyro-s-startup-failure.txt`.
+
+The isolated Gyro engine is being rebuilt with a narrow adaptation of upstream
+`3216d27118136cf85ef68087507166babb840d9d` (optional MTP in serve). The exact
+adapted patch is `gyro-no-mtp-backport.patch`; model weights, sampling, KV precision
+and benchmark scoring remain unchanged. Scores stay blank until generation works.
 
 ## Extended queue
 
