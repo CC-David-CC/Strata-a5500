@@ -1,5 +1,11 @@
 # Prefix reuse and explicit disk restore
 
+![Actual latency and speedup against full prefill](overview.png)
+
+The overview uses logarithmic axes so subsecond reuse and long full-prefill times
+remain readable. Its 1x line marks break-even; disk restore falls below it at 1K.
+The paired charts below retain the direct main-versus-integration comparison.
+
 ![1K–8K: first-token latency including restore](short/ttft.png)
 
 ![32K–128K: first-token examples including restore](long/ttft.png)
