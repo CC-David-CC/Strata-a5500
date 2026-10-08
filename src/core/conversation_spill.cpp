@@ -223,32 +223,29 @@ bool ConversationSpillCache::load(const std::string& path, SavedConversation& im
     return session_file_read(path, identity_, image, bytes, error, limits);
 }
 
-bool ConversationSpillCache::spill(const SavedConversation& image, std::string& error) {
-    if (!enabled_) return false;
-    if (image.live.ids.empty() || !image.stage_images.empty()) { error = "spill needs a single-GPU conversation"; return false; }
+std::filesystem::path ConversationSpillCache::next_stem() {
     std::error_code ec;
     std::filesystem::path stem;
     do {
         stem = directory_ / ("strata-conv-" + std::to_string(++serial_));
     } while (std::filesystem::exists(stem.string() + ".sess", ec) || std::filesystem::exists(stem.string() + ".meta", ec));
+    return stem;
+}
+
+// The file at <stem>.sess is written: check it against the disk limit, write its sidecar and index it.
+bool ConversationSpillCache::index_written(const std::filesystem::path& stem, uint64_t file_bytes,
+                                           const SavedConversation& meta, std::string& error) {
+    std::error_code ec;
     const std::string session = stem.string() + ".sess";
-    size_t file_bytes = 0;
-    SessionWriteOptions wo;
-    wo.durable = true;
-    SessionStatus st;
-    if (!session_file_write(session, image, identity_, file_bytes, error, wo, &st)) {
-        std::filesystem::remove(session, ec);
-        return false;
-    }
     if (file_bytes > budget_) { std::filesystem::remove(session, ec); error = "snapshot exceeds the disk cache limit"; return false; }
     Entry entry;
     entry.stem = stem;
     entry.file_bytes = file_bytes;
-    entry.cvec = image.cvec;
-    entry.live_meta.ids = image.live.ids;
-    entry.live_meta.imgs = image.live.imgs;
-    entry.checkpoint_lengths.reserve(image.checkpoints.size());
-    for (const auto& c : image.checkpoints) entry.checkpoint_lengths.push_back(c.ids.size());
+    entry.cvec = meta.cvec;
+    entry.live_meta.ids = meta.live.ids;
+    entry.live_meta.imgs = meta.live.imgs;
+    entry.checkpoint_lengths.reserve(meta.checkpoints.size());
+    for (const auto& c : meta.checkpoints) entry.checkpoint_lengths.push_back(c.ids.size());
     if (!write_sidecar(stem.string() + ".meta", entry, error)) { std::filesystem::remove(session, ec); return false; }
     try {
         entries_.push_back(std::move(entry));
@@ -259,6 +256,43 @@ bool ConversationSpillCache::spill(const SavedConversation& image, std::string& 
     bytes_ += file_bytes;
     enforce_budget();
     return true;
+}
+
+bool ConversationSpillCache::spill(const SavedConversation& image, std::string& error) {
+    if (!enabled_) return false;
+    if (image.live.ids.empty() || !image.stage_images.empty()) { error = "spill needs a single-GPU conversation"; return false; }
+    std::error_code ec;
+    const std::filesystem::path stem = next_stem();
+    const std::string session = stem.string() + ".sess";
+    size_t file_bytes = 0;
+    SessionWriteOptions wo;
+    wo.durable = true;
+    SessionStatus st;
+    if (!session_file_write(session, image, identity_, file_bytes, error, wo, &st)) {
+        std::filesystem::remove(session, ec);
+        return false;
+    }
+    return index_written(stem, file_bytes, image, error);
+}
+
+bool ConversationSpillCache::spill_streamed(const SavedConversation& meta, const std::vector<SessionKvSource>& kv,
+                                            size_t& bytes, std::string& error, bool durable) {
+    bytes = 0;
+    if (!enabled_) return false;
+    if (meta.live.ids.empty() || !meta.stage_images.empty() || !meta.kv.empty()) {
+        error = "a streamed spill needs a single-GPU conversation without a host K/V image"; return false;
+    }
+    std::error_code ec;
+    const std::filesystem::path stem = next_stem();
+    const std::string session = stem.string() + ".sess";
+    SessionWriteOptions wo;
+    wo.durable = durable;
+    SessionStatus st;
+    if (!session_file_write(session, meta, kv, identity_, bytes, error, wo, &st)) {
+        std::filesystem::remove(session, ec);
+        return false;
+    }
+    return index_written(stem, bytes, meta, error);
 }
 
 bool ConversationSpillCache::erase(const std::string& path, std::string& error) {
@@ -283,7 +317,8 @@ void ConversationSpillCache::unpin(const std::string& path) {
 
 size_t ConversationSpillCache::drop_superseded(const std::vector<int32_t>& ids,
                                                const std::vector<ConversationImageKey>& images,
-                                               const std::vector<ConversationCheckpoint>& checkpoints, bool cvec) {
+                                               const std::vector<ConversationCheckpoint>& checkpoints, bool cvec,
+                                               const std::string& keep) {
     size_t dropped = 0;
     for (size_t i = 0; i < entries_.size();) {
         const Entry& entry = entries_[i];
@@ -308,7 +343,8 @@ size_t ConversationSpillCache::drop_superseded(const std::vector<int32_t>& ids,
         bool held = same_saved_prefix(deepest, ids, images);
         for (const auto& checkpoint : checkpoints)
             if (!held && same_saved_prefix(deepest, checkpoint.ids, checkpoint.imgs)) held = true;
-        if (entry.cvec == cvec && deepest && held && entry.session_path() != pinned_path_) {
+        if (entry.cvec == cvec && deepest && held && entry.session_path() != pinned_path_ &&
+            (keep.empty() || entry.session_path() != keep)) {
             std::error_code ec;
             std::filesystem::remove(entry.session_path(), ec);
             std::filesystem::remove(entry.meta_path(), ec);

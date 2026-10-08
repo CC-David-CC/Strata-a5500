@@ -60,13 +60,23 @@ public:
               std::string& error) const;
     // Writes a parked conversation (its K/V in RAM) as a session file plus its sidecar, and indexes it.
     bool spill(const SavedConversation& image, std::string& error);
+    // --conversation-cache-disk-only: the same file and sidecar, written straight from the live session - `meta`
+    // carries everything but the K/V (meta.kv empty), `kv` streams each layer from its pool into the file - so no
+    // host image of the conversation is ever held.  `bytes` is the file's size.  durable=false skips the flushes: a
+    // file torn by a crash fails the payload hash when it is read and is discarded, so a cache need not pay for them.
+    bool spill_streamed(const SavedConversation& meta, const std::vector<SessionKvSource>& kv, size_t& bytes,
+                        std::string& error, bool durable = false);
     bool erase(const std::string& path, std::string& error);
     // A conversation being restored is held out of eviction until it is put back in RAM or dropped.
     void pin(const std::string& path);
     void unpin(const std::string& path);
     // Removes the disk copies of this conversation a turn back, the same rule the RAM cache applies before evicting.
+    // `keep` (a session path) is never dropped: a disk-only save writes the new copy first and then drops the old ones.
     size_t drop_superseded(const std::vector<int32_t>& ids, const std::vector<ConversationImageKey>& images,
-                           const std::vector<ConversationCheckpoint>& checkpoints, bool cvec);
+                           const std::vector<ConversationCheckpoint>& checkpoints, bool cvec,
+                           const std::string& keep = {});
+    // The session path of the newest file (the one the last spill wrote), or empty.
+    std::string newest_path() const { return entries_.empty() ? std::string() : entries_.back().session_path(); }
 
 private:
     struct Entry {
@@ -79,6 +89,9 @@ private:
         std::string meta_path() const { return (stem.string() + ".meta"); }
     };
     void enforce_budget();
+    std::filesystem::path next_stem();
+    bool index_written(const std::filesystem::path& stem, uint64_t file_bytes, const SavedConversation& meta,
+                       std::string& error);
     bool read_sidecar(const std::filesystem::path& meta, Entry& entry, bool& other_identity, std::string& error) const;
     bool write_sidecar(const std::filesystem::path& meta, const Entry& entry, std::string& error) const;
 

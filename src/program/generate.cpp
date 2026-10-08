@@ -595,6 +595,10 @@ struct Options {
     /// is written here as a session file (the same format as the slot save/restore API) and can come back after a
     /// restart. Empty = off.
     std::string conversation_cache_spill_dir;
+    /// --conversation-cache-disk-only: the conversation cache lives on disk, not in RAM - a conversation switched
+    /// away from is streamed from its pools straight into the spill directory and a returning one streamed back
+    /// (no RAM budget, no parked host image; --conversation-cache-mib is not needed and not used).
+    bool conversation_cache_disk_only = false;
     int64_t conversation_cache_disk_mib = 8192;   // the spill directory's limit (0 = off)
     double conversation_cache_similarity = 0.0;   // least LCP/new-prompt fraction a disk hit may offer (range [0,1))
     int64_t conversation_cache_n_min = 0;         // least common-prefix tokens a disk hit may offer
@@ -743,6 +747,10 @@ void usage() {
                  "  --session-min-free-mib N  --serve: disk space a SAVE must leave free (default 4096; 0 = no check)\n"
                  "  --conversation-cache-spill-dir DIR  --serve: keep conversations the RAM cache evicts on disk,\n"
                  "                       across restarts (default off; needs --conversation-cache-mib)\n"
+                 "  --conversation-cache-disk-only  --serve, one GPU: the conversation cache on disk only: a\n"
+                 "                       conversation switched away from is streamed from the GPU straight into\n"
+                 "                       --conversation-cache-spill-dir and streamed back when it returns (no RAM\n"
+                 "                       budget, no host copy; needs --conversation-cache-spill-dir)\n"
                  "  --conversation-cache-disk-mib N  --serve: the spill directory's limit (default 8192; 0 = off)\n"
                  "  --conversation-cache-similarity F  --serve: least common-prefix fraction a disk hit may offer\n"
                  "                       (default 0 = any; range [0,1))\n"
@@ -1785,6 +1793,7 @@ int main(int argc, char** argv) {
             else o.conversation_cache_n_min = number;
         }
         else if (a == "--conversation-cache-spill-dir") o.conversation_cache_spill_dir = next("--conversation-cache-spill-dir");
+        else if (a == "--conversation-cache-disk-only") o.conversation_cache_disk_only = true;
         else if (a == "--conversation-cache-similarity") {
             const std::string value = next("--conversation-cache-similarity");
             char* end = nullptr;
@@ -1937,7 +1946,13 @@ int main(int argc, char** argv) {
     if (o.serve && o.conversation_cache_mib > 0 && (o.prompt_cache == 0 || o.conversation_cache_slots == 0))
         std::fprintf(stderr, "strata serve: warning: conversation caching is disabled by %s\n",
                      o.prompt_cache == 0 ? "--prompt-cache 0" : "--conversation-cache-slots 0");
-    if (o.serve && !o.conversation_cache_spill_dir.empty() &&
+    if (o.serve && o.conversation_cache_disk_only &&
+        (o.conversation_cache_spill_dir.empty() || o.prompt_cache == 0 || o.conversation_cache_disk_mib == 0)) {
+        std::fprintf(stderr, "strata serve: warning: --conversation-cache-disk-only needs --conversation-cache-spill-dir, "
+                             "--prompt-cache and a nonzero --conversation-cache-disk-mib; it is off\n");
+        o.conversation_cache_disk_only = false;
+    }
+    if (o.serve && !o.conversation_cache_spill_dir.empty() && !o.conversation_cache_disk_only &&
         (o.conversation_cache_mib == 0 || o.prompt_cache == 0 || o.conversation_cache_slots == 0 ||
          o.conversation_cache_disk_mib == 0))
         std::fprintf(stderr, "strata serve: warning: the disk conversation cache needs --conversation-cache-mib, "
@@ -6959,7 +6974,13 @@ int main(int argc, char** argv) {
         // conversation and a hand-saved session file are interchangeable.
         strata::core::ConversationSpillCache conversation_spill;
         strata::core::SessionFileIdentity spill_identity;
-        if (o.serve && conversations.enabled() && !o.conversation_cache_spill_dir.empty() &&
+        // --conversation-cache-disk-only opens the disk tier without a RAM cache (single GPU, no --batch / peer)
+        const bool disk_only = o.serve && o.conversation_cache_disk_only && stages.empty() && !multi_gpu &&
+                               o.batch <= 0 && o.peer_device < 1;
+        if (o.serve && o.conversation_cache_disk_only && !disk_only)
+            std::fprintf(stderr, "strata serve: conversation cache: --conversation-cache-disk-only is single-GPU without "
+                                 "--batch or --peer-device; it is off\n");
+        if (o.serve && (conversations.enabled() || disk_only) && !o.conversation_cache_spill_dir.empty() &&
             o.conversation_cache_disk_mib > 0 && stages.empty()) {
             std::string identity_error;
             if (!session_identity(spill_identity, identity_error, nullptr)) {
@@ -6993,9 +7014,81 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "strata serve: conversation cache: spill failed; dropping evicted conversation\n");
             }
         };
+        // --conversation-cache-disk-only: the live conversation, streamed from its pools into the spill directory -
+        // the SAVE path's capture (the deepest checkpoint and the running state are copied; the K/V is not).  The new
+        // file is written before this conversation's older copies are dropped, so a failed write loses nothing, and
+        // nothing is refused for its size against a RAM budget: the disk limit is the only one.  Never fatal: a
+        // conversation that cannot be saved is read again from its prompt when it comes back.
+        // set per request: the request continues the live conversation from its newest turn checkpoint (the agent's
+        // next turn), so the outgoing tail is only the reply the client sends again - not worth a disk write
+        bool disk_continuing = false;
+        auto disk_save_live = [&](bool durable, const char* why) {
+            if (!disk_only || !conversation_spill.enabled() || !live_ok || live.empty()) return;
+            const auto t0 = Clock::now();
+            try {
+                std::string e;
+                if (!ver.wait_commit(e)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk save skipped (%s)\n", e.c_str());
+                    return;
+                }
+                strata::core::SessionSaveLive sl;
+                {
+                    strata::core::ConversationStateSizes z;
+                    std::string zwhy;
+                    uint64_t state = UINT64_MAX;
+                    if (strata::core::conversation_session_sizes(g, ss, z, zwhy)) {
+                        const uint64_t q = (uint64_t) std::max<int64_t>(ss.qsa_alloc, 0);
+                        const uint64_t per = (uint64_t) z.tail + z.dead + z.block_pos;
+                        if (q == 0 || per <= (UINT64_MAX - z.gdn - z.ple) / q) state = z.gdn + z.ple + q * per;
+                    }
+                    sl.state_bytes = state;
+                    sl.tokens = live.size();
+                    sl.images = live_imgs.size();
+                    sl.kv_layers = (uint64_t) std::max<int64_t>(ss.qsa_alloc, 0) + 1;
+                }
+                const uint64_t floor = (uint64_t) o.conversation_cache_min_free_mib << 20;
+                auto admit = [&](uint64_t need, std::string& w) {
+                    if (strata::core::conversation_memory_admit(strata::core::conversation_available_memory(), need, floor))
+                        return true;
+                    w = "not enough RAM for the save's transient buffers";
+                    return false;
+                };
+                std::vector<ConvCheckpoint> disk_checks;
+                std::string w;
+                if (!strata::core::session_save_checkpoints(checks, sl, admit, disk_checks, w)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk save skipped (%s)\n", w.c_str());
+                    return;
+                }
+                const strata::core::ConversationView view{live, live_imgs, disk_checks, cvec_cached};
+                strata::core::SavedConversation meta;
+                std::vector<strata::core::SessionKvSource> sources;
+                if (!strata::core::conversation_snapshot_sources(meta, sources, view, ss, g, mtp.kv_state(), e)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk save skipped (%s)\n", e.c_str());
+                    return;
+                }
+                size_t bytes = 0;
+                if (!conversation_spill.spill_streamed(meta, sources, bytes, e, durable)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk save failed (%s); it will be read "
+                                         "again when it returns\n", e.c_str());
+                    return;
+                }
+                const std::string kept = conversation_spill.newest_path();
+                const size_t dropped = conversation_spill.drop_superseded(live, live_imgs, checks, cvec_cached, kept);
+                std::fprintf(stderr, "strata serve: conversation cache: disk-saved %zu tokens (%zu MiB, %s) in %.1f ms; "
+                             "%zu older cop%s dropped; disk=%zu MiB in %zu files\n", live.size(), bytes >> 20, why,
+                             std::chrono::duration<double, std::milli>(Clock::now() - t0).count(), dropped,
+                             dropped == 1 ? "y" : "ies", (size_t) (conversation_spill.bytes() >> 20), conversation_spill.size());
+            } catch (const std::bad_alloc&) {
+                std::fprintf(stderr, "strata serve: conversation cache: disk save skipped (allocation failed)\n");
+            }
+        };
         // Save only on a switch/rewind, not on each continuing request. No graph
         // addresses change: all parked images live in ordinary host vectors.
         auto park_current_body = [&](size_t held) -> bool {
+            if (disk_only) {
+                if (!disk_continuing) disk_save_live(false, "switch");
+                return true;
+            }
             if (!conversations.enabled() || !live_ok || live.empty()) return true;
             // #342: before make_room evicts oldest-first, the copies of this conversation a turn back go (they hold
             // nothing the outgoing chain does not, apart from the tail this conversation rewrote)
@@ -9102,7 +9195,54 @@ int main(int argc, char** argv) {
             // offers a longer resume than RAM, the batch slots and the live state does, read it back whole.
             const auto disk_match = conversation_spill.best(ids, req_imgs, want_cvec,
                                                             o.conversation_cache_similarity, o.conversation_cache_n_min);
-            if (!disk_match.path.empty() && disk_match.tokens > std::max(resume, std::max(slot_tokens, parked.tokens))) {
+            // --conversation-cache-disk-only: the disk match is read back with the streaming RESTORE path - its read
+            // pass now (it parses and checks the whole file, the K/V stays on disk; nothing on the device changes, so a
+            // refusal leaves this request as it was), its apply pass after the outgoing conversation is saved below
+            bool disk_incoming = false;
+            strata::core::SavedConversation disk_meta;   // running state + K/V headers; the K/V buffers stay empty
+            std::vector<std::array<uint64_t, 5>> disk_file_kv;
+            std::string disk_in_path;
+            size_t disk_in_bytes = 0;
+            int64_t disk_in_tokens = 0;
+            bool disk_in_live = false;
+            double disk_read_ms = 0;
+            if (disk_only && !disk_match.path.empty() && disk_match.tokens > std::max(resume, slot_tokens)) {
+                const auto td = Clock::now();
+                try {
+                    strata::core::SessionReadLimits limits;
+                    const uint64_t floor = (uint64_t) o.conversation_cache_min_free_mib << 20;
+                    limits.admit = [floor](uint64_t need, std::string& why) {
+                        if (strata::core::conversation_memory_admit(strata::core::conversation_available_memory(), need, floor))
+                            return true;
+                        why = "not enough RAM for the read pass";
+                        return false;
+                    };
+                    std::string le;
+                    strata::core::SessionStatus st;
+                    if (!strata::core::conversation_session_read_limits(limits, ss, g, mtp.kv_state(), (uint64_t) o.max_context,
+                            (uint64_t) std::max(o.prompt_cache, 1), le)) {
+                        std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (%s)\n", le.c_str());
+                    } else if (!strata::core::session_file_read_streamed(disk_match.path, spill_identity, disk_meta,
+                                   disk_in_bytes, le, limits, &disk_file_kv, &st) ||
+                               !strata::core::conversation_snapshot_validate_meta(disk_meta, ss, g, mtp.kv_state(), le)) {
+                        std::fprintf(stderr, "strata serve: conversation cache: discard unusable disk conversation (%s)\n",
+                                     le.c_str());
+                        std::string erase_error;
+                        conversation_spill.erase(disk_match.path, erase_error);
+                    } else {
+                        disk_incoming = true;
+                        disk_in_path = disk_match.path;
+                        disk_in_tokens = disk_match.tokens;
+                        disk_in_live = disk_match.live;
+                        conversation_spill.pin(disk_in_path);   // the outgoing save below must not drop or evict it
+                    }
+                } catch (const std::bad_alloc&) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (allocation failed)\n");
+                }
+                disk_read_ms = std::chrono::duration<double, std::milli>(Clock::now() - td).count();
+                if (disk_incoming) slot_source = -1;
+            }
+            if (!disk_only && !disk_match.path.empty() && disk_match.tokens > std::max(resume, std::max(slot_tokens, parked.tokens))) {
                 constexpr uint64_t admission_extra = 1ull << 20;
                 const uint64_t estimate = disk_match.file_bytes > UINT64_MAX - disk_match.file_bytes / 8 - admission_extra
                                               ? UINT64_MAX
@@ -9209,7 +9349,16 @@ int main(int argc, char** argv) {
                 resume == req_pin && live_ok)
                 for (const ConvCheckpoint& c : checks)
                     if ((int64_t) c.ids.size() == resume && c.pinned) pin_sibling = true;
-            if ((!from_live || incoming || slot_source >= 0) && !pin_sibling && !park_current(incoming ? incoming->bytes() : 0)) {
+            // disk-only: the agent's next turn of the live conversation (it resumes at the newest turn checkpoint) is
+            // not a switch - nothing is written for it
+            disk_continuing = false;
+            if (disk_only && !incoming && !disk_incoming && slot_source < 0 && resume > 0) {
+                size_t deepest = 0;
+                for (const ConvCheckpoint& c : checks) deepest = std::max(deepest, c.ids.size());
+                disk_continuing = (int64_t) deepest == resume;
+            }
+            if ((!from_live || incoming || disk_incoming || slot_source >= 0) && !pin_sibling &&
+                !park_current(incoming ? incoming->bytes() : 0)) {
                 std::printf("ERR %s\n", err.c_str());
                 return 1;
             }
@@ -9249,6 +9398,67 @@ int main(int argc, char** argv) {
                                  slot_ck != nullptr ? "its turn checkpoint" : "all it holds",
                                  std::chrono::duration<double, std::milli>(Clock::now() - t0).count());
                 }
+            }
+            if (disk_incoming) {
+                // the apply pass: disk -> the authoritative pools in blocks of at most 16 MiB, bound to the sizes the
+                // read pass checked.  Before the first block a failure leaves the live state as it was (this request
+                // reads its prompt as if there had been no hit); after it the engine fail-stops, as RESTORE does.
+                const auto t0 = Clock::now();
+                bool applied = false;
+                std::vector<strata::core::ConversationKvTarget> targets;
+                if (!kvg_ensure((int64_t) disk_meta.live.ids.size() + 256, kv_quiesce)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (the K/V cannot grow to it)\n");
+                } else if (!strata::core::conversation_kv_targets(disk_meta, ss, g, mtp.kv_state(), targets, err)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (%s)\n", err.c_str());
+                    err.clear();
+                } else if (cudaDeviceSynchronize() != cudaSuccess) {
+                    std::printf("ERR the device did not go quiet before a disk restore\n");
+                    return 1;
+                } else {
+                    conversations.take_reuse();
+                    bool touched = false;
+                    auto sink = [&](size_t layer, size_t part, uint64_t offset, const void* data, size_t n) {
+                        if (layer >= targets.size()) { err = "session file: K/V layer outside the validated set"; return false; }
+                        touched = true;
+                        return targets[layer].apply(part, offset, data, n, err);
+                    };
+                    strata::core::SessionStatus st2;
+                    if (!strata::core::session_file_apply_streamed(disk_in_path, spill_identity, sink, disk_file_kv, err, &st2)) {
+                        if (touched) {
+                            std::printf("ERR restoring a disk conversation failed after the device state was changed: %s\n",
+                                        err.c_str());
+                            return 1;
+                        }
+                        std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (%s)\n", err.c_str());
+                        err.clear();
+                        std::string erase_error;
+                        conversation_spill.erase(disk_in_path, erase_error);
+                    } else {
+                        for (auto& t : targets)
+                            if (!t.finish(err)) {
+                                std::printf("ERR restoring a disk conversation: residency refill failed: %s\n", err.c_str());
+                                return 1;
+                            }
+                        if (!strata::core::conversation_checkpoint_restore(disk_meta.live, ss, g, err)) {
+                            std::printf("ERR restoring a disk conversation: running-state restore failed: %s\n", err.c_str());
+                            return 1;
+                        }
+                        live = std::move(disk_meta.live.ids);
+                        live_imgs = std::move(disk_meta.live.imgs);
+                        checks = std::move(disk_meta.checkpoints);
+                        for (const ConvCheckpoint& c : checks) check_clock = std::max(check_clock, c.used);
+                        cvec_cached = disk_meta.cvec;
+                        resume = disk_in_tokens;
+                        from_live = disk_in_live;
+                        applied = true;
+                    }
+                }
+                conversation_spill.unpin(disk_in_path);   // the file stays: a later save of this conversation supersedes it
+                if (applied)
+                    std::fprintf(stderr, "strata serve: conversation cache: disk-restored %lld tokens (%s, %zu MiB) in "
+                                 "%.1f ms (read pass %.1f ms)\n", (long long) resume, from_live ? "live" : "checkpoint",
+                                 disk_in_bytes >> 20, std::chrono::duration<double, std::milli>(Clock::now() - t0).count() +
+                                 disk_read_ms, disk_read_ms);
             }
             // the elastic K/V: a parked conversation is restored whole, and it may be longer than this prompt
             if (incoming && !kvg_ensure((int64_t) incoming->live.ids.size() + 256, kv_quiesce)) {
@@ -11122,7 +11332,9 @@ int main(int argc, char** argv) {
                              remote_experts[(size_t) r].ms_begin() - begin_before[(size_t) r],
                              remote_experts[(size_t) r].ms_wait() - wait_before[(size_t) r]);
         }
-        if (conversation_spill.enabled()) {   // the parked conversations go to disk, so a restart finds them
+        if (conversation_spill.enabled() && disk_only) {   // the live conversation goes to disk, flushed
+            disk_save_live(true, "shutdown");
+        } else if (conversation_spill.enabled()) {   // the parked conversations go to disk, so a restart finds them
             if (!park_current(0))
                 std::fprintf(stderr, "strata serve: conversation cache: the final active conversation was not captured (%s)\n",
                              err.c_str());
