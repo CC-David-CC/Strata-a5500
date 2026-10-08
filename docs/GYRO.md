@@ -1,5 +1,26 @@
 # Gyro (agentionai rotor quants) on Strata
 
+## Upstream integration branch
+
+`work/gyro-upstream-integration` merges agentionai Strata `rc1` at
+`434e136f73a7da2bfd11cde3bb0aa0acaf1328c6` into upstream Strata 0.1.40.3
+(`d5ea7133741e67743c0e886bb426c0ce8d69cf6c`). The original commits and authors are
+retained. The two repositories have rewritten commit IDs: their pre-Gyro commits
+`6f32ec07` and `a1641e9f` have exactly the same tree,
+`27b0e86ffc000d325a9fbf0bd753ee5817eddaa7`. A content-preserving ancestry merge
+connects them before merging the Gyro changes.
+
+This branch runs Strata itself. It still needs the agentionai GGML dependency
+for the custom trellis types; pin that dependency to
+`dc255f2a4b6e4211b555b0c05260b2523281f314`. It does not run llama-server.
+Upstream serving supports running without `--mtp`; the draft-head instructions
+below are optional when evaluating without speculation.
+
+The merged branch is under validation. All performance numbers below describe
+the original agentionai fork and have not yet been reproduced on this merge.
+
+## Original fork validation
+
 Validated on Linux with an RTX 5090 (32 GB, CUDA 13.0, sm_120; 2026-10-02 and 2026-10-03), an RTX 3090 (24 GB,
 sm_86; 2026-10-03) and two RTX 4090s (24 GB each, sm_89; 2026-10-04, single and dual GPU). A short end-to-end run on AMD (Strix Halo, gfx1151, ROCm) passed on 2026-10-03.
 
@@ -19,10 +40,10 @@ Qwen3.8-Flash-Next models. It is not the GGUF draft file from the Gyro repositor
 
 ## Quick setup
 
-Gyro support lives on the `rc1` branch of the agentionai fork:
+For this integration branch:
 
 ```sh
-git clone -b rc1 https://github.com/agentionai/Strata && cd Strata
+git clone -b work/gyro-upstream-integration https://github.com/CC-David-CC/Strata-a5500 Strata && cd Strata
 ```
 
 `tools/gyro_setup.sh` does every step below on Linux:
@@ -41,7 +62,8 @@ It prints the command that starts the server. The steps, by hand:
 Strata's GGML dependency must be the agentionai llama.cpp fork, which has the trellis types:
 
 ```sh
-git clone --depth 1 https://github.com/agentionai/llama.cpp ../agention-llama.cpp
+git clone https://github.com/agentionai/llama.cpp ../agention-llama.cpp
+git -C ../agention-llama.cpp checkout dc255f2a4b6e4211b555b0c05260b2523281f314
 # NVIDIA. RTX 50 series: use CUDA 13 (CUDA 12.8 crashes the prompt path on sm_120: issues #220, #224)
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSTRATA_ENABLE_CUDA=ON \
   -DCMAKE_CUDA_ARCHITECTURES=120 -DSTRATA_GGML_DIR=$PWD/../agention-llama.cpp

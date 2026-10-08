@@ -1485,7 +1485,7 @@ if(STRATA_BUILD_TESTS)
     add_test(NAME q2_bitplane_parity COMMAND q2_bitplane_parity)
     set_tests_properties(q2_bitplane_parity PROPERTIES ENVIRONMENT "STRATA_Q2_BITPLANE=1")
   endif()
-  if(STRATA_NATIVE_EXPERTS)
+  if(STRATA_NATIVE_EXPERTS AND STRATA_GGML_DIR AND EXISTS "${STRATA_GGML_DIR}/ggml/src/ggml-cuda/tq.cuh")
     # APR port: a Hadamard-folded trellis expert (TQ2_T / TQK6 / TQK7) on the CPU path vs llama.cpp's graph for the
     # same weights (synthetic; needs STRATA_GGML_DIR = a ggml with the trellis types, else it reports and fails)
     add_executable(native_hadamard_test src/kernels/cpu/native_hadamard_test.cpp)
