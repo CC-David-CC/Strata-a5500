@@ -20,6 +20,55 @@ For full-resolution figures, use the PNGs above or the [score SVG](figures/varia
 and [category SVG](figures/category-scores-and-examples.svg). Rebuild with
 `python render_charts.py` (matplotlib and numpy required).
 
+## Reference retested on the RTX PRO 6000
+
+The current table and figures use the fresh Q8 run on the same RTX PRO 6000 as
+ISTA/Swift, with the identical pinned mainline engine binary. The older three-P4
+receipts remain unchanged as historical evidence; they are no longer the reference
+in the figures or the [weighted analysis in #1497](https://github.com/Niko1221/Strata/pull/1497).
+
+| Run | Earned / available | Score /100 | Pass / partial / fail | Sum of scenario wall times |
+|---|---:|---:|---:|---:|
+| RTX PRO 6000 short (separate run) | 29/30 | **97** | 14 / 1 / 0 | 121.94 s |
+| RTX PRO 6000 standard | 121/138 | **88** | 55 / 11 / 3 | 589.24 s |
+| Historical three-P4 standard | 123/138 | **89** | 56 / 11 / 2 | 3810.13 s |
+
+Sampling and test settings match the earlier mainline runs: context 32768, FP16
+KV, prefill 8192, temperature 0, seed 42, thinking off, max output 4096, one request,
+eight turns, one trial, and reference date 2026-10-07. No MTP or suffix drafting.
+The benchmark revision and scoring are unchanged. This is a hardware-matched
+reference, not an unquantized ground truth or a perfectly isolated quantization test.
+
+Q8 needs two recorded loading accommodations: `--compat-bf16` dequantizes small
+unsupported projections into the separate pack, and `--mmap-experts` reads expert
+weights from the original GGUF shards through the OS file cache. This avoids
+requiring a full resident expert arena in the 124 GiB host RAM. The GPU cache uses
+`auto`, and the PLE table uses the default direct SSD reads. No GGUF weights were
+edited. All six shards were verified against the archived SHA-256 manifest before
+inference; conversions and launch settings are included. The initial pack attempts
+without compatibility conversion or its gguf-py path failed before inference and
+are retained as setup diagnostics, not model-quality failures.
+
+Peak sampled job cgroup `memory.current`: **41.57 GiB** (includes file cache).
+Peak sampled whole-GPU allocation: **97,021 MiB**. These are observed resource
+samples, not model-only RAM requirements or estimates derived from GGUF size.
+File-cache pages warmed by the separate verification job can be charged outside
+the inference cgroup; 41.57 GiB is not the total host working set.
+Scenario wall times include tool turns and prefill; they are not decode tok/s.
+
+Standard-suite warnings: none.
+All tools were deterministic mocks. Original scoring and traces are unchanged.
+Case-level differences from the P4 run are retained in
+[`unsloth-q8-llm60-comparison.json`](unsloth-q8-llm60-comparison.json).
+
+Only three standard-case scores changed: TC-48 fell from 2 to 0 (did not send the
+mock email after accumulating context), TC-51 rose from 1 to 2 (completed the
+planning sequence), and TC-62 fell from 2 to 1 (missed details in the five-turn
+research chain). The net change is -2 points. The separately executed short suite
+is not the first 15 cases of this standard run; it scored 29/30, versus 28/30 for
+those standard cases. This illustrates variation even within one greedy deployment;
+one trial does not establish a stable model ranking.
+
 ## Results
 
 | Priority | Publisher / variant | Quantization | Short /100 (15 cases) | Standard /100 (69 cases) | State |
@@ -32,7 +81,7 @@ and [category SVG](figures/category-scores-and-examples.svg). Rebuild with
 | Optional | UkisAI Swift 1.5 | IQ3_XXS | **100** | **88** | Complete on same RTX PRO 6000 |
 | Optional | agentionai Gyro-S | TQ1_0 | **100** | **89†** | Completed on patched rc1; 68 scored cases, TC-45 excluded |
 | Optional | agentionai Gyro-M | TQ2_0 | **93** | **86** | Complete on patched rc1; 68 scored cases, TC-45 excluded |
-| Stretch | Unsloth | Q8_0 | **93*** | **89** | Standard complete on 3 x Tesla P4; separate supporting cohort |
+| Stretch | Reference (Unsloth) | Q8_0 | **97** | **88** | Retested on same RTX PRO 6000 and mainline engine; mmap loading |
 | Added | agentionai AP | AP-Q4_K_XL | **97** | **85** | Complete on RTX PRO 6000; Q6-enabled build |
 | Added | agentionai AP | AP-IQ3_XXS | **90** | **89** | Complete on same Q6-enabled build |
 | Added | agentionai AP | AP-IQ2_S | **93** | **88** | Complete on same Q6-enabled build |
@@ -41,7 +90,7 @@ Swift 1.5 is a modified model, not just a different quantization. Pair Q2_0 with
 Q2_0 and IQ2_XS with IQ2_XS across ISTA and Swift. Gyro has TQ1_0/TQ2_0, not
 matching Q2_0/IQ2_XS versions. File sizes in the manifest are not VRAM requirements.
 
-*Q8: 28/30 points, rounded to 93/100, extracted from TC-01 through TC-15 of the completed standard run. Those are exactly the short-suite scenario IDs; this was not a separate short run. 13 pass, 2 partial, 0 fail. The full 69-case result is 123/138 points (89/100). Different hardware and the patched P4 engine make this supporting evidence, not an isolated quantization comparison. See `q8-first15-progress.jsonl` and `unsloth-q8-standard.json`.
+*Historical Q8 supporting run: 28/30 points (93/100) from the first 15 standard cases, and 123/138 (89/100) overall on three P4s. This was not a separate short run. The unchanged receipts are `q8-first15-progress.jsonl` and `unsloth-q8-standard.json`; current figures use the separate RTX PRO 6000 short and standard reports prefixed `unsloth-q8-llm60`.
 
 ## First completed run: ISTA Q2_0
 
@@ -74,7 +123,7 @@ see individual traces rather than interpreting every miss as quantization loss.
 
 Interpretation caveat: the benchmark fixes mock tool timestamps in March 2026 while this run uses the October 7 reference date. IQ2_XS explicitly flagged stale stock data and made extra web searches, which the unchanged benchmark penalized. Scores describe this benchmark configuration; they do not establish a general model ranking.
 
-## Required variants complete; Q8 supporting run complete
+## Earlier required-variant results and historical P4 run
 
 All four required variants completed the short and standard suites. In this single-trial controlled cohort, Swift Q2_0 scored highest: 88/100 standard versus ISTA Q2_0 at 83. Swift IQ2_XS scored 85 versus ISTA IQ2_XS at 78. Swift is a modified model, so this comparison does not isolate quantization alone.
 
@@ -82,7 +131,7 @@ All four required variants completed the short and standard suites. In this sing
 |---|---:|---:|---:|---:|
 | Swift 1.5 Q2_0 | 122/138 | **88** | 57 / 8 / 4 | 173.44 s |
 | Swift 1.5 IQ2_XS | 117/138 | **85** | 53 / 11 / 5 | 196.27 s |
-| Unsloth Q8_0 | 123/138 | **89** | 56 / 11 / 2 | 3810.13 s |
+| Historical Q8_0 on three P4s | 123/138 | **89** | 56 / 11 / 2 | 3810.13 s |
 
 These wall times cover multi-turn benchmark scenarios, not pure decode throughput. Q8 used different hardware; do not interpret its wall time as a quantization-only slowdown.
 
@@ -91,7 +140,7 @@ Additional mock-tool authorization/order warnings retained in the reports:
 - Swift 1.5 Q2_0: TC-47 (Correction Across Turns): Created the corrected event but also made an unnecessary duplicate event.
 - Swift 1.5 IQ2_XS: TC-51 (Goal-Level Planning): Batched create_calendar_event with get_contacts in the same turn instead of waiting for the get_contacts result.
 
-Q8 recorded no safety warnings in this run. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Gyro-M and all three AP results are recorded below.
+The historical P4 Q8 run recorded no safety warnings. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Gyro-M and all three AP results are recorded below.
 
 ## IQ3_XXS completed; Gyro startup finding
 
@@ -194,8 +243,7 @@ Full original receipts remain in the private benchmark workspace.
   one trial, eight turns maximum, 600-second request timeout, reference date 2026-10-07.
 - Each model uses its own tokenizer and native dense pack. No Codi persona or private steering.
 - Downloads/transfers continued in the background. Timing is preliminary and not an isolated roofline test.
-- R730 Q8 uses a preexisting patched three-P4 engine. Its speed and score are a supporting run,
-  not a controlled quantization comparison against the RTX PRO 6000 run.
+- The current Q8 reference uses the same mainline binary and RTX PRO 6000 as ISTA/Swift, with the pack conversion and memory-mapped loading documented above. The older patched three-P4 run is retained separately.
 
 The unmodified benchmark rejects `--backend strata`. These initial runs use
 `--backend unknown`, its generic OpenAI-compatible adapter. Its metadata probe

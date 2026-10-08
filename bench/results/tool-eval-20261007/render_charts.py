@@ -11,7 +11,7 @@ from matplotlib.patches import Patch
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "figures"
 OUT.mkdir(exist_ok=True)
-plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none", "font.size": 11})
+plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none", "font.size": 11, "svg.hashsalt": "tool-eval-q8-retest"})
 INK, MUTED, TEAL, PALE, BG = "#152b40", "#566b7c", "#087f8c", "#bce3e2", "#f5f8fb"
 SOURCE = "Tool-Eval-Bench by SeraphimSerapis | github.com/SeraphimSerapis/tool-eval-bench"
 MODELS = [
@@ -26,7 +26,7 @@ MODELS = [
     ("AP-IQ2_S", "AP\nIQ2_S", "ap-iq2-s", 93),
     ("Gyro-S / TQ1_0", "Gyro-S\nTQ1_0", "gyro-s", 100),
     ("Gyro-M / TQ2_0", "Gyro-M\nTQ2_0", "gyro-m", 93),
-    ("Unsloth Q8_0", "Unsloth\nQ8_0", "unsloth-q8", 93),
+    ("Reference", "Reference\nQ8_0", "unsloth-q8-llm60", 97),
 ]
 REPORTS = [json.loads((ROOT / (m[2] + "-standard.json")).read_text(encoding="utf-8")) for m in MODELS]
 SHORT = []
@@ -62,16 +62,16 @@ for i, row in enumerate(y):
     ax.text(SHORT[i] + 1.2, row + .15, str(SHORT[i]), va="center", fontsize=11, color=MUTED)
     ax.text(score + 1.2, row - .15, str(score), va="center", fontsize=11, color=TEAL, weight="bold")
 for ypos, label in [(-.7, "MAINLINE / RTX PRO 6000"), (6.25, "AP / SAME GPU, Q6 BUILD OPTION ON"),
-                    (10.25, "GYRO / SAME GPU, PATCHED RC1"), (13.25, "Q8 / THREE TESLA P4s")]:
+                    (10.25, "GYRO / SAME GPU, PATCHED RC1"), (13.25, "REFERENCE / SAME GPU + MAINLINE, MMAP")]:
     ax.text(-.26, ypos, label, transform=ax.get_yaxis_transform(), color=MUTED, fontsize=9, weight="bold")
 ax.legend(handles=[Patch(facecolor=TEAL, label="Standard score /100"),
                    Patch(facecolor=PALE, edgecolor=TEAL, label="Short score /100")],
           loc="lower left", bbox_to_anchor=(0, 1.08), frameon=False, ncol=2, fontsize=12)
 fig.text(.055, .125, "Read by cohort, not as a hardware or quantization-only ranking.", color=INK, weight="bold", fontsize=12)
-fig.text(.055, .091, "Standard: 69 scored cases; Gyro: 68 (TC-45 excluded). Short: 15 cases; Q8 uses the first 15 of its standard run.", color=MUTED, fontsize=10)
-fig.text(.055, .064, "Swift and AP are modified variants. Greedy sampling, thinking off. Background transfers can affect timing.", color=MUTED, fontsize=10)
+fig.text(.055, .091, "Standard: 69 scored cases; Gyro: 68 (TC-45 excluded). Short: 15 cases, run separately for every variant.", color=MUTED, fontsize=10)
+fig.text(.055, .064, "Swift is post-trained; AP uses mixed precision. Greedy sampling, thinking off. Timing is preliminary.", color=MUTED, fontsize=10)
 fig.text(.055, .03, SOURCE + "  |  Measured 2026-10-07/08", color=INK, fontsize=9)
-for ext in ("png", "svg"):fig.savefig(OUT / ("variant-scores." + ext), dpi=160, facecolor=BG)
+for ext in ("png", "svg"):fig.savefig(OUT / ("variant-scores." + ext), dpi=160, facecolor=BG, metadata={"Date":None} if ext == "svg" else None)
 plt.close(fig)
 
 # Short paraphrases of scenario expectations; these are not model quotations.
@@ -110,7 +110,7 @@ for row in range(15):
     for col in range(12):
         v=data[row,col];ax.text(col,row,str(v),ha="center",va="center",fontsize=11,weight="bold",color="white" if v>=65 else INK)
 for boundary in [5.5, 8.5, 10.5]:ax.axvline(boundary, color=BG, linewidth=7)
-for mid, name in [(2.5,"ISTA / Swift"),(7,"AP"),(9.5,"Gyro*"),(11,"Q8*")]:
+for mid, name in [(2.5,"ISTA / Swift"),(7,"AP"),(9.5,"Gyro*"),(11,"Reference")]:
     ax.text(mid, -2.0, name, ha="center", color=TEAL, weight="bold", fontsize=11)
 ex = fig.add_axes([.65, .17, .325, .63], facecolor=BG)
 ex.set_xlim(0,1);ex.set_ylim(14.5,-.5);ex.axis("off")
@@ -120,10 +120,10 @@ for i, (_,_,case,example) in enumerate(EXAMPLES):
     ex.text(.995,i+.31,case,ha="right",va="center",fontsize=8,color=MUTED)
 fig.text(.65,.855,"WHAT THE TEST ASKS",color=TEAL,weight="bold",fontsize=11)
 fig.text(.035,.112,"A tool-use benchmark, not a general intelligence ranking.",color=INK,weight="bold",fontsize=12)
-fig.text(.035,.081,"*Gyro excludes TC-45 (instruction following); Q8 uses a separate three-P4 engine. API restrictions also affect scores.",color=MUTED,fontsize=10)
+fig.text(.035,.081,"*Gyro excludes TC-45. Reference now uses the same mainline engine and RTX PRO 6000, with mmap loading.",color=MUTED,fontsize=10)
 fig.text(.035,.057,"Examples are paraphrases of scenario expectations, not observed model answers. All external actions use deterministic mocks.",color=MUTED,fontsize=10)
 fig.text(.035,.025,SOURCE,color=INK,fontsize=10)
-for ext in ("png", "svg"):fig.savefig(OUT / ("category-scores-and-examples." + ext),dpi=160,facecolor=BG)
+for ext in ("png", "svg"):fig.savefig(OUT / ("category-scores-and-examples." + ext),dpi=160,facecolor=BG,metadata={"Date":None} if ext == "svg" else None)
 plt.close(fig)
 # Matplotlib emits insignificant trailing spaces inside SVG path attributes.
 for svg in OUT.glob("*.svg"):
