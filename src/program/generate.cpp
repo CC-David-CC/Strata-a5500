@@ -7022,6 +7022,47 @@ int main(int argc, char** argv) {
         // set per request: the request continues the live conversation from its newest turn checkpoint (the agent's
         // next turn), so the outgoing tail is only the reply the client sends again - not worth a disk write
         bool disk_continuing = false;
+        // The conversation's root - its system prompt and tools, up to the first turn boundary at least
+        // --prompt-cache-root tokens in (the engine's own root rule) - as a persistent PREFIX entry, once per distinct
+        // root: a new conversation that opens the same way (a coding agent's next session) restores it instead of
+        // reading the whole preamble again.  The file holds the K/V of the root's cells only and, as its live state,
+        // the root checkpoint's own running state, so it is exactly the state the engine has after reading the root.
+        auto disk_save_root = [&]() {
+            if (o.prompt_cache_root <= 0 || o.turn_token < 0) return;
+            int64_t root_len = -1;
+            for (size_t i = 1; i < live.size(); ++i)
+                if (live[i] == o.turn_token) { if ((int64_t) i >= o.prompt_cache_root) root_len = (int64_t) i; break; }
+            if (root_len < 0) return;
+            const ConvCheckpoint* root = nullptr;
+            for (const ConvCheckpoint& c : checks)
+                if ((int64_t) c.ids.size() == root_len && !c.gdn.empty()) root = &c;
+            if (root == nullptr || conversation_spill.has_prefix(root->ids, root->imgs, cvec_cached)) return;
+            const auto tr = Clock::now();
+            std::string e;
+            try {
+                std::vector<ConvCheckpoint> one{*root};
+                const strata::core::ConversationView view{root->ids, root->imgs, one, cvec_cached};
+                strata::core::SavedConversation meta;
+                std::vector<strata::core::SessionKvSource> sources;
+                if (!strata::core::conversation_snapshot_sources(meta, sources, view, ss, g, mtp.kv_state(), e)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: prefix save skipped (%s)\n", e.c_str());
+                    return;
+                }
+                meta.live = *root;   // the running state at the root, not the live tail's
+                meta.live.pinned = false;
+                size_t bytes = 0;
+                if (!conversation_spill.spill_streamed(meta, sources, bytes, e, true, true)) {
+                    std::fprintf(stderr, "strata serve: conversation cache: prefix save failed (%s)\n", e.c_str());
+                    return;
+                }
+                std::fprintf(stderr, "strata serve: conversation cache: prefix-saved the %lld-token root (%zu MiB) in "
+                             "%.1f ms; %zu prefixes on disk\n", (long long) root_len, bytes >> 20,
+                             std::chrono::duration<double, std::milli>(Clock::now() - tr).count(),
+                             conversation_spill.prefix_count());
+            } catch (const std::bad_alloc&) {
+                std::fprintf(stderr, "strata serve: conversation cache: prefix save skipped (allocation failed)\n");
+            }
+        };
         auto disk_save_live = [&](bool durable, const char* why) {
             if (!disk_only || !conversation_spill.enabled() || !live_ok || live.empty()) return;
             const auto t0 = Clock::now();
@@ -7074,6 +7115,7 @@ int main(int argc, char** argv) {
                 }
                 const std::string kept = conversation_spill.newest_path();
                 const size_t dropped = conversation_spill.drop_superseded(live, live_imgs, checks, cvec_cached, kept);
+                disk_save_root();
                 std::fprintf(stderr, "strata serve: conversation cache: disk-saved %zu tokens (%zu MiB, %s) in %.1f ms; "
                              "%zu older cop%s dropped; disk=%zu MiB in %zu files\n", live.size(), bytes >> 20, why,
                              std::chrono::duration<double, std::milli>(Clock::now() - t0).count(), dropped,

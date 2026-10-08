@@ -64,8 +64,14 @@ public:
     // carries everything but the K/V (meta.kv empty), `kv` streams each layer from its pool into the file - so no
     // host image of the conversation is ever held.  `bytes` is the file's size.  durable=false skips the flushes: a
     // file torn by a crash fails the payload hash when it is read and is discarded, so a cache need not pay for them.
+    // prefix=true writes a PREFIX entry (strata-conv-prefix-N): a conversation's root - its system prompt and tools -
+    // that any new conversation opening the same way resumes from.  Prefix entries persist: drop_superseded never
+    // removes them and the disk budget evicts every ordinary conversation before one of them.
     bool spill_streamed(const SavedConversation& meta, const std::vector<SessionKvSource>& kv, size_t& bytes,
-                        std::string& error, bool durable = false);
+                        std::string& error, bool durable = false, bool prefix = false);
+    // A prefix entry holding exactly these tokens (and images) is on disk already.
+    bool has_prefix(const std::vector<int32_t>& ids, const std::vector<ConversationImageKey>& images, bool cvec) const;
+    size_t prefix_count() const;
     bool erase(const std::string& path, std::string& error);
     // A conversation being restored is held out of eviction until it is put back in RAM or dropped.
     void pin(const std::string& path);
@@ -85,13 +91,14 @@ private:
         bool cvec = true;
         ConversationCheckpoint live_meta;    // ids + imgs only; no running state
         std::vector<size_t> checkpoint_lengths;
+        bool prefix = false;                 // a persistent root entry (named strata-conv-prefix-N)
         std::string session_path() const { return (stem.string() + ".sess"); }
         std::string meta_path() const { return (stem.string() + ".meta"); }
     };
     void enforce_budget();
-    std::filesystem::path next_stem();
+    std::filesystem::path next_stem(bool prefix = false);
     bool index_written(const std::filesystem::path& stem, uint64_t file_bytes, const SavedConversation& meta,
-                       std::string& error);
+                       std::string& error, bool prefix = false);
     bool read_sidecar(const std::filesystem::path& meta, Entry& entry, bool& other_identity, std::string& error) const;
     bool write_sidecar(const std::filesystem::path& meta, const Entry& entry, std::string& error) const;
 

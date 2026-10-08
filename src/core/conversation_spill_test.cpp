@@ -271,6 +271,61 @@ int main() {
         fs::remove_all(sdir);
     }
 
+    // prefix entries (a conversation's root): named strata-conv-prefix-N, kept by drop_superseded, evicted last, deduped,
+    // and still prefix entries after a reopen (restart).
+    {
+        const fs::path pdir = fs::temp_directory_path() / "strata_spill_prefix_test";
+        fs::remove_all(pdir);
+        auto sources_of = [](const SavedConversation& img) {
+            std::vector<SessionKvSource> sources;
+            for (const auto& k : img.kv) {
+                SessionKvSource src;
+                src.format = k.format; src.cells = k.cells; src.heads = k.heads; src.head_dim = k.head_dim;
+                src.page_size = k.page_size; src.pooled_rows = k.pooled_rows; src.idx_dim = k.idx_dim;
+                const std::array<const ConversationBuffer*, 5> parts = {&k.k, &k.v, &k.k_scale, &k.v_scale, &k.pooled};
+                for (size_t i = 0; i < 5; ++i) src.sizes[i] = parts[i]->size();
+                src.read = [parts](size_t part, size_t offset, void* dst, size_t n) { return parts[part]->read(dst, offset, n); };
+                sources.push_back(std::move(src));
+            }
+            return sources;
+        };
+        auto meta_of = [](SavedConversation img) { img.kv.clear(); return img; };
+        ConversationSpillCache sp;
+        check(sp.open(pdir, id, 1ull << 30, error), "prefix: open");
+        // the root: 600 tokens, its own (only) checkpoint
+        SavedConversation root = sample(600);
+        root.checkpoints.clear();
+        root.checkpoints.push_back(checkpoint(600, 7));
+        size_t written = 0;
+        check(!sp.has_prefix(root.live.ids, {}, root.cvec), "prefix: none yet");
+        check(sp.spill_streamed(meta_of(root), sources_of(root), written, error, true, true), "prefix: save root");
+        check(sp.prefix_count() == 1 && sp.has_prefix(root.live.ids, {}, root.cvec), "prefix: indexed as prefix");
+        check(fs::path(sp.newest_path()).filename().string().rfind("strata-conv-prefix-", 0) == 0, "prefix: file name");
+        // a conversation that continues the root: the root entry is a valid resume for its prompt
+        SavedConversation conv = sample(1000);   // ids 1000.. : the root's 600 ids are its first 600
+        conv.checkpoints.clear();
+        conv.checkpoints.push_back(checkpoint(600, 8));
+        check(sp.spill_streamed(meta_of(conv), sources_of(conv), written, error), "prefix: save a conversation");
+        std::vector<int32_t> new_chat(root.live.ids);
+        new_chat.push_back(99999);                // a new conversation: same root, different first message
+        const auto hit = sp.best(new_chat, {}, root.cvec, 0.0, 0);
+        check(bool(hit) && hit.tokens == 600, "prefix: a new conversation resumes at the root");
+        // drop_superseded on the conversation's path removes the old conversation copy, never the prefix
+        const size_t dropped = sp.drop_superseded(conv.live.ids, {}, conv.checkpoints, conv.cvec);
+        check(dropped == 1 && sp.size() == 1 && sp.prefix_count() == 1, "prefix: drop_superseded keeps the prefix");
+        // the budget evicts ordinary conversations first: add two, shrink the budget to fit only the prefix + one
+        check(sp.spill_streamed(meta_of(conv), sources_of(conv), written, error), "prefix: save conversation 2");
+        const uint64_t one_conv = written;
+        check(sp.spill_streamed(meta_of(sample(900)), sources_of(sample(900)), written, error), "prefix: save conversation 3");
+        ConversationSpillCache tight;
+        const uint64_t prefix_bytes = sp.bytes() - one_conv - written;
+        check(tight.open(pdir, id, prefix_bytes + std::max<uint64_t>(one_conv, written) + 16, error), "prefix: reopen with a tight budget");
+        check(tight.prefix_count() == 1, "prefix: still a prefix after reopen");
+        check(tight.size() == 2, "prefix: budget evicted an ordinary conversation, not the prefix");
+        check(tight.has_prefix(root.live.ids, {}, root.cvec), "prefix: dedupe sees the reopened prefix");
+        fs::remove_all(pdir);
+    }
+
     std::printf("conversation_spill_test: %d checks passed\n", checks);
     return 0;
 }
