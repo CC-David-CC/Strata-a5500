@@ -992,7 +992,8 @@ plus ~1.1K tokens a turn, with an engine restart after 9 requests:
 | no conversation cache | 11.4-22.3 s (nothing reused) | 0 |
 | `--conversation-cache-disk-only` | 2.3-3.6 s (88-94% reused) | 12 |
 
-A switch wrote 360-443 MiB in 181-196 ms; a return read it back in 291-351 ms (the read pass ~150 ms of it). Process
+A switch wrote 360-443 MiB in 181-196 ms; a return read it back in 291-351 ms (the read pass ~150 ms of it), and in
+275-361 ms with every spill file pushed out of the page cache first (`fincore`: 0 bytes resident). Process
 memory (RssAnon) peaked 0.6 GiB above a run without the cache during a switch and ended 0.15 GiB above it; no
 conversation stays in RAM. Greedy replies matched the run without the cache for 13 of 15 turns; the other two
 match the RAM cache's restore of the same state (a restore and a full read of the prompt round differently).
