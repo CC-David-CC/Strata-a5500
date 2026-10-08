@@ -125,4 +125,7 @@ fig.text(.035,.057,"Examples are paraphrases of scenario expectations, not obser
 fig.text(.035,.025,SOURCE,color=INK,fontsize=10)
 for ext in ("png", "svg"):fig.savefig(OUT / ("category-scores-and-examples." + ext),dpi=160,facecolor=BG)
 plt.close(fig)
+# Matplotlib emits insignificant trailing spaces inside SVG path attributes.
+for svg in OUT.glob("*.svg"):
+    svg.write_text("\n".join(line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()) + "\n", encoding="utf-8")
 print("Wrote two figures as PNG and SVG")
