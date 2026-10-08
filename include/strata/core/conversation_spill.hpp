@@ -12,7 +12,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace strata::core {
@@ -25,12 +27,32 @@ struct ConversationSpillMatch {
     explicit operator bool() const { return !path.empty() && tokens > 0; }
 };
 
+// What a background write did (ConversationSpillCache::spill_async), reported once it is waited for.
+struct ConversationSpillWrite {
+    bool ok = false;
+    size_t tokens = 0;
+    uint64_t bytes = 0;
+    double ms = 0;      // the write itself, on the writer thread
+    std::string error;
+};
+
+// The checkpoints a spilled conversation keeps: the deepest one (the next turn's resume point, as SAVE keeps) and the
+// shallowest one (the chain's root, in practice the end of the system prompt, which a new chat that shares it resumes
+// from).  The others only serve edits further back; dropping them keeps a file to the live K/V plus two states.
+void conversation_spill_trim_checkpoints(SavedConversation& image);
+
 class ConversationSpillCache {
 public:
+    ConversationSpillCache() = default;
+    ConversationSpillCache(const ConversationSpillCache&) = delete;
+    ConversationSpillCache& operator=(const ConversationSpillCache&) = delete;
+    ~ConversationSpillCache() { wait(); }
+
     // Opens (creating if needed) the spill directory and indexes the conversations already in it. Files whose
     // sidecar names another model/config identity, or whose session file is missing or unreadable, are removed.
+    // `min_free_bytes`: every write leaves at least this much free on the disk (the session files' preflight).
     bool open(const std::filesystem::path& directory, SessionFileIdentity identity, uint64_t budget_bytes,
-              std::string& error);
+              std::string& error, uint64_t min_free_bytes = 0);
     bool enabled() const { return enabled_; }
     size_t size() const { return entries_.size(); }
     uint64_t bytes() const { return bytes_; }
@@ -60,6 +82,15 @@ public:
               std::string& error) const;
     // Writes a parked conversation (its K/V in RAM) as a session file plus its sidecar, and indexes it.
     bool spill(const SavedConversation& image, std::string& error);
+    // The same on a background thread, so the request that evicted the conversation does not wait for the disk: the
+    // image is taken (its checkpoints trimmed, conversation_spill_trim_checkpoints) and freed once written.  The file
+    // is indexed - and so matched, superseded or evicted - only by wait(), on the caller's thread; one write runs at a
+    // time (a running one is waited for first, its result dropped: call wait() before to see it).  False when it
+    // did not start (disabled, or not a single-GPU conversation): `image` is then left as it was.
+    bool spill_async(SavedConversation&& image, std::string& error);
+    // Waits for the background write, if one runs, and indexes its file; what it did, or nothing when none ran.
+    std::optional<ConversationSpillWrite> wait();
+    bool writing() const { return writer_.joinable(); }
     // --conversation-cache-disk-only: the same file and sidecar, written straight from the live session - `meta`
     // carries everything but the K/V (meta.kv empty), `kv` streams each layer from its pool into the file - so no
     // host image of the conversation is ever held.  `bytes` is the file's size.  durable=false skips the flushes: a
@@ -97,7 +128,13 @@ private:
 
     bool enabled_ = false;
     SessionFileIdentity identity_{};
-    uint64_t budget_ = 0, bytes_ = 0, serial_ = 0;
+    uint64_t budget_ = 0, bytes_ = 0, serial_ = 0, min_free_ = 0;
+    // the background write: the writer thread reads `pending_` and fills `pending_result_`; this thread touches
+    // neither until it has joined
+    std::thread writer_;
+    SavedConversation pending_;
+    std::filesystem::path pending_stem_;
+    ConversationSpillWrite pending_result_;
     size_t stale_files_wiped_ = 0, disk_evictions_ = 0;
     std::filesystem::path directory_;
     std::vector<Entry> entries_;   // oldest spill first

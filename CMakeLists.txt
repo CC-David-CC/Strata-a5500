@@ -116,6 +116,8 @@ if(STRATA_BUILD_CONVERSATION_TESTS)
   add_test(NAME conversation_file_test COMMAND conversation_file_test)
   add_executable(conversation_spill_test src/core/conversation_spill_test.cpp src/core/conversation_spill.cpp src/core/conversation_file.cpp)
   target_include_directories(conversation_spill_test PRIVATE include)
+  find_package(Threads REQUIRED)
+  target_link_libraries(conversation_spill_test PRIVATE Threads::Threads)
   add_test(NAME conversation_spill_test COMMAND conversation_spill_test)
 endif()
 
