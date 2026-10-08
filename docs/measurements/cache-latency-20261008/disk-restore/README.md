@@ -1,4 +1,9 @@
-# Prefix reuse and explicit disk restore
+# Disk restore: 11.6x faster first token in the 128K example
+
+With #1489, restoring a saved 128K prefix and generating the first text token took
+**1.956 seconds**, versus **22.611 seconds** for full prefill: **11.6x faster**.
+This is one measured example with warm OS page cache; it includes restore time
+but excludes initial SAVE/prefill. Live prefix reuse is a secondary comparison.
 
 ![Actual latency and speedup against full prefill](overview.png)
 

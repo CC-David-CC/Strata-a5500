@@ -60,17 +60,20 @@ def main():
         cold = values['cold', n]
         for mode, offset in [('pinned', -.16), ('disk_restore', .16)]:
             ratio = cold / values[mode, n]
-            right.plot([1, ratio], [i+offset]*2, color=colors[mode], lw=2.5, alpha=.7)
-            right.scatter(ratio, i+offset, s=38, color=colors[mode], zorder=4)
+            right.plot([1, ratio], [i+offset]*2, color=colors[mode],
+                       lw=3.5 if mode == 'disk_restore' else 1.2,
+                       alpha=1 if mode == 'disk_restore' else .4)
+            right.scatter(ratio, i+offset, s=48 if mode == 'disk_restore' else 24, color=colors[mode], zorder=4)
             right.annotate(f'{ratio:.2f}×', (ratio, i+offset), xytext=(7, -11 if ratio < 1 else -3), textcoords='offset points',
                            size=9, color=colors[mode])
     handles = [Line2D([0], [0], color=colors[m], marker='o', lw=0, label=labels[m])
-               for m in ('cold', 'pinned', 'disk_restore')]
+               for m in ('disk_restore', 'cold', 'pinned')]
     fig.legend(handles=handles, loc='upper left', bbox_to_anchor=(.055, .902), ncol=3,
                frameon=False, fontsize=11, handletextpad=.5, columnspacing=2)
-    fig.suptitle('When restoring a prefix beats reading it again', x=.058, y=.981,
+    fig.suptitle('Disk restore: 11.6× faster first token at 128K', x=.058, y=.981,
                  ha='left', fontsize=24, weight='bold')
-    fig.text(.059, .934, 'Integration #1489  •  ISTA IQ2_XS  •  RTX PRO 6000 Blackwell  •  FP16 KV  •  128-token replies', size=11)
+    fig.text(.059, .942, '22.611 s full prefill → 1.956 s restore + first token  •  Single 128K example; warm OS page cache', size=11)
+    fig.text(.059, .916, 'Integration #1489  •  ISTA IQ2_XS  •  RTX PRO 6000 Blackwell  •  FP16 KV  •  128-token replies', size=10)
     fig.text(.06, .087, '1K–8K: three-sample medians. 32K–128K: one example each. Dashed divider also marks 32K → 256K capacity.', size=9)
     fig.text(.06, .063, 'Disk series includes RESTORE + request, with warm OS page cache. Initial SAVE / prefill and model loading are excluded.', size=9)
     fig.text(.06, .037, 'Main: live-prefix results are similar; session SAVE failed at all 11 sizes in this non-MTP configuration. No disk latency is inferred.',
