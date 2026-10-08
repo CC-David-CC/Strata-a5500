@@ -158,5 +158,29 @@
     "file": "Qwen3.8-Flash-Next-Gyro-M-TQ2_0.gguf",
     "size": 91965774272,
     "sha256": "5edfedf7398e18cb9d7cc32f40035acfc5f66bb9051e8216a053ac72d5324ee9"
+  },
+  {
+    "repo": "agentionai/Qwen3.8-Flash-Next-AP-GGUF",
+    "revision": "0061a60e46ad672a73cec31cb627dc841d4760a4",
+    "quant": "AP-Q4_K_XL",
+    "file": "AP-Q4_K_XL/Qwen3.8-Flash-Next-AP-Q4_K_XL.gguf",
+    "size": 101142769536,
+    "sha256": "bbff0a2cdc2bb461c92b873f5dd175d551928cbff61ebed8022375b8df1d0269"
+  },
+  {
+    "repo": "agentionai/Qwen3.8-Flash-Next-AP-GGUF",
+    "revision": "0061a60e46ad672a73cec31cb627dc841d4760a4",
+    "quant": "AP-IQ3_XXS",
+    "file": "AP-IQ3_XXS/Qwen3.8-Flash-Next-AP-IQ3_XXS.gguf",
+    "size": 86672420736,
+    "sha256": "47f12b59ff3f0d39c578205f038c9d828094c1abaeb419279955fceda403c7e3"
+  },
+  {
+    "repo": "agentionai/Qwen3.8-Flash-Next-AP-GGUF",
+    "revision": "0061a60e46ad672a73cec31cb627dc841d4760a4",
+    "quant": "AP-IQ2_S",
+    "file": "AP-IQ2_S/Qwen3.8-Flash-Next-AP-IQ2_S.gguf",
+    "size": 81641739136,
+    "sha256": "7296b652432390f6a3964f4e671b59f2e9c45353d2ceb01e4cbfdefcc29c5a8f"
   }
 ]

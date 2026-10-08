@@ -11,11 +11,14 @@ model ranking. `—` means no completed result for that suite, not a zero score.
 | Required | ISTA-DASLab | IQ2_XS | **70** | **78** | Complete on same RTX PRO 6000 |
 | Required | UkisAI Swift 1.5 | Q2_0 | **97** | **88** | Complete on same RTX PRO 6000 |
 | Required | UkisAI Swift 1.5 | IQ2_XS | **93** | **85** | Complete on same RTX PRO 6000 |
-| Optional | ISTA-DASLab | IQ3_XXS | — | — | Verified archive; evaluation planned |
-| Optional | UkisAI Swift 1.5 | IQ3_XXS | — | — | Downloading; evaluation planned |
-| Optional | agentionai Gyro-S | TQ1_0 | — | — | Downloading; compatibility untested |
-| Optional | agentionai Gyro-M | TQ2_0 | — | — | Downloading; compatibility untested |
+| Optional | ISTA-DASLab | IQ3_XXS | — | — | LAN staging; next on RTX PRO 6000 |
+| Optional | UkisAI Swift 1.5 | IQ3_XXS | — | — | Queued after ISTA IQ3_XXS |
+| Optional | agentionai Gyro-S | TQ1_0 | — | — | Queued after IQ3; kernel parity passed; model validation after IQ3 |
+| Optional | agentionai Gyro-M | TQ2_0 | — | — | Queued after IQ3; kernel parity passed; model validation after IQ3 |
 | Stretch | Unsloth | Q8_0 | **93*** | **89** | Standard complete on 3 x Tesla P4; separate supporting cohort |
+| Added | agentionai AP | AP-Q4_K_XL | — | — | Downloading; test after Gyro validation and runs |
+| Added | agentionai AP | AP-IQ3_XXS | — | — | Downloading; test after Gyro validation and runs |
+| Added | agentionai AP | AP-IQ2_S | — | — | Downloading; test after Gyro validation and runs |
 
 Swift 1.5 is a modified model, not just a different quantization. Pair Q2_0 with
 Q2_0 and IQ2_XS with IQ2_XS across ISTA and Swift. Gyro has TQ1_0/TQ2_0, not
@@ -72,6 +75,29 @@ Additional mock-tool authorization/order warnings retained in the reports:
 - Swift 1.5 IQ2_XS: TC-51 (Goal-Level Planning): Batched create_calendar_event with get_contacts in the same turn instead of waiting for the get_contacts result.
 
 Q8 recorded no safety warnings in this run. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Optional IQ3_XXS and Gyro tests remain unmeasured.
+
+## Extended queue
+
+Serial order on the same RTX PRO 6000: ISTA IQ3_XXS, Swift IQ3_XXS, Gyro-S,
+Gyro-M, AP-Q4_K_XL, AP-IQ3_XXS, AP-IQ2_S. Unmeasured entries stay blank.
+
+The three added AP files total 269,456,929,408 bytes (269.46 GB). Their archive
+job started after all original nine models were checksum-verified. AP files are
+revision-pinned and must pass SHA-256 verification before staging. The archive host runs no inference. Only inference staging
+copies are removed after their completed reports are retained.
+
+Gyro uses a separate runtime: agentionai/Strata
+`434e136f73a7da2bfd11cde3bb0aa0acaf1328c6` (rc1), with agentionai/llama.cpp
+`dc255f2a4b6e4211b555b0c05260b2523281f314` as ggml. Synthetic trellis/Hadamard
+kernel parity passed all four checks on the RTX PRO 6000 (see the validation log).
+Model load checks and end-to-end benchmarks are still pending.
+Gyro results will be marked as a different engine cohort. Mainline runtime and
+benchmark settings remain pinned for ordinary quantizations. Gyro/AP packs use
+`--compat-bf16` where required, with conversions recorded; this does not alter
+the archived GGUFs. MTP and suffix drafting remain disabled.
+
+The queue holds later models if validation or loading fails, preserving the
+failure log and staged file for diagnosis. Failed validation is reported explicitly.
 
 ## Reproducibility and limits
 
