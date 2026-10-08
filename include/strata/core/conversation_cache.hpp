@@ -345,11 +345,12 @@ public:
     // Reserve before allocating a snapshot. held is an incoming image removed
     // with take() but still alive during the exchange; count it against RAM too.
     bool make_room(size_t incoming, size_t held = 0) {
-        return make_room(incoming, held, [](const SavedConversation&) {});
+        return make_room(incoming, held, [](SavedConversation&&) {});
     }
 
-    // The spill callback sees every conversation this call evicts from RAM, oldest first, before it is dropped, so
-    // a durable disk tier can keep it. The default does nothing (the RAM cache alone).
+    // The spill callback is handed every conversation this call evicts from RAM, oldest first, as an rvalue before it
+    // is dropped, so a durable disk tier can keep it (and may move it out). The default does nothing (the RAM cache
+    // alone).
     template<class Spill>
     bool make_room(size_t incoming, size_t held, Spill&& spill) {
         if (!enabled() || held > budget_ || incoming > budget_ - held) return false;
@@ -376,8 +377,8 @@ public:
     bool evict_oldest(Spill&& spill) {
         auto victim = std::find_if(entries_.begin(), entries_.end(), [](const SavedConversation& e) { return !e.pinned(); });
         if (victim == entries_.end()) return false;
-        spill(*victim);
         bytes_ -= victim->bytes();
+        spill(std::move(*victim));   // the callback may take the image (a background write)
         entries_.erase(victim);
         ++evictions_;
         return true;
@@ -426,8 +427,8 @@ public:
     size_t spill_all(Spill&& spill) {
         size_t count = 0;
         while (!entries_.empty()) {
-            spill(entries_.front());
             bytes_ -= entries_.front().bytes();
+            spill(std::move(entries_.front()));
             entries_.pop_front();
             ++evictions_;
             ++count;
@@ -437,10 +438,15 @@ public:
     }
 
     bool put(SavedConversation&& image, size_t held = 0) {
+        return put(std::move(image), held, [](SavedConversation&&) {});
+    }
+    // The same, handing what it evicts to `spill` as make_room does (an image larger than its estimate can evict more).
+    template<class Spill>
+    bool put(SavedConversation&& image, size_t held, Spill&& spill) {
         const size_t n = image.bytes();
         if (!enabled() || held > budget_ || n > budget_ - held) return false;   // make_room's refusal, first
         drop_superseded(image.live.ids, image.live.imgs, image.checkpoints, image.cvec);
-        if (!make_room(n, held)) return false;
+        if (!make_room(n, held, spill)) return false;
         entries_.push_back(std::move(image));
         bytes_ += n;
         return true;

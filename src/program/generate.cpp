@@ -605,6 +605,7 @@ struct Options {
     int64_t conversation_cache_disk_mib = 8192;   // the spill directory's limit (0 = off)
     double conversation_cache_similarity = 0.0;   // least LCP/new-prompt fraction a disk hit may offer (range [0,1))
     int64_t conversation_cache_n_min = 0;         // least common-prefix tokens a disk hit may offer
+    int64_t conversation_cache_disk_min_tokens = 0;   // a conversation shorter than this is not written to disk
     /// --serve: also keep a checkpoint every N freshly read prompt tokens (0 = only at the last turn boundary)
     int64_t prompt_cache_every = 16384;
     bool prompt_cache_tail = false;   // optional extra checkpoint at an existing near-tail chunk boundary
@@ -758,6 +759,8 @@ void usage() {
                  "  --conversation-cache-similarity F  --serve: least common-prefix fraction a disk hit may offer\n"
                  "                       (default 0 = any; range [0,1))\n"
                  "  --conversation-cache-n-min N  --serve: least common-prefix tokens a disk hit may offer (default 0)\n"
+                 "  --conversation-cache-disk-min-tokens N  --serve: a conversation shorter than N tokens is not\n"
+                 "                       written to the spill directory - reading it again is cheap (default 0)\n"
                  "  --vram-elastic       --serve (#533, opt-in, NVIDIA): the expert cache in segments (--vram-segment-mib,\n"
                  "                       default 512), so the command `VRAM <reserve_mib>` (the server's POST /v1/vram) can\n"
                  "                       give VRAM back to other programs between requests and take it back later\n"
@@ -1837,12 +1840,14 @@ int main(int argc, char** argv) {
         else if (a == "--prompt-cache") o.prompt_cache = std::max(0, std::atoi(next("--prompt-cache")));
         else if (a == "--conversation-cache-mib" || a == "--conversation-cache-slots" ||
                  a == "--conversation-cache-min-free-mib" || a == "--session-min-free-mib" ||
-                 a == "--conversation-cache-disk-mib" || a == "--conversation-cache-n-min") {
+                 a == "--conversation-cache-disk-mib" || a == "--conversation-cache-n-min" ||
+                 a == "--conversation-cache-disk-min-tokens") {
             const std::string value = next(a.c_str());
             int64_t number = 0;
             const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
             const int64_t limit = a == "--conversation-cache-slots" ? INT32_MAX :
-                                  a == "--conversation-cache-n-min" ? INT64_MAX : INT64_MAX / (1024 * 1024);
+                                  a == "--conversation-cache-n-min" || a == "--conversation-cache-disk-min-tokens"
+                                      ? INT64_MAX : INT64_MAX / (1024 * 1024);
             if (result.ec != std::errc{} || result.ptr != value.data() + value.size() || number < 0 || number > limit) {
                 std::fprintf(stderr, "%s needs a nonnegative integer within range\n", a.c_str());
                 return 2;
@@ -1852,6 +1857,7 @@ int main(int argc, char** argv) {
             else if (a == "--session-min-free-mib") o.session_min_free_mib = number;
             else if (a == "--conversation-cache-slots") o.conversation_cache_slots = (int) number;
             else if (a == "--conversation-cache-disk-mib") o.conversation_cache_disk_mib = number;
+            else if (a == "--conversation-cache-disk-min-tokens") o.conversation_cache_disk_min_tokens = number;
             else o.conversation_cache_n_min = number;
         }
         else if (a == "--conversation-cache-spill-dir") o.conversation_cache_spill_dir = next("--conversation-cache-spill-dir");
@@ -7111,7 +7117,8 @@ int main(int argc, char** argv) {
             } else {
                 std::string spill_error;
                 if (!conversation_spill.open(o.conversation_cache_spill_dir, spill_identity,
-                        (uint64_t) o.conversation_cache_disk_mib * 1024 * 1024, spill_error)) {
+                        (uint64_t) o.conversation_cache_disk_mib * 1024 * 1024, spill_error,
+                        (uint64_t) o.session_min_free_mib << 20)) {
                     std::fprintf(stderr, "strata serve: conversation cache: disk tier disabled (%s)\n", spill_error.c_str());
                 } else if (conversation_spill.enabled()) {
                     std::fprintf(stderr, "strata serve: conversation cache: spill dir ready (%zu conversations, %llu MiB, "
@@ -7121,18 +7128,36 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        auto spill_evicted = [&](const strata::core::SavedConversation& evicted) {
+        // The background write of an evicted conversation (spill_async) is indexed - and reported - here, before the
+        // disk tier is matched, written or shut down: the file is only matched once it is complete.
+        auto spill_wait = [&] {
+            const auto t0 = Clock::now();
+            const auto w = conversation_spill.wait();
+            if (!w) return;
+            const double waited = std::chrono::duration<double, std::milli>(Clock::now() - t0).count();
+            if (w->ok)
+                std::fprintf(stderr, "strata serve: conversation cache: spilled %zu tokens (%llu MiB) in %.1f ms in the "
+                             "background (waited %.1f ms); disk=%zu MiB disk_evictions=%zu\n", w->tokens,
+                             (unsigned long long) (w->bytes >> 20), w->ms, waited,
+                             (size_t) (conversation_spill.bytes() >> 20), conversation_spill.disk_evictions());
+            else
+                std::fprintf(stderr, "strata serve: conversation cache: could not spill evicted conversation (%s); "
+                             "dropped it\n", w->error.c_str());
+        };
+        // A conversation the RAM cache evicts is handed to a writer thread: the request that evicted it goes on.
+        auto spill_evicted = [&](strata::core::SavedConversation&& evicted) {
             if (!conversation_spill.enabled()) return;
+            if ((int64_t) evicted.live.ids.size() < o.conversation_cache_disk_min_tokens) {
+                std::fprintf(stderr, "strata serve: conversation cache: evicted %zu tokens, below "
+                             "--conversation-cache-disk-min-tokens; not spilled\n", evicted.live.ids.size());
+                return;
+            }
             try {
+                spill_wait();
                 std::string spill_error;
-                if (conversation_spill.spill(evicted, spill_error)) {
-                    std::fprintf(stderr, "strata serve: conversation cache: spilled %zu tokens (%zu MiB); disk=%zu MiB "
-                                 "disk_evictions=%zu\n", evicted.live.ids.size(), evicted.bytes() >> 20,
-                                 (size_t) (conversation_spill.bytes() >> 20), conversation_spill.disk_evictions());
-                } else {
+                if (!conversation_spill.spill_async(std::move(evicted), spill_error))
                     std::fprintf(stderr, "strata serve: conversation cache: could not spill evicted conversation (%s); "
                                  "dropping it\n", spill_error.c_str());
-                }
             } catch (...) {
                 std::fprintf(stderr, "strata serve: conversation cache: spill failed; dropping evicted conversation\n");
             }
@@ -7195,8 +7220,18 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "strata serve: conversation cache: prefix save skipped (allocation failed)\n");
             }
         };
+
+        // The same streamed save serves the RAM cache too, for a conversation it cannot park (larger than its budget,
+        // or refused by the physical RAM admission): it goes to disk instead of being dropped.
+        const bool can_stream = stages.empty() && !multi_gpu && o.batch <= 0 && o.peer_device < 1;
         auto disk_save_live = [&](bool durable, const char* why) {
-            if (!disk_only || !conversation_spill.enabled() || !live_ok || live.empty()) return;
+            if (!can_stream || !conversation_spill.enabled() || !live_ok || live.empty()) return;
+            if ((int64_t) live.size() < o.conversation_cache_disk_min_tokens) {
+                std::fprintf(stderr, "strata serve: conversation cache: %zu tokens, below --conversation-cache-disk-min-tokens; "
+                             "not written (%s)\n", live.size(), why);
+                return;
+            }
+            spill_wait();
             const auto t0 = Clock::now();
             try {
                 std::string e;
@@ -7269,6 +7304,7 @@ int main(int argc, char** argv) {
             if (const size_t dropped = conversations.drop_superseded(live, live_imgs, checks, cvec_cached))
                 std::fprintf(stderr, "strata serve: conversation cache: dropped %zu superseded cop%s of this "
                              "conversation; parked=%zu\n", dropped, dropped == 1 ? "y" : "ies", conversations.size());
+            spill_wait();
             const size_t disk_dropped = conversation_spill.drop_superseded(live, live_imgs, checks, cvec_cached);
             if (disk_dropped)
                 std::fprintf(stderr, "strata serve: conversation cache: removed %zu superseded disk conversation%s\n",
@@ -7341,6 +7377,7 @@ int main(int argc, char** argv) {
             if (!conversations.make_room(estimate, held, spill_evicted)) {
                 std::fprintf(stderr, "strata serve: conversation cache: skip parking (snapshot %zu MiB exceeds available budget)\n",
                              estimate >> 20);
+                disk_save_live(false, "too large for the RAM cache");
                 return true;
             }
             const auto t0 = Clock::now();
@@ -7365,10 +7402,15 @@ int main(int argc, char** argv) {
                 while (!admit() && conversations.size() > 0 && evicted < conversations.slots() &&
                        conversations.evict_oldest(spill_evicted))
                     ++evicted;
-                if (!admit()) {
+                // a conversation just evicted may still be in RAM, being written in the background: when that is
+                // what stands in the way, wait for the write (it frees the image) rather than send this one to disk
+                bool admitted = admit();
+                if (!admitted && conversation_spill.writing()) { spill_wait(); admitted = admit(); }
+                if (!admitted) {
                     std::fprintf(stderr, "strata serve: conversation cache: skip parking (physical RAM admission; need %zu MiB plus %lld MiB floor; evicted %zu, %zu still parked, or telemetry unavailable)\n",
                                  additional >> 20, (long long) o.conversation_cache_min_free_mib,
                                  evicted, conversations.size());
+                    disk_save_live(false, "no RAM to park it");
                     return true;
                 }
                 if (evicted)
@@ -7395,7 +7437,8 @@ int main(int argc, char** argv) {
                     return true;
                 }
                 const size_t snapshot_bytes = image.bytes();
-                const bool stored = conversations.put(std::move(image), held);
+                const bool stored = conversations.put(std::move(image), held, spill_evicted);
+                if (!stored) spill_evicted(std::move(image));   // put() leaves a refused image whole: to disk instead
                 std::fprintf(stderr, "strata serve: conversation cache: %s %zu tokens in %.1f ms; parked=%zu bytes=%zu evictions=%zu snapshot_bytes=%zu reused_kv_bytes=%zu\n",
                              stored ? "parked" : "skipped", live.size(),
                              std::chrono::duration<double, std::milli>(Clock::now() - t0).count(),
@@ -8267,7 +8310,7 @@ int main(int argc, char** argv) {
                         "mtp_max=%d lookup=%d vram_free_mib=%lld cvec=%s arena_mib=%lld pool_workers=%d pcie_frac=%.2f "
                         "spec_min_p=%.2f conversation_cache_mib=%lld conversation_cache_slots=%d "
                         "conversation_cache_min_free_mib=%lld conversation_cache_disk_mib=%lld conversation_cache_disk_only=%d "
-                        "conversation_cache_similarity=%.3f conversation_cache_n_min=%lld "
+                        "conversation_cache_similarity=%.3f conversation_cache_n_min=%lld conversation_cache_disk_min_tokens=%lld "
                         "tail_role_token=%lld vram_elastic=%d%s engine=" STRATA_VERSION "\n",
                         (long long) o.max_context, o.kv.c_str(),
                         (long long) (g.n_qsa_layers() > 0 && ss.qsa_states[ss.qsa_primary()].kv_mode == 1
@@ -8281,6 +8324,7 @@ int main(int argc, char** argv) {
                         o.spec_min_p, (long long) o.conversation_cache_mib, o.conversation_cache_slots,
                         (long long) o.conversation_cache_min_free_mib, (long long) o.conversation_cache_disk_mib, disk_only ? 1 : 0,
                         o.conversation_cache_similarity, (long long) o.conversation_cache_n_min,
+                        (long long) o.conversation_cache_disk_min_tokens,
                         (long long) o.tail_role_token, xcache.segmented() ? 1 : 0,
                         o.batch > 0 ? (" batch_slots=" + std::to_string(o.batch) +
                                        " slot_cache=" + std::to_string(o.prompt_cache > 0 ? 1 : 0) +
@@ -9438,6 +9482,7 @@ int main(int argc, char** argv) {
             std::string incoming_disk_path;
             // A spilled conversation can beat the RAM cache: match it from its sidecar (no K/V read), and only if it
             // offers a longer resume than RAM, the batch slots and the live state does, read it back whole.
+            spill_wait();   // an eviction still being written is matched once it is complete
             const auto disk_match = conversation_spill.best(ids, req_imgs, want_cvec,
                                                             o.conversation_cache_similarity, o.conversation_cache_n_min);
             // --conversation-cache-disk-only: the disk match is read back with the streaming RESTORE path - its read
@@ -9451,7 +9496,19 @@ int main(int argc, char** argv) {
             int64_t disk_in_tokens = 0;
             bool disk_in_live = false;
             double disk_read_ms = 0;
-            if (disk_only && !disk_match.path.empty() && disk_match.tokens > std::max(resume, slot_tokens)) {
+            // what reading a disk hit back whole would take in RAM (the RAM path below): the file plus an eighth
+            constexpr uint64_t admission_extra = 1ull << 20;
+            const uint64_t disk_estimate = disk_match.file_bytes > UINT64_MAX - disk_match.file_bytes / 8 - admission_extra
+                                               ? UINT64_MAX
+                                               : disk_match.file_bytes + disk_match.file_bytes / 8 + admission_extra;
+            const uint64_t ram_budget = (uint64_t) o.conversation_cache_mib * 1024 * 1024;
+            const bool disk_hit = !disk_match.path.empty() &&
+                                  disk_match.tokens > std::max(resume, std::max(slot_tokens, parked.tokens));
+            // with the RAM cache on, a hit larger than its budget (one it could not park either) is streamed back the
+            // way disk-only reads it, instead of being refused
+            const bool stream_hit = disk_hit && (disk_only || (can_stream && (disk_estimate > ram_budget ||
+                                                                            disk_estimate > SIZE_MAX)));
+            if (stream_hit) {
                 const auto td = Clock::now();
                 try {
                     strata::core::SessionReadLimits limits;
@@ -9510,12 +9567,8 @@ int main(int argc, char** argv) {
                 disk_read_ms = std::chrono::duration<double, std::milli>(Clock::now() - td).count();
                 if (disk_incoming) slot_source = -1;
             }
-            if (!disk_only && !disk_match.path.empty() && disk_match.tokens > std::max(resume, std::max(slot_tokens, parked.tokens))) {
-                constexpr uint64_t admission_extra = 1ull << 20;
-                const uint64_t estimate = disk_match.file_bytes > UINT64_MAX - disk_match.file_bytes / 8 - admission_extra
-                                              ? UINT64_MAX
-                                              : disk_match.file_bytes + disk_match.file_bytes / 8 + admission_extra;
-                const uint64_t ram_budget = (uint64_t) o.conversation_cache_mib * 1024 * 1024;
+            if (!disk_only && disk_hit && !stream_hit) {
+                const uint64_t estimate = disk_estimate;
                 if (estimate > ram_budget || estimate > SIZE_MAX) {
                     std::fprintf(stderr, "strata serve: conversation cache: disk hit needs %llu MiB; RAM budget is %llu MiB\n",
                                  (unsigned long long) (estimate >> 20), (unsigned long long) (ram_budget >> 20));
@@ -9526,8 +9579,13 @@ int main(int argc, char** argv) {
                         conversation_spill.unpin(disk_match.path);
                     } else {
                         const uint64_t floor = (uint64_t) o.conversation_cache_min_free_mib << 20;
-                        if (!strata::core::conversation_memory_admit(strata::core::conversation_available_memory(),
-                                estimate, floor)) {
+                        auto admitted = [&] {
+                            return strata::core::conversation_memory_admit(strata::core::conversation_available_memory(),
+                                                                           estimate, floor);
+                        };
+                        bool admit = admitted();
+                        if (!admit && conversation_spill.writing()) { spill_wait(); admit = admitted(); }   // as when parking
+                        if (!admit) {
                             std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (physical RAM admission; "
                                          "need %llu MiB plus a %lld MiB floor, or telemetry unavailable)\n",
                                          (unsigned long long) (estimate >> 20), (long long) o.conversation_cache_min_free_mib);
@@ -11626,6 +11684,7 @@ int main(int argc, char** argv) {
                 std::fprintf(stderr, "strata serve: conversation cache: the final active conversation was not captured (%s)\n",
                              err.c_str());
             const size_t resident = conversations.spill_all(spill_evicted);
+            spill_wait();   // the last background write, before the process ends
             std::fprintf(stderr, "strata serve: conversation cache: shutdown spilled %zu parked conversations; disk=%zu MiB "
                          "disk_evictions=%zu\n", resident, (size_t) (conversation_spill.bytes() >> 20),
                          conversation_spill.disk_evictions());
