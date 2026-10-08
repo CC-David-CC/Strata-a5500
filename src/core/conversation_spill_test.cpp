@@ -3,6 +3,7 @@
 // Built with -DSTRATA_BUILD_CONVERSATION_TESTS=ON; no CUDA, no model.
 #include "strata/core/conversation_spill.hpp"
 
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
@@ -187,6 +188,89 @@ int main() {
     check(tier.size() == 2, "both conversations now on disk");
 
     fs::remove_all(dir);
+    // --conversation-cache-disk-only: a conversation streamed from its sources (no host K/V image) is written as the
+    // same file the image spill writes, indexed the same way, and reads back with the same K/V bytes.
+    {
+        const fs::path sdir = fs::temp_directory_path() / "strata_spill_streamed_test";
+        fs::remove_all(sdir);
+        auto make_sources = [](const SavedConversation& img) {
+            std::vector<SessionKvSource> sources;
+            for (const auto& k : img.kv) {
+                SessionKvSource src;
+                src.format = k.format; src.cells = k.cells; src.heads = k.heads; src.head_dim = k.head_dim;
+                src.page_size = k.page_size; src.pooled_rows = k.pooled_rows; src.idx_dim = k.idx_dim;
+                const std::array<const ConversationBuffer*, 5> parts = {&k.k, &k.v, &k.k_scale, &k.v_scale, &k.pooled};
+                for (size_t i = 0; i < 5; ++i) src.sizes[i] = parts[i]->size();
+                src.read = [parts](size_t part, size_t offset, void* dst, size_t n) { return parts[part]->read(dst, offset, n); };
+                sources.push_back(std::move(src));
+            }
+            return sources;
+        };
+        auto slurp = [](const std::string& path) {
+            FILE* f = std::fopen(path.c_str(), "rb");
+            std::vector<uint8_t> v;
+            if (!f) return v;
+            uint8_t buf[65536];
+            size_t n;
+            while ((n = std::fread(buf, 1, sizeof buf, f)) > 0) v.insert(v.end(), buf, buf + n);
+            std::fclose(f);
+            return v;
+        };
+        ConversationSpillCache img_dir, str_dir;
+        check(img_dir.open(sdir / "image", id, 1ull << 30, error), "streamed: open image dir");
+        check(str_dir.open(sdir / "streamed", id, 1ull << 30, error), "streamed: open streamed dir");
+        const SavedConversation c = sample(1500);
+        check(img_dir.spill(c, error), "streamed: image spill");
+        SavedConversation meta = c;
+        meta.kv.clear();
+        size_t written = 0;
+        check(str_dir.spill_streamed(meta, make_sources(c), written, error), "streamed: streamed spill");
+        check(written > 0 && str_dir.bytes() == written, "streamed: size accounted");
+        check(slurp(img_dir.newest_path()) == slurp(str_dir.newest_path()), "streamed: file equals the image spill's");
+        // it matches and reads back like any spilled conversation
+        std::vector<int32_t> next_prompt = c.live.ids;
+        next_prompt.push_back(7);
+        const auto hit = str_dir.best(next_prompt, {}, c.cvec, 0.0, 0);
+        check(bool(hit) && hit.tokens == (int64_t) c.live.ids.size() && hit.live, "streamed: full live match");
+        SavedConversation back;
+        check(str_dir.load(hit.path, back, {}, error), "streamed: load back");
+        bool same = back.kv.size() == c.kv.size();
+        for (size_t i = 0; same && i < c.kv.size(); ++i)
+            same = buffers_equal(back.kv[i].k, c.kv[i].k) && buffers_equal(back.kv[i].v, c.kv[i].v) &&
+                   buffers_equal(back.kv[i].pooled, c.kv[i].pooled);
+        check(same, "streamed: K/V bytes round-trip");
+        // a host K/V image passed to the streamed spill is refused (ambiguous), and so is an empty conversation
+        check(!str_dir.spill_streamed(c, make_sources(c), written, error), "streamed: image K/V refused");
+        SavedConversation empty = meta;
+        empty.live.ids.clear();
+        check(!str_dir.spill_streamed(empty, {}, written, error), "streamed: empty conversation refused");
+        // a failing source leaves no file and no index entry
+        auto broken = make_sources(c);
+        broken[0].read = [](size_t, size_t, void*, size_t) { return false; };
+        const size_t before = str_dir.size();
+        check(!str_dir.spill_streamed(meta, broken, written, error), "streamed: failing source fails");
+        check(str_dir.size() == before, "streamed: failed write not indexed");
+        size_t sess_files = 0;
+        for (const auto& e : fs::directory_iterator(sdir / "streamed"))
+            if (e.path().extension() == ".sess") ++sess_files;
+        check(sess_files == before, "streamed: failed write leaves no session file");
+        // the new copy is written before the older ones are dropped: with keep, drop_superseded spares it
+        SavedConversation longer = c;
+        for (int i = 0; i < 200; ++i) longer.live.ids.push_back(int32_t(5000 + i));
+        longer.checkpoints.push_back(checkpoint(c.live.ids.size(), 9));   // the turn checkpoint: the old conversation's end
+        SavedConversation longer_meta = longer;
+        longer_meta.kv.clear();
+        check(str_dir.spill_streamed(longer_meta, make_sources(longer), written, error), "keep: spill the newer copy");
+        const std::string kept = str_dir.newest_path();
+        check(str_dir.size() == 2, "keep: old and new copy on disk");
+        const size_t dropped = str_dir.drop_superseded(longer.live.ids, {}, longer.checkpoints, longer.cvec, kept);
+        check(dropped == 1 && str_dir.size() == 1 && str_dir.newest_path() == kept, "keep: old copy dropped, new kept");
+        // without keep the same rule would drop the new copy too (its deepest checkpoint is on the live path)
+        check(str_dir.drop_superseded(longer.live.ids, {}, longer.checkpoints, longer.cvec) == 1 && str_dir.size() == 0,
+              "keep: the rule alone drops the new copy");
+        fs::remove_all(sdir);
+    }
+
     std::printf("conversation_spill_test: %d checks passed\n", checks);
     return 0;
 }
