@@ -5,6 +5,7 @@
 #include "strata/core/conversation_spill.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <fstream>
 #include <limits>
@@ -78,6 +79,21 @@ bool valid_meta_chain(const ConversationCheckpoint& live, const std::vector<size
 
 } // namespace
 
+void conversation_spill_trim_checkpoints(SavedConversation& image) {
+    auto& c = image.checkpoints;
+    if (c.size() <= 2) return;
+    size_t lo = 0, hi = 0;
+    for (size_t i = 1; i < c.size(); ++i) {
+        if (c[i].ids.size() < c[lo].ids.size()) lo = i;
+        if (c[i].ids.size() > c[hi].ids.size()) hi = i;
+    }
+    std::vector<ConversationCheckpoint> kept;
+    kept.reserve(2);
+    kept.push_back(std::move(c[lo]));
+    if (hi != lo) kept.push_back(std::move(c[hi]));
+    c = std::move(kept);
+}
+
 bool ConversationSpillCache::read_sidecar(const std::filesystem::path& meta, Entry& entry, bool& other_identity,
                                           std::string& error) const {
     other_identity = false;
@@ -142,8 +158,10 @@ bool ConversationSpillCache::write_sidecar(const std::filesystem::path& meta, co
 }
 
 bool ConversationSpillCache::open(const std::filesystem::path& directory, SessionFileIdentity identity,
-                                  uint64_t budget_bytes, std::string& error) {
+                                  uint64_t budget_bytes, std::string& error, uint64_t min_free_bytes) {
+    wait();
     enabled_ = false;
+    min_free_ = min_free_bytes;
     stale_files_wiped_ = 0;
     disk_evictions_ = 0;
     entries_.clear();
@@ -267,12 +285,71 @@ bool ConversationSpillCache::spill(const SavedConversation& image, std::string& 
     size_t file_bytes = 0;
     SessionWriteOptions wo;
     wo.durable = true;
+    wo.min_free_bytes = min_free_;
     SessionStatus st;
     if (!session_file_write(session, image, identity_, file_bytes, error, wo, &st)) {
         std::filesystem::remove(session, ec);
         return false;
     }
     return index_written(stem, file_bytes, image, error);
+}
+
+bool ConversationSpillCache::spill_async(SavedConversation&& image, std::string& error) {
+    if (!enabled_) return false;
+    if (image.live.ids.empty() || !image.stage_images.empty()) { error = "spill needs a single-GPU conversation"; return false; }
+    wait();
+    pending_stem_ = next_stem();
+    pending_result_ = {};
+    pending_ = std::move(image);
+    conversation_spill_trim_checkpoints(pending_);
+    try {
+        writer_ = std::thread([this] {
+            const auto t0 = std::chrono::steady_clock::now();
+            ConversationSpillWrite r;
+            r.tokens = pending_.live.ids.size();
+            try {
+                size_t file_bytes = 0;
+                SessionWriteOptions wo;
+                wo.durable = true;
+                wo.min_free_bytes = min_free_;
+                SessionStatus st;
+                r.ok = session_file_write(pending_stem_.string() + ".sess", pending_, identity_, file_bytes, r.error, wo, &st);
+                r.bytes = file_bytes;
+            } catch (const std::bad_alloc&) {
+                r.ok = false;
+                r.error = "not enough RAM to write the spill file";
+            }
+            r.ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            pending_result_ = std::move(r);
+        });
+    } catch (const std::system_error&) {
+        // no thread to be had: write it here instead
+        const bool ok = spill(pending_, error);
+        pending_ = {};
+        return ok;
+    }
+    return true;
+}
+
+std::optional<ConversationSpillWrite> ConversationSpillCache::wait() {
+    if (!writer_.joinable()) return std::nullopt;
+    writer_.join();
+    ConversationSpillWrite r = std::move(pending_result_);
+    std::error_code ec;
+    if (r.ok) {
+        try {
+            if (!index_written(pending_stem_, r.bytes, pending_, r.error)) r.ok = false;
+        } catch (const std::bad_alloc&) {
+            std::filesystem::remove(pending_stem_.string() + ".sess", ec);
+            r.ok = false;
+            r.error = "not enough RAM to index the spill file";
+        }
+    } else {
+        std::filesystem::remove(pending_stem_.string() + ".sess", ec);
+    }
+    pending_ = {};
+    pending_result_ = {};
+    return r;
 }
 
 bool ConversationSpillCache::spill_streamed(const SavedConversation& meta, const std::vector<SessionKvSource>& kv,
@@ -287,6 +364,7 @@ bool ConversationSpillCache::spill_streamed(const SavedConversation& meta, const
     const std::string session = stem.string() + ".sess";
     SessionWriteOptions wo;
     wo.durable = durable;
+    wo.min_free_bytes = min_free_;
     SessionStatus st;
     if (!session_file_write(session, meta, kv, identity_, bytes, error, wo, &st)) {
         std::filesystem::remove(session, ec);

@@ -972,6 +972,34 @@ A disk hit is read into host RAM before it is restored: it must fit the configur
 engine logs spill, restore, stale-file and disk-budget events. The disk tier keeps the existing single-GPU parking
 limit: with `--layer-split` the disk tier stays off.
 
+An evicted conversation is written by a background thread, so the request that evicted it does not wait for the disk:
+the file is matched once it is complete (the next request, or a shutdown, waits for a write still running). Until
+then the evicted image stays in RAM; when parking needs that RAM (the physical-memory admission refuses), the request
+waits for the write instead of skipping the park. A spilled file keeps two checkpoints, the deepest one (the next
+turn's resume point, as SAVE keeps) and the shallowest one (the chain's root, in practice the end of the system
+prompt, which a new chat that shares it resumes from). A conversation the RAM cache cannot park - larger than its
+budget, or refused by the physical-memory admission - is streamed to DIR the way `--conversation-cache-disk-only`
+writes it, instead of being dropped, and a disk hit too large for the RAM budget is streamed back the way that mode
+reads it (single GPU, without `--batch` or `--peer-device`).
+`--conversation-cache-disk-min-tokens N` (default 0) writes nothing for a conversation shorter than N tokens: reading
+it again is cheaper than a file. Every write leaves `--session-min-free-mib` free on the disk, as SAVE does.
+
+Measured on an RTX 2080 Ti 22 GB (Linux, CUDA 13.3, NVMe; Swift 1.5 IQ3_S, `--kv int8 --kv-resident 32768
+--spec 4 --mtp`), the workload above (three conversations sharing a ~4.4K-token system prompt, a ~16K-token first
+prompt, ~2.2K tokens a turn, `--conversation-cache-slots 1`, an engine restart after 9 requests), prompt read of the
+12 later turns:
+
+| | median | range | turns resumed |
+|---|---:|---:|---:|
+| `--conversation-cache-mib 4096`, writes inside the request | 5.20 s | 4.72-6.12 s | 12 |
+| `--conversation-cache-mib 4096`, background writes | 4.51 s | 4.39-6.46 s | 12 |
+| `--conversation-cache-mib 256`, nothing parks | 14.83 s | 11.11-23.32 s | 0 |
+| `--conversation-cache-mib 256`, streamed to and from disk | 5.01 s | 4.84-6.63 s | 12 |
+
+A background write took 0.36-0.65 s, of which a request waited 0-20 ms; a spilled file holding two checkpoints was
+603-698 MiB against 1149-1617 MiB with every checkpoint. A streamed save took 0.37-0.47 s and a streamed restore
+0.59-0.96 s (read pass 0.28-0.52 s). A clean shutdown took 2.9-4.2 s.
+
 **The conversation cache on disk only (`--conversation-cache-disk-only`).** With `--conversation-cache-spill-dir DIR`
 and this flag, the conversation cache needs no RAM budget (`--conversation-cache-mib` is not used). When a request
 switches to another conversation, the outgoing one is written to DIR the way a session SAVE writes it: the running

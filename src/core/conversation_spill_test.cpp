@@ -271,6 +271,103 @@ int main() {
         fs::remove_all(sdir);
     }
 
+    // the checkpoints a spill keeps: the shallowest (the shared root) and the deepest (the next turn's resume point)
+    {
+        SavedConversation t = sample(1000);   // checkpoints at 250 and 500
+        t.checkpoints.push_back(checkpoint(750, 5));
+        t.checkpoints.insert(t.checkpoints.begin(), checkpoint(100, 6));
+        conversation_spill_trim_checkpoints(t);
+        check(t.checkpoints.size() == 2 && t.checkpoints[0].ids.size() == 100 && t.checkpoints[1].ids.size() == 750,
+              "trim: root and deepest kept, in order");
+        check(t.checkpoints[0].gdn == checkpoint(100, 6).gdn && t.checkpoints[1].gdn == checkpoint(750, 5).gdn,
+              "trim: the kept checkpoints' state intact");
+        SavedConversation two = sample(1000);
+        conversation_spill_trim_checkpoints(two);
+        check(two.checkpoints.size() == 2, "trim: two checkpoints stay two");
+    }
+
+    // the background write: the image is taken, the file is matched only once wait() has indexed it
+    {
+        const fs::path adir = fs::temp_directory_path() / ("strata-spill-async-" + std::to_string(
+            std::chrono::steady_clock::now().time_since_epoch().count()));
+        fs::remove_all(adir);
+        ConversationSpillCache tier2;
+        check(tier2.open(adir, id, 1ull << 30, error), "async: open");
+        check(!tier2.wait(), "async: nothing to wait for");
+        SavedConversation x = sample(1000);
+        x.checkpoints.push_back(checkpoint(750, 5));
+        x.checkpoints.insert(x.checkpoints.begin(), checkpoint(100, 6));
+        const SavedConversation expect = x;
+        check(tier2.spill_async(std::move(x), error), "async: started");
+        check(x.live.ids.empty() && x.kv.empty(), "async: the image was taken");
+        check(tier2.size() == 0, "async: not indexed before wait");
+        std::vector<int32_t> cont = expect.live.ids;
+        cont.push_back(int32_t(7777));
+        check(!tier2.best(cont, expect.live.imgs, false, 0.0, 0), "async: not matched before wait");
+        const auto w = tier2.wait();
+        check(w && w->ok && w->tokens == 1000 && w->bytes > 0, "async: the write is reported");
+        check(!tier2.writing() && tier2.size() == 1, "async: indexed after wait");
+        const auto m = tier2.best(cont, expect.live.imgs, false, 0.0, 0);
+        check(bool(m) && m.tokens == 1000 && m.live, "async: matched after wait");
+        SavedConversation back2;
+        check(tier2.load(m.path, back2, {}, error), "async: load back");
+        check(back2.live.ids == expect.live.ids && back2.live.gdn == expect.live.gdn, "async: live state round-trip");
+        check(back2.checkpoints.size() == 2 && back2.checkpoints[0].ids.size() == 100 &&
+              back2.checkpoints[1].ids.size() == 750, "async: the file holds the root and the deepest checkpoint");
+        bool same = back2.kv.size() == expect.kv.size();
+        for (size_t i = 0; same && i < back2.kv.size(); ++i)
+            same = buffers_equal(back2.kv[i].k, expect.kv[i].k) && buffers_equal(back2.kv[i].v, expect.kv[i].v);
+        check(same, "async: K/V bytes round-trip");
+        // a prompt that leaves the conversation past the root resumes at the root from disk
+        std::vector<int32_t> branch(expect.live.ids.begin(), expect.live.ids.begin() + 120);
+        branch.push_back(int32_t(4242));
+        const auto root = tier2.best(branch, {}, false, 0.0, 0);
+        check(bool(root) && root.tokens == 100 && !root.live, "async: a new branch resumes at the root");
+
+        // a second write waits for the first (one at a time), and both end up indexed
+        check(tier2.spill_async(sample(1500), error), "async: second write");
+        check(tier2.spill_async(sample(2000), error), "async: third write waits for the second");
+        check(tier2.size() == 2, "async: the second is indexed when the third starts");
+        check(tier2.wait() && tier2.size() == 3, "async: the third indexed after wait");
+
+        // the RAM cache hands its evictions over as rvalues: the tier takes them without a copy and RAM accounting holds
+        ConversationCache ram2(sample(1000).bytes() * 3, 1);
+        check(ram2.put(sample(1000)), "async ram: put");
+        const size_t ram_bytes = ram2.bytes();
+        size_t handed = 0;
+        auto take = [&](SavedConversation&& evicted) { ++handed; tier2.spill_async(std::move(evicted), error); };
+        check(ram2.make_room(ram_bytes, 0, take) && handed == 1 && ram2.bytes() == 0 && ram2.size() == 0,
+              "async ram: the eviction is moved out, the cache's bytes drop by its size");
+        // put() hands what it evicts to the callback too
+        check(ram2.put(sample(1500), 0, take) && handed == 1, "async ram: put into an empty cache evicts nothing");
+        check(ram2.put(sample(1000), 0, take) && handed == 2 && ram2.size() == 1, "async ram: put evicts through the callback");
+        check(tier2.wait() && tier2.size() == 5, "async ram: both evicted conversations reached disk");
+
+        // a destroyed tier waits for its write: the file is complete on disk
+        {
+            ConversationSpillCache scoped;
+            check(scoped.open(adir, id, 1ull << 30, error), "async: open scoped");
+            check(scoped.spill_async(sample(800), error), "async: scoped write");
+        }
+        ConversationSpillCache reopened;
+        check(reopened.open(adir, id, 1ull << 30, error) && reopened.size() == 6,
+              "async: a write finished by the destructor is indexed on reopen");
+
+        // the free-space preflight: a write that would leave less than min_free on the disk is refused, no file kept
+        ConversationSpillCache full;
+        check(full.open(adir, id, 1ull << 30, error, UINT64_MAX / 2), "async: open with an impossible free-space floor");
+        const size_t files_before = full.size();
+        check(full.spill_async(sample(600), error), "async: full disk write started");
+        const auto refused = full.wait();
+        check(refused && !refused->ok && !refused->error.empty(), "async: refused by the free-space preflight");
+        check(full.size() == files_before, "async: a refused write is not indexed");
+        size_t sess = 0;
+        for (const auto& e : fs::directory_iterator(adir))
+            if (e.path().extension() == ".sess") ++sess;
+        check(sess == files_before, "async: a refused write leaves no session file");
+        fs::remove_all(adir);
+    }
+
     std::printf("conversation_spill_test: %d checks passed\n", checks);
     return 0;
 }
