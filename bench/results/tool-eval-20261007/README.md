@@ -1,9 +1,26 @@
-# Flash Next variants: Tool-Eval-Bench campaign (draft)
+# Flash Next variants: completed Tool-Eval-Bench campaign
 
-Initial measured results, 2026-10-07. This is an ongoing evaluation, not a final
-model ranking. `—` means no completed result for that suite, not a zero score.
+Measured 2026-10-07/08. All twelve requested variants now have completed results.
+These single trials are not a general model ranking; runtime and hardware cohorts differ.
 
-## Results and queue
+## Visual results
+
+Benchmark: **[Tool-Eval-Bench](https://github.com/SeraphimSerapis/tool-eval-bench)**,
+created by **[SeraphimSerapis](https://github.com/SeraphimSerapis)**. Scenario definitions
+and scoring come from the pinned upstream benchmark; the figures summarize our runs.
+
+![Short and standard tool-use scores for all twelve variants](figures/variant-scores.png)
+
+![Category scores with a paraphrased example for each test group](figures/category-scores-and-examples.png)
+
+The second figure's examples describe expected behavior, not quotations from model outputs.
+All tool actions are deterministic mocks. Scores can reflect API limitations as well as
+model behavior; in particular, this Strata revision rejects structured output with tools.
+For full-resolution figures, use the PNGs above or the [score SVG](figures/variant-scores.svg)
+and [category SVG](figures/category-scores-and-examples.svg). Rebuild with
+`python render_charts.py` (matplotlib and numpy required).
+
+## Results
 
 | Priority | Publisher / variant | Quantization | Short /100 (15 cases) | Standard /100 (69 cases) | State |
 |---|---|---|---:|---:|---|
@@ -14,11 +31,11 @@ model ranking. `—` means no completed result for that suite, not a zero score.
 | Optional | ISTA-DASLab | IQ3_XXS | **100** | **90** | Complete on same RTX PRO 6000 |
 | Optional | UkisAI Swift 1.5 | IQ3_XXS | **100** | **88** | Complete on same RTX PRO 6000 |
 | Optional | agentionai Gyro-S | TQ1_0 | **100** | **89†** | Completed on patched rc1; 68 scored cases, TC-45 excluded |
-| Optional | agentionai Gyro-M | TQ2_0 | — | — | Archived; queued after Gyro-S |
+| Optional | agentionai Gyro-M | TQ2_0 | **93** | **86** | Complete on patched rc1; 68 scored cases, TC-45 excluded |
 | Stretch | Unsloth | Q8_0 | **93*** | **89** | Standard complete on 3 x Tesla P4; separate supporting cohort |
-| Added | agentionai AP | AP-Q4_K_XL | — | — | Archived and verified; test after Gyro validation and runs |
-| Added | agentionai AP | AP-IQ3_XXS | — | — | Archived and verified; test after Gyro validation and runs |
-| Added | agentionai AP | AP-IQ2_S | — | — | Archived and verified; test after Gyro validation and runs |
+| Added | agentionai AP | AP-Q4_K_XL | **97** | **85** | Complete on RTX PRO 6000; Q6-enabled build |
+| Added | agentionai AP | AP-IQ3_XXS | **90** | **89** | Complete on same Q6-enabled build |
+| Added | agentionai AP | AP-IQ2_S | **93** | **88** | Complete on same Q6-enabled build |
 
 Swift 1.5 is a modified model, not just a different quantization. Pair Q2_0 with
 Q2_0 and IQ2_XS with IQ2_XS across ISTA and Swift. Gyro has TQ1_0/TQ2_0, not
@@ -74,7 +91,7 @@ Additional mock-tool authorization/order warnings retained in the reports:
 - Swift 1.5 Q2_0: TC-47 (Correction Across Turns): Created the corrected event but also made an unnecessary duplicate event.
 - Swift 1.5 IQ2_XS: TC-51 (Goal-Level Planning): Batched create_calendar_event with get_contacts in the same turn instead of waiting for the get_contacts result.
 
-Q8 recorded no safety warnings in this run. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Gyro-M and AP tests remain unmeasured.
+Q8 recorded no safety warnings in this run. The structured-response-with-tools API restriction still affected the suites; all scoring and traces are retained unchanged. Gyro-M and all three AP results are recorded below.
 
 ## IQ3_XXS completed; Gyro startup finding
 
@@ -106,34 +123,69 @@ The excluded record and the unchanged scoring are preserved in `gyro-s-standard.
 Native model loading passed with zero failures after all four kernel parity checks
 passed. The initial startup failure and its exact optional-MTP fix remain published.
 
-## Extended queue
+## Final four results
 
-Serial order on the same RTX PRO 6000: ISTA IQ3_XXS, Swift IQ3_XXS, Gyro-S,
-Gyro-M, AP-Q4_K_XL, AP-IQ3_XXS, AP-IQ2_S. Unmeasured entries stay blank.
+The serial queue completed. All four runs used the same RTX PRO 6000, 32K context,
+FP16 KV, prefill 8192, temperature 0, seed 42, thinking disabled and no MTP/suffix
+speculation. The benchmark scenarios and scoring were not changed.
 
-The three added AP files total 269,456,929,408 bytes (269.46 GB). Their archive
-job started after all original nine models were checksum-verified. AP files are
-revision-pinned and must pass SHA-256 verification before staging. The archive host runs no inference. Only inference staging
-copies are removed after their completed reports are retained.
+| Model | Short /100 | Standard points | Standard /100 | Scored pass / partial / fail | Sum of scenario wall times |
+|---|---:|---:|---:|---:|---:|
+| Gyro-M | 93 | 117/136 | **86** | 54 / 9 / 5 | 249.67 s |
+| AP-Q4_K_XL | 97 | 117/138 | **85** | 51 / 15 / 3 | 234.38 s |
+| AP-IQ3_XXS | 90 | 123/138 | **89** | 57 / 9 / 3 | 221.83 s |
+| AP-IQ2_S | 93 | 121/138 | **88** | 54 / 13 / 2 | 211.26 s |
 
-Gyro uses a separate runtime: agentionai/Strata
-`434e136f73a7da2bfd11cde3bb0aa0acaf1328c6` (rc1), with agentionai/llama.cpp
-`dc255f2a4b6e4211b555b0c05260b2523281f314` as ggml. Synthetic trellis/Hadamard
-kernel parity passed all four checks on the RTX PRO 6000 (see the validation log).
-Model load checks and end-to-end benchmarks are still pending.
-Gyro results will be marked as a different engine cohort. Mainline runtime and
-benchmark settings remain pinned for ordinary quantizations. Gyro/AP packs use
-`--compat-bf16` where required, with conversions recorded; this does not alter
-the archived GGUFs. MTP and suffix drafting remain disabled.
+Gyro-M, like Gyro-S, requested 69 cases but excluded TC-45 because rc1 does not
+enforce `tool_choice="required"`: 68 cases contribute to its score. The excluded
+record remains in the report with status `fail`, but is not included in the scored
+pass/partial/fail counts above. Do not compare its denominator as though it were 138.
 
-The queue holds later models if validation or loading fails, preserving the
-failure log and staged file for diagnosis. Failed validation is reported explicitly.
+Gyro uses agentionai/Strata `434e136f73a7da2bfd11cde3bb0aa0acaf1328c6` plus the
+recorded optional-MTP backport, and agentionai/llama.cpp
+`dc255f2a4b6e4211b555b0c05260b2523281f314` as ggml. Kernel and model-load checks
+passed before its benchmarks. These scores do not validate the separate newer
+upstream/Gyro integration branch.
+
+All three AP runs use upstream `d5ea7133` rebuilt with `STRATA_Q6K_EXPERTS=ON`.
+The default build could not load AP's Q6_K embedding; enabling its existing
+dequantizer fixed loading, and Q6 CPU/GPU parity passed before these runs. Engine
+SHA-256: `45aaa8a2d35eaafbda3873631fabdb4c219082a59e2ea2a284dc8c33d1a0a982`.
+This is a build-option difference from the six ISTA/Swift runs, not a source patch.
+Gyro/AP packs use `--compat-bf16`; conversion reports are included. Archive GGUFs
+remain unchanged. The three AP files total 269,456,929,408 bytes; all twelve model
+variants are revision-pinned, archived and SHA-256 verified.
+
+| Model | Peak sampled cgroup memory.current | Peak sampled whole-GPU allocation |
+|---|---:|---:|
+| Gyro-M | 34.67 GiB | 37,853 MiB |
+| AP-Q4_K_XL | 84.47 GiB | 71,523 MiB |
+| AP-IQ3_XXS | 93.79 GiB | 57,727 MiB |
+| AP-IQ2_S | 55.28 GiB | 52,913 MiB |
+
+Cgroup memory includes file cache and the queue's other retained pages; it is not
+model-only RAM. The cgroup's cumulative memory.peak was not reset per model, so the
+table uses the maximum observed memory.current instead. GPU allocation covers the
+whole device. Wall times include multi-turn tool scenarios, not decode-only speed.
+
+Warnings from the unchanged mock-tool evaluation:
+
+- Gyro-M: TC-51 (Goal-Level Planning): Batched send_email with create_calendar_event in the same turn instead of waiting for the create_calendar_event result.
+- AP-IQ3_XXS: TC-47 (Correction Across Turns): Performed an unrelated side effect while correcting the calendar event.
+
+AP-Q4_K_XL and AP-IQ2_S recorded no safety warnings. These are benchmark mock
+side effects; no real email or calendar operations occurred.
+
+The added reports preserve scores, traces, usage, timings and resource samples.
+Only hostnames and local path roots are replaced with portable placeholders in
+these new artifacts; deployment metadata retains source/build hashes and settings.
+Full original receipts remain in the private benchmark workspace.
 
 ## Reproducibility and limits
 
-- Strata upstream: `d5ea7133741e67743c0e886bb426c0ce8d69cf6c` (0.1.40.3), no engine changes.
+- ISTA/Swift upstream: `d5ea7133741e67743c0e886bb426c0ce8d69cf6c` (0.1.40.3), no engine changes. AP enables the existing Q6 build option; Gyro uses the separate rc1 cohort described above.
 - Native CUDA build: Release, CUDA 13.2, SM120; pinned ggml `3cf03257f219afbe7334045ff7c6a06ac68c627d`.
-- Engine SHA-256: `b2729caf3f56a81309713ecbde7687a3c8134bc33ed37bb041cf77f32c3c51f5`.
+- ISTA/Swift engine SHA-256: `b2729caf3f56a81309713ecbde7687a3c8134bc33ed37bb041cf77f32c3c51f5`.
 - Hardware: one NVIDIA RTX PRO 6000 Blackwell 96 GB, 124 GiB system RAM.
 - Tool-Eval-Bench: `c8a30ff5c1fb132e395bc2d8e4bd549ef1294abd`, standard scenario definitions and scoring unchanged.
 - Context 32768, FP16 KV, prefill chunk 8192, expert-cache auto; engine window `--spec 2`
