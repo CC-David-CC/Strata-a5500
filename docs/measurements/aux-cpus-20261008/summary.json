@@ -1,0 +1,116 @@
+{
+  "requests_including_warmups": 622,
+  "errors": 0,
+  "cases": [
+    {
+      "host": "llm-49",
+      "case": "single-reserved-core",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": -1.0378078710464145,
+      "ttft_8k_off_s": 3.7922523414999887,
+      "ttft_8k_on_s": 2.8191794869962905,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 869.5,
+      "host_involuntary_on": 44.0
+    },
+    {
+      "host": "llm-49",
+      "case": "single-auto",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": -7.062018959738269,
+      "ttft_8k_off_s": 4.427256059498177,
+      "ttft_8k_on_s": 3.2908153435018903,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 13449.5,
+      "host_involuntary_on": 41.0
+    },
+    {
+      "host": "llm-60",
+      "case": "single-reserved-core",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": 0.0,
+      "ttft_8k_off_s": 1.3262276054592803,
+      "ttft_8k_on_s": 1.3183249720023014,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 305.0,
+      "host_involuntary_on": 10.5
+    },
+    {
+      "host": "llm-60",
+      "case": "single-auto",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": 0.0,
+      "ttft_8k_off_s": 1.3164041555137374,
+      "ttft_8k_on_s": 1.304809753492009,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 311.5,
+      "host_involuntary_on": 14.0
+    },
+    {
+      "host": "llm-79",
+      "case": "single-reserved-core",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": -0.10141987829613841,
+      "ttft_8k_off_s": 15.542695262498455,
+      "ttft_8k_on_s": 14.136353941001289,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 2737.0,
+      "host_involuntary_on": 113.5
+    },
+    {
+      "host": "llm-79",
+      "case": "single-auto",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": -1.1213162086818107,
+      "ttft_8k_off_s": 15.285081866502878,
+      "ttft_8k_on_s": 14.236061779993179,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 2630.0,
+      "host_involuntary_on": 118.0
+    },
+    {
+      "host": "r730",
+      "case": "three-26-core",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": 0.0,
+      "ttft_8k_off_s": 43.922741040587425,
+      "ttft_8k_on_s": 44.05034425109625,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 5675.0,
+      "host_involuntary_on": 133.0
+    },
+    {
+      "host": "r730",
+      "case": "two-26-core",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": -0.2906162464985984,
+      "ttft_8k_off_s": 39.31461807060987,
+      "ttft_8k_on_s": 39.27464683097787,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 6296.5,
+      "host_involuntary_on": 189.5
+    },
+    {
+      "host": "r730",
+      "case": "two-27-auto",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": -0.28893733347175043,
+      "ttft_8k_off_s": 39.22788270749152,
+      "ttft_8k_on_s": 39.285740861087106,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 6317.0,
+      "host_involuntary_on": 195.5
+    },
+    {
+      "host": "r730",
+      "case": "three-27-auto",
+      "decode_pairs": 12,
+      "decode_paired_median_pct": -0.5797150154590591,
+      "ttft_8k_off_s": 43.88725281052757,
+      "ttft_8k_on_s": 43.90141844796017,
+      "prefill_pairs": 2,
+      "host_involuntary_off": 5700.0,
+      "host_involuntary_on": 129.0
+    }
+  ]
+}

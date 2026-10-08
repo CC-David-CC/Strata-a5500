@@ -1,0 +1,12 @@
+| Host / configuration | Paired decode change | 8K TTFT off ? on |
+|---|---:|---:|
+| llm-49 / single-reserved-core | -1.04% | 3.792 ? 2.819 s |
+| llm-49 / single-auto | -7.06% | 4.427 ? 3.291 s |
+| llm-60 / single-reserved-core | +0.00% | 1.326 ? 1.318 s |
+| llm-60 / single-auto | +0.00% | 1.316 ? 1.305 s |
+| llm-79 / single-reserved-core | -0.10% | 15.543 ? 14.136 s |
+| llm-79 / single-auto | -1.12% | 15.285 ? 14.236 s |
+| r730 / three-26-core | +0.00% | 43.923 ? 44.050 s |
+| r730 / two-26-core | -0.29% | 39.315 ? 39.275 s |
+| r730 / two-27-auto | -0.29% | 39.228 ? 39.286 s |
+| r730 / three-27-auto | -0.58% | 43.887 ? 43.901 s |
