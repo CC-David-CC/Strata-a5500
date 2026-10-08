@@ -8104,7 +8104,7 @@ int main(int argc, char** argv) {
                         "expert_slots_primary=%lld expert_cache_primary_mib=%lld spec=%d "
                         "mtp_max=%d lookup=%d vram_free_mib=%lld cvec=%s arena_mib=%lld pool_workers=%d pcie_frac=%.2f "
                         "spec_min_p=%.2f conversation_cache_mib=%lld conversation_cache_slots=%d "
-                        "conversation_cache_min_free_mib=%lld conversation_cache_disk_mib=%lld "
+                        "conversation_cache_min_free_mib=%lld conversation_cache_disk_mib=%lld conversation_cache_disk_only=%d "
                         "conversation_cache_similarity=%.3f conversation_cache_n_min=%lld "
                         "tail_role_token=%lld vram_elastic=%d%s engine=" STRATA_VERSION "\n",
                         (long long) o.max_context, o.kv.c_str(),
@@ -8117,7 +8117,7 @@ int main(int argc, char** argv) {
                         (long long) ((o.mmap_experts ? src.resident_bytes() : strata::kernels::cpu::expert_layout().total) >> 20),
                         pool.workers(), o.pcie_frac,
                         o.spec_min_p, (long long) o.conversation_cache_mib, o.conversation_cache_slots,
-                        (long long) o.conversation_cache_min_free_mib, (long long) o.conversation_cache_disk_mib,
+                        (long long) o.conversation_cache_min_free_mib, (long long) o.conversation_cache_disk_mib, disk_only ? 1 : 0,
                         o.conversation_cache_similarity, (long long) o.conversation_cache_n_min,
                         (long long) o.tail_role_token, xcache.segmented() ? 1 : 0,
                         o.batch > 0 ? (" batch_slots=" + std::to_string(o.batch) +
@@ -9262,20 +9262,43 @@ int main(int argc, char** argv) {
                 try {
                     strata::core::SessionReadLimits limits;
                     const uint64_t floor = (uint64_t) o.conversation_cache_min_free_mib << 20;
-                    limits.admit = [floor](uint64_t need, std::string& why) {
+                    limits.admit = [floor, &o](uint64_t need, std::string& why) {
                         if (strata::core::conversation_memory_admit(strata::core::conversation_available_memory(), need, floor))
                             return true;
-                        why = "not enough RAM for the read pass";
+                        why = "not enough RAM for the read pass: " + std::to_string(need >> 20) + " MiB plus the " +
+                              std::to_string((long long) o.conversation_cache_min_free_mib) +
+                              " MiB --conversation-cache-min-free-mib floor";
                         return false;
                     };
                     std::string le;
                     strata::core::SessionStatus st;
-                    if (!strata::core::conversation_session_read_limits(limits, ss, g, mtp.kv_state(), (uint64_t) o.max_context,
-                            (uint64_t) std::max(o.prompt_cache, 1), le)) {
+                    // A disk-only save writes at most one checkpoint (session_save_checkpoints: the deepest), so the read
+                    // pass admits one first - and its RAM preflight is sized for one, not for --prompt-cache of them.  A
+                    // file the RAM cache spilled (the same directory without this flag) can hold more: a file refused as
+                    // invalid is read once more under the engine's own checkpoint limit before it counts as bad.
+                    auto read_pass = [&](uint64_t max_checkpoints) {
+                        st = {};
+                        disk_meta = {};
+                        disk_file_kv.clear();
+                        if (!strata::core::conversation_session_read_limits(limits, ss, g, mtp.kv_state(),
+                                (uint64_t) o.max_context, max_checkpoints, le)) {
+                            st.error = strata::core::SessionError::memory;   // a runtime limit, not the file: keep it
+                            return false;
+                        }
+                        return strata::core::session_file_read_streamed(disk_match.path, spill_identity, disk_meta,
+                                                                        disk_in_bytes, le, limits, &disk_file_kv, &st);
+                    };
+                    const uint64_t engine_checkpoints = (uint64_t) std::max(o.prompt_cache, 1);
+                    bool read_ok = read_pass(1);
+                    if (!read_ok && st.error == strata::core::SessionError::invalid && engine_checkpoints > 1)
+                        read_ok = read_pass(engine_checkpoints);
+                    std::error_code exists_error;
+                    if (!read_ok && !std::filesystem::exists(disk_match.path, exists_error) && !exists_error)
+                        st.error = strata::core::SessionError::invalid;   // gone from the directory: drop its entry
+                    if (!read_ok && st.error != strata::core::SessionError::invalid) {
+                        // RAM, storage or I/O refused this request's read: the file may be fine, keep it for later
                         std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (%s)\n", le.c_str());
-                    } else if (!strata::core::session_file_read_streamed(disk_match.path, spill_identity, disk_meta,
-                                   disk_in_bytes, le, limits, &disk_file_kv, &st) ||
-                               !strata::core::conversation_snapshot_validate_meta(disk_meta, ss, g, mtp.kv_state(), le)) {
+                    } else if (!read_ok || !strata::core::conversation_snapshot_validate_meta(disk_meta, ss, g, mtp.kv_state(), le)) {
                         std::fprintf(stderr, "strata serve: conversation cache: discard unusable disk conversation (%s)\n",
                                      le.c_str());
                         std::string erase_error;
