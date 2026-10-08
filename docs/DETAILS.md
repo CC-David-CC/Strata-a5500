@@ -998,6 +998,16 @@ memory (RssAnon) peaked 0.6 GiB above a run without the cache during a switch an
 conversation stays in RAM. Greedy replies matched the run without the cache for 13 of 15 turns; the other two
 match the RAM cache's restore of the same state (a restore and a full read of the prompt round differently).
 
+Disk-only mode also keeps **prefix entries** (`strata-conv-prefix-N`): when a conversation is saved, its shared
+opening is saved once more on its own, once per distinct opening. That is the deepest `"strata_prefix"` checkpoint on
+the live path when the request pinned one, else the root (the first turn boundary at least `--prompt-cache-root`
+tokens in). A new conversation that opens the same way - a coding agent's next session - resumes from it instead of
+reading its system prompt and tools again. Prefix entries are never removed as superseded, the disk budget evicts
+every ordinary conversation before one of them, and they survive a restart. With a client that sends
+`"strata_prefix"` at the end of Claude Code's `<system-reminder>` blocks, a new session's first turn reused 13,434
+of 15,924 tokens and took 4.7 s instead of 15.7 s; after an engine restart, 5.1 s (the 420 MiB entry restored in
+326 ms).
+
 **Session files (disk).** The conversation the engine holds can be saved to a file and restored later, also after a
 restart of the same engine version, so a long prompt is not read again. The server exposes the save and restore
 requests of llama-server's slot API, for its single slot 0, when started with `--slot-save-path DIR` (also
