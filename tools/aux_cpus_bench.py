@@ -1,4 +1,4 @@
-"""Paired R730 #1598 probe. Real native engine; loopback HTTP; no Codi service.
+"""Paired fleet #1598 probe. Real native engine; loopback HTTP; no Codi service.
 
 Interleave off/on and include off/off controls. Preserve every response, engine
 timing and Linux thread-affinity snapshot. Checkpoints are disabled for fresh
@@ -68,11 +68,20 @@ def main():
     ap.add_argument('--decode-only',action='store_true')
     args=ap.parse_args();out=ROOT/'results'/args.label;out.mkdir(parents=True,exist_ok=False)
     cfg=json.loads(Path('/home/dflanag3/CodiServer/config.json').read_text())
-    cfg.pop('api_key',None);cfg['gpu']=[int(x) for x in args.gpus.split(',')];cfg['layer_split']=args.split
+    original_exe=cfg['exe']
+    cfg.pop('api_key',None);gpus=[int(x) for x in args.gpus.split(',')]
+    cfg['gpu']=gpus if len(gpus)>1 else gpus[0]
+    if len(gpus)>1:cfg['layer_split']=args.split
+    else:cfg.pop('layer_split',None)
     cfg['cwd']=str(SOURCE);cfg['exe']=str(ROOT/'build/strata')
-    if args.original:cfg['exe']='/home/dflanag3/CodiServer/build/strata'
-    cfg['log']=str(out/'engine.log');native=cfg['args'];native[native.index('--pool-workers')+1]=str(args.workers)
-    if args.no_adapt:native[native.index('--adapt-every')+1]='0'
+    if args.original:cfg['exe']=original_exe
+    cfg['log']=str(out/'engine.log');cfg['state']=str(out/'state');native=cfg['args']
+    def option(name,value):
+        if name in native:native[native.index(name)+1]=str(value)
+        else:native.extend([name,str(value)])
+    option('--pool-workers',args.workers)
+    if '--conversation-cache-spill-dir' in native:option('--conversation-cache-spill-dir',out/'kv')
+    if args.no_adapt:option('--adapt-every',0)
     if args.aux!='auto':native+=['--aux-cpus',args.aux]
     elif args.startup=='on':native+=['--aux-cpus','auto']
     (out/'config.json').write_text(json.dumps(cfg,indent=2))
