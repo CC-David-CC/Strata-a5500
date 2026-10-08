@@ -5,7 +5,8 @@ Strata main and the Responses/disk-cache integration in
 [#1489](https://github.com/Niko1221/Strata/pull/1489). It uses Strata's public
 Python server and native engine directly. There is no downstream profile wrapper.
 
-Results: [1K–8K preliminary medians](measurements/cache-latency-20261008/pilot/)
+Results: [completed 1K–8K percentiles, 6,400 measured requests](measurements/cache-latency-20261008/full/),
+[disk restore examples](measurements/cache-latency-20261008/disk-restore/),
 and [32K–128K single examples](measurements/cache-latency-20261008/long-examples/).
 
 The first pass is deliberately small: three measured requests at each prefix
@@ -14,8 +15,10 @@ An additional pass measures one request per cell at 32K, 64K and 128K after one
 warm-up, using a 256K context capacity for both builds. These are single examples,
 not latency percentiles. It keeps all other engine and sampling settings identical.
 
-The follow-up campaign is configured for 200 measured requests per cell in ten
-blocks of 20; it is paused while the initial evidence branch is prepared for review.
+The follow-up campaign completed 200 measured requests per cell in ten
+blocks of 20: 6,400 requests across two builds, two modes and eight lengths,
+with zero request errors. This repeated campaign covers cache-disabled and
+pinned live reuse only; disk restore retains the smaller sample counts above.
 Warm-ups and requests used to switch conversations are kept in the raw logs
 but excluded from the measured population. Build/mode order reverses on alternate
 blocks; prefix-length order is deterministically shuffled within each block.

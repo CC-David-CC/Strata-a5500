@@ -69,7 +69,8 @@ def charts(summary, out, subtitle):
     counts = [r['n'] for r in summary if r['n'] > 0]
     minimum = min(counts, default=0)
     single = bool(counts) and all(n == 1 for n in counts)
-    note = (f'n = {minimum}–{max(counts, default=0)} per successful cell. '
+    sample_label = str(minimum) if minimum == max(counts, default=0) else f'{minimum}–{max(counts, default=0)}'
+    note = (f'n = {sample_label} per successful cell. '
             'Warm-ups excluded; cache misses retained. '
             + ('PRELIMINARY: too few samples for tail estimates.' if minimum < 100
                else 'p99 is exploratory (200 samples gives about two upper-tail observations).'))
@@ -130,12 +131,17 @@ def charts(summary, out, subtitle):
         ax.set_title(f'{target//1024}K prefix', loc='left', weight='bold')
         ax.set_xticks(range(5), [f'p{p}' for p in PERCENTILES])
         ax.grid(axis='y', alpha=.18)
-        ax.set_ylim(bottom=0)
-    handles = [Line2D([0], [0], color=COLORS[m], lw=3, label=LABELS[m]) for m in MODES]
+    # Set shared limits after every panel is populated. Setting a lower limit
+    # on the first panel disables autoscaling and clips later, slower panels.
+    upper = max(r[f'ttft_s_p{p}'] for r in summary for p in PERCENTILES
+                if r[f'ttft_s_p{p}'] is not None)
+    axes.flat[0].set_ylim(0, upper * 1.08)
+    present = {r['mode'] for r in summary}
+    handles = [Line2D([0], [0], color=COLORS[m], lw=3, label=LABELS[m]) for m in MODES if m in present]
     handles += [Line2D([0], [0], color='#253D50', label='main', marker='o'),
                 Line2D([0], [0], color='#253D50', linestyle='--', label='#1489', marker='s')]
     fig.legend(handles=handles, loc='lower center', ncol=6, frameon=False, bbox_to_anchor=(.5, .065))
-    fig.suptitle('The full latency distribution, from median to tail', x=.055, y=.985, ha='left', size=23, weight='bold')
+    fig.suptitle('Measured TTFT percentiles, from median to tail', x=.055, y=.985, ha='left', size=23, weight='bold')
     fig.text(.055, .93, subtitle + '  •  TTFT in seconds, lower is better', size=10)
     fig.text(.055, .025, note, size=9)
     fig.subplots_adjust(top=.87, bottom=.17, hspace=.36, wspace=.15)
