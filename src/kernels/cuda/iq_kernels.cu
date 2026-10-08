@@ -1358,7 +1358,7 @@ __global__ void __launch_bounds__(256) native_gu_multi_kernel(const unsigned lon
     STRATA_SHARED_ALIGN16_U32(s_grid_buf, IqGridWords<TG, STAGE_GRID>::value);
     const uint32_t* s_grid = stage_iq_grid<TG, STAGE_GRID>(s_grid_buf, threadIdx.x, 256);
     const int nb = (int) (L.n_embd / Fmt<TG>::qk), xb = (int) (L.n_embd / 32);
-    if constexpr (SUB16) {
+    if constexpr (SUB16 && Fmt<TG>::ipb * 32 == Fmt<TG>::qk) {
         if (xb == 80) {
             const int subwarp = threadIdx.x >> 4, t = threadIdx.x & 15;
             const int row = blockIdx.x * 16 + subwarp;            // 0 .. 2*n_ff
@@ -2041,9 +2041,6 @@ __device__ __forceinline__ void dq_dispatch(int ty, const void* vx, int64_t ibs,
         case 42: dq_q2_0(vx, ibs, y, tid); break;
         case 12: dq_q4_k(vx, ibs, y, tid); break;
         case 13: dq_q5_k(vx, ibs, y, tid); break;
-#ifdef STRATA_Q6K_EXPERTS
-        case 14: dq_q6_k(vx, ibs, y, tid); break;
-#endif
         case 7: dq_q5_1(vx, ibs, y, tid); break;
         case 6: dq_q5_0(vx, ibs, y, tid); break;
         case 2: dq_q4_0(vx, ibs, y, tid); break;
@@ -2097,6 +2094,16 @@ int d_qk(int t) {
         STRATA_D_FMTS(STRATA_QK)
 #undef STRATA_QK
         default: return 0;
+    }
+}
+// The 16-lane kernel consumes exactly 80 lane contributions at width 2560.
+// Trellis blocks need 160 contributions despite also having 80 activation blocks.
+bool gu_sub16_supported(int t) {
+    switch (t) {
+#define STRATA_SUB16(T) case T: return kSplit<T> && Fmt<T>::ipb * 32 == Fmt<T>::qk;
+        STRATA_GU_FMTS(STRATA_SUB16)
+#undef STRATA_SUB16
+        default: return false;
     }
 }
 bool gu_split(int t) {
@@ -3621,7 +3628,7 @@ void native_expert_grouped(const NativeExpertLayout& L, const unsigned long long
     }
     const bool v1 = g_grouped_v1;
     const int64_t gy = (v1 || grid_groups <= 0 || grid_groups > cap_groups) ? cap_groups : grid_groups;
-    const int gu_rows = (!g_old_kernels && !g_no_sub16_gu && L.n_embd == 2560 && gu_split(L.gu_type)) ? 16 : GU_ROWS;
+    const int gu_rows = (!g_old_kernels && !g_no_sub16_gu && L.n_embd == 2560 && gu_sub16_supported(L.gu_type)) ? 16 : GU_ROWS;
     const dim3 ggu((unsigned) ((2 * L.n_ff + gu_rows - 1) / gu_rows), (unsigned) gy);
 #if defined(STRATA_HIP_GFX906)
     const int em0 = exp_mode();
