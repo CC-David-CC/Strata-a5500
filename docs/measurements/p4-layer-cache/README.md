@@ -1,5 +1,10 @@
 # Active-layer cache: P4 validation
 
+The [cross-GPU follow-up](cross-gpu/README.md) adds three-repeat 4K/8K/12K
+measurements, default-off regression checks and CUDA/HIP/SYCL builds. It completes
+the backend builds listed as pending in the initial PR description. This page
+preserves the initial experiment and its original sample counts.
+
 Measured 2026-10-09. This is validation evidence for the opt-in native change,
 not a general performance claim. It was developed on public #1667 at `378f3f58`
 and committed as `2d2096c1`, then extracted onto main (`fb58e0db`) without server
@@ -103,8 +108,8 @@ options are omitted. It generates the synthetic maintenance-notes prompt and
 records its exact token IDs. Checkpoint integration additionally requires #1667;
 native prefill and its benchmark do not.
 
-CUDA only was built and exercised. HIP/SYCL builds remain outstanding before
-review. AMD, RTX 3070, larger contexts, other quants and other models were not
-validated. Multi-GPU, images and unsupported layouts decline this experimental
+This initial experiment built and exercised CUDA only; the follow-up above
+covers the later HIP/SYCL builds and additional GPUs. Larger contexts, other
+quants and other models were not validated here. Multi-GPU, images and unsupported layouts decline this experimental
 path. Performance depends on free VRAM, chunk size and expert reuse. No default
 is changed.

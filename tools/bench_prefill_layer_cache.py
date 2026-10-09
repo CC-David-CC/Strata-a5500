@@ -17,6 +17,14 @@ from serve.frontend import ChatTemplate
 from strata_tokenizer import Tokenizer
 
 
+def check_staging_profiles(logs):
+    profiles = {arm: ('auto-RAM' if 'stager takes the RAM profile' in log else 'default/explicit')
+                for arm, log in logs.items()}
+    if len(set(profiles.values())) != 1:
+        raise ValueError(f'staging profiles differ: {profiles}; warm the model files and rerun both arms')
+    return profiles
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--config', required=True)
@@ -114,6 +122,8 @@ def main():
             rows = [r for r in report['runs'] if r['tokens'] == n and r['repeat'] >= 0]
             assert all(r['output'] == rows[0]['output'] for r in rows), f'token mismatch at {n}'
         assert any(r['enabled'] and 'strata layer cache: window' in r['log'] for r in report['runs']), 'scheduler never activated'
+        report['staging_profiles'] = check_staging_profiles(
+            {arm: (out / (arm + '.log')).read_text(errors='replace') for arm in ['off', 'on']})
         report['complete'] = True
     finally:
         save()

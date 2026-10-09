@@ -53,19 +53,27 @@ and exercise checkpoint reuse/branching/restart before enabling it for service.
 compares off/on with automatic chunk sizing, three repetitions at 4K/8K and
 64 generated tokens. A 512-token warmup also generates 64 tokens, so MTP graph
 memory is allocated before measurements. It records exact token IDs and fails on output mismatch,
-prefix reuse, or a scheduler that never activates. `--reference-exe` can select
+prefix reuse, a scheduler that never activates, or different automatic staging
+profiles between arms. `--reference-exe` can select
 an unmodified engine for the off arm. Use `--chunk 512` to compare fixed chunks.
 `--cancel-test` additionally cancels an active prompt and checks recovery on the
 same engine.
 
-## P4 validation
+## Validation
 
 On one Tesla P4 with Qwen3.8-Flash-Next-GSQ-RCO IQ3_XXS, automatic chunk
-sizing and 4,096 fresh prompt tokens, median prompt throughput increased from
-108.133524 to 115.816006 tok/s (+7.105%; two repetitions per arm). An initial
-8,192-token pair measured 115.079293 to 122.610686 tok/s (+6.545%). All compared
-64-token outputs matched exactly. CUDA was built and exercised; HIP and SYCL
-builds remain outstanding. These are small samples on one workload.
+sizing, the three-repeat follow-up measured +7.021% at 4K, +6.589% at 8K and
++13.716% at 12K fresh prompt tokens. All compared 64-token outputs matched
+exactly. CUDA, HIP and SYCL engine builds passed; SYCL inference was not tested.
+These remain small samples on one synthetic workload.
+
+The RTX 3070 results show why this stays opt-in: with matched warm-file staging,
+4K prefill was 7.017% slower, while 8K and 12K improved by 17.225% and 10.342%.
+The RX 5500 XT with 32 GB host RAM was 5.036%-23.523% slower at these lengths
+with the default cache window.
+The small MTP warmup does not ensure warm model files: confirm that both arms
+select the same staging profile before interpreting a speed comparison.
 
 See [measurements and validation](measurements/p4-layer-cache/README.md) for
-per-run data, warmup differences, checkpoint checks and reproduction settings.
+the initial experiment, and the [cross-GPU follow-up](measurements/p4-layer-cache/cross-gpu/README.md)
+for repeated measurements, per-run data, backend build details and limitations.
