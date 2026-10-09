@@ -9504,10 +9504,74 @@ int main(int argc, char** argv) {
             const uint64_t ram_budget = (uint64_t) o.conversation_cache_mib * 1024 * 1024;
             const bool disk_hit = !disk_match.path.empty() &&
                                   disk_match.tokens > std::max(resume, std::max(slot_tokens, parked.tokens));
-            // with the RAM cache on, a hit larger than its budget (one it could not park either) is streamed back the
-            // way disk-only reads it, instead of being refused
-            const bool stream_hit = disk_hit && (disk_only || (can_stream && (disk_estimate > ram_budget ||
-                                                                            disk_estimate > SIZE_MAX)));
+            // with the RAM cache on, a hit larger than its budget (one it could not park either), or one the RAM cache
+            // cannot take now (below), is streamed back the way disk-only reads it, instead of being refused
+            bool stream_hit = disk_hit && (disk_only || (can_stream && (disk_estimate > ram_budget ||
+                                                                      disk_estimate > SIZE_MAX)));
+            if (!disk_only && disk_hit && !stream_hit) {
+                const uint64_t estimate = disk_estimate;
+                if (estimate > ram_budget || estimate > SIZE_MAX) {
+                    std::fprintf(stderr, "strata serve: conversation cache: disk hit needs %llu MiB; RAM budget is %llu MiB\n",
+                                 (unsigned long long) (estimate >> 20), (unsigned long long) (ram_budget >> 20));
+                } else {
+                    conversation_spill.pin(disk_match.path);
+                    if (!conversations.make_room((size_t) estimate, 0, spill_evicted)) {
+                        std::fprintf(stderr, "strata serve: conversation cache: disk hit does not fit the RAM cache budget%s\n",
+                                     can_stream ? "; streaming it" : "");
+                        conversation_spill.unpin(disk_match.path);
+                        stream_hit = can_stream;
+                    } else {
+                        const uint64_t floor = (uint64_t) o.conversation_cache_min_free_mib << 20;
+                        auto admitted = [&] {
+                            return strata::core::conversation_memory_admit(strata::core::conversation_available_memory(),
+                                                                           estimate, floor);
+                        };
+                        bool admit = admitted();
+                        if (!admit && conversation_spill.writing()) { spill_wait(); admit = admitted(); }   // as when parking
+                        if (!admit) {
+                            std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (physical RAM admission; "
+                                         "need %llu MiB plus a %lld MiB floor, or telemetry unavailable)%s\n",
+                                         (unsigned long long) (estimate >> 20), (long long) o.conversation_cache_min_free_mib,
+                                         can_stream ? "; streaming it" : "");
+                            conversation_spill.unpin(disk_match.path);
+                            stream_hit = can_stream;
+                        } else {
+                            strata::core::SessionReadLimits limits;
+                            limits.admit = [floor, &o](uint64_t need, std::string& why) {
+                                const auto avail = strata::core::conversation_available_memory();
+                                if (strata::core::conversation_memory_admit(avail, need, floor)) return true;
+                                why = "not enough RAM to read it";
+                                return false;
+                            };
+                            std::string limits_error;
+                            if (!strata::core::conversation_session_read_limits(
+                                    limits, ss, g, mtp.kv_state(), (uint64_t) o.max_context,
+                                    (uint64_t) std::max(o.prompt_cache, 1), limits_error)) {
+                                std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (%s)\n", limits_error.c_str());
+                                conversation_spill.unpin(disk_match.path);
+                            } else {
+                                strata::core::SavedConversation restored;
+                                std::string spill_error;
+                                if (!conversation_spill.load(disk_match.path, restored, limits, spill_error)) {
+                                    std::fprintf(stderr, "strata serve: conversation cache: discard unreadable disk conversation (%s)\n",
+                                                 spill_error.c_str());
+                                    std::string erase_error;
+                                    conversation_spill.erase(disk_match.path, erase_error);
+                                    conversation_spill.unpin(disk_match.path);
+                                } else if (restored.bytes() > ram_budget) {
+                                    std::fprintf(stderr, "strata serve: conversation cache: disk conversation exceeds the RAM cache budget after loading\n");
+                                    conversation_spill.unpin(disk_match.path);
+                                } else {
+                                    incoming.emplace(std::move(restored));
+                                    parked = {0, disk_match.tokens, disk_match.live};
+                                    incoming_from_disk = true;
+                                    incoming_disk_path = disk_match.path;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (stream_hit) {
                 const auto td = Clock::now();
                 try {
@@ -9566,66 +9630,6 @@ int main(int argc, char** argv) {
                 }
                 disk_read_ms = std::chrono::duration<double, std::milli>(Clock::now() - td).count();
                 if (disk_incoming) slot_source = -1;
-            }
-            if (!disk_only && disk_hit && !stream_hit) {
-                const uint64_t estimate = disk_estimate;
-                if (estimate > ram_budget || estimate > SIZE_MAX) {
-                    std::fprintf(stderr, "strata serve: conversation cache: disk hit needs %llu MiB; RAM budget is %llu MiB\n",
-                                 (unsigned long long) (estimate >> 20), (unsigned long long) (ram_budget >> 20));
-                } else {
-                    conversation_spill.pin(disk_match.path);
-                    if (!conversations.make_room((size_t) estimate, 0, spill_evicted)) {
-                        std::fprintf(stderr, "strata serve: conversation cache: disk hit does not fit the RAM cache budget\n");
-                        conversation_spill.unpin(disk_match.path);
-                    } else {
-                        const uint64_t floor = (uint64_t) o.conversation_cache_min_free_mib << 20;
-                        auto admitted = [&] {
-                            return strata::core::conversation_memory_admit(strata::core::conversation_available_memory(),
-                                                                           estimate, floor);
-                        };
-                        bool admit = admitted();
-                        if (!admit && conversation_spill.writing()) { spill_wait(); admit = admitted(); }   // as when parking
-                        if (!admit) {
-                            std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (physical RAM admission; "
-                                         "need %llu MiB plus a %lld MiB floor, or telemetry unavailable)\n",
-                                         (unsigned long long) (estimate >> 20), (long long) o.conversation_cache_min_free_mib);
-                            conversation_spill.unpin(disk_match.path);
-                        } else {
-                            strata::core::SessionReadLimits limits;
-                            limits.admit = [floor, &o](uint64_t need, std::string& why) {
-                                const auto avail = strata::core::conversation_available_memory();
-                                if (strata::core::conversation_memory_admit(avail, need, floor)) return true;
-                                why = "not enough RAM to read it";
-                                return false;
-                            };
-                            std::string limits_error;
-                            if (!strata::core::conversation_session_read_limits(
-                                    limits, ss, g, mtp.kv_state(), (uint64_t) o.max_context,
-                                    (uint64_t) std::max(o.prompt_cache, 1), limits_error)) {
-                                std::fprintf(stderr, "strata serve: conversation cache: disk hit skipped (%s)\n", limits_error.c_str());
-                                conversation_spill.unpin(disk_match.path);
-                            } else {
-                                strata::core::SavedConversation restored;
-                                std::string spill_error;
-                                if (!conversation_spill.load(disk_match.path, restored, limits, spill_error)) {
-                                    std::fprintf(stderr, "strata serve: conversation cache: discard unreadable disk conversation (%s)\n",
-                                                 spill_error.c_str());
-                                    std::string erase_error;
-                                    conversation_spill.erase(disk_match.path, erase_error);
-                                    conversation_spill.unpin(disk_match.path);
-                                } else if (restored.bytes() > ram_budget) {
-                                    std::fprintf(stderr, "strata serve: conversation cache: disk conversation exceeds the RAM cache budget after loading\n");
-                                    conversation_spill.unpin(disk_match.path);
-                                } else {
-                                    incoming.emplace(std::move(restored));
-                                    parked = {0, disk_match.tokens, disk_match.live};
-                                    incoming_from_disk = true;
-                                    incoming_disk_path = disk_match.path;
-                                }
-                            }
-                        }
-                    }
-                }
             }
             // The disk attempt above ran make_room before reading its file, so a failed disk load (a damaged file,
             // an admission refusal) can have evicted the entry `parked` named: recompute the RAM match before the

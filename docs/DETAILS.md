@@ -984,8 +984,8 @@ waits for the write instead of skipping the park. A spilled file keeps two check
 turn's resume point, as SAVE keeps) and the shallowest one (the chain's root, in practice the end of the system
 prompt, which a new chat that shares it resumes from). A conversation the RAM cache cannot park - larger than its
 budget, or refused by the physical-memory admission - is streamed to DIR the way `--conversation-cache-disk-only`
-writes it, instead of being dropped, and a disk hit too large for the RAM budget is streamed back the way that mode
-reads it (single GPU, without `--batch` or `--peer-device`).
+writes it, instead of being dropped, and a disk hit too large for the RAM budget, or one the RAM cache cannot take now (the physical-RAM
+admission), is streamed back the way that mode reads it (single GPU, without `--batch` or `--peer-device`).
 `--conversation-cache-disk-min-tokens N` (default 0) writes nothing for a conversation shorter than N tokens: reading
 it again is cheaper than a file. Every write leaves `--session-min-free-mib` free on the disk, as SAVE does.
 
