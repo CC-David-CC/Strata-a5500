@@ -397,6 +397,18 @@ size_t ConversationSpillCache::drop_superseded(const std::vector<int32_t>& ids,
                                                const std::vector<ConversationImageKey>& images,
                                                const std::vector<ConversationCheckpoint>& checkpoints, bool cvec,
                                                const std::string& keep) {
+    // With a replacement file, only states actually indexed in that file supersede older copies. The caller's
+    // live chain may contain a shared root which session_save_checkpoints omitted from the streamed snapshot.
+    // Copy only lengths: entries_ is modified below, so an Entry reference would be invalidated by an erase.
+    std::vector<size_t> retained_lengths;
+    if (!keep.empty()) {
+        const auto saved = std::find_if(entries_.begin(), entries_.end(),
+                                       [&](const Entry& e) { return e.session_path() == keep; });
+        if (saved == entries_.end() || saved->cvec != cvec || saved->live_meta.ids != ids ||
+            saved->live_meta.imgs != images) return 0;
+        retained_lengths = saved->checkpoint_lengths;
+        retained_lengths.push_back(saved->live_meta.ids.size());
+    }
     size_t dropped = 0;
     for (size_t i = 0; i < entries_.size();) {
         const Entry& entry = entries_[i];
@@ -421,7 +433,9 @@ size_t ConversationSpillCache::drop_superseded(const std::vector<int32_t>& ids,
         bool held = same_saved_prefix(deepest, ids, images);
         for (const auto& checkpoint : checkpoints)
             if (!held && same_saved_prefix(deepest, checkpoint.ids, checkpoint.imgs)) held = true;
-        if (entry.cvec == cvec && deepest && held && entry.session_path() != pinned_path_ &&
+        const bool retained = keep.empty() ||
+            std::find(retained_lengths.begin(), retained_lengths.end(), deepest) != retained_lengths.end();
+        if (entry.cvec == cvec && deepest && held && retained && entry.session_path() != pinned_path_ &&
             (keep.empty() || entry.session_path() != keep)) {
             std::error_code ec;
             std::filesystem::remove(entry.session_path(), ec);

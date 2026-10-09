@@ -268,6 +268,42 @@ int main() {
         // without keep the same rule would drop the new copy too (its deepest checkpoint is on the live path)
         check(str_dir.drop_superseded(longer.live.ids, {}, longer.checkpoints, longer.cvec) == 1 && str_dir.size() == 0,
               "keep: the rule alone drops the new copy");
+
+        // A streamed save keeps fewer checkpoints than the live chain. An older base must not be removed merely
+        // because its resume point is still in RAM: that point must exist in the replacement file as well.
+        SavedConversation base = sample(500);
+        base.checkpoints = {base.live};
+        check(str_dir.spill(base, error), "retention: save shared base");
+        const std::string base_path = str_dir.newest_path();
+        SavedConversation branch = sample(1000);
+        branch.checkpoints = {base.live, checkpoint(750, 7)};
+        SavedConversation branch_meta = branch;
+        branch_meta.kv.clear();
+        branch_meta.checkpoints = session_checkpoints_to_save(branch.checkpoints);
+        check(branch_meta.checkpoints.size() == 1 && branch_meta.checkpoints[0].ids.size() == 750,
+              "retention: streamed snapshot omits shared base checkpoint");
+        check(str_dir.spill_streamed(branch_meta, make_sources(branch), written, error), "retention: save branch");
+        const std::string branch_path = str_dir.newest_path();
+        check(str_dir.drop_superseded(branch.live.ids, {}, branch.checkpoints, false, branch_path) == 0,
+              "retention: RAM-only checkpoint cannot supersede saved base");
+        std::vector<int32_t> other_branch = base.live.ids;
+        other_branch.push_back(99);
+        const auto base_hit = str_dir.best(other_branch, {}, false, 0.0, 0);
+        check(base_hit && base_hit.path == base_path && base_hit.tokens == 500,
+              "retention: changed suffix still matches base");
+        ConversationSpillCache reopened;
+        check(reopened.open(sdir / "streamed", id, 1ull << 30, error), "retention: reopen after restart");
+        check(reopened.best(other_branch, {}, false, 0.0, 0).tokens == 500,
+              "retention: base survives reindex");
+        // Once a replacement really contains the root, the redundant base can be removed.
+        branch_meta.checkpoints = branch.checkpoints;
+        check(str_dir.spill_streamed(branch_meta, make_sources(branch), written, error), "retention: save root and turn");
+        check(str_dir.drop_superseded(branch.live.ids, {}, branch.checkpoints, false, str_dir.newest_path()) == 2,
+              "retention: genuinely retained checkpoints supersede both old copies");
+        check(str_dir.best(other_branch, {}, false, 0.0, 0).tokens == 500,
+              "retention: replacement supplies shared base");
+        check(str_dir.drop_superseded(branch.live.ids, {}, branch.checkpoints, false, "missing.sess") == 0,
+              "retention: unindexed replacement cannot supersede anything");
         fs::remove_all(sdir);
     }
 

@@ -103,6 +103,7 @@ public:
     void unpin(const std::string& path);
     // Removes the disk copies of this conversation a turn back, the same rule the RAM cache applies before evicting.
     // `keep` (a session path) is never dropped: a disk-only save writes the new copy first and then drops the old ones.
+    // When supplied, only checkpoints actually retained by that indexed file can supersede an older copy.
     size_t drop_superseded(const std::vector<int32_t>& ids, const std::vector<ConversationImageKey>& images,
                            const std::vector<ConversationCheckpoint>& checkpoints, bool cvec,
                            const std::string& keep = {});
