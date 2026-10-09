@@ -6,6 +6,7 @@ parent's history. Deleted/expired ancestors remain internally until no child nee
 from __future__ import annotations
 
 import copy
+from contextlib import contextmanager
 import functools
 import json
 import sqlite3
@@ -28,6 +29,20 @@ def storage_errors(method):
 
 
 class ResponseStore:
+    @contextmanager
+    def transaction(self):
+        # SAVEPOINT nests safely when an experimental extension adds state to a
+        # base operation. sqlite Connection.__exit__ would commit the outer work.
+        name = "tx_" + new_id("save")
+        self.db.execute("SAVEPOINT " + name)
+        try:
+            yield
+            self.db.execute("RELEASE " + name)
+        except BaseException:
+            self.db.execute("ROLLBACK TO " + name)
+            self.db.execute("RELEASE " + name)
+            raise
+
     def __init__(self, directory, retention_s=30 * 86400, max_bytes=256 * 1024 * 1024):
         if isinstance(retention_s, bool) or not isinstance(retention_s, (int, float)) or not 0 <= retention_s < float('inf'):
             raise ValueError("responses_retention_s must be a finite number >= 0")
@@ -109,6 +124,13 @@ class ResponseStore:
             rid = parent
         return [item for group in reversed(chain) for item in group]
 
+    def _resolve_history(self, rid, req):
+        return self._history(rid)
+
+    def _input_history(self, rid):
+        parent, inputs, _, _ = self._row(rid)
+        return self._history(parent) + json.loads(inputs)
+
     @storage_errors
     def resolve(self, req, model):
         store = req.get("store", True)
@@ -127,7 +149,7 @@ class ResponseStore:
             item.setdefault("id", new_id("item"))
             if not isinstance(item["id"], str) or not item["id"]:
                 raise ResponsesError("input item id must be a nonempty string", "input")
-        with self.lock, self.db:
+        with self.lock, self.transaction():
             self._prune()
             history = []
             if parent:
@@ -137,7 +159,7 @@ class ResponseStore:
                                          "response_not_ready", 409)
                 if response["model"] != model:
                     raise ResponsesError("previous response belongs to a different model", "previous_response_id")
-                history = self._history(parent)
+                history = self._resolve_history(parent, req)
         item_ids = [item["id"] for item in history + inputs]
         if len(item_ids) != len(set(item_ids)):
             raise ResponsesError("input item ids must be unique within a conversation", "input")
@@ -155,7 +177,7 @@ class ResponseStore:
         if not context["store"]:
             return
         inputs, raw = self._json(context["input"]), self._json(response)
-        with self.lock, self.db:
+        with self.lock, self.transaction():
             self._prune()
             if context["parent"]:
                 self._row(context["parent"])  # deletion between resolve and admission must not leave a broken chain
@@ -167,7 +189,7 @@ class ResponseStore:
     def finish(self, response):
         if not response["store"]:
             return
-        with self.lock, self.db:
+        with self.lock, self.transaction():
             _, _, old, deleted = self._row(response["id"], internal=True)
             if json.loads(old)["status"] not in ("queued", "in_progress"):
                 return  # terminal IDs never mutate
@@ -179,13 +201,13 @@ class ResponseStore:
 
     @storage_errors
     def get(self, rid):
-        with self.lock, self.db:
+        with self.lock, self.transaction():
             self._prune()
             return json.loads(self._row(rid)[2])
 
     @storage_errors
     def delete(self, rid):
-        with self.lock, self.db:
+        with self.lock, self.transaction():
             self._prune()
             self._row(rid)
             self.db.execute("UPDATE responses SET deleted=1 WHERE id=?", (rid,))
@@ -203,10 +225,9 @@ class ResponseStore:
             limit = 0
         if order not in ("asc", "desc") or not 1 <= limit <= 100:
             raise ResponsesError("order must be asc or desc; limit must be 1..100")
-        with self.lock, self.db:
+        with self.lock, self.transaction():
             self._prune()
-            parent, inputs, _, _ = self._row(rid)
-            items = self._history(parent) + json.loads(inputs)
+            items = self._input_history(rid)
         if order == "desc":
             items.reverse()
         for name in ("after", "before"):

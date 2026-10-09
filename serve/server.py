@@ -64,6 +64,7 @@ from serve.structured import StructuredOutputError, prepare_format, validated_js
 from serve import responses as responses_api  # noqa: E402
 from serve.responses import ResponsesError, error_body as responses_error_body  # noqa: E402
 from serve import response_runner  # noqa: E402
+from serve.branch_store import BranchReceipt
 from serve.response_store import ResponseStore  # noqa: E402
 
 IM_END = "<|im_end|>"
@@ -2397,6 +2398,7 @@ class Service:
         self.shared_path = None                       # where they are kept between starts (next to the config)
         self.fifo = threading.Lock()
         self.slot_save_path = None                    # --slot-save-path: /slots/0?action=save|restore (off when None)
+        self.branch_checkpoints = None
         self.response_store = None                   # experimental API history, separate from native KV files
         self.response_summaries = False               # an optional second generation on the same queue
         self.embeddings = threading.local()           # the current request's image embeddings file (GENI)
@@ -3276,6 +3278,8 @@ class Service:
                             self.status.update(st)
                         self.last_request_at = time.time()
                         rate.clear()                    # the previous request's samples must not leak into this one
+                    if self.branch_checkpoints and isinstance(sampling.get("_branch_response_id"), BranchReceipt) and not emb:
+                        self.branch_checkpoints.before(self.engine, ids, sampling)
                     before = getattr(self.engine, "last", None)
                     last_print = time.time()
                     prompt, thought = ids, 0            # thought: the reasoning tokens so far (the budget's count)
@@ -3456,6 +3460,10 @@ class Service:
                               f"{run_len} times in a row: ended as \"length\" (repeat_stop_tokens in "
                               "strata-<model>.json; 0 turns this off). If a new request with a short prompt does the "
                               "same, restart the server and report it (#606)", flush=True)
+                    if isinstance(sampling.get("_branch_response_id"), BranchReceipt) and hasattr(self.response_store, "record_generated"):
+                        self.response_store.record_generated(sampling["_branch_response_id"], raw_ids)
+                    if self.branch_checkpoints and isinstance(sampling.get("_branch_response_id"), BranchReceipt) and not emb:
+                        self.branch_checkpoints.after(self.engine, ids, prompt + seg, finish not in ("cancel", "disconnect"), sampling["_branch_response_id"])
                 except GeneratorExit:                   # the client disconnected mid-stream
                     finish = "disconnect"
                     raise
@@ -4402,7 +4410,16 @@ def make_handler(svc: Service):
                 req = json.loads(self._body() or b"{}")
                 if not isinstance(req, dict):
                     raise ValueError("send a JSON object")
-                if path.startswith("/v1/responses/"):        # no POST subresources (cancel / compact)
+                if path.startswith("/v1/responses/") and hasattr(svc.response_store, "bookmark"):
+                    parts = path.split("/")
+                    if len(parts) == 5 and parts[4] == "bookmark":
+                        if self._foreign_page():
+                            return
+                        try:
+                            return self._json(200, svc.response_store.bookmark(parts[3], req.get("protected")))
+                        except ResponsesError as e:
+                            return self._json(e.status, e.body())
+                if path.startswith("/v1/responses/"):        # unsupported POST subresources
                     message = "this Responses POST subresource is not supported" if svc.response_store else \
                         "this server keeps no responses (stateless); send the whole conversation to POST /v1/responses"
                     self._json(404, responses_error_body(message, code="not_found"))
@@ -4772,11 +4789,13 @@ def make_handler(svc: Service):
                 return
             parts = path.split("/")[3:]
             if not svc.response_store or not parts or len(parts) > 2 or (len(parts) == 2 and
-                    (delete or parts[1] != "input_items")):
+                    (delete or parts[1] not in (("input_items", "history") if hasattr(svc.response_store, "boundaries") else ("input_items",)))):
                 return self._json(404, responses_error_body("response persistence is disabled or route not found"))
             try:
                 if delete:
                     result = svc.response_store.delete(parts[0])
+                elif len(parts) == 2 and parts[1] == "history":
+                    result = svc.response_store.boundaries(parts[0])
                 elif len(parts) == 2:
                     result = svc.response_store.input_items(parts[0], parse_qs(urlsplit(self.path).query,
                                                                              keep_blank_values=True))
@@ -4804,6 +4823,9 @@ def make_handler(svc: Service):
             Errors use the Responses format; once the stream has started they arrive as a response.failed event."""
             context = None
             try:
+                req = {k: v for k, v in req.items() if not k.startswith("_branch_")}
+                if any(k in req for k in ("branch_from", "migrate_history")) and not hasattr(svc.response_store, "boundaries"):
+                    raise ResponsesError("branch history is disabled", code="unsupported_parameter")
                 responses_api.check_request(req, allow_previous=svc.response_store is not None)
                 if svc.response_store:
                     req, context = svc.response_store.resolve(req, svc.model_for(req))
@@ -4831,6 +4853,14 @@ def make_handler(svc: Service):
                     reserve = 0
                 if context is not None:
                     svc.response_store.begin(asm.response, context)
+                    if context["store"] and hasattr(svc.response_store, "record_prompt"):
+                        try:
+                            svc.response_store.record_prompt(asm.response["id"], ids)
+                        except ResponsesError:
+                            asm.response["status"] = "failed"
+                            svc.response_store.finish(asm.response)
+                            raise
+                        req["_branch_response_id"] = BranchReceipt(asm.response["id"])
             except ResponsesError as e:
                 return self._json(e.status, e.body())
             except ModelBusy as e:
@@ -5254,6 +5284,9 @@ def serve(svc: Service, host="127.0.0.1", port=8095) -> ThreadingHTTPServer:
     svc.host_names = host_names_for(host, svc.allowed_hosts, svc.trusted_origins)
     svc.start_telemetry()
     httpd = Server((host, port), make_handler(svc))
+    if svc.branch_checkpoints:
+        # Join active handlers before closing history or deleting transient state.
+        httpd.daemon_threads = False
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return httpd
 
@@ -5426,18 +5459,22 @@ def main() -> int:
                          "conversation the engine holds, to or from DIR/NAME (also \"slot_save_path\" in the config)")
     ap.add_argument("--experimental-responses-persistence", action=argparse.BooleanOptionalAction, default=None,
                     help="retain Responses item history and enable previous_response_id / GET / DELETE (default: off)")
+    ap.add_argument("--experimental-branch-checkpoints", action=argparse.BooleanOptionalAction, default=None,
+                    help="immutable history boundaries and measured-cost checkpoint storage (serial execution)")
     ap.add_argument("--responses-store-path", metavar="DIR", help="directory owned by this server for Responses history")
     ap.add_argument("--experimental-responses-summaries", action=argparse.BooleanOptionalAction, default=None,
                     help="allow a second generation for reasoning.summary; --no-experimental-responses-summaries skips it")
     a = ap.parse_args()
     cfg = json.loads(Path(a.config).read_text(encoding="utf-8-sig")) if a.config else {}   # Notepad adds a BOM
-    for name in ("experimental_responses_persistence", "experimental_responses_summaries"):
+    for name in ("experimental_responses_persistence", "experimental_responses_summaries", "experimental_branch_checkpoints"):
         value = getattr(a, name)
         if value is None:
             value = cfg.get(name, False)
         if not isinstance(value, bool):
             ap.error(f"{name} must be true or false")
         setattr(a, name, value)
+    if a.experimental_branch_checkpoints:
+        a.experimental_responses_persistence = True
     responses_path = a.responses_store_path or cfg.get("responses_store_path")
     if a.experimental_responses_persistence and not responses_path:
         ap.error("--experimental-responses-persistence requires --responses-store-path DIR or responses_store_path")
@@ -5570,7 +5607,10 @@ def main() -> int:
         int(cfg.get("min_free_vram_mib") or 0)
     svc.before_load = a.before_load or cfg.get("before_load") or None
     svc.response_summaries = a.experimental_responses_summaries
-    if a.experimental_responses_persistence:
+    if a.experimental_branch_checkpoints:
+        from serve.branch_runtime import enable
+        enable(svc, {**cfg, "tokenizer": str(tpath.resolve())}, slot_save_dir(responses_path, None if a.responses_store_path else cfg.get("cwd")))
+    elif a.experimental_responses_persistence:
         try:
             capacity = cfg.get("responses_store_max_mib", 256)
             if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity < 1:
@@ -5679,7 +5719,10 @@ def main() -> int:
             time.sleep(1)                               # Windows never delivers Ctrl+C to an untimed Event.wait()
     except KeyboardInterrupt:
         print("\n[strata] stopping (Ctrl+C again to end the engine at once) ...", flush=True)
-        closers = [httpd.shutdown, getattr(engine, "close", None), vision.shutdown if vision else None,
+        closers = [httpd.shutdown, httpd.server_close, getattr(engine, "close", None),
+                   svc.response_store.close if svc.response_store else None,
+                   svc.branch_checkpoints.catalog.close if svc.branch_checkpoints else None,
+                   vision.shutdown if vision else None,
                    hub.close if hub is not None else None]
         for close in filter(None, closers):
             try:
