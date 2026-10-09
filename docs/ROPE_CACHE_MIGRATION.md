@@ -9,7 +9,7 @@ No default changes. The feature requires `--experimental-rope-yarn4-cache` on
 both the source and target engine, with `STRATA_ROPE_TABLE=1` in both engine
 environments. The default analytic fast-math caches are rejected: their angles
 can differ from the table coefficients. It is experimental, limited to text-only
-single-GPU FP16 KV with MTP and batching off, and requires
+single-GPU FP16 KV with batching off, and requires
 `--conversation-cache-mib 0`. CUDA and HIP share one host converter. The SYCL
 engine's separate entry point does not expose this operation.
 
@@ -17,8 +17,8 @@ engine's separate entry point does not expose this operation.
 
 Build this branch's native engine first and set the configuration's `exe` to
 the absolute path of that new `build/strata` binary. In an existing **single-GPU** server
-configuration, keep the model paths and tokenizer, remove `--mtp <path>` from
-the engine's `args`, and replace conflicting KV/context/RoPE options with:
+configuration, keep the model paths and tokenizer, and replace conflicting
+KV/context/RoPE options with:
 
 ```text
 --experimental-rope-yarn4-cache --kv fp16 --conversation-cache-mib 0
@@ -41,9 +41,10 @@ replace the last line of engine arguments with:
 --max-context 1048832 --rope-scaling yarn --rope-scale 4 --yarn-orig-ctx 262144
 ```
 
-These capacities include headroom; allocating 1M is not a claim that migration
-has been tested through a full 1M continuation. The initial probe below uses
-only 4K before attempting larger allocations.
+These capacities include output headroom. The MTP-enabled converter has measured
+actual continuation from a converted 256K prefix to 512K and 1M; see the
+[MTP report](../bench/results/2026-10-09-mtp-migration/README.md).
+The small reproduction probe below starts with 4K.
 
 After a source chat has completed, save it:
 
@@ -104,6 +105,16 @@ and key-side magnitude ratio once. Non-rotary key components stay unchanged.
 Paged FP16 main keys, completed FP32 pooled indexer keys at their block-start
 positions, and position-zero spare/dead indexer keys are covered.
 
+When MTP is enabled, the additional draft layer's FP16 keys are converted at
+their absolute cell positions using the same rotation. This layer uses dense
+attention and has no pooled indexer state. Draft values remain unchanged.
+The uncomputed final draft cell and page padding are retained without interpreting
+their contents; the normal continuation path recomputes the boundary cell before
+it is needed. Native session restore also restores the draft ring from its host
+copy. Keep the same MTP weights, window and other state-affecting settings in
+source and target configurations. Both full and windowed draft attention are
+included in the mathematical tests; runtime coverage is reported separately.
+
 Values, recurrent GDN state, PLE state, unrotated raw tails, canonical tokens,
 and absolute positions are retained. Deeper-layer values and recurrent state
 still reflect the original attention computations. **Coordinate correctness
@@ -112,7 +123,7 @@ is the fallback when approximation is unacceptable.
 
 The supported geometry is the current Qwen4exp hybrid QSA/GDN layout: 24 query
 heads, 2 KV heads, head dimension 256, and 64 rotary dimensions. Other layouts,
-layer splits, multimodal state, MTP, BF16, quantized KV (INT8, rotated INT8,
+layer splits, multimodal state, BF16, quantized KV (INT8, rotated INT8,
 Q4_0 and K8V4), and inconsistent model/settings are refused.
 
 ## Integrity, memory, and compatibility
@@ -139,6 +150,39 @@ unchanged. Normal inference settings are unchanged.
 The necessary MTP-off save/restore fix omits the unallocated draft layer;
 MTP-enabled session layout is unchanged.
 
+## MTP validation
+
+MTP support includes draft-state conversion;
+it does not remove the FP16 limitation. CUDA/HIP inference without the
+experimental option retains its existing path. An MTP setting alone does not
+make an older source snapshot compatible: source and target must both use the
+experimental full identity and table-coefficient mode.
+
+On llm-79 (RX 7900 XTX), a 4,096-token ISTA IQ3_XXS probe with FP16 KV,
+MTP width 4 and the default 32K draft window recovered all three retrieval
+markers after migration. Against fresh YaRN, 32 forced-token rows measured
+mean KL 0.004069, 31/32 top-token agreement and a 0.9682 perplexity ratio.
+The fresh-replay control itself had nonzero mean KL 0.001792, so these are
+measured per-case differences, not a bitwise-equivalence claim. Coordinate
+and snapshot unit tests passed 3,827 checks with GCC and with the HIP build.
+The separate SYCL engine also compiled with Intel oneAPI 2026.1.1, and the
+same 3,827 host checks passed with `icpx`. This is a compile compatibility
+check, not an Intel GPU execution test or a SYCL migration endpoint.
+Separate CUDA runs subsequently measured actual 256K-to-512K/1M continuation.
+All marker retrieval cases passed; the converted history remains approximate.
+The MTP report records each forced-token comparison, source-save/conversion/
+restore costs, working-set measurements and remaining limitations. Small
+synthetic cases do not establish broad long-context quality.
+
+For a probe that exercises a draft window smaller than the prefix:
+
+```sh
+python tools/bench_rope_migration.py --config /path/config.json \
+  --output /new/probe-directory --tokens 4096 --source-context 8192 \
+  --target-context 16384 --compare --mtp /path/mtp/rt \
+  --mtp-window 1024 --kv-resident 4096
+```
+
 ## Tests and reproduction
 
 The deterministic FP64 oracle is independent of the converter. It covers the
@@ -164,7 +208,8 @@ using an opt-in bounded diagnostic (`STRATA_MIGRATION_LOGITS`, enabled alongside
 replay, and ordinary RoPE at a larger allocation. Quality differences are
 measurements, not automatic pass/fail thresholds. Do not confuse a configured
 1M capacity, a fresh 1M YaRN run, and migration followed by continuation to 1M.
-The last of these remains unverified. No automatic switching policy is proposed.
+Actual extension to 1M is measured in the MTP report. No automatic
+switching policy is proposed.
 
 Measured CUDA/HIP lifecycle checks and timing/quality differences are documented
 in the [migration report](../bench/results/2026-10-09-rope-cache-migration/README.md).

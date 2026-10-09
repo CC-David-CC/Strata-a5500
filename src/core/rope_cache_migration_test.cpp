@@ -162,8 +162,61 @@ void test_session_conversion() {
     check(!migrate_rope_cache_to_yarn4(loaded,a,b,e),"duplicate after reload rejected");
     std::filesystem::remove(path);
 }
+void test_mtp_session_conversion() {
+    for (int64_t window : {0, 32768}) {
+        auto s=profile(false),t=profile(true);
+        s.config.mtp_window=t.config.mtp_window=window;
+        auto c=fixture();
+        auto draft=c.kv.front();
+        draft.pooled.resize(0);draft.pooled_rows=0;
+        c.kv.push_back(std::move(draft));
+        auto old=c;
+        std::string e;
+        check(migrate_rope_cache_to_yarn4(c,s,t,e),e.c_str());
+        check(c.kv.back().v==old.kv.back().v,"MTP values unchanged");
+        check(c.live.dead.size()==old.live.dead.size() && c.kv.back().pooled.empty(),
+              "dense MTP has no extra main indexer state");
+        for (size_t p=0;p<c.kv.back().cells;++p) for(size_t h=0;h<2;++h) {
+            const size_t row=((p/4*2+h)*4+p%4)*512;
+            uint16_t before[256],after[256];
+            old.kv.back().k.read(before,row,512);c.kv.back().k.read(after,row,512);
+            if(p>=old.live.ids.size()-1) {
+                check(std::memcmp(before,after,512)==0,"uncomputed MTP boundary and padding untouched");
+                continue;
+            }
+            check(std::memcmp(before+64,after+64,384)==0,"MTP nonrotary bytes unchanged");
+            for(int pair=0;pair<32;++pair) {
+                auto raw=oracle(0.25,0.25,-(int64_t)p,pair,false);
+                auto want=oracle(raw.first,raw.second,p,pair,true);
+                near(strata::fp16_to_fp32(after[pair]),want.first,0.001,"MTP absolute-position X oracle");
+                near(strata::fp16_to_fp32(after[pair+32]),want.second,0.001,"MTP absolute-position Y oracle");
+            }
+        }
+        auto bad=old;
+        uint16_t nan=0x7e00;
+        bad.kv.back().k.visit(0,2,[&](uint8_t* p,size_t n,size_t){std::memcpy(p,&nan,n);return true;});
+        const auto original=bad;
+        check(!migrate_rope_cache_to_yarn4(bad,s,t,e),"nonfinite draft key fails conversion");
+        check(bad.kv.front().k==original.kv.front().k && bad.kv.back().k==original.kv.back().k &&
+              bad.rope_migration==original.rope_migration,"draft failure leaves main and draft state atomic");
+        bad=old;bad.kv.pop_back();
+        check(!migrate_rope_cache_to_yarn4(bad,s,t,e),"MTP configuration requires saved draft state");
+        bad=old;bad.kv.back().format=1;
+        check(!migrate_rope_cache_to_yarn4(bad,s,t,e),"quantized draft refused");
+        auto changed=t;changed.config.mtp_window=window+1;bad=old;
+        check(!migrate_rope_cache_to_yarn4(bad,s,changed,e),"draft window mismatch refused");
+        const auto path=std::filesystem::temp_directory_path()/"strata-rope-mtp-test.sess";
+        size_t bytes=0;SavedConversation loaded;SessionFileIdentity id{123,session_config_fingerprint(t.config)};
+        check(session_file_write(path.string(),c,id,bytes,e),e.c_str());
+        check(session_file_read(path.string(),id,loaded,bytes,e),e.c_str());
+        check(loaded.kv.back().k==c.kv.back().k && loaded.rope_migration==c.rope_migration,
+              "MTP migration provenance and draft keys survive reload");
+        check(!migrate_rope_cache_to_yarn4(loaded,s,t,e),"reloaded MTP migration cannot repeat");
+        std::filesystem::remove(path);
+    }
+}
 }
 int main() {
-    test_ordinary_rope_to_yarn4_key_conversion();test_session_conversion();
+    test_ordinary_rope_to_yarn4_key_conversion();test_session_conversion();test_mtp_session_conversion();
     std::printf("rope_cache_migration_test: %d checks passed\n",checks);
 }

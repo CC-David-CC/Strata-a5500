@@ -7,6 +7,8 @@ every source, target, and control. It is separate from measurements of stock
 Strata's existing YaRN with its default numerical path. The converter refuses
 analytic fast-math caches because their actual angles can differ from the table.
 
+> These are the original MTP-off measurements. The [MTP follow-up](../2026-10-09-mtp-migration/README.md) adds CUDA/HIP draft-state conversion, actual continuation through 512K and 1M, and completed SYCL build checks.
+
 ## Results
 
 ISTA-DASLab IQ3_XXS, FP16 KV, single GPU, MTP and parked-conversation caching off,
@@ -69,13 +71,14 @@ baseline variability should be considered when interpreting its migration result
 - The engine explicitly refuses experimental mode without the table setting.
   A low-disk attempt refused before writing; the completed run followed cleanup
   of disposable benchmark artifacts.
-- SYCL build validation is **pending**; its entry point does not expose migration.
-  Keep this a draft until the shared-file build check is done. A migrated cache
-  continued through a full 1M sequence is **unverified**. Neither a 1M allocation
-  nor the separate fresh-YaRN report establishes that result.
+- These initial samples did not cover SYCL or migrated continuation through 1M.
+  The linked follow-up now includes the SYCL build/host checks and actual CUDA
+  continuation from a migrated 256K prefix through 512K and 1M. Intel GPU runtime
+  execution remains unverified; the separate SYCL entry point has no migration endpoint.
 - Full-model per-layer K/V comparisons, broad task suites, streaming-KV
   configurations, BF16 and quantized-KV conversion are not validated here.
-  BF16, quantized KV, MTP, multi-GPU and multimodal conversion are rejected.
+  BF16, quantized KV, multi-GPU and multimodal conversion are rejected.
+  MTP is supported by the separately measured follow-up in this branch.
 
 The 256K source and converted files each occupy about 7.08 GB (decimal); keeping
 both needs about 14.17 GB plus the configured free-space reserve. During that

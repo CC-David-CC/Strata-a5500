@@ -714,7 +714,7 @@ void usage() {
                  "  --rope-scale F       the extension factor for linear/yarn (default: the model file's\n"
                  "                       factor, else 1 = off)\n"
                  "  --experimental-rope-yarn4-cache  opt in to approximate ordinary -> YaRN 4x\n"
-                 "                       session migration (FP16, single GPU, no MTP/batch/vision,\n"
+                 "                       session migration (FP16, single GPU, no batch/vision,\n"
                  "                       --conversation-cache-mib 0; full model fingerprint)\n"
                  "  --rope-freq-base N   the raw ggml knobs: the frequency base (0 = the model's 1e7) and\n"
                  "  --rope-freq-scale F  the angle shrink (0 = 1/--rope-scale)\n"
@@ -2275,9 +2275,9 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "strata generate: positive --max-new and --max-context must fit the prompt and generation\n");
         return 2;
     }
-    if (o.experimental_rope_yarn4_cache && (o.kv != "fp16" || !o.mtp.empty() || o.batch > 0 ||
+    if (o.experimental_rope_yarn4_cache && (o.kv != "fp16" || o.batch > 0 ||
         o.gpu_stages || o.peer_device >= 1 || o.vision || o.conversation_cache_mib != 0)) {
-        std::fprintf(stderr, "experimental RoPE migration requires fp16, one GPU, MTP/batch/vision off, conversation-cache-mib 0\n");
+        std::fprintf(stderr, "experimental RoPE migration requires fp16, one GPU, batch/vision off, conversation-cache-mib 0\n");
         return 2;
     }
     if (o.experimental_rope_yarn4_cache &&
@@ -8808,7 +8808,7 @@ int main(int argc, char** argv) {
                         strata::core::SessionReadLimits limits;
                         limits.max_tokens = source_context;
                         limits.max_checkpoints = (uint64_t) std::max(o.prompt_cache, 1);
-                        limits.max_kv_layers = (uint64_t) g.n_qsa_layers();
+                        limits.max_kv_layers = (uint64_t) g.n_qsa_layers() + (use_mtp ? 1 : 0);
                         limits.admit = [&](uint64_t need, std::string& why) {
                             // Full saved state plus staged K/indexer buffers, no second GPU cache.
                             const auto available = strata::core::conversation_available_memory();

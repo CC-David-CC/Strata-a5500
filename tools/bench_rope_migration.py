@@ -45,6 +45,10 @@ def main():
     ap.add_argument('--target-context', type=int, default=16384)
     ap.add_argument('--kv-resident', type=int, default=0)
     ap.add_argument('--compare', action='store_true')
+    ap.add_argument('--mtp', help='MTP runtime directory; convert and validate its FP16 draft state too')
+    ap.add_argument('--mtp-window', type=int, default=32768)
+    ap.add_argument('--extend-tokens', type=int, nargs='*', default=[],
+                    help='After migration, extend the same canonical chat to these total token lengths')
     ap.add_argument('--ordinary-only', action='store_const', const='none', dest='fresh_rope',
                     help='Fresh ordinary-RoPE retrieval only; no session writes or YaRN runs')
     ap.add_argument('--fresh-rope', choices=('none','yarn'),
@@ -52,6 +56,9 @@ def main():
     args = ap.parse_args()
     if args.fresh_rope and args.compare:
         ap.error('fresh-only and --compare are separate experiments')
+    if args.extend_tokens and (not args.compare or args.fresh_rope or
+            any(n <= args.tokens or n + 128 > args.target_context for n in args.extend_tokens)):
+        ap.error('extension requires --compare and larger lengths fitting target context plus 128 tokens')
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=False)
     config = json.loads(Path(args.config).read_text())
@@ -67,10 +74,12 @@ def main():
     tok = ST.Tokenizer(vocab_tokens, (tp/'merges.txt').read_text().split('\n'),
                        json.loads((tp/'token_type.json').read_text()))
     template = ChatTemplate(tp/'chat_template.jinja')
-    def prompt(padding):
-        text = ('The first code is CEDAR-731.\n' + ' apple'*(padding//2) +
+    def prompt_text(padding):
+        return ('The first code is CEDAR-731.\n' + ' apple'*(padding//2) +
                 '\nThe middle code is MARBLE-482.\n' + ' orange'*(padding-padding//2) +
                 '\nThe last code is QUARTZ-956.\nReturn all three codes in order separated by |. Nothing else.')
+    def prompt(padding):
+        text = prompt_text(padding)
         return tok.encode(template.render([{'role':'user','content':text}], tools=None,
                                          enable_thinking=False), parse_special=True)
     lo, hi = 0, args.tokens
@@ -85,13 +94,17 @@ def main():
     raw = config['args']; i = 0
     remove = {'--max-context','--kv','--kv-resident','--mtp','--spec','--conversation-cache-mib',
               '--rope-scaling',
-              '--rope-scale','--prefill','--suffix-draft'}
+              '--rope-scale','--prefill','--suffix-draft','--mtp-window',
+              '--conversation-cache-spill-dir','--conversation-cache-disk-mib','--conversation-cache-dir'}
     while i < len(raw):
         if raw[i] in remove: i += 2
-        elif raw[i] == '--experimental-rope-yarn4-cache': i += 1
+        elif raw[i] in ('--experimental-rope-yarn4-cache','--conversation-cache-disk-only'): i += 1
         else: base_args.append(raw[i]); i += 1
     base_args += ['--kv','fp16','--spec','2','--suffix-draft','0','--conversation-cache-mib','0',
                   '--experimental-rope-yarn4-cache','--prefill','8192']
+    if args.mtp:
+        base_args[base_args.index('--spec')+1]='4'
+        base_args += ['--mtp',args.mtp,'--mtp-window',str(args.mtp_window)]
     if args.kv_resident: base_args += ['--kv-resident',str(args.kv_resident)]
     def start(label, yarn, context):
         argv = base_args+['--max-context',str(context),'--rope-scaling','yarn' if yarn else 'none']
@@ -119,23 +132,28 @@ def main():
         text = tok.decode(result)
         record(kind='generate',label=label,ttft_s=None if first is None else first-started,
                total_s=elapsed,output_tokens=len(result),text=text,reused=engine.reused,
+               drafts_accepted=engine.last.get('drafts_accepted'),drafts_offered=engine.last.get('drafts_offered'),
                decode_tps=(len(result)-1)/max(.000001,elapsed-(first-started)) if first and len(result)>1 else None,
-               correct=all(code in text for code in ('CEDAR-731','MARBLE-482','QUARTZ-956')),
+               retrieval_task=limit>1,
+               correct=all(code in text for code in ('CEDAR-731','MARBLE-482','QUARTZ-956')) if limit>1 else None,
                input_tokens=len(tokens),input_sha256=hashlib.sha256(json.dumps(tokens).encode()).hexdigest())
         return result
     forced=tok.encode('CEDAR-731|MARBLE-482|QUARTZ-956. These are the three codes recorded in the document.',parse_special=False)
     distributions={}
-    def forced_eval(engine,label):
+    eval_lengths={}
+    def forced_eval(engine,label,prompt_ids=None):
+        prompt_ids=ids if prompt_ids is None else prompt_ids
+        eval_lengths[label]=len(prompt_ids)
         path=output/(engine.probe_label+'.logits.bin')
         offset=path.stat().st_size if path.exists() else 0
-        generate(engine,label+'-forced',ids+forced,1)
+        generate(engine,label+'-forced',prompt_ids+forced,1)
         data=path.read_bytes()[offset:] if path.exists() else b''
         parsed={}
         at=0
         while at<len(data):
             pos,target,count=struct.unpack_from('<qii',data,at);at+=16
             row=np.frombuffer(data,dtype='<f4',count=count,offset=at).astype(np.float64);at+=count*4
-            if not args.tokens-1<=pos<args.tokens+len(forced)-1:continue
+            if not len(prompt_ids)-1<=pos<len(prompt_ids)+len(forced)-1:continue
             assert np.isfinite(row).all(),(label,pos)
             row-=np.max(row);row-=np.log(np.exp(row).sum())
             parsed[pos]=(target,row)
@@ -144,7 +162,9 @@ def main():
     def compare(reference,candidate):
         a,b=distributions[reference],distributions[candidate]
         common=sorted(a.keys() & b.keys())
-        expected=list(range(args.tokens-1,args.tokens+len(forced)-1))
+        assert eval_lengths[reference]==eval_lengths[candidate]
+        length=eval_lengths[reference]
+        expected=list(range(length-1,length+len(forced)-1))
         assert sorted(a)==sorted(b)==expected,('incomplete full-vocabulary diagnostic rows',reference,candidate,sorted(a),sorted(b),expected)
         metrics=[]
         for pos in common:
@@ -199,6 +219,40 @@ def main():
         restored=engine.session_file('restore',str(roundtrip))
         record(kind='restore-migrated',**restored)
         assert restored.get('approximate_migrated_history'), restored
+        reloaded = generate(engine,'B-reloaded-yarn',ids,64)
+        assert all(code in tok.decode(reloaded) for code in ('CEDAR-731','MARBLE-482','QUARTZ-956'))
+        for target in args.extend_tokens:
+            def extended(padding):
+                messages=[{'role':'user','content':prompt_text(lo)},
+                          {'role':'assistant','content':'CEDAR-731|MARBLE-482|QUARTZ-956'},
+                          {'role':'user','content':'Additional reference material follows.\n'+' blue'*padding+
+                           '\nRecall the first, middle and last codes from the earlier document. '
+                           'Return all three in order separated by |. Nothing else.'}]
+                return tok.encode(template.render(messages,tools=None,enable_thinking=False),parse_special=True)
+            low,high=0,target
+            while low<high:
+                mid=(low+high+1)//2
+                if len(extended(mid))<=target:low=mid
+                else:high=mid-1
+            extended_ids=extended(low)
+            assert len(extended_ids)==target,(len(extended_ids),target)
+            assert extended_ids[:len(saved)]==saved,'extension must preserve the canonical source prefix exactly'
+            record(kind='extension-input',tokens=target,source_cached_tokens=len(saved),
+                   sha256=hashlib.sha256(json.dumps(extended_ids).encode()).hexdigest())
+            for arm in ('A','C','B'):
+                label=f'{arm}-extend-{target}'
+                if arm=='B':
+                    record(kind='extension-restore',label=label,
+                           **engine.session_file('restore',str(source)+'.yarn4'))
+                else:
+                    generate(engine,label+'-reset',[42,43,44,45],1)
+                generate(engine,label+'-prefix',extended_ids[:-1],1)
+                if arm=='B':
+                    assert engine.reused>=len(saved)-8,('migration unexpectedly replayed old prefix',engine.reused,len(saved))
+                forced_eval(engine,label,extended_ids)
+                generate(engine,label+'-retrieval',extended_ids,64)
+            compare(f'A-extend-{target}',f'C-extend-{target}')
+            compare(f'A-extend-{target}',f'B-extend-{target}')
         engine.close(); engine=None
         if args.compare:
             compare('A','C');compare('A','B');compare('ordinary','A')
@@ -212,7 +266,8 @@ def main():
             'per-case logit and retrieval measurements; no automatic quality verdict'
             if args.compare else 'retrieval/lifecycle measurements only'),
             actual_prompt_tokens=len(ids), allocation_limit=args.target_context,
-            full_1m_sequence_verified=False)
+            extended_contexts=args.extend_tokens,
+            full_1m_sequence_verified=1048576 in args.extend_tokens)
     except BaseException as exc:
         record(kind='failure',error=repr(exc))
         raise

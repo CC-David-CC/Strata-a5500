@@ -89,17 +89,18 @@ bool migrate_rope_cache_to_yarn4(SavedConversation& cache, const RopeCacheProfil
     config.max_context = source.config.max_context;
     if (session_config_fingerprint(config) != session_config_fingerprint(source.config) ||
         target.config.max_context < source.config.max_context) return fail("non-RoPE execution settings differ");
-    if (source.config.kv != "fp16" || source.config.kv_rot || source.config.mtp_window != -1)
-        return fail("only unrotated FP16 KV without MTP is implemented (BF16/quantized/MTP rejected)");
+    if (source.config.kv != "fp16" || source.config.kv_rot || source.config.mtp_window < -1)
+        return fail("only unrotated FP16 KV is implemented (BF16/quantized rejected)");
+    const bool draft = source.config.mtp_window >= 0;
     const auto& g = cache.geometry;
     // Actual qwen4exp QSA/GDN layout; no conventional-transformer assumption.
     if (!cache.stage_images.empty() || cache.layer_lo != 0 || cache.layer_hi != g[1] ||
         g[1] <= 0 || g[2] != 4 || g[1] % g[2] || g[9] != 24 || g[10] != 2 ||
-        g[11] != 256 || g[12] != 4 || g[13] != 128 || cache.kv.size() != size_t(g[1]/4))
+        g[11] != 256 || g[12] != 4 || g[13] != 128 || cache.kv.size() != size_t(g[1]/4) + draft)
         return fail("unsupported architecture, layer carve, or draft layout");
     if (cache.live.ids.empty() || !cache.live.imgs.empty() || !cache.live.stage_parts.empty() ||
         cache.live.ids.size() > uint64_t(source.config.max_context)) return fail("invalid token extent or multimodal state");
-    const size_t tokens = cache.live.ids.size(), layers = cache.kv.size();
+    const size_t tokens = cache.live.ids.size(), layers = size_t(g[1]/4);
     auto checkpoint_valid = [&](const ConversationCheckpoint& cp) {
         return !cp.ids.empty() && cp.ids.size() <= tokens && cp.imgs.empty() && cp.stage_parts.empty() &&
             std::equal(cp.ids.begin(), cp.ids.end(), cache.live.ids.begin()) &&
@@ -107,13 +108,15 @@ bool migrate_rope_cache_to_yarn4(SavedConversation& cache, const RopeCacheProfil
     };
     if (!checkpoint_valid(cache.live)) return fail("invalid live indexer state");
     for (const auto& cp : cache.checkpoints) if (!checkpoint_valid(cp)) return fail("invalid ancestor checkpoint");
-    for (const auto& kv : cache.kv) {
+    for (size_t layer = 0; layer < cache.kv.size(); ++layer) {
+        const auto& kv = cache.kv[layer];
+        const size_t pooled_rows = layer < layers ? tokens/4+1 : 0;
         if (kv.format != 0 || kv.heads != 2 || kv.head_dim != 256 || kv.idx_dim != 128 ||
             kv.page_size <= 0 || kv.cells <= 0 || kv.cells % kv.page_size || uint64_t(kv.cells) < tokens ||
             uint64_t(kv.cells) - tokens >= uint64_t(kv.page_size) ||
             uint64_t(kv.cells) > SIZE_MAX/1024 || kv.k.size() != size_t(kv.cells)*1024 ||
             kv.v.size() != kv.k.size() || !kv.k_scale.empty() || !kv.v_scale.empty() ||
-            kv.pooled_rows != int64_t(tokens/4+1) || kv.pooled.size() != (tokens/4+1)*128*4)
+            kv.pooled_rows != int64_t(pooled_rows) || kv.pooled.size() != pooled_rows*128*4)
             return fail("unsupported KV representation or corrupt buffer extent");
     }
     try {
@@ -127,7 +130,7 @@ bool migrate_rope_cache_to_yarn4(SavedConversation& cache, const RopeCacheProfil
             rotations[p*32+pair]={x,y};
         }
         struct Staged { ConversationBuffer k, pooled; };
-        std::vector<Staged> staged(layers);
+        std::vector<Staged> staged(cache.kv.size());
         std::vector<std::vector<uint8_t>> dead;
         auto stage_dead = [&](const ConversationCheckpoint& cp) {
             auto bytes = cp.dead;
@@ -140,10 +143,15 @@ bool migrate_rope_cache_to_yarn4(SavedConversation& cache, const RopeCacheProfil
         };
         stage_dead(cache.live);
         for (const auto& cp : cache.checkpoints) stage_dead(cp);
-        for (size_t layer = 0; layer < layers; ++layer) {
+        for (size_t layer = 0; layer < cache.kv.size(); ++layer) {
             const auto& kv = cache.kv[layer];
             auto& stage = staged[layer]; stage.k = kv.k; stage.pooled = kv.pooled;
-            for (size_t p = 0; p < tokens; ++p) for (size_t head = 0; head < 2; ++head) {
+            // MTP cell p pairs main residual p with token p+1, using RoPE
+            // position p. Its final cell may not yet exist at an output cap;
+            // ordinary continuation recomputes it via draft_first. Do not
+            // interpret that unused cell (or page padding) as a valid key.
+            const size_t key_tokens = layer < layers ? tokens : tokens-1;
+            for (size_t p = 0; p < key_tokens; ++p) for (size_t head = 0; head < 2; ++head) {
                 const size_t row = ((p/kv.page_size*2+head)*kv.page_size+p%kv.page_size)*512;
                 uint16_t values[64]; stage.k.read(values, row, sizeof(values));
                 for (int pair = 0; pair < 32; ++pair) {
@@ -156,7 +164,7 @@ bool migrate_rope_cache_to_yarn4(SavedConversation& cache, const RopeCacheProfil
                 }
                 write(stage.k, row, values, sizeof(values));
             }
-            for (size_t p = 0; p < tokens/4+1; ++p) {
+            for (size_t p = 0; p < size_t(kv.pooled_rows); ++p) {
                 float row[128]; stage.pooled.read(row, p*sizeof(row), sizeof(row));
                 row_float(row, p == tokens/4 ? 0 : int64_t(p*4), source, target);
                 write(stage.pooled, p*sizeof(row), row, sizeof(row));
@@ -164,7 +172,7 @@ bool migrate_rope_cache_to_yarn4(SavedConversation& cache, const RopeCacheProfil
         }
         // No allocations or fallible transfers after this point. V/GDN/PLE/raw
         // tails/token IDs are untouched. Old state is not silently called exact.
-        for (size_t i = 0; i < layers; ++i) {
+        for (size_t i = 0; i < cache.kv.size(); ++i) {
             cache.kv[i].k = std::move(staged[i].k);
             cache.kv[i].pooled = std::move(staged[i].pooled);
         }
