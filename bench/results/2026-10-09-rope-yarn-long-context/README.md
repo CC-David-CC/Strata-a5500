@@ -30,7 +30,7 @@ Strata installation, rerun setup with the desired total context capacity.
 Linux:
 
 ```sh
-./setup.sh --context 1048576 --rope-scaling yarn --rope-scale 4
+./setup.sh --setup --context 1048576 --rope-scaling yarn --rope-scale 4
 ```
 
 Windows:
@@ -39,7 +39,10 @@ Windows:
 START-HERE.bat --setup --context 1048576 --rope-scaling yarn --rope-scale 4
 ```
 
-Use the launch script produced by setup, then send requests normally. For 512K,
+Stop the current server before rerunning setup. Select the model you want to
+configure; `--setup` saves the new settings and starts it. On later launches,
+run `./setup.sh` on Linux or `START-HERE.bat` on Windows to use the saved settings,
+then send requests normally. For 512K,
 use `--context 524288 --rope-scaling yarn --rope-scale 2`. That is the existing
 setup policy; **YaRN 2x at 512K was not measured in this report**.
 Setup chooses other options for your hardware, so these commands do not promise
