@@ -165,3 +165,6 @@ replay, and ordinary RoPE at a larger allocation. Quality differences are
 measurements, not automatic pass/fail thresholds. Do not confuse a configured
 1M capacity, a fresh 1M YaRN run, and migration followed by continuation to 1M.
 The last of these remains unverified. No automatic switching policy is proposed.
+
+Measured CUDA/HIP lifecycle checks and timing/quality differences are documented
+in the [migration report](../bench/results/2026-10-09-rope-cache-migration/README.md).

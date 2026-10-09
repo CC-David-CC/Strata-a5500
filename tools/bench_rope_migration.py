@@ -155,7 +155,7 @@ def main():
         mean_kl=float(np.mean([x['kl'] for x in metrics]));top=float(np.mean([x['top_agrees'] for x in metrics]));delta=float(np.mean([x['nll_delta'] for x in metrics]))
         record(kind='quality',reference=reference,candidate=candidate,rows=len(metrics),mean_kl=mean_kl,
             max_kl=max(x['kl'] for x in metrics),top_agreement=top,mean_nll_delta=delta,perplexity_ratio=float(np.exp(delta)),individual=metrics)
-    source = output/'ordinary.sess' 
+    source = output/'ordinary.sess'
     engine = None
     try:
         if args.fresh_rope:
