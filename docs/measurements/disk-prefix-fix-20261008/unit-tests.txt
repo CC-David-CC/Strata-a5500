@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /home/dflanag3/strata-disk-tier-1529-20261008/build
+Test project /home/dflanag3/strata-disk-tier-1529-20261008/build
+    Start  1: conversation_cache_test
+1/5 Test  #1: conversation_cache_test ..........   Passed    0.02 sec
+    Start  4: conversation_file_test
+2/5 Test  #4: conversation_file_test ...........   Passed    1.29 sec
+    Start  5: conversation_spill_test
+3/5 Test  #5: conversation_spill_test ..........   Passed    0.03 sec
+    Start 10: conversation_snapshot_test
+4/5 Test #10: conversation_snapshot_test .......   Passed    0.67 sec
+    Start 11: conversation_validation_test
+5/5 Test #11: conversation_validation_test .....   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   2.05 sec

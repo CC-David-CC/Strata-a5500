@@ -1,0 +1,3 @@
+PR #1529 on #1489, with the new regression test and without the fix:
+FAIL: retention: RAM-only checkpoint cannot supersede saved base
+Exit code 1.
