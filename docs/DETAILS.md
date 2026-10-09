@@ -996,14 +996,15 @@ prompt, ~2.2K tokens a turn, `--conversation-cache-slots 1`, an engine restart a
 
 | | median | range | turns resumed |
 |---|---:|---:|---:|
-| `--conversation-cache-mib 4096`, writes inside the request | 5.20 s | 4.72-6.12 s | 12 |
-| `--conversation-cache-mib 4096`, background writes | 4.51 s | 4.39-6.46 s | 12 |
-| `--conversation-cache-mib 256`, nothing parks | 14.83 s | 11.11-23.32 s | 0 |
-| `--conversation-cache-mib 256`, streamed to and from disk | 5.01 s | 4.84-6.63 s | 12 |
+| `--conversation-cache-mib 4096`, writes inside the request | 4.95 s | 4.62-6.19 s | 12 |
+| `--conversation-cache-mib 4096`, background writes | 4.45 s | 4.30-6.25 s | 12 |
+| `--conversation-cache-mib 256`, nothing parks | 14.24 s | 10.69-22.59 s | 0 |
+| `--conversation-cache-mib 256`, streamed to and from disk | 4.89 s | 4.70-6.57 s | 12 |
 
-A background write took 0.36-0.65 s, of which a request waited 0-20 ms; a spilled file holding two checkpoints was
-603-698 MiB against 1149-1617 MiB with every checkpoint. A streamed save took 0.37-0.47 s and a streamed restore
-0.59-0.96 s (read pass 0.28-0.52 s). A clean shutdown took 2.9-4.2 s.
+A background write took 0.32-0.56 s, of which a request waited 0.4-10.4 ms (a shutdown waited up to 0.46 s for the
+write in flight); a spilled file holding two checkpoints was 603-699 MiB against 1149-1618 MiB with every checkpoint.
+A streamed save took 0.37-0.68 s and a streamed restore 0.59-0.97 s (read pass 0.27-0.50 s). A clean shutdown took
+3.1-4.0 s.
 
 **The conversation cache on disk only (`--conversation-cache-disk-only`).** With `--conversation-cache-spill-dir DIR`
 and this flag, the conversation cache needs no RAM budget (`--conversation-cache-mib` is not used). When a request
