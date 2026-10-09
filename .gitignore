@@ -28,6 +28,8 @@ td.log
 # created by setup.py on the user's machine
 /.venv/
 /build/
+/build-gcc-*/
+/build-cuda12-gcc-*/
 /third_party/llama.cpp
 /models/
 /packs/

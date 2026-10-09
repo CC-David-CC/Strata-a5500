@@ -1,0 +1,104 @@
+Issue #1645: Linux GCC selection validation
+=========================================
+
+Tested 2026-10-08. Baseline: fb58e0dbc8399662c0e47c76578c6e878b14f6cf.
+Compiler-selection implementation: 03fa3b6075bf6fb2a5bb6aefb8ddde6eccdf20fe.
+The later validation changes only repair test fixtures, ignore generated build
+directories and add this report; they do not change the tested build logic.
+
+Environment
+-----------
+Ubuntu 24.04.5, RTX 3070 8 GB, NVIDIA driver 595.91.07, 64 GB system RAM.
+CUDA 12.9.86 from NVIDIA's cuda-12.9.1 Conda channel, installed in a private
+prefix. GCC/G++ 15.3.0 and 14.4.0 from conda-forge in separate private prefixes.
+The second supported compiler is the host's /usr/bin/gcc-13 and g++-13 (13.3.0).
+No system compiler, CUDA installation or driver was replaced.
+
+The test PATH supplies gcc/g++/cc/c++ as links to the real GCC 15 executables,
+and gcc-14/g++-14 as links to the real GCC 14 executables. These are actual
+compilers, not scripts that fake version output or successful compilation.
+STRATA_NVCC selects the private CUDA 12.9 nvcc. CC, CXX, CUDACXX, CUDAHOSTCXX
+and STRATA_GCC are initially unset. Settings use a test-only XDG_CONFIG_HOME.
+
+Existing Coder IQ1_M GGUFs and their prepared pack are reused. The MTP files
+are copied into the test data directory because setup can update draft_vocab.
+The existing BF16 image projection is reused. No model download is needed.
+
+Reproduction
+------------
+With the directories above supplied as CUDA129, GCC15, TEST_BIN, TEST_CONFIG,
+DATA_DIR and MODEL_DIR,
+run the following from separate baseline and patched source checkouts:
+
+  export PATH="$TEST_BIN:$PATH"
+  export STRATA_NVCC="$CUDA129/bin/nvcc"
+  export LD_LIBRARY_PATH="$GCC15/lib:$CUDA129/lib"
+  export XDG_CONFIG_HOME="$TEST_CONFIG"
+  unset CC CXX CUDACXX CUDAHOSTCXX STRATA_GCC
+  ./setup.sh --setup --yes --no-start --build --cuda 12 \
+    --family coder --model IQ1_M --context 2048 --vision gpu --low-ram off \
+    --experimental-speed-projection off --data-dir "$DATA_DIR" \
+    --gguf-dir "$MODEL_DIR"
+
+Both checkouts fail during CMake's real CUDA compiler check:
+  unsupported GNU version! gcc versions later than 14 are not supported!
+
+In the SAME patched checkout, rerun that command with --gcc gcc-14.
+This run also sets CUDAHOSTCXX to the GCC 15 g++ executable deliberately.
+The explicit selection wins: CMake uses GCC 14 for C and C++, and g++-14 for
+nvcc's host code. The real engine and GPU image encoder compile and link,
+setup writes the model configuration and launcher, and exits 0 with "All set."
+No setup functions, compiler calls, GPU detection or build results are mocked.
+The old failed default CMake directory is left in place throughout this test.
+
+An identical second run exits 0 and reports "engine already built for this PC".
+STRATA_GCC=gcc-14 without --gcc also reuses the build.
+
+All compiler-transition checks passed:
+  - STRATA_GCC=gcc-14 selects and reuses the GCC 14 build.
+  - --gcc /usr/bin/gcc-13 overrides STRATA_GCC=gcc-14 and rebuilds both
+    the engine and GPU image encoder with the real system GCC 13 toolchain.
+  - Switching back to --gcc gcc-14 restores both original binaries exactly
+    (SHA-256 comparison), from their separate CMake build directories.
+  - Removing the override attempts the default GCC 15 build and fails with
+    the expected CUDA compiler rejection; it does not reuse the GCC 14 build.
+  - A nonexistent compiler path fails early.
+  - Restoring --gcc gcc-14 succeeds and reuses the build again.
+
+GCC 14 binaries before and after the GCC 13 transition (SHA-256):
+  strata:        48c418ee7bd770da75d1312e78f12fe9ff4bb51b86e8fbab96ec8fd4257ccc10
+  strata-vision: 381fdcf15f8966276cf88d470b6a845d8137ff68bfe0069f3646a54f59ddb03b
+
+Runtime validation
+------------------
+A separate server bound only to 127.0.0.1 loads the actual GCC 14/CUDA 12.9
+engine and GPU image encoder, using a copy of setup's generated configuration.
+The binaries are copied before the GCC 13 rebuild to keep this test on GCC 14.
+
+With the generated defaults (context 2048, prefill auto, 1024 image tokens,
+spec 4, reserve 700 MiB), the text request "What is 2 plus 2?" returns "4".
+The image request fails with cuBLAS status 14 after the engine reports only
+73 MiB of free VRAM. This is a failed default-budget vision smoke test; it is
+not represented as passing.
+
+With prefill 128 and vision.max_tokens 128 (spec 4 and reserve 700 MiB retained),
+both actual inference requests pass: arithmetic returns "4", and a synthetic
+solid-red image returns " red". No engine source change is used for this retry.
+The temporary server and its child processes are stopped after the requests.
+These are functional smoke tests, not performance or model-quality benchmarks.
+
+Unit regression suite
+---------------------
+  python -m unittest discover -s tools -p 'test_setup_*.py'
+
+With external socket connections forbidden and the suite's intentional
+loopback HTTP fixture permitted:
+  Windows / Python 3.13: 432 tests passed.
+  Linux / Python 3.12: 431 passed, 1 Windows-only CPUID test skipped.
+
+The three previously reported Linux problems were incomplete test isolation:
+two checksum tests left the release HEAD request unmocked and used checkout
+engine state; one AMD choice test mocked only the Windows prebuilt path.
+The fixtures now stub that HEAD request, use a temporary engine directory,
+and stub the Linux HIP build too. The checksum/refusal and model-choice
+assertions are retained. Product download and HIP behavior are unchanged.

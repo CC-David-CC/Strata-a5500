@@ -295,6 +295,17 @@ class WhatARefusalDoesToTheCaller(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         (Path(self.tmp.name) / "engine").mkdir(parents=True, exist_ok=True)
+        (Path(self.tmp.name) / "CMakeLists.txt").write_bytes((ROOT / "CMakeLists.txt").read_bytes())
+        # get_prebuilt checks the release with HEAD before our fake download. Keep that check offline,
+        # and keep engine state inside this test rather than depending on the checkout's installed engine.
+        for patcher in (mock.patch.object(setup, "ROOT", Path(self.tmp.name)),
+                        mock.patch.object(setup.urllib.request, "urlopen", side_effect=self.head)):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def head(self, request, **kwargs):
+        self.assertEqual(request.get_method(), "HEAD")
+        return mock.Mock()
 
     def fake_download(self, url, dst, what=None):
         with zipfile.ZipFile(dst, "w") as z:
