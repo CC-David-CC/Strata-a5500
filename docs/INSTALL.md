@@ -57,6 +57,22 @@ the build tools), and the same start: `http://127.0.0.1:8080`. Later runs of `./
 start the model directly; `./setup.sh --setup` installs another model or changes the settings. Other distributions,
 WSL and compiling: [details](DETAILS.md#linux).
 
+For a CUDA source build that needs an older GCC than your distribution's default, install matching GCC C and
+C++ packages (for example `gcc-14` and `g++-14`) and select them explicitly:
+
+```bash
+./setup.sh --setup --build --cuda 12 --gcc gcc-14
+```
+
+`--gcc` accepts an executable name on `PATH` or a full path such as `/opt/gcc/bin/gcc-14`. Setup uses the matching
+`g++-14` for both C++ and CUDA host code, including the image encoder. Choose a GCC version supported by your
+installed CUDA toolkit; setup does not install that GCC version or bypass CUDA's compiler checks.
+`STRATA_GCC=gcc-14` is the environment-variable equivalent; `--gcc` takes precedence. Keep passing the option (or
+export the variable) on later source builds and updates. A different selection rebuilds the engine and uses a
+separate CMake build folder, so an earlier compiler choice cannot stay in CMake's cache. With no selection,
+compiler discovery is unchanged. This option is for the Linux NVIDIA backend; use `--build` to compile instead
+of downloading a ready-made engine.
+
 ## AMD cards
 
 The steps are the same as with NVIDIA: `START-HERE.bat` on Windows, `./setup.sh` on Linux. Setup finds the Radeon

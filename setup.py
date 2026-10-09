@@ -3024,6 +3024,25 @@ def sm120_nvcc(nvcc, cuda_v, archs):
     return nvcc, cuda_v
 
 
+def gcc_compilers() -> dict:
+    """An opt-in GCC toolchain for Linux CUDA builds (#1645); leave compiler discovery alone otherwise."""
+    pick = os.environ.get("STRATA_GCC")
+    if WIN or not pick:
+        return {}
+    cxx = re.sub(r"gcc(?P<version>-[0-9.]+)?$", r"g++\g<version>", pick)
+    if cxx == pick:
+        fail(f"not a GCC executable name: {pick}", "use --gcc gcc-14 or --gcc /path/to/gcc-14")
+    compilers = {}
+    for key, name in (("C", pick), ("CXX", cxx)):
+        path = shutil.which(name)
+        if path is None:
+            fail(f"GCC compiler not found: {name}",
+                 "install matching gcc and g++ packages, then pass --gcc gcc-14 (or its full path)")
+        compilers[key] = os.path.abspath(path)
+    compilers["CUDA_HOST"] = compilers["CXX"]
+    return compilers
+
+
 def install_build_tools(gpu, yes):
     """The compiler and the CUDA toolkit, installed for the user (asks once).  Returns (nvcc, vcvars)."""
     archs = [int(x) for x in gpu.get("archs", [gpu["arch"]])]
@@ -3044,7 +3063,7 @@ def install_build_tools(gpu, yes):
     # RTX 50 (sm_120): CUDA 13.0 - an engine built with 12.8 crashed in the prompt path on Linux (#220)
     need_cuda = need12 if old else (13, 0) if max(archs) >= 120 else (12, 0)
     vcvars = find_vcvars(cuda_v) if WIN else None
-    have_cc = vcvars is not None if WIN else shutil.which("g++") is not None
+    have_cc = vcvars is not None if WIN else bool(gcc_compilers()) or shutil.which("g++") is not None
     missing = []
     if not have_cc:
         missing.append("Visual Studio 2022 Build Tools (C++)" if WIN else "the C++ compiler (build-essential)")
@@ -3093,7 +3112,7 @@ def install_build_tools(gpu, yes):
             run(["sudo", "apt-get", "update"])
             run(["sudo", "apt-get", "install", "-y", "cuda-toolkit-13-0"])
     nvcc, cuda_v = find_nvcc(below=(13, 0)) if old else find_nvcc()
-    if (WIN and find_vcvars(cuda_v) is None) or (not WIN and shutil.which("g++") is None):
+    if (WIN and find_vcvars(cuda_v) is None) or (not WIN and not gcc_compilers() and shutil.which("g++") is None):
         fail("the C++ build tools did not install", "install them by hand (README.md) and run it again")
     if nvcc is None or cuda_v < need_cuda:
         fail("the CUDA Toolkit did not install", "install it from https://developer.nvidia.com/cuda-downloads, then run it again")
@@ -3122,7 +3141,12 @@ def cmake_build(src, bdir, target, defs, vcvars, bat_name):
                        encoding="utf-8")
         run(["cmd", "/c", str(bat)])
     else:
-        run(conf)
+        # CUDAHOSTCXX takes precedence over CMake's -D on the first configure. An explicit --gcc must win.
+        host = next((d.split("=", 1)[1] for d in defs if d.startswith("-DCMAKE_CUDA_HOST_COMPILER=")), None)
+        if host:
+            run(conf, env={**os.environ, "CUDAHOSTCXX": host})
+        else:
+            run(conf)
         if run(build, check=False).returncode != 0:
             say("  (the build stopped - trying it once more)")
             run(build)
@@ -3201,9 +3225,12 @@ def build_engine(gpu, vision, yes, llama, toolkit=None) -> Path:
     # same; the compile keeps the generations it was built for
     new_arch = local and not set(archs) <= built
     floor = cpu_floor(cpu_info()[1])                     # "" on an AVX2 CPU: the normal engine
+    compilers = gcc_compilers()
+    same_compilers = (meta.get("gcc_compilers") or {}) == compilers
     engine_ok = local and (eng / EXE).exists() and meta.get("src") == src and not new_arch and \
-        (meta.get("isa_floor") or "") == floor
-    vision_ok = not want_vision or ((eng / VEXE).exists() and (not local or meta.get("vision_src") == vsrc))
+        (meta.get("isa_floor") or "") == floor and same_compilers
+    vision_ok = not want_vision or ((eng / VEXE).exists() and (not local or meta.get("vision_src") == vsrc)
+                                  and same_compilers)
     if engine_ok and vision_ok:
         ok("engine already built for this PC")
         return eng
@@ -3212,6 +3239,12 @@ def build_engine(gpu, vision, yes, llama, toolkit=None) -> Path:
     nvcc, vcvars = install_build_tools({**gpu, "archs": archs, "toolkit": toolkit}, yes)
     cuda_archs = ";".join(str(x) for x in archs)
     bdir, vdir = (ROOT / "build-cuda12", ROOT / "build-vision-cuda12") if t12 else (ROOT / "build", ROOT / "build-vision")
+    compiler_defs = [f"-DCMAKE_{key}_COMPILER={value}" for key, value in compilers.items()]
+    if compilers:
+        # A CUDA host compiler cannot be changed in an already configured CMake tree. Keep the default tree
+        # intact and give each explicitly selected toolchain its own engine and image-encoder build folders.
+        suffix = "-gcc-" + hashlib.sha256(json.dumps(compilers, sort_keys=True).encode()).hexdigest()[:12]
+        bdir, vdir = bdir.with_name(bdir.name + suffix), vdir.with_name(vdir.name + suffix)
     if not engine_ok:
         say("  Compiling the engine for " + ", ".join(f"sm_{x}" for x in archs) + " (a card it had no code for; "
             "10-20 minutes, once) ..." if new_arch else
@@ -3220,14 +3253,14 @@ def build_engine(gpu, vision, yes, llama, toolkit=None) -> Path:
         cmake_build(ROOT, bdir, "strata",
                     ["-DSTRATA_ENABLE_CUDA=ON", "-DSTRATA_BUILD_TESTS=OFF", f"-DCMAKE_CUDA_ARCHITECTURES={cuda_archs}",
                      f"-DCMAKE_CUDA_COMPILER={nvcc}", *toolkit_root_defs(nvcc), f"-DSTRATA_GGML_DIR={llama}",
-                     *engine_defs(archs, toolkit),
+                     *engine_defs(archs, toolkit), *compiler_defs,
                      *isa_floor_defs(floor, bdir, meta)],
                     vcvars, "build-strata-cuda12.bat" if t12 else "build-strata.bat")
         shutil.copy2(bdir / EXE, eng / EXE)
     if not vision_ok:
         say("  Compiling the image encoder" + (" with CUDA (10-20 minutes, once) ..." if vision == "gpu" else " ..."))
         defs = [f"-DLLAMA_DIR={llama}", f"-DSTRATA_VISION_CUDA={'ON' if vision == 'gpu' else 'OFF'}",
-                "-DSTRATA_PORTABLE=OFF"]                   # built here, for this PC: native, like the engine
+                "-DSTRATA_PORTABLE=OFF", *compiler_defs]   # built here, for this PC: native, like the engine
         if vision == "gpu":
             defs += [f"-DCMAKE_CUDA_ARCHITECTURES={cuda_archs}", f"-DCMAKE_CUDA_COMPILER={nvcc}",
                      *toolkit_root_defs(nvcc)]
@@ -3239,6 +3272,7 @@ def build_engine(gpu, vision, yes, llama, toolkit=None) -> Path:
     stamp.write_text(json.dumps({"source": "local", "version": source_version(), "archs": archs,
                                  "vision": vision, **({"toolkit": 12} if t12 else {}),
                                  "cuda_dirs": dirs, "src": src, "vision_src": vsrc if want_vision else None,
+                                 **({"gcc_compilers": compilers} if compilers else {}),
                                  **({"isa_floor": floor} if floor else {})}, indent=1))
     ok(f"engine compiled: {eng / EXE}")
     return eng
@@ -4626,6 +4660,9 @@ def main() -> int:
     ap.add_argument("--rollback-engine", action="store_true",
                     help="put back the engine an update replaced (kept in engine/.previous), and keep the current one there")
     ap.add_argument("--build", action="store_true", help="compile the engine instead of using the ready-made one")
+    ap.add_argument("--gcc", default=os.environ.get("STRATA_GCC"), metavar="GCC",
+                    help="Linux CUDA source builds: GCC executable (e.g. gcc-14 or /opt/gcc/bin/gcc); "
+                         "uses its matching g++ for C++ and nvcc host code (STRATA_GCC)")
     ap.add_argument("--source", choices=SOURCES, default=None,
                     help="where the model files come from: auto (default: Hugging Face), huggingface or modelscope "
                          "(mainland China: the same files, checked against ModelScope's published SHA-256; "
@@ -4670,6 +4707,12 @@ def main() -> int:
                          "sycl = Intel Arc, EXPERIMENTAL: Linux, built from source (docs/INTEL_ARC.md)")
     ap.add_argument("--skip-build", action="store_true", help=argparse.SUPPRESS)
     a = ap.parse_args()
+    if a.gcc:
+        if WIN or a.backend not in (None, "cuda"):
+            ap.error("--gcc / STRATA_GCC is for Linux CUDA builds only")
+        os.environ["STRATA_GCC"] = a.gcc
+        a.backend = "cuda"
+        gcc_compilers()                                # fail before any downloads or installation
     if a.source:
         os.environ["STRATA_SOURCE"] = a.source
     if a.inspect:                                      # headers only: nothing is installed
