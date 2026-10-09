@@ -49,3 +49,6 @@ fig.text(.05, .055, 'Engine startup and source SAVE excluded. Migration includes
 fig.subplots_adjust(left=.10, right=.98, top=.78, bottom=.24, wspace=.38)
 fig.savefig(root/'overview.png', dpi=180, facecolor=fig.get_facecolor())
 fig.savefig(root/'overview.svg', facecolor=fig.get_facecolor())
+
+svg = root / "overview.svg"
+svg.write_text("\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n")
