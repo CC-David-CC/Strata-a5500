@@ -1,0 +1,1642 @@
+[
+  {
+    "tokens": 131072,
+    "rope": "ordinary",
+    "rope_factor": 1,
+    "complete": true,
+    "snapshot_bytes": 3928282812,
+    "parked_ram_bytes": 4520114508,
+    "park_outgoing_s": 1.6235,
+    "peak_rss_gib": 47.10737228393555,
+    "peak_vram_gib": 49.4619140625,
+    "max_swap_kib": 0,
+    "observed_filesystem_growth_gib": 11.004291534423828,
+    "minimum_free_disk_gib": 94.81770324707031,
+    "rows": {
+      "live-reuse": {
+        "mode": "live",
+        "label": "live-reuse",
+        "ttft_s": 0.24969725392293185,
+        "last_text_s": 0.32973622099962085,
+        "total_s": 0.36040249397046864,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_3a39505d2a054debbca16b37d5684267",
+          "object": "response",
+          "created_at": 1791539420,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_4948f029dcf54fbdb298c76c33fca664",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_e86dfee6f72340e1bf48cccb3e9410a2",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 131105,
+            "input_tokens_details": {
+              "cached_tokens": 131065
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 131127
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791539421
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 131105,
+        "input_sha256": "34f33b0e999c7ec3db92611d0aacdfb694ff7016607aea749bcae1bdd5e293e0",
+        "cached_tokens": 131065,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 131105.0,
+          "reused_tokens": 131065.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 167.0,
+          "prefill_tps": 240.0,
+          "generated": 22.0,
+          "decode_ms": 87.0,
+          "decode_tps": 252.8
+        },
+        "peak_rss_gib": null,
+        "peak_vram_gib": null
+      },
+      "fresh-replay": {
+        "mode": "live",
+        "label": "fresh-replay",
+        "ttft_s": 20.513841695035808,
+        "last_text_s": 20.593480480951257,
+        "total_s": 20.61599522002507,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_475c0c4e8d104ea2adbd73a9ae20a5b6",
+          "object": "response",
+          "created_at": 1791539421,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_4f3d36e7785a4ffea85cf7b3b856e2d7",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_e86dfee6f72340e1bf48cccb3e9410a2",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 131105,
+            "input_tokens_details": {
+              "cached_tokens": 0
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 131127
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791539441
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 131105,
+        "input_sha256": "34f33b0e999c7ec3db92611d0aacdfb694ff7016607aea749bcae1bdd5e293e0",
+        "cached_tokens": 0,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 131105.0,
+          "reused_tokens": 0.0,
+          "new_tokens": 131105.0,
+          "prefill_ms": 20438.0,
+          "prefill_tps": 6414.8,
+          "generated": 22.0,
+          "decode_ms": 87.0,
+          "decode_tps": 254.2
+        },
+        "peak_rss_gib": 43.49441909790039,
+        "peak_vram_gib": 49.4619140625
+      },
+      "ram-restore": {
+        "mode": "ram",
+        "label": "ram-restore",
+        "ttft_s": 0.5984695090446621,
+        "last_text_s": 0.6784338050056249,
+        "total_s": 0.7095577999716625,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_8f3073ece54d4ff89d97f5d1cd45331f",
+          "object": "response",
+          "created_at": 1791539511,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_cec749bfe735462ab926600c9af58769",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_75622d4799a4491e96e42ca4a4144f0b",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 131105,
+            "input_tokens_details": {
+              "cached_tokens": 131065
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 131127
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791539512
+        },
+        "disk_restores": 0,
+        "ram_restore": true,
+        "checkpoint_bytes": 0,
+        "input_tokens": 131105,
+        "input_sha256": "34f33b0e999c7ec3db92611d0aacdfb694ff7016607aea749bcae1bdd5e293e0",
+        "cached_tokens": 131065,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 131105.0,
+          "reused_tokens": 131065.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 519.0,
+          "prefill_tps": 77.0,
+          "generated": 22.0,
+          "decode_ms": 87.0,
+          "decode_tps": 253.1
+        },
+        "peak_rss_gib": 47.10737228393555,
+        "peak_vram_gib": 49.4599609375
+      },
+      "disk-restore-after-restart": {
+        "mode": "disk",
+        "label": "disk-restore-after-restart",
+        "ttft_s": 5.482988268020563,
+        "last_text_s": 5.564607937936671,
+        "total_s": 12.690262745018117,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_84bd582e3fa8478d93c8f76d6b541ad7",
+          "object": "response",
+          "created_at": 1791539635,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_657f6bd9fd0b439496eb46bf0cea3c1a",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_8e9b68355a7943f7a579880e65ea8ee7",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 131105,
+            "input_tokens_details": {
+              "cached_tokens": 131065
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 131127
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791539648
+        },
+        "disk_restores": 1,
+        "ram_restore": false,
+        "checkpoint_bytes": 7858030284,
+        "input_tokens": 131105,
+        "input_sha256": "34f33b0e999c7ec3db92611d0aacdfb694ff7016607aea749bcae1bdd5e293e0",
+        "cached_tokens": 131065,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 131105.0,
+          "reused_tokens": 131065.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 182.0,
+          "prefill_tps": 219.2,
+          "generated": 22.0,
+          "decode_ms": 89.0,
+          "decode_tps": 248.5
+        },
+        "peak_rss_gib": 46.165523529052734,
+        "peak_vram_gib": 49.4072265625
+      }
+    },
+    "audits": [
+      {
+        "mode": "live",
+        "startup_s": 47.03481331199873
+      },
+      {
+        "mode": "live",
+        "reuse_verified": true
+      },
+      {
+        "mode": "ram",
+        "startup_s": 46.02351384109352
+      },
+      {
+        "mode": "ram",
+        "reuse_verified": true
+      },
+      {
+        "mode": "disk",
+        "startup_s": 46.02309531101491
+      },
+      {
+        "mode": "disk",
+        "startup_s": 46.01459723699372
+      },
+      {
+        "mode": "disk",
+        "reuse_verified": true
+      }
+    ]
+  },
+  {
+    "tokens": 262144,
+    "rope": "ordinary",
+    "rope_factor": 1,
+    "complete": true,
+    "snapshot_bytes": 7620318908,
+    "parked_ram_bytes": 8214253036,
+    "park_outgoing_s": 2.9439,
+    "peak_rss_gib": 50.7066764831543,
+    "peak_vram_gib": 52.9482421875,
+    "max_swap_kib": 0,
+    "observed_filesystem_growth_gib": 21.332164764404297,
+    "minimum_free_disk_gib": 84.47561645507812,
+    "rows": {
+      "live-reuse": {
+        "mode": "live",
+        "label": "live-reuse",
+        "ttft_s": 0.32771557103842497,
+        "last_text_s": 0.4102589599788189,
+        "total_s": 0.4732039390364662,
+        "answer": "CEDAR-731|MARBLE-482|QUARTZ-956",
+        "response": {
+          "id": "resp_9744c3f765e6470d827d7e6b9d8b67ea",
+          "object": "response",
+          "created_at": 1791539740,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_2127b1ad23044644a68a761b3c2b7cd5",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731|MARBLE-482|QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_93ec993c25814b9597de782c8496d872",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 262177,
+            "input_tokens_details": {
+              "cached_tokens": 262137
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 262199
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791539740
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 262177,
+        "input_sha256": "0a9825add62105cc50763b1760bd48a1ef63dfa81bb2f0eab5b795805dca5b8f",
+        "cached_tokens": 262137,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 262177.0,
+          "reused_tokens": 262137.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 171.0,
+          "prefill_tps": 233.8,
+          "generated": 22.0,
+          "decode_ms": 101.0,
+          "decode_tps": 216.8
+        },
+        "peak_rss_gib": null,
+        "peak_vram_gib": null
+      },
+      "fresh-replay": {
+        "mode": "live",
+        "label": "fresh-replay",
+        "ttft_s": 43.17260108399205,
+        "last_text_s": 43.25486785697285,
+        "total_s": 43.32100423099473,
+        "answer": "CEDAR-731|MARBLE-482|QUARTZ-956",
+        "response": {
+          "id": "resp_afe0c3cf329b41c998879559d4140828",
+          "object": "response",
+          "created_at": 1791539740,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_0c9fe769f7c8446d9acc249b85a409ef",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731|MARBLE-482|QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_93ec993c25814b9597de782c8496d872",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 262177,
+            "input_tokens_details": {
+              "cached_tokens": 0
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 262199
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791539784
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 262177,
+        "input_sha256": "0a9825add62105cc50763b1760bd48a1ef63dfa81bb2f0eab5b795805dca5b8f",
+        "cached_tokens": 0,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 262177.0,
+          "reused_tokens": 0.0,
+          "new_tokens": 262177.0,
+          "prefill_ms": 43016.0,
+          "prefill_tps": 6094.8,
+          "generated": 22.0,
+          "decode_ms": 101.0,
+          "decode_tps": 217.7
+        },
+        "peak_rss_gib": 43.38994216918945,
+        "peak_vram_gib": 52.9482421875
+      },
+      "ram-restore": {
+        "mode": "ram",
+        "label": "ram-restore",
+        "ttft_s": 0.9065079889260232,
+        "last_text_s": 0.9891360920155421,
+        "total_s": 1.054618521942757,
+        "answer": "CEDAR-731|MARBLE-482|QUARTZ-956",
+        "response": {
+          "id": "resp_13cd9a1ebda041fb825c151c6f879f6b",
+          "object": "response",
+          "created_at": 1791539877,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_cd3343b26c77447996599fb0b36bb696",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731|MARBLE-482|QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_4d169ff2e197443fa4d5b3d797f9f532",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 262177,
+            "input_tokens_details": {
+              "cached_tokens": 262137
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 262199
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791539878
+        },
+        "disk_restores": 0,
+        "ram_restore": true,
+        "checkpoint_bytes": 0,
+        "input_tokens": 262177,
+        "input_sha256": "0a9825add62105cc50763b1760bd48a1ef63dfa81bb2f0eab5b795805dca5b8f",
+        "cached_tokens": 262137,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 262177.0,
+          "reused_tokens": 262137.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 759.0,
+          "prefill_tps": 52.7,
+          "generated": 22.0,
+          "decode_ms": 101.0,
+          "decode_tps": 216.8
+        },
+        "peak_rss_gib": 50.7066764831543,
+        "peak_vram_gib": 52.9462890625
+      },
+      "disk-restore-after-restart": {
+        "mode": "disk",
+        "label": "disk-restore-after-restart",
+        "ttft_s": 10.550562874996103,
+        "last_text_s": 10.634749536053278,
+        "total_s": 25.126299774972722,
+        "answer": "CEDAR-731|MARBLE-482|QUARTZ-956",
+        "response": {
+          "id": "resp_7ac0cbfc4bed4a20b8b65550fc08daf2",
+          "object": "response",
+          "created_at": 1791540031,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_1d1949db6c9346aa831d267fa104d2e8",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731|MARBLE-482|QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_f1778e24597d4ef295640ab8be89a619",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 262177,
+            "input_tokens_details": {
+              "cached_tokens": 262137
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 262199
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791540056
+        },
+        "disk_restores": 1,
+        "ram_restore": false,
+        "checkpoint_bytes": 15242208976,
+        "input_tokens": 262177,
+        "input_sha256": "0a9825add62105cc50763b1760bd48a1ef63dfa81bb2f0eab5b795805dca5b8f",
+        "cached_tokens": 262137,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 262177.0,
+          "reused_tokens": 262137.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 188.0,
+          "prefill_tps": 213.2,
+          "generated": 22.0,
+          "decode_ms": 103.0,
+          "decode_tps": 214.1
+        },
+        "peak_rss_gib": 49.01838684082031,
+        "peak_vram_gib": 52.8935546875
+      }
+    },
+    "audits": [
+      {
+        "mode": "live",
+        "startup_s": 46.03384814201854
+      },
+      {
+        "mode": "live",
+        "reuse_verified": true
+      },
+      {
+        "mode": "ram",
+        "startup_s": 46.02290623402223
+      },
+      {
+        "mode": "ram",
+        "reuse_verified": true
+      },
+      {
+        "mode": "disk",
+        "startup_s": 46.02055975305848
+      },
+      {
+        "mode": "disk",
+        "startup_s": 46.01492183096707
+      },
+      {
+        "mode": "disk",
+        "reuse_verified": true
+      }
+    ]
+  },
+  {
+    "tokens": 524288,
+    "rope": "yarn",
+    "rope_factor": 2,
+    "complete": true,
+    "snapshot_bytes": 15004391100,
+    "parked_ram_bytes": 15602530092,
+    "park_outgoing_s": 5.6028,
+    "peak_rss_gib": 57.66048812866211,
+    "peak_vram_gib": 59.9228515625,
+    "max_swap_kib": 0,
+    "observed_filesystem_growth_gib": 42.00058364868164,
+    "minimum_free_disk_gib": 63.779380798339844,
+    "rows": {
+      "live-reuse": {
+        "mode": "live",
+        "label": "live-reuse",
+        "ttft_s": 0.4918977840570733,
+        "last_text_s": 0.5669082209933549,
+        "total_s": 0.68565843696706,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_6d51f503ef224093a92b09529da1376f",
+          "object": "response",
+          "created_at": 1791540202,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_fa9a5fbcb96e42eab163330615c3ad59",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_d88380ef60d5408ca2f0a04a8270c8bc",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 524321,
+            "input_tokens_details": {
+              "cached_tokens": 524281
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 524343
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791540203
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 524321,
+        "input_sha256": "763b52700499add4ebc64b21b5f25b35d10bc710fef1e46ed7c76bf75ccf4edc",
+        "cached_tokens": 524281,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 524321.0,
+          "reused_tokens": 524281.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 179.0,
+          "prefill_tps": 223.3,
+          "generated": 22.0,
+          "decode_ms": 95.0,
+          "decode_tps": 232.0
+        },
+        "peak_rss_gib": null,
+        "peak_vram_gib": null
+      },
+      "fresh-replay": {
+        "mode": "live",
+        "label": "fresh-replay",
+        "ttft_s": 95.78238621994387,
+        "last_text_s": 95.85697504505515,
+        "total_s": 95.98347948002629,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_7b2187a077f0442f9839a502865fb341",
+          "object": "response",
+          "created_at": 1791540203,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_2b2c6130aaa14f96bafd646ce7e021e7",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_d88380ef60d5408ca2f0a04a8270c8bc",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 524321,
+            "input_tokens_details": {
+              "cached_tokens": 0
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 524343
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791540299
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 524321,
+        "input_sha256": "763b52700499add4ebc64b21b5f25b35d10bc710fef1e46ed7c76bf75ccf4edc",
+        "cached_tokens": 0,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 524321.0,
+          "reused_tokens": 0.0,
+          "new_tokens": 524321.0,
+          "prefill_ms": 95477.0,
+          "prefill_tps": 5491.6,
+          "generated": 22.0,
+          "decode_ms": 94.0,
+          "decode_tps": 233.1
+        },
+        "peak_rss_gib": 43.50234603881836,
+        "peak_vram_gib": 59.9228515625
+      },
+      "ram-restore": {
+        "mode": "ram",
+        "label": "ram-restore",
+        "ttft_s": 1.5487727950094268,
+        "last_text_s": 1.623606937006116,
+        "total_s": 1.7432173419510946,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_4c3a4a67ce024b019f115fa6033cef6d",
+          "object": "response",
+          "created_at": 1791540448,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_617a86d326be4a29bdc49d8972227927",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_9ccc44d5efe24e17991ea8435e3b6e8b",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 524321,
+            "input_tokens_details": {
+              "cached_tokens": 524281
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 524343
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791540449
+        },
+        "disk_restores": 0,
+        "ram_restore": true,
+        "checkpoint_bytes": 0,
+        "input_tokens": 524321,
+        "input_sha256": "763b52700499add4ebc64b21b5f25b35d10bc710fef1e46ed7c76bf75ccf4edc",
+        "cached_tokens": 524281,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 524321.0,
+          "reused_tokens": 524281.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 1248.0,
+          "prefill_tps": 32.0,
+          "generated": 22.0,
+          "decode_ms": 95.0,
+          "decode_tps": 232.2
+        },
+        "peak_rss_gib": 57.66048812866211,
+        "peak_vram_gib": 59.9208984375
+      },
+      "disk-restore-after-restart": {
+        "mode": "disk",
+        "label": "disk-restore-after-restart",
+        "ttft_s": 20.66528010298498,
+        "last_text_s": 20.741014497936703,
+        "total_s": 54.04052897891961,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_fdc0095adc604b5e84dd6e3bdeb6461d",
+          "object": "response",
+          "created_at": 1791540673,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_b75264714fc64a5c906f0416330255f8",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_0e5e33c2b3e144a5b4a1c083519f95c1",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 524321,
+            "input_tokens_details": {
+              "cached_tokens": 524281
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 524343
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791540727
+        },
+        "disk_restores": 1,
+        "ram_restore": false,
+        "checkpoint_bytes": 30010353360,
+        "input_tokens": 524321,
+        "input_sha256": "763b52700499add4ebc64b21b5f25b35d10bc710fef1e46ed7c76bf75ccf4edc",
+        "cached_tokens": 524281,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 524321.0,
+          "reused_tokens": 524281.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 194.0,
+          "prefill_tps": 206.1,
+          "generated": 22.0,
+          "decode_ms": 95.0,
+          "decode_tps": 230.7
+        },
+        "peak_rss_gib": 56.538211822509766,
+        "peak_vram_gib": 59.8681640625
+      }
+    },
+    "audits": [
+      {
+        "mode": "live",
+        "startup_s": 46.03099472797476
+      },
+      {
+        "mode": "live",
+        "reuse_verified": true
+      },
+      {
+        "mode": "ram",
+        "startup_s": 46.02291329798754
+      },
+      {
+        "mode": "ram",
+        "reuse_verified": true
+      },
+      {
+        "mode": "disk",
+        "startup_s": 46.02310067601502
+      },
+      {
+        "mode": "disk",
+        "startup_s": 46.0205823170254
+      },
+      {
+        "mode": "disk",
+        "reuse_verified": true
+      }
+    ]
+  },
+  {
+    "tokens": 1048576,
+    "rope": "yarn",
+    "rope_factor": 4,
+    "complete": true,
+    "snapshot_bytes": 29772535484,
+    "parked_ram_bytes": 30379084204,
+    "park_outgoing_s": 10.896,
+    "peak_rss_gib": 71.56215286254883,
+    "peak_vram_gib": 73.8720703125,
+    "max_swap_kib": 0,
+    "observed_filesystem_growth_gib": 83.32644271850586,
+    "minimum_free_disk_gib": 22.398414611816406,
+    "rows": {
+      "live-reuse": {
+        "mode": "live",
+        "label": "live-reuse",
+        "ttft_s": 0.8685657029272988,
+        "last_text_s": 0.9731523810187355,
+        "total_s": 1.19956697197631,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_bd7fec8db9fd4094b455a54b45f4dbde",
+          "object": "response",
+          "created_at": 1791541017,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_68762ac7bfa3426e8dbffb6264f0cb66",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_a6b45db1c21f481ca2e52d4ca6031b7c",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 1048609,
+            "input_tokens_details": {
+              "cached_tokens": 1048569
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1048631
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791541018
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 1048609,
+        "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+        "cached_tokens": 1048569,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 1048609.0,
+          "reused_tokens": 1048569.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 235.0,
+          "prefill_tps": 170.0,
+          "generated": 22.0,
+          "decode_ms": 134.0,
+          "decode_tps": 164.4
+        },
+        "peak_rss_gib": 43.634071350097656,
+        "peak_vram_gib": 73.8701171875
+      },
+      "fresh-replay": {
+        "mode": "live",
+        "label": "fresh-replay",
+        "ttft_s": 236.48358545801602,
+        "last_text_s": 236.58791765198112,
+        "total_s": 236.8377242279239,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_5a725dcb387e4bb0b2c0e8fbaa35a71a",
+          "object": "response",
+          "created_at": 1791541019,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_6a9c6250e9894201b572a70ac636425e",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_a6b45db1c21f481ca2e52d4ca6031b7c",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 1048609,
+            "input_tokens_details": {
+              "cached_tokens": 0
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1048631
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791541255
+        },
+        "disk_restores": 0,
+        "ram_restore": false,
+        "checkpoint_bytes": 0,
+        "input_tokens": 1048609,
+        "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+        "cached_tokens": 0,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 1048609.0,
+          "reused_tokens": 0.0,
+          "new_tokens": 1048609.0,
+          "prefill_ms": 235872.0,
+          "prefill_tps": 4445.7,
+          "generated": 22.0,
+          "decode_ms": 133.0,
+          "decode_tps": 165.0
+        },
+        "peak_rss_gib": 43.70549011230469,
+        "peak_vram_gib": 73.8720703125
+      },
+      "ram-restore": {
+        "mode": "ram",
+        "label": "ram-restore",
+        "ttft_s": 2.874367843964137,
+        "last_text_s": 2.978978053899482,
+        "total_s": 3.206204501911998,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_6fbf5b6b6dd74684bdee3462e63100dc",
+          "object": "response",
+          "created_at": 1791541550,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_71e4d94fe4b946dfb04a3a88611ada62",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_aa34abbdd16445238883ec206c4df4f9",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 1048609,
+            "input_tokens_details": {
+              "cached_tokens": 1048569
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1048631
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791541553
+        },
+        "disk_restores": 0,
+        "ram_restore": true,
+        "checkpoint_bytes": 0,
+        "input_tokens": 1048609,
+        "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+        "cached_tokens": 1048569,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 1048609.0,
+          "reused_tokens": 1048569.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 2266.0,
+          "prefill_tps": 17.7,
+          "generated": 22.0,
+          "decode_ms": 134.0,
+          "decode_tps": 164.8
+        },
+        "peak_rss_gib": 71.56215286254883,
+        "peak_vram_gib": 73.8701171875
+      },
+      "disk-restore-after-restart": {
+        "mode": "disk",
+        "label": "disk-restore-after-restart",
+        "ttft_s": 40.52904955204576,
+        "last_text_s": 40.633305498049594,
+        "total_s": 106.89060473407153,
+        "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+        "response": {
+          "id": "resp_cab5561aacd64f458b08d7ecbab8c4ab",
+          "object": "response",
+          "created_at": 1791541951,
+          "status": "completed",
+          "background": false,
+          "error": null,
+          "incomplete_details": null,
+          "instructions": null,
+          "max_output_tokens": 128,
+          "model": "qwen3.8-flash-next",
+          "output": [
+            {
+              "id": "msg_cd0e23f06fc542c2bc7521151033daa6",
+              "type": "message",
+              "status": "completed",
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "output_text",
+                  "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                  "annotations": [],
+                  "logprobs": []
+                }
+              ]
+            }
+          ],
+          "parallel_tool_calls": true,
+          "previous_response_id": "resp_2f4e86cdbbf44670b1e6e7e650156032",
+          "reasoning": {
+            "effort": "none",
+            "summary": null
+          },
+          "store": true,
+          "temperature": 0,
+          "text": {
+            "format": {
+              "type": "text"
+            }
+          },
+          "tool_choice": "auto",
+          "tools": [],
+          "top_p": null,
+          "truncation": "disabled",
+          "usage": {
+            "input_tokens": 1048609,
+            "input_tokens_details": {
+              "cached_tokens": 1048569
+            },
+            "output_tokens": 22,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1048631
+          },
+          "user": null,
+          "metadata": {},
+          "completed_at": 1791542057
+        },
+        "disk_restores": 1,
+        "ram_restore": false,
+        "checkpoint_bytes": 59546642128,
+        "input_tokens": 1048609,
+        "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+        "cached_tokens": 1048569,
+        "correct_codes": [
+          true,
+          true,
+          true
+        ],
+        "correct_code_order": true,
+        "native": {
+          "prompt_tokens": 1048609.0,
+          "reused_tokens": 1048569.0,
+          "new_tokens": 40.0,
+          "prefill_ms": 245.0,
+          "prefill_tps": 163.0,
+          "generated": 22.0,
+          "decode_ms": 133.0,
+          "decode_tps": 165.4
+        },
+        "peak_rss_gib": 70.48068618774414,
+        "peak_vram_gib": 73.8173828125
+      }
+    },
+    "audits": [
+      {
+        "mode": "live",
+        "startup_s": 47.0993734409567
+      },
+      {
+        "mode": "live",
+        "reuse_verified": true
+      },
+      {
+        "mode": "ram",
+        "startup_s": 46.019459698931314
+      },
+      {
+        "mode": "ram",
+        "reuse_verified": true
+      },
+      {
+        "mode": "disk",
+        "startup_s": 46.02043002296705
+      },
+      {
+        "mode": "disk",
+        "startup_s": 47.02530528395437
+      },
+      {
+        "mode": "disk",
+        "reuse_verified": true
+      }
+    ]
+  }
+]

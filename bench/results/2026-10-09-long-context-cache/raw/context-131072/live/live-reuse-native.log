@@ -1,0 +1,1 @@
+strata serve: prompt 131105 tokens = 131065 reused + 40 read in 167 ms (240.0 tok/s), 22 generated in 87 ms (252.8 tok/s), drafts accepted 16 of 21, 6 checkpoints

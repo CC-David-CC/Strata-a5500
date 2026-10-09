@@ -1,0 +1,3 @@
+strata serve: conversation cache: parked 21 tokens in 90.1 ms; parked=1 bytes=236806196 evictions=0 snapshot_bytes=236806196 reused_kv_bytes=0
+strata serve: conversation cache: restored 131065 tokens (checkpoint) in 262.1 ms; parked=1 bytes=3927921500
+strata serve: prompt 131105 tokens = 131065 reused + 40 read in 519 ms (77.0 tok/s), 22 generated in 87 ms (253.1 tok/s), drafts accepted 16 of 21, 6 checkpoints

@@ -1,0 +1,722 @@
+{
+  "prefix_tokens": 1048576,
+  "prefix_sha256": "f389e344da7b4105a2f09c78a7db4cb340e0cd30046e4a031a4f90c2bea8c2b3",
+  "exe_sha256": "6d1ff96c482bec4ac3c5d277b61554ca4f2db29e285952f9928df669a950ae1a",
+  "rows": [
+    {
+      "mode": "live",
+      "label": "seed-prefill",
+      "ttft_s": 234.29640688805375,
+      "last_text_s": 234.29640688805375,
+      "total_s": 234.49903930909932,
+      "answer": "READY",
+      "response": {
+        "id": "resp_a6b45db1c21f481ca2e52d4ca6031b7c",
+        "object": "response",
+        "created_at": 1791540782,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_5d3225cc221e49ee95d1485687a42fae",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "READY",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1048576,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1048578
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541017
+      },
+      "disk_restores": 0,
+      "ram_restore": false,
+      "checkpoint_bytes": 0,
+      "input_tokens": 1048576,
+      "input_sha256": "f389e344da7b4105a2f09c78a7db4cb340e0cd30046e4a031a4f90c2bea8c2b3",
+      "cached_tokens": 0
+    },
+    {
+      "mode": "live",
+      "label": "live-reuse",
+      "ttft_s": 0.8685657029272988,
+      "last_text_s": 0.9731523810187355,
+      "total_s": 1.19956697197631,
+      "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+      "response": {
+        "id": "resp_bd7fec8db9fd4094b455a54b45f4dbde",
+        "object": "response",
+        "created_at": 1791541017,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_68762ac7bfa3426e8dbffb6264f0cb66",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": "resp_a6b45db1c21f481ca2e52d4ca6031b7c",
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1048609,
+          "input_tokens_details": {
+            "cached_tokens": 1048569
+          },
+          "output_tokens": 22,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1048631
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541018
+      },
+      "disk_restores": 0,
+      "ram_restore": false,
+      "checkpoint_bytes": 0,
+      "input_tokens": 1048609,
+      "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+      "cached_tokens": 1048569,
+      "correct_codes": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "mode": "live",
+      "label": "distraction",
+      "ttft_s": 0.1833154329797253,
+      "last_text_s": 0.1833154329797253,
+      "total_s": 0.32260809803847224,
+      "answer": "READY",
+      "response": {
+        "id": "resp_924a0a96044f485ca1e142ebf3d0367f",
+        "object": "response",
+        "created_at": 1791541018,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_d14d35dbc85b470cb7d19594fc307b20",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "READY",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 17,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 19
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541018
+      },
+      "disk_restores": 0,
+      "ram_restore": false,
+      "checkpoint_bytes": 0,
+      "input_tokens": 17,
+      "input_sha256": "3c961970ec784ff87a6b713d9d8a102f67212c018d3771fd1f00fe3d6c4d6726",
+      "cached_tokens": 0
+    },
+    {
+      "mode": "live",
+      "label": "fresh-replay",
+      "ttft_s": 236.48358545801602,
+      "last_text_s": 236.58791765198112,
+      "total_s": 236.8377242279239,
+      "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+      "response": {
+        "id": "resp_5a725dcb387e4bb0b2c0e8fbaa35a71a",
+        "object": "response",
+        "created_at": 1791541019,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_6a9c6250e9894201b572a70ac636425e",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": "resp_a6b45db1c21f481ca2e52d4ca6031b7c",
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1048609,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 22,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1048631
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541255
+      },
+      "disk_restores": 0,
+      "ram_restore": false,
+      "checkpoint_bytes": 0,
+      "input_tokens": 1048609,
+      "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+      "cached_tokens": 0,
+      "correct_codes": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "mode": "ram",
+      "label": "seed-prefill",
+      "ttft_s": 235.4010502579622,
+      "last_text_s": 235.4010502579622,
+      "total_s": 235.60197388601955,
+      "answer": "READY",
+      "response": {
+        "id": "resp_aa34abbdd16445238883ec206c4df4f9",
+        "object": "response",
+        "created_at": 1791541303,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_f1ccfb6543304cf99df46edfd63803a2",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "READY",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1048576,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1048578
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541538
+      },
+      "disk_restores": 0,
+      "ram_restore": false,
+      "checkpoint_bytes": 0,
+      "input_tokens": 1048576,
+      "input_sha256": "f389e344da7b4105a2f09c78a7db4cb340e0cd30046e4a031a4f90c2bea8c2b3",
+      "cached_tokens": 0
+    },
+    {
+      "mode": "ram",
+      "label": "distraction",
+      "ttft_s": 11.067284487071447,
+      "last_text_s": 11.067284487071447,
+      "total_s": 11.14842825604137,
+      "answer": "READY",
+      "response": {
+        "id": "resp_633ffb1336124c3ca3b073cdf3c65838",
+        "object": "response",
+        "created_at": 1791541538,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_77220b6909cf4c9490e65b017126a405",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "READY",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 17,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 19
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541549
+      },
+      "disk_restores": 0,
+      "ram_restore": false,
+      "checkpoint_bytes": 0,
+      "input_tokens": 17,
+      "input_sha256": "3c961970ec784ff87a6b713d9d8a102f67212c018d3771fd1f00fe3d6c4d6726",
+      "cached_tokens": 0
+    },
+    {
+      "mode": "ram",
+      "label": "ram-restore",
+      "ttft_s": 2.874367843964137,
+      "last_text_s": 2.978978053899482,
+      "total_s": 3.206204501911998,
+      "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+      "response": {
+        "id": "resp_6fbf5b6b6dd74684bdee3462e63100dc",
+        "object": "response",
+        "created_at": 1791541550,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_71e4d94fe4b946dfb04a3a88611ada62",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": "resp_aa34abbdd16445238883ec206c4df4f9",
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1048609,
+          "input_tokens_details": {
+            "cached_tokens": 1048569
+          },
+          "output_tokens": 22,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1048631
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541553
+      },
+      "disk_restores": 0,
+      "ram_restore": true,
+      "checkpoint_bytes": 0,
+      "input_tokens": 1048609,
+      "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+      "cached_tokens": 1048569,
+      "correct_codes": [
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "mode": "disk",
+      "label": "seed-prefill",
+      "ttft_s": 235.19362991000526,
+      "last_text_s": 235.19362991000526,
+      "total_s": 299.34449030598626,
+      "answer": "READY",
+      "response": {
+        "id": "resp_2f4e86cdbbf44670b1e6e7e650156032",
+        "object": "response",
+        "created_at": 1791541602,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_d2f2a4c5cce04a5fad159e28c14c7a38",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "READY",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": null,
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1048576,
+          "input_tokens_details": {
+            "cached_tokens": 0
+          },
+          "output_tokens": 2,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1048578
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791541901
+      },
+      "disk_restores": 0,
+      "ram_restore": false,
+      "checkpoint_bytes": 29772535484,
+      "input_tokens": 1048576,
+      "input_sha256": "f389e344da7b4105a2f09c78a7db4cb340e0cd30046e4a031a4f90c2bea8c2b3",
+      "cached_tokens": 0
+    },
+    {
+      "mode": "disk",
+      "label": "disk-restore-after-restart",
+      "ttft_s": 40.52904955204576,
+      "last_text_s": 40.633305498049594,
+      "total_s": 106.89060473407153,
+      "answer": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+      "response": {
+        "id": "resp_cab5561aacd64f458b08d7ecbab8c4ab",
+        "object": "response",
+        "created_at": 1791541951,
+        "status": "completed",
+        "background": false,
+        "error": null,
+        "incomplete_details": null,
+        "instructions": null,
+        "max_output_tokens": 128,
+        "model": "qwen3.8-flash-next",
+        "output": [
+          {
+            "id": "msg_cd0e23f06fc542c2bc7521151033daa6",
+            "type": "message",
+            "status": "completed",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "CEDAR-731 | MARBLE-482 | QUARTZ-956",
+                "annotations": [],
+                "logprobs": []
+              }
+            ]
+          }
+        ],
+        "parallel_tool_calls": true,
+        "previous_response_id": "resp_2f4e86cdbbf44670b1e6e7e650156032",
+        "reasoning": {
+          "effort": "none",
+          "summary": null
+        },
+        "store": true,
+        "temperature": 0,
+        "text": {
+          "format": {
+            "type": "text"
+          }
+        },
+        "tool_choice": "auto",
+        "tools": [],
+        "top_p": null,
+        "truncation": "disabled",
+        "usage": {
+          "input_tokens": 1048609,
+          "input_tokens_details": {
+            "cached_tokens": 1048569
+          },
+          "output_tokens": 22,
+          "output_tokens_details": {
+            "reasoning_tokens": 0
+          },
+          "total_tokens": 1048631
+        },
+        "user": null,
+        "metadata": {},
+        "completed_at": 1791542057
+      },
+      "disk_restores": 1,
+      "ram_restore": false,
+      "checkpoint_bytes": 59546642128,
+      "input_tokens": 1048609,
+      "input_sha256": "d56cd1325efe072aeef8cd7e957842ad65311f783e028668e407d3845de7cdb1",
+      "cached_tokens": 1048569,
+      "correct_codes": [
+        true,
+        true,
+        true
+      ]
+    }
+  ],
+  "audits": [
+    {
+      "mode": "live",
+      "startup_s": 47.0993734409567
+    },
+    {
+      "mode": "live",
+      "reuse_verified": true
+    },
+    {
+      "mode": "ram",
+      "startup_s": 46.019459698931314
+    },
+    {
+      "mode": "ram",
+      "reuse_verified": true
+    },
+    {
+      "mode": "disk",
+      "startup_s": 46.02043002296705
+    },
+    {
+      "mode": "disk",
+      "startup_s": 47.02530528395437
+    },
+    {
+      "mode": "disk",
+      "reuse_verified": true
+    }
+  ],
+  "samples_per_condition": 1,
+  "output_cap": 128,
+  "kv": "fp16",
+  "mtp_spec": 4,
+  "rope": "yarn",
+  "rope_factor": 4,
+  "peak_rss_gib": 71.56215286254883,
+  "peak_gpu_gib": 73.8720703125
+}

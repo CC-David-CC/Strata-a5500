@@ -1,0 +1,9 @@
+strata serve: session restored 262148 tokens, 1 checkpoints, 7620318908 bytes from /home/dflanag3/long-context-cache-20261009/context-262144/disk/state/responses/execution-cache/ff29234c260b4cf69e8f06bb48725d31.restore.tmp in 5244.1 ms (read+check 4744.2 ms)
+strata verify: capturing the 4-token window (43104 MiB of VRAM free)
+strata verify: captured the 4-token window (upload no error, sync no error)
+strata verify: capturing the 1-token window (43100 MiB of VRAM free)
+strata verify: captured the 1-token window (upload no error, sync no error)
+strata verify: capturing the 2-token window (43094 MiB of VRAM free)
+strata verify: captured the 2-token window (upload no error, sync no error)
+strata serve: prompt 262177 tokens = 262137 reused + 40 read in 188 ms (213.2 tok/s), 22 generated in 103 ms (214.1 tok/s), drafts accepted 16 of 24, 2 checkpoints
+strata serve: session saved 262201 tokens, 1 of 2 checkpoints, 7621890068 bytes to /home/dflanag3/long-context-cache-20261009/context-262144/disk/state/responses/execution-cache/ef3d478239b54c1eba213f48f3e9cd1a.save.tmp in 2174.4 ms (state 131.7 ms)

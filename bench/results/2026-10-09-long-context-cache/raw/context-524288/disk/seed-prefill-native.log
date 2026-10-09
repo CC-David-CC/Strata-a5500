@@ -1,0 +1,8 @@
+strata verify: capturing the 4-token window (35908 MiB of VRAM free)
+strata verify: captured the 4-token window (upload no error, sync no error)
+strata verify: capturing the 2-token window (35904 MiB of VRAM free)
+strata verify: captured the 2-token window (upload no error, sync no error)
+strata verify: capturing the 1-token window (35898 MiB of VRAM free)
+strata verify: captured the 1-token window (upload no error, sync no error)
+strata serve: prompt 524288 tokens = 0 reused + 524288 read in 95059 ms (5515.4 tok/s), 2 generated in 27 ms (74.6 tok/s), drafts accepted 3 of 3, 6 checkpoints
+strata serve: session saved 524292 tokens, 1 of 6 checkpoints, 15004391100 bytes to /home/dflanag3/long-context-cache-20261009/context-524288/disk/state/responses/execution-cache/50133769dfd1476797c8e2c60e43d6de.save.tmp in 4197.0 ms (state 133.9 ms)

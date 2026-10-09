@@ -1,0 +1,7 @@
+strata verify: capturing the 4-token window (21624 MiB of VRAM free)
+strata verify: captured the 4-token window (upload no error, sync no error)
+strata verify: capturing the 2-token window (21620 MiB of VRAM free)
+strata verify: captured the 2-token window (upload no error, sync no error)
+strata verify: capturing the 1-token window (21614 MiB of VRAM free)
+strata verify: captured the 1-token window (upload no error, sync no error)
+strata serve: prompt 1048576 tokens = 0 reused + 1048576 read in 233620 ms (4488.4 tok/s), 2 generated in 37 ms (54.7 tok/s), drafts accepted 3 of 3, 6 checkpoints

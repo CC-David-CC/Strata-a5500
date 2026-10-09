@@ -1,0 +1,12 @@
+........................./home/dflanag3/long-context-cache-20261009/core/serve/telemetry.py:230: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/stat' mode='r' encoding='UTF-8'>
+  f = [int(x) for x in open("/proc/stat").readline().split()[1:]]
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/home/dflanag3/long-context-cache-20261009/core/serve/telemetry.py:213: ResourceWarning: unclosed file <_io.TextIOWrapper name='/proc/cpuinfo' mode='r' encoding='utf-8'>
+  return line.split(":", 1)[1].strip()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.....[strata] refused an API request from the web page 'https://evil.invalid' (no API key; add its host to "allowed_hosts" or its origin to "cors_origins" in the config)
+......s....................
+----------------------------------------------------------------------
+Ran 57 tests in 12.823s
+
+OK (skipped=1)
