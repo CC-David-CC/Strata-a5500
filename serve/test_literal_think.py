@@ -1,10 +1,12 @@
 """Token identity and bounded literal-tag continuations, without a model or GPU."""
 import threading
 import unittest
+import json
+import urllib.request
 from pathlib import Path
 
 from serve.frontend import ChatTemplate
-from serve.server import ByteTokenizer, MockEngine, Service
+from serve.server import ByteTokenizer, MockEngine, Service, serve
 
 
 class ThinkTokenizer(ByteTokenizer):
@@ -131,6 +133,79 @@ class LiteralThink(unittest.TestCase):
         self.assertEqual(len(engine.prompts), 3)
         self.assertEqual(engine.prompts[2][:10], [65] + self.plain("`</think>"))
         self.assertEqual(text["content"], "42")
+
+
+class LiteralThinkHTTP(unittest.TestCase):
+    """The client sees the same complete reasoning and answer in both API formats."""
+    REASONING = "Read `</think>` as text. Done."
+
+    def setUp(self):
+        self.tok = ThinkTokenizer()
+        self.plain = lambda text: self.tok.encode(text, plain=[(0, len(text))])
+        self.end = self.tok.encode("</think>", parse_special=True)
+        self.stop = self.tok.encode("<|im_end|>", parse_special=True)
+        self.engine = ScriptEngine(self.tok, [self.plain(self.REASONING) + self.end + self.plain("42") + self.stop])
+        self.svc = Service(self.engine, self.tok, ChatTemplate(Path(__file__).parent / "chat_template.jinja"))
+        self.httpd = serve(self.svc, port=0)
+        self.base = f"http://127.0.0.1:{self.httpd.server_address[1]}"
+
+    def tearDown(self):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+
+    def request(self, path, stream):
+        body = {"model": "m", "messages": [{"role": "user", "content": "Explain the closing tag."}],
+                "max_tokens": 512, "stream": stream}
+        req = urllib.request.Request(self.base + path, data=json.dumps(body).encode(),
+                                     headers={"Content-Type": "application/json", "anthropic-version": "2023-06-01"})
+        with urllib.request.urlopen(req, timeout=30) as response:
+            self.assertEqual(response.status, 200)
+            raw = response.read().decode()
+        return raw if stream else json.loads(raw)
+
+    def assert_openai(self, stream):
+        result = self.request("/v1/chat/completions", stream)
+        if stream:
+            self.assertTrue(result.rstrip().endswith("data: [DONE]"))
+            chunks = [json.loads(line[6:]) for line in result.splitlines() if line.startswith("data: {")]
+            choices = [chunk["choices"][0] for chunk in chunks if chunk.get("choices")]
+            reasoning = "".join(c["delta"].get("reasoning_content", "") for c in choices)
+            content = "".join(c["delta"].get("content", "") for c in choices)
+            self.assertEqual([c["finish_reason"] for c in choices if c.get("finish_reason")], ["stop"])
+        else:
+            choice = result["choices"][0]
+            reasoning, content = choice["message"]["reasoning_content"], choice["message"]["content"]
+            self.assertEqual(choice["finish_reason"], "stop")
+        self.assertEqual((reasoning, content), (self.REASONING, "42"))
+
+    def test_openai_ordinary_tag_streaming(self):
+        self.assert_openai(True)
+        self.assertEqual(len(self.engine.prompts), 1)
+
+    def test_openai_ordinary_tag_nonstreaming(self):
+        self.assert_openai(False)
+        self.assertEqual(len(self.engine.prompts), 1)
+
+    def test_openai_quoted_special_repair_both_formats(self):
+        self.svc.literal_think_guard = True
+        scripts = [self.plain("Read `") + self.end + self.stop,
+                   self.plain("` as text. Done.") + self.end + self.plain("42") + self.stop]
+        for stream in (False, True):
+            with self.subTest(stream=stream):
+                self.engine.scripts = scripts
+                self.engine.prompts.clear()
+                self.assert_openai(stream)
+                self.assertEqual(len(self.engine.prompts), 2)
+
+    def test_anthropic_ordinary_tag_streaming(self):
+        raw = self.request("/v1/messages", True)
+        events = [json.loads(line[6:]) for line in raw.splitlines() if line.startswith("data: {")]
+        deltas = [ev["delta"] for ev in events if ev["type"] == "content_block_delta"]
+        self.assertEqual("".join(d.get("thinking", "") for d in deltas), self.REASONING)
+        self.assertEqual("".join(d.get("text", "") for d in deltas), "42")
+        self.assertEqual([ev["delta"]["stop_reason"] for ev in events if ev["type"] == "message_delta"], ["end_turn"])
+        self.assertEqual(events[-1]["type"], "message_stop")
+        self.assertEqual(len(self.engine.prompts), 1)
 
 
 if __name__ == "__main__":
