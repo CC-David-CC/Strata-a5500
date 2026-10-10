@@ -1803,6 +1803,33 @@ class ClientHangUp(unittest.TestCase):
 class EngineDeath(unittest.TestCase):
     """Issue #27: a dead engine is an error (not "length"), and the next request starts it again."""
 
+    def test_watchdog_line_survives_long_trace_tail(self):
+        engine = StrataEngine.__new__(StrataEngine)
+        engine.silent_note = None
+        engine.last_err = None
+        engine.proc = mock.Mock()
+        engine.proc.poll.return_value = -6
+        watchdog = ("strata serve: no progress for 60 s during a request (request -1) - stopping the engine so the "
+                    "server starts it again (issue #29)")
+        with tempfile.TemporaryDirectory() as d:
+            engine.log_path = str(Path(d) / "engine.log")
+            Path(engine.log_path).write_text(watchdog + "\n" + "strata verify trace: " + "x" * 40_000 + "\n",
+                                             encoding="utf-8")
+            note = engine.death_note()
+        self.assertIn("issue #29", note)
+        self.assertIn("no progress for 60 s", note)
+
+    def test_watchdog_line_without_trailing_newline(self):
+        engine = StrataEngine.__new__(StrataEngine)
+        engine.silent_note = None
+        engine.last_err = None
+        engine.proc = mock.Mock()
+        engine.proc.poll.return_value = -6
+        with tempfile.TemporaryDirectory() as d:
+            engine.log_path = str(Path(d) / "engine.log")
+            Path(engine.log_path).write_text("strata serve: no progress (issue #29)", encoding="utf-8")
+            self.assertIn("issue #29", engine.death_note())
+
     def test_error_then_restart(self):
         tok = ByteTokenizer()
         eng = DyingEngine(tok, "</think>\n\n" + ANSWER, max_context=CTX)
