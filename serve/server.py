@@ -779,7 +779,7 @@ class StrataEngine:
             q.put(None)
 
     def death_note(self) -> str:
-        """Why the engine most likely ended, from the end of its log: its own watchdog (issue #29), else RAM."""
+        """Why this engine run most likely ended: its watchdog (issue #29), its last error, else the RAM hint."""
         if getattr(self, "silent_note", None):          # #481: the server ended it, not the OS or the engine itself
             return self.silent_note
         watchdog = ""
@@ -788,11 +788,12 @@ class StrataEngine:
             with open(self.log_path, "rb") as f:
                 f.seek(0, 2)
                 end = f.tell()
+                begin = min(end, max(0, getattr(self, "log_start", 0)))
                 # Trace dumps can put the watchdog line tens of kilobytes before EOF. Walk backward in bounded
-                # chunks so a long-running append-only log does not need to be read into memory just to find it.
+                # reads, stopping at this engine's start: a previous run's watchdog must not explain a new exit.
                 carry = b""
-                while end:
-                    start = max(0, end - 8192)
+                while end > begin:
+                    start = max(begin, end - 8192)
                     f.seek(start)
                     parts = (f.read(end - start) + carry).split(b"\n")
                     carry = parts[0]
