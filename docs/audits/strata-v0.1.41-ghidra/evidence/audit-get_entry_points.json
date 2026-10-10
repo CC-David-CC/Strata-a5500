@@ -1,0 +1,15 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "entry @ 1404edefc [Function] (0 params) [external entry]\ntls_callback_1 @ 1404ee224 [Function] (0 params) [external entry]\ntls_callback_0 @ 1404ee368 [Function] (0 params) [external entry]\nIMAGE_DOS_HEADER_140000000 @ 140000000 [Label] [program entry]",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": {
+    "result": "entry @ 1404edefc [Function] (0 params) [external entry]\ntls_callback_1 @ 1404ee224 [Function] (0 params) [external entry]\ntls_callback_0 @ 1404ee368 [Function] (0 params) [external entry]\nIMAGE_DOS_HEADER_140000000 @ 140000000 [Label] [program entry]"
+  },
+  "isError": false
+}

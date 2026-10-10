@@ -1,0 +1,15 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "Program Name: strata.exe\nExecutable Path: <artifact-directory>/strata.exe\nArchitecture: x86\nCompiler: windows\nLanguage: x86:LE:64:default\nEndian: Little\nAddress Size: 64 bits\nBase Address: 140000000\nMemory Blocks: 10\nTotal Memory Size: 165428900 bytes\nFunction Count: 7570\nSymbol Count: 7751\n",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": {
+    "result": "Program Name: strata.exe\nExecutable Path: <artifact-directory>/strata.exe\nArchitecture: x86\nCompiler: windows\nLanguage: x86:LE:64:default\nEndian: Little\nAddress Size: 64 bits\nBase Address: 140000000\nMemory Blocks: 10\nTotal Memory Size: 165428900 bytes\nFunction Count: 7570\nSymbol Count: 7751\n"
+  },
+  "isError": false
+}

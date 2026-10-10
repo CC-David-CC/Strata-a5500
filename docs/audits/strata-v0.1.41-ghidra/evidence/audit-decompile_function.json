@@ -1,0 +1,15 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "\r\nvoid entry(void)\r\n\r\n{\r\n  FUN_1404ee60c();\r\n  FUN_1404edd80();\r\n  return;\r\n}\r\n\r\n",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": {
+    "result": "\r\nvoid entry(void)\r\n\r\n{\r\n  FUN_1404ee60c();\r\n  FUN_1404edd80();\r\n  return;\r\n}\r\n\r\n"
+  },
+  "isError": false
+}

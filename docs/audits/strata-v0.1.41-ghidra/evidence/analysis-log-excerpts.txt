@@ -1,0 +1,4 @@
+INFO  Skipping PDB processing: failed to locate PDB file in configured locations (PdbUniversalAnalyzer)
+ERROR VarnodeContext: out of address spaces at @14009f4a0 for: RAX-14009f4a0 (VarnodeContext)
+WARN  java.lang.NullPointerException: Cannot invoke "ghidra.app.plugin.core.osgi.BundleHost.getBundleFiles()" because "ghidra.app.script.GhidraScriptUtil.bundleHost" is null (bundleHost" is null)
+ERROR VarnodeContext: out of address spaces at @14009f4db for: RAX-14009f4db (VarnodeContext)

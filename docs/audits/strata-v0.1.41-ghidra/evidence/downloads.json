@@ -1,0 +1,42 @@
+[
+  {
+    "name": "ghidra_12.1.4_PUBLIC_20260921.zip",
+    "url": "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_12.1.4_build/ghidra_12.1.4_PUBLIC_20260921.zip",
+    "sha256": "ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db",
+    "bytes": 569649598,
+    "repo": "NationalSecurityAgency/ghidra",
+    "tag": "Ghidra_12.1.4_build"
+  },
+  {
+    "name": "GhidraMCP-6.0.0.zip",
+    "url": "https://github.com/bethington/ghidra-mcp/releases/download/v6.0.0/GhidraMCP-6.0.0.zip",
+    "sha256": "867731de27d5143632a010943b907a6485dd54d0e19729e2f85ee9f692c99873",
+    "bytes": 728120,
+    "repo": "bethington/ghidra-mcp",
+    "tag": "v6.0.0"
+  },
+  {
+    "name": "ghidra_mcp_bridge-6.0.0-py3-none-any.whl",
+    "url": "https://github.com/bethington/ghidra-mcp/releases/download/v6.0.0/ghidra_mcp_bridge-6.0.0-py3-none-any.whl",
+    "sha256": "71939a890009826664720166d8f786f3a2ea2460f7effcd83c73759ba4241334",
+    "bytes": 67283,
+    "repo": "bethington/ghidra-mcp",
+    "tag": "v6.0.0"
+  },
+  {
+    "name": "strata-windows-x64.zip",
+    "url": "https://github.com/Niko1221/Strata/releases/download/v0.1.41/strata-windows-x64.zip",
+    "sha256": "3dd7715f4844c0f9d2f28eb5067af0198f386df060c93523cd17e1d65b757f13",
+    "bytes": 137164559,
+    "repo": "Niko1221/Strata",
+    "tag": "v0.1.41"
+  },
+  {
+    "name": "OpenJDK21U-jdk_x64_windows_hotspot_21.0.12.1_1.zip",
+    "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_x64_windows_hotspot_21.0.12.1_1.zip",
+    "sha256": "f9d6e191ab098c0d416e7d588a24420a8621cd2f4720dab2459b8b7b2d2d8b4e",
+    "bytes": 205073461,
+    "repo": "eclipse-temurin",
+    "tag": "21"
+  }
+]

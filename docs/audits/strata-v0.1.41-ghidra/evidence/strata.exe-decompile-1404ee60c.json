@@ -1,0 +1,15 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "\r\nvoid FUN_1404ee60c(void)\r\n\r\n{\r\n  uint uVar1;\r\n  ulonglong local_res8;\r\n  uint local_res10;\r\n  undefined4 uStackX_14;\r\n  ulonglong local_18 [2];\r\n  \r\n  if (DAT_140689d80 == 0x2b992ddfa232) {\r\n    local_res8 = 0;\r\n    GetSystemTimeAsFileTime(&local_res8);\r\n    local_18[0] = local_res8;\r\n    uVar1 = GetCurrentThreadId();\r\n    local_18[0] = local_18[0] ^ uVar1;\r\n    uVar1 = GetCurrentProcessId();\r\n    local_18[0] = local_18[0] ^ uVar1;\r\n    QueryPerformanceCounter(&local_res10);\r\n    DAT_140689d80 =\r\n         ((ulonglong)local_res10 << 0x20 ^ CONCAT44(uStackX_14,local_res10) ^ local_18[0] ^\r\n         (ulonglong)local_18) & 0xffffffffffff;\r\n    if (DAT_140689d80 == 0x2b992ddfa232) {\r\n      DAT_140689d80 = 0x2b992ddfa233;\r\n    }\r\n  }\r\n  DAT_140689dc0 = ~DAT_140689d80;\r\n  return;\r\n}\r\n\r\n",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": {
+    "result": "\r\nvoid FUN_1404ee60c(void)\r\n\r\n{\r\n  uint uVar1;\r\n  ulonglong local_res8;\r\n  uint local_res10;\r\n  undefined4 uStackX_14;\r\n  ulonglong local_18 [2];\r\n  \r\n  if (DAT_140689d80 == 0x2b992ddfa232) {\r\n    local_res8 = 0;\r\n    GetSystemTimeAsFileTime(&local_res8);\r\n    local_18[0] = local_res8;\r\n    uVar1 = GetCurrentThreadId();\r\n    local_18[0] = local_18[0] ^ uVar1;\r\n    uVar1 = GetCurrentProcessId();\r\n    local_18[0] = local_18[0] ^ uVar1;\r\n    QueryPerformanceCounter(&local_res10);\r\n    DAT_140689d80 =\r\n         ((ulonglong)local_res10 << 0x20 ^ CONCAT44(uStackX_14,local_res10) ^ local_18[0] ^\r\n         (ulonglong)local_18) & 0xffffffffffff;\r\n    if (DAT_140689d80 == 0x2b992ddfa232) {\r\n      DAT_140689d80 = 0x2b992ddfa233;\r\n    }\r\n  }\r\n  DAT_140689dc0 = ~DAT_140689d80;\r\n  return;\r\n}\r\n\r\n"
+  },
+  "isError": false
+}

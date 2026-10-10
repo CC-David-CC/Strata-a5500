@@ -1,0 +1,15 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"matches\":[],\"total\":0,\"offset\":0,\"limit\":100}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": {
+    "result": "{\"matches\":[],\"total\":0,\"offset\":0,\"limit\":100}"
+  },
+  "isError": false
+}

@@ -1,0 +1,15 @@
+{
+  "meta": null,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"name\":\"strata.exe\",\"analyzing\":true,\"analyzed\":false,\"should_ask_to_analyze\":false,\"function_count\":8455}",
+      "annotations": null,
+      "meta": null
+    }
+  ],
+  "structuredContent": {
+    "result": "{\"name\":\"strata.exe\",\"analyzing\":true,\"analyzed\":false,\"should_ask_to_analyze\":false,\"function_count\":8455}"
+  },
+  "isError": false
+}
