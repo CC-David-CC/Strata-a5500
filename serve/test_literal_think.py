@@ -84,10 +84,19 @@ class LiteralThink(unittest.TestCase):
         self.assertEqual(text["reasoning"], "Read `")
         self.assertEqual(len(engine.prompts), 1)
 
-    def test_stop_after_backtick_is_not_invented_tag(self):
-        text, _, engine = self.run_script([self.plain("Read `") + self.stop], guard=True)
-        self.assertEqual(text["reasoning"], "Read `")
+    def test_guard_off_does_not_continue_after_stop_in_code(self):
+        text, done, engine = self.run_script([self.plain("Read `") + self.stop], guard=False)
+        self.assertEqual(text, {"reasoning": "Read `", "content": ""})
+        self.assertEqual(done["finish"], "stop")
         self.assertEqual(len(engine.prompts), 1)
+
+    def test_guard_continues_after_eos_in_unclosed_reasoning_code(self):
+        text, done, engine = self.run_script(
+            [self.plain("Read `") + self.stop,
+             self.plain("` as literal text. Done.") + self.end + self.plain("42") + self.stop], guard=True)
+        self.assertEqual(text, {"reasoning": "Read `</think>` as literal text. Done.", "content": "42"})
+        self.assertEqual(done["finish"], "stop")
+        self.assertEqual(len(engine.prompts), 2)
 
     def test_fenced_special_is_replaced(self):
         text, _, engine = self.run_script([self.plain("```xml\n") + self.end,

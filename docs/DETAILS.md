@@ -745,8 +745,10 @@ print(r.choices[0].message.content)
   spans with ordinary text tokens and resumes generation from that prefix. This heuristic is off by default:
   an unclosed code span can also precede a genuine end of reasoning. It allows at most 64 substitutions per reply,
   counts the consumed special and inserted text tokens against the output limit, and respects client stop strings.
-  A stop token after a bare backtick alone does not trigger this repair. Mid-line markers outside code still close
-  reasoning normally. This does not guarantee that a model will finish its answer.
+  On end-of-turn while reasoning has an unclosed code span and no answer or tool call, it can also replace the stop
+  with literal `</think>` text and continue. This code-span stop repair is why the guard is opt-in: an unclosed
+  code span can precede a genuine end of reasoning. Mid-line markers outside code still close reasoning normally.
+  This does not guarantee that a model will finish its answer.
 - **A reply stuck on one token is ended (0.1.39, #606).** When a reply repeats the same token 256 times in a row, the
   server ends it there with `finish_reason` `"length"` and says so in its window: a model in a loop, or a broken
   state that answers one token forever (#606 saw 36,689 tokens of `!`). `"repeat_stop_tokens": N` in

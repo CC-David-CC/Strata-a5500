@@ -3782,6 +3782,7 @@ class Service:
                             else self.engine.generate(prompt, max_new - n, sampling, cancel)
                         recover_prompt = None
                         literal_extra = None
+                        literal_stop = False
                         seg, wrap, leaving = [], False, False   # this pass's tokens; the budget is reached; closed
                         opens = False                   # the thinking is over: write the forced call's opening
                         try:
@@ -3805,7 +3806,20 @@ class Service:
                                         opens = True    # #537: the held </think> was the end: the call opens there
                                         break
                                     finish = "stop"
-                                    raw_ids.append(t)
+                                    if (self.literal_think_guard and literal_swaps < 64 and not answered
+                                            and parser.state == "reasoning" and parser._in_code()
+                                            and not wrap and not opens and not cancel.is_set()
+                                            and (stops is None or stops.hit is None)):
+                                        # A turn-ending token after an unfinished reasoning code span can strand
+                                        # the answer. Keep it out of the model prefix, write the literal marker,
+                                        # and let the existing bounded continuation path finish the code span.
+                                        literal_extra = self.think_literal_ids.get(self.think_end_id)
+                                        literal_stop = (literal_extra is not None
+                                                        and max_new - n - len(literal_extra) >= 1)
+                                    if not literal_stop:
+                                        raw_ids.append(t)
+                                    else:
+                                        n -= 1  # replace the model's EOS with the literal closing-tag text
                                     break
                                 if (self.literal_think_guard and literal_swaps < 64
                                         and t in self.think_literal_ids and not parser.buf
