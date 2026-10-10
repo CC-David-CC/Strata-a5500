@@ -60,6 +60,11 @@ class LiteralThink(unittest.TestCase):
         self.assertEqual(text, {"reasoning": "Read `</think>` as text. ", "content": "42"})
         self.assertEqual(done["finish"], "stop")
 
+    def test_literal_tag_in_prose_does_not_route_following_reasoning_to_answer(self):
+        reasoning = "The literal </think> tag can appear in prose before the explanation continues. "
+        text, _, _ = self.run_script([self.plain(reasoning) + self.end + self.plain("42") + self.stop])
+        self.assertEqual(text, {"reasoning": reasoning, "content": "42"})
+
     def test_real_midline_marker_closes_reasoning(self):
         text, _, engine = self.run_script([self.plain("Done.") + self.end + self.plain("42") + self.stop], guard=True)
         self.assertEqual(text, {"reasoning": "Done.", "content": "42"})

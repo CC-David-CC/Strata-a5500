@@ -3944,8 +3944,10 @@ class Service:
                         # below continues it: a client that is told why its reply is empty can act on it (retry, or
                         # turn the guard on), the log says it, and /metrics' totals count it.  The detection changes
                         # nothing about the reply itself, so it needs no switch.
+                        parser_inside_thinking = (parser.state == "reasoning" or
+                                                  (not parser.token_aware and parser.state == "content"))
                         inside_thinking = (thinking and finish == "stop" and not answered and not wrap and not opens
-                                           and parser.state in ("reasoning", "content")
+                                           and parser_inside_thinking
                                            and (stops is None or stops.hit is None) and not cancel.is_set())
                         if inside_thinking:
                             reported_inside_thinking = True
@@ -3981,19 +3983,40 @@ class Service:
                                       "generated): closing the thinking so the model answers "
                                       f"({literal_retries} of {LITERAL_THINK_RETRIES}, literal_think_guard)",
                                       flush=True)
-                                if parser.state == "content":       # the tag was text: it belongs to the reasoning
+                                if parser.state == "content" and not parser.token_aware:
+                                    # The legacy parser mistook ordinary tag text for the marker; restore it to reasoning.
                                     parser.reopen_reasoning()       # ... and the thinking was not over:
                                     for ev in [Event("reasoning", THINK_END)]:   # the close below then lands as the
                                         self._note(n, [ev], st, rate)            # marker, not as answer text
                                         yield "event", ev
-                                for t in extra:
-                                    n += 1
-                                    raw_ids.append(t)
-                                    thinking_n += parser.state in ("reasoning", "rcall")
-                                    evs = cut(parser.feed(detok.push(t)))
+                                if parser.token_aware:
+                                    # This close is service-inserted control, not model text. With token-aware parsing,
+                                    # feeding its decoded spelling would correctly treat ordinary `</think>` tokens
+                                    # as literal text, so deliver the boundary by identity instead.
+                                    inserted = ""
+                                    for t in extra:
+                                        n += 1
+                                        raw_ids.append(t)
+                                        thinking_n += parser.state in ("reasoning", "rcall")
+                                        inserted += detok.push(t)
+                                    before, sep, after = inserted.partition(THINK_END)
+                                    evs = parser.feed(before)
+                                    if sep:
+                                        evs += parser.end_thinking()
+                                        evs += parser.feed(after)
+                                    evs = cut(evs)
                                     self._note(n, evs, st, rate)
                                     for ev in evs:
                                         yield "event", ev
+                                else:
+                                    for t in extra:
+                                        n += 1
+                                        raw_ids.append(t)
+                                        thinking_n += parser.state in ("reasoning", "rcall")
+                                        evs = cut(parser.feed(detok.push(t)))
+                                        self._note(n, evs, st, rate)
+                                        for ev in evs:
+                                            yield "event", ev
                                 prompt = prompt + seg + extra
                                 finish = "length"
                                 continue
