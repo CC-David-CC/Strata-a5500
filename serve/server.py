@@ -3895,6 +3895,7 @@ class Service:
                                 n += 1
                                 raw_ids.append(t)
                                 thinking_n += parser.state in ("reasoning", "rcall")
+                                thought += parser.state == "reasoning"
                                 evs = cut(feed_token(t))
                                 self._note(n, evs, st, rate)
                                 for ev in evs:

@@ -11,19 +11,27 @@ class ThinkTokenizer(ByteTokenizer):
     SPECIALS = ByteTokenizer.SPECIALS + ["<think>", "</think>"]
     ALWAYS = ("<think>", "</think>")
 
+    def token_bytes(self, t):
+        return self.SPECIALS[t - 256].encode() if t >= 256 else bytes([t])
+
 
 class ScriptEngine(MockEngine):
     def __init__(self, tok, scripts):
         super().__init__(tok, "", max_context=4096)
         self.scripts, self.prompts = scripts, []
+        self.cancel_on_close = False
 
     def generate(self, ids, max_new, sampling, cancel, embeddings=None):
         script = self.scripts[min(len(self.prompts), len(self.scripts) - 1)]
         self.prompts.append(list(ids))
-        for t in script[:max_new]:
-            if cancel.is_set():
-                return
-            yield t
+        try:
+            for t in script[:max_new]:
+                if cancel.is_set():
+                    return
+                yield t
+        finally:
+            if self.cancel_on_close:
+                cancel.set()
 
 
 class LiteralThink(unittest.TestCase):
@@ -35,8 +43,9 @@ class LiteralThink(unittest.TestCase):
     def plain(self, text):
         return self.tok.encode(text, plain=[(0, len(text))])
 
-    def run_script(self, scripts, thinking=True, guard=False, max_new=512, sampling=None):
+    def run_script(self, scripts, thinking=True, guard=False, max_new=512, sampling=None, cancel_on_close=False):
         engine = ScriptEngine(self.tok, scripts)
+        engine.cancel_on_close = cancel_on_close
         svc = Service(engine, self.tok, ChatTemplate(Path(__file__).parent / "chat_template.jinja"))
         svc.literal_think_guard = guard
         rows = list(svc.run([65], thinking, [], max_new, sampling or {}, threading.Event()))
@@ -109,6 +118,19 @@ class LiteralThink(unittest.TestCase):
         text, done, _ = self.run_script([self.plain("Done.") + self.end + self.stop], guard=True)
         self.assertEqual(text, {"reasoning": "Done.", "content": ""})
         self.assertEqual(done["finish"], "stop")
+
+    def test_cancel_while_draining_does_not_resume(self):
+        _, done, engine = self.run_script([self.plain("`") + self.end], guard=True, cancel_on_close=True)
+        self.assertEqual(len(engine.prompts), 1)
+        self.assertEqual(done["finish"], "cancel")
+
+    def test_replacement_then_budget_keeps_rewritten_prefix(self):
+        text, _, engine = self.run_script([self.plain("`") + self.end, self.plain("` more"),
+                                          self.plain("42") + self.stop], guard=True,
+                                         sampling={"reasoning_budget_tokens": 5})
+        self.assertEqual(len(engine.prompts), 3)
+        self.assertEqual(engine.prompts[2][:10], [65] + self.plain("`</think>"))
+        self.assertEqual(text["content"], "42")
 
 
 if __name__ == "__main__":
