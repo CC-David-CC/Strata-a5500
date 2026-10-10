@@ -110,6 +110,20 @@ answer after a start differ from the next ones. Measured here (IQ3_XXS, a 3.6K-t
 three switches 1 answer of 4, without `--pcie-frac 0` 2 of 4 (the first one differs), with the defaults 2 of 4.
 `--pcie-frac 0` costs decode speed (the missed experts all run on the CPU), so keep it for A/B runs.
 
+**Reproducible token comparisons with caching kept on (0.1.41, opt-in, `--reproducible`):** this flag bundles
+`STRATA_IQ_MT_MIN=1`, disables adaptive expert swaps, and sets `--pcie-frac 0`. It leaves the prompt and conversation
+caches enabled, so it can compare fresh reads with RAM parking, disk-only restore, and disk fallback. Use it for
+exact-token evaluations; it can reduce throughput when requests need experts outside VRAM, and it is not a promise
+that outputs match across different hardware, drivers, or builds. The probe `tools/conversation_token_parity.py`
+checks greedy and fixed-seed sampled output after switching away and returning to the same prompt. On llm-60
+(RTX PRO 6000 Blackwell, CUDA 13.2; ISTA IQ3_XXS, INT8 KV, MTP `--spec 4`, 32K context), a 1,957-token prompt
+matched fresh prefill across RAM, disk-only, and RAM-pressure disk-fallback paths for greedy and for sampling at
+temperature 0.7 / top-k 20 / top-p 0.95 / seed 12345. A separate baseline/candidate run matched token IDs for eight
+8,303-token shared-prefix prompts under the same fixed execution settings. Without those settings, a repeated
+fallback run diverged at token 12 on one prompt; the opt-in disk verifier found every main and draft K/V layer and
+the recurrent running state byte-identical after restore, pointing to execution-path arithmetic rather than a
+corrupt snapshot. These are single-machine measurements, not a cross-platform determinism claim.
+
 **Coupled drafts with Gumbel-max picks (opt-in, `STRATA_SPEC_COUPLED=1` and `STRATA_SPEC_GUMBEL=1`):** for a request
 that samples (temperature above 0), `STRATA_SPEC_COUPLED=1` lets the draft layer sample its guesses with the target's own
 chain and random draw instead of taking its most likely token. `STRATA_SPEC_GUMBEL=1` changes how both of them pick from

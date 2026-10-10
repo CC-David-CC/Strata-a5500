@@ -582,6 +582,8 @@ struct Options {
     bool split_skip_if_fits = false;
     /// Plan v0.3 P8: stay resident and take requests on stdin (see the --serve block in main).
     bool serve = false;
+    /// Stabilize token-level comparisons across IQ grouping and expert execution placement.
+    bool reproducible = false;
     /// The vision path: keep a per-cell (t, h, w) rotary position table so --serve can take GENI requests.
     bool vision = false;
     int adapt_swaps = 96;
@@ -692,6 +694,8 @@ void usage() {
                  "                       --expert-profile; STRATA_KV_GROW=1/0 also). Default: the whole --max-context\n"
                  "                       allocated at start\n"
                  "  --stream-token       enqueue token work on the session stream (experimental)\n"
+                 "  --reproducible       stabilize token-level A/B comparisons: fixed IQ grouping, no adaptive swaps,\n"
+                 "                       CPU for missed experts; may reduce throughput; conversation caching stays on\n"
                  "  --check-logits       copy and check all logits in the stream-token path\n"
                  "  --gr-fp32-activations  experimental CUDA-oracle GR activation precision\n"
                  "  --gr-native-mmvf      experimental pinned GR norm/projections; implies FP32 activations\n"
@@ -1654,6 +1658,7 @@ int main(int argc, char** argv) {
         bool parsed = true;
         if (a == "--help" || a == "-h") { usage(); return 0; }
         else if (a == "--gpu") { (void) next("--gpu"); }   // applied at startup, before any CUDA call
+        else if (a == "--reproducible") o.reproducible = true;
         else if (a == "--pack") o.pack = next("--pack");
         else if (a == "--tokens") {
             if (have_tokens) { std::fprintf(stderr, "supply one token input only\n"); return 2; }
@@ -1994,6 +1999,22 @@ int main(int argc, char** argv) {
             return 2;
         }
         }
+    }
+    if (o.reproducible) {
+        // These sources can change IQ results without changing the model or prompt: CPU dot vs multi-token
+        // grouping, expert migration between CPU/GPU, and mapped-PCIe execution of misses. Keep the cache lifecycle
+        // intact; use this policy for exact-token A/B checks across fresh, parked, and disk-restored sessions.
+        o.adapt_every = 0;
+        o.adapt_swaps = 0;
+        o.peer_adapt_swaps = 0;
+        o.pcie_frac = 0.0;
+#if defined(_WIN32)
+        _putenv_s("STRATA_IQ_MT_MIN", "1");
+#else
+        setenv("STRATA_IQ_MT_MIN", "1", 1);
+#endif
+        std::fprintf(stderr, "strata: reproducible execution policy on (IQ multi-token grouping, adaptive swaps off, "
+                             "PCIe miss share 0; conversation caching remains enabled)\n");
     }
 #if defined(STRATA_USE_HIP)
     {   // gfx1151 (Strix Halo): the switches that are exact there are on by default (strata/core/arch_defaults.hpp); before
@@ -9749,8 +9770,17 @@ int main(int argc, char** argv) {
                 } else {
                     conversations.take_reuse();
                     bool touched = false;
+                    const bool verify_disk_draft = use_mtp && stages.empty() &&
+                                                   std::getenv("STRATA_SNAPSHOT_VERIFY") != nullptr;
+                    std::vector<uint64_t> streamed_hashes(targets.size(), 1469598103934665603ull);
+                    std::vector<uint64_t> streamed_bytes(targets.size(), 0);
                     auto sink = [&](size_t layer, size_t part, uint64_t offset, const void* data, size_t n) {
                         if (layer >= targets.size()) { err = "session file: K/V layer outside the validated set"; return false; }
+                        if (verify_disk_draft) {
+                            const auto* p = static_cast<const uint8_t*>(data);
+                            for (size_t i = 0; i < n; ++i) { streamed_hashes[layer] ^= p[i]; streamed_hashes[layer] *= 1099511628211ull; }
+                            streamed_bytes[layer] += n;
+                        }
                         touched = true;
                         return targets[layer].apply(part, offset, data, n, err);
                     };
@@ -9771,9 +9801,65 @@ int main(int argc, char** argv) {
                                 std::printf("ERR restoring a disk conversation: residency refill failed: %s\n", err.c_str());
                                 return 1;
                             }
+                        // The streamed parser keeps K/V payloads on disk, so verify the exact bytes delivered by
+                        // the file against a fresh readback of the restored MTP draft state instead of comparing
+                        // against disk_meta.kv (which intentionally contains metadata only).
+                        if (verify_disk_draft) {
+                            const strata::core::OnDevice on_d(0);
+                            for (size_t layer = 0; layer < targets.size(); ++layer) {
+                                strata::core::ConversationKv restored;
+                                const bool index = layer + 1 < targets.size();
+                                if (!strata::core::conversation_kv_save(restored, *targets[layer].state, g,
+                                        int64_t(disk_meta.live.ids.size()), index, err)) {
+                                    std::printf("ERR capturing restored disk KV layer %zu: %s\n", layer, err.c_str());
+                                    return 1;
+                                }
+                                uint64_t restored_hash = 1469598103934665603ull;
+                                uint64_t restored_size = 0;
+                                const std::array<const strata::core::ConversationBuffer*, 5> parts = {
+                                    &restored.k, &restored.v, &restored.k_scale, &restored.v_scale, &restored.pooled};
+                                bool captured = true;
+                                for (const auto* part : parts) {
+                                    if (!part->visit(0, part->size(), [&](const uint8_t* p, size_t n, size_t) {
+                                            for (size_t i = 0; i < n; ++i) { restored_hash ^= p[i]; restored_hash *= 1099511628211ull; }
+                                            restored_size += n;
+                                            return true;
+                                        })) { captured = false; break; }
+                                }
+                                if (!captured || restored_size != streamed_bytes[layer] || restored_hash != streamed_hashes[layer]) {
+                                    std::printf("ERR verifying restored disk KV layer %zu: streamed bytes differ from restored state "
+                                                "(file=%llu/%016llx state=%llu/%016llx)\n", layer,
+                                                (unsigned long long) streamed_bytes[layer],
+                                                (unsigned long long) streamed_hashes[layer],
+                                                (unsigned long long) restored_size,
+                                                (unsigned long long) restored_hash);
+                                    return 1;
+                                }
+                                std::fprintf(stderr, "strata serve: SNAPSHOT_VERIFY kv_layer=%zu hash=%016llx bytes=%llu source=disk\n",
+                                             layer, (unsigned long long) restored_hash, (unsigned long long) restored_size);
+                            }
+                        }
                         if (!strata::core::conversation_checkpoint_restore(disk_meta.live, ss, g, err)) {
                             std::printf("ERR restoring a disk conversation: running-state restore failed: %s\n", err.c_str());
                             return 1;
+                        }
+                        if (verify_disk_draft) {
+                            strata::core::ConversationCheckpoint restored;
+                            restored.ids = disk_meta.live.ids;
+                            restored.imgs = disk_meta.live.imgs;
+                            if (!strata::core::conversation_checkpoint_save(restored, ss, g, err)) {
+                                std::printf("ERR capturing restored disk running state: %s\n", err.c_str());
+                                return 1;
+                            }
+                            const auto& expected = disk_meta.live;
+                            if (restored.gdn != expected.gdn || restored.ple != expected.ple ||
+                                restored.tails != expected.tails || restored.dead != expected.dead ||
+                                restored.block_pos != expected.block_pos) {
+                                std::printf("ERR verifying restored disk running state: bytes differ from session file\n");
+                                return 1;
+                            }
+                            std::fprintf(stderr, "strata serve: SNAPSHOT_VERIFY running_state=exact source=disk tokens=%zu\n",
+                                         restored.ids.size());
                         }
                         live = std::move(disk_meta.live.ids);
                         live_imgs = std::move(disk_meta.live.imgs);
