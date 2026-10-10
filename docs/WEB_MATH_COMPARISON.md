@@ -71,8 +71,10 @@ The Linux-local path removes Windows and SSH overhead. Keep those numbers separa
 
 KaTeX and MathJax provide semantic MathML. The TeX image has the source as its accessible description; it does not
 provide equivalent mathematical navigation. The tests inspect markup, not a manual screen-reader session.
-Playwright WebKit is engine coverage, not a physical Safari/iPhone test. Docker Desktop installation on Windows
-was not tested; the Windows server/client and the Linux container worker were tested together.
+Playwright WebKit is engine coverage, not a physical Safari/iPhone test. Docker Desktop 4.94.0 was installed
+on Windows using its per-user WSL 2 backend; the local Docker Engine 29.8.2 passed hello-world. Native full-TeX
+image build and renderer validation are still pending. The recorded TeX results below use the Windows
+server/client with the Linux container worker, not a native Docker Desktop worker.
 
 The full TeX image uses a pinned Debian base digest, pinned TeX Live distribution package, installed-package lock
 file, and an exact image ID when started. Transitive Debian dependencies can change on rebuild; archive the
