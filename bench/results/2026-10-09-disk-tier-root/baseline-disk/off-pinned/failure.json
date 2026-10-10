@@ -1,0 +1,4 @@
+{
+  "type": "SessionRefused",
+  "error": "conversation snapshot: invalid K/V extent"
+}

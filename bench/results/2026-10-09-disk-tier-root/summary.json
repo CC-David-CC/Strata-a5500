@@ -1,0 +1,1722 @@
+{
+  "arms": [
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1450.5,
+      "reused": 8176,
+      "return_prompt_ms": 686.8,
+      "return_total_s": 1.0613727599848062,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 1,
+      "failure": false
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1446.8,
+      "reused": 8176,
+      "return_prompt_ms": 642.7,
+      "return_total_s": 1.0148289520293474,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 1,
+      "failure": false
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "off-pinned",
+      "generations": 1,
+      "cold_prompt_ms": 1448.2,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": true
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "off-unpinned",
+      "generations": 1,
+      "cold_prompt_ms": 1484.1,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": true
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1588.1,
+      "reused": 8191,
+      "return_prompt_ms": 605.1,
+      "return_total_s": 0.9790523939300328,
+      "prefix_saves": [
+        "8191"
+      ],
+      "positive_cleanup_events": 10,
+      "failure": false
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1591.6,
+      "reused": 8191,
+      "return_prompt_ms": 235.5,
+      "return_total_s": 0.608471521991305,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1586.7,
+      "reused": 8191,
+      "return_prompt_ms": 605.9,
+      "return_total_s": 0.9784959519747645,
+      "prefix_saves": [
+        "8191"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1458.3,
+      "reused": 8191,
+      "return_prompt_ms": 209.0,
+      "return_total_s": 0.5831835260614753,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1480.8,
+      "reused": 8176,
+      "return_prompt_ms": 163.3,
+      "return_total_s": 0.5369561779079959,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1454.4,
+      "reused": 8176,
+      "return_prompt_ms": 703.5,
+      "return_total_s": 1.0780015439959243,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1458.1,
+      "reused": 8176,
+      "return_prompt_ms": 636.3,
+      "return_total_s": 1.0108257390093058,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1457.3,
+      "reused": 8176,
+      "return_prompt_ms": 629.0,
+      "return_total_s": 1.0034654410555959,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "mtp-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1463.3,
+      "reused": 8176,
+      "return_prompt_ms": 687.8,
+      "return_total_s": 1.0621227530064061,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 1,
+      "failure": false
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1453.0,
+      "reused": 8176,
+      "return_prompt_ms": 642.0,
+      "return_total_s": 1.0149112429935485,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 1,
+      "failure": false
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "off-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1449.4,
+      "reused": 8176,
+      "return_prompt_ms": 730.5,
+      "return_total_s": 1.400070472038351,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 1,
+      "failure": false
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "off-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1449.1,
+      "reused": 8176,
+      "return_prompt_ms": 705.3,
+      "return_total_s": 1.3789705309318379,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 1,
+      "failure": false
+    },
+    {
+      "run": "candidate-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1590.2,
+      "reused": 8191,
+      "return_prompt_ms": 598.9,
+      "return_total_s": 0.972415160969831,
+      "prefix_saves": [
+        "8191"
+      ],
+      "positive_cleanup_events": 10,
+      "failure": false
+    },
+    {
+      "run": "candidate-effective-pin-disk",
+      "arm": "off-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1612.2,
+      "reused": 8191,
+      "return_prompt_ms": 630.0,
+      "return_total_s": 1.3029988870257512,
+      "prefix_saves": [
+        "8191"
+      ],
+      "positive_cleanup_events": 10,
+      "failure": false
+    },
+    {
+      "run": "candidate-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1586.8,
+      "reused": 8191,
+      "return_prompt_ms": 236.6,
+      "return_total_s": 0.6098794660065323,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-effective-pin-ram",
+      "arm": "off-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1609.8,
+      "reused": 8191,
+      "return_prompt_ms": 257.6,
+      "return_total_s": 0.9217898909701034,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1587.7,
+      "reused": 8191,
+      "return_prompt_ms": 599.7,
+      "return_total_s": 0.9726965790614486,
+      "prefix_saves": [
+        "8191"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-effective-pin-ram-fallback",
+      "arm": "off-pinned",
+      "generations": 14,
+      "cold_prompt_ms": 1608.5,
+      "reused": 8191,
+      "return_prompt_ms": 626.3,
+      "return_total_s": 1.2955242110183463,
+      "prefix_saves": [
+        "8191"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "mtp-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1459.5,
+      "reused": 8191,
+      "return_prompt_ms": 222.1,
+      "return_total_s": 0.5961477370001376,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1473.8,
+      "reused": 8176,
+      "return_prompt_ms": 170.5,
+      "return_total_s": 0.5441579020116478,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "off-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1456.7,
+      "reused": 8191,
+      "return_prompt_ms": 269.5,
+      "return_total_s": 0.9404148340690881,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "off-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1453.8,
+      "reused": 8176,
+      "return_prompt_ms": 288.6,
+      "return_total_s": 0.9579750869888812,
+      "prefix_saves": [],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "mtp-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1458.6,
+      "reused": 8176,
+      "return_prompt_ms": 670.1,
+      "return_total_s": 1.045351422042586,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1458.5,
+      "reused": 8176,
+      "return_prompt_ms": 633.4,
+      "return_total_s": 1.0079907809849828,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "off-pinned",
+      "generations": 13,
+      "cold_prompt_ms": 1460.5,
+      "reused": 8176,
+      "return_prompt_ms": 744.7,
+      "return_total_s": 1.4182408099295571,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "off-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1457.2,
+      "reused": 8176,
+      "return_prompt_ms": 703.4,
+      "return_total_s": 1.3738762609427795,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    },
+    {
+      "run": "candidate-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "generations": 13,
+      "cold_prompt_ms": 1455.3,
+      "reused": 8176,
+      "return_prompt_ms": 633.4,
+      "return_total_s": 1.0076165300561115,
+      "prefix_saves": [
+        "8176"
+      ],
+      "positive_cleanup_events": 0,
+      "failure": false
+    }
+  ],
+  "parity": [
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "off-pinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "off-unpinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-7-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-1-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-4-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-5-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-6-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "restart-return-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "restart-return-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-7-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-1-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-4-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-5-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "request": "shared-6-events.json",
+      "equal": false,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "return-new-suffix-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "explicit-restore-control-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-3-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-0-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-7-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "restart-return-events.json",
+      "equal": true,
+      "baseline_tokens": 97,
+      "candidate_tokens": 97
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "switch-away-events.json",
+      "equal": true,
+      "baseline_tokens": 8,
+      "candidate_tokens": 8
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "park-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "warm-base-events.json",
+      "equal": true,
+      "baseline_tokens": 1,
+      "candidate_tokens": 1
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-1-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-2-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-4-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-5-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "request": "shared-6-events.json",
+      "equal": true,
+      "baseline_tokens": 128,
+      "candidate_tokens": 128
+    }
+  ],
+  "restore_parity": [
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-disk",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-ram",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-ram-fallback",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "baseline-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "off-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-disk",
+      "arm": "off-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-disk",
+      "arm": "mtp-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-disk",
+      "arm": "off-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-disk",
+      "arm": "off-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram",
+      "arm": "mtp-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram",
+      "arm": "off-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram",
+      "arm": "off-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram-fallback",
+      "arm": "mtp-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram-fallback",
+      "arm": "off-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-effective-pin-ram-fallback",
+      "arm": "off-pinned",
+      "control": "restart-return",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "off-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram",
+      "arm": "off-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "mtp-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "off-pinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-ram-fallback",
+      "arm": "off-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    },
+    {
+      "run": "candidate-repeat-ram-fallback",
+      "arm": "mtp-unpinned",
+      "control": "explicit-restore-control",
+      "equal": true
+    }
+  ]
+}

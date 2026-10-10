@@ -1,0 +1,256 @@
+{
+  "phase": "complete",
+  "runs": [
+    {
+      "name": "baseline-repeat-ram-fallback",
+      "status": "complete",
+      "generations": 13,
+      "failed_arms": 0,
+      "cache_mode": "ram-fallback"
+    },
+    {
+      "name": "candidate-repeat-ram-fallback",
+      "status": "complete",
+      "generations": 13,
+      "failed_arms": 0,
+      "cache_mode": "ram-fallback"
+    }
+  ],
+  "finished": 1791603862.3123753,
+  "comparisons": [
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "return-new-suffix-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "explicit-restore-control-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-3-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-0-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-7-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "switch-away-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "park-base-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "warm-base-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-1-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-2-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-4-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-5-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-ram-fallback",
+      "right": "baseline-repeat-ram-fallback",
+      "request": "shared-6-events.json",
+      "equal": false
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "return-new-suffix-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "explicit-restore-control-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-3-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-0-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-7-events.json",
+      "equal": false
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "switch-away-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "park-base-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "warm-base-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-1-events.json",
+      "equal": false
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-2-events.json",
+      "equal": true
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-4-events.json",
+      "equal": false
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-5-events.json",
+      "equal": false
+    },
+    {
+      "left": "candidate-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-6-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "return-new-suffix-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "explicit-restore-control-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-3-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-0-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-7-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "switch-away-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "park-base-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "warm-base-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-1-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-2-events.json",
+      "equal": true
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-4-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-5-events.json",
+      "equal": false
+    },
+    {
+      "left": "baseline-repeat-ram-fallback",
+      "right": "candidate-repeat-ram-fallback",
+      "request": "shared-6-events.json",
+      "equal": false
+    }
+  ]
+}

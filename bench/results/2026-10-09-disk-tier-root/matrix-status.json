@@ -1,0 +1,43 @@
+{
+  "started": 1791603056.5187418,
+  "runs": [
+    {
+      "name": "candidate-disk",
+      "status": "complete",
+      "generations": 52,
+      "failed_arms": 0,
+      "cache_mode": "disk"
+    },
+    {
+      "name": "candidate-ram",
+      "status": "complete",
+      "generations": 52,
+      "failed_arms": 0,
+      "cache_mode": "ram"
+    },
+    {
+      "name": "candidate-ram-fallback",
+      "status": "complete",
+      "generations": 52,
+      "failed_arms": 0,
+      "cache_mode": "ram-fallback"
+    },
+    {
+      "name": "baseline-ram",
+      "status": "complete",
+      "generations": 26,
+      "failed_arms": 0,
+      "cache_mode": "ram"
+    },
+    {
+      "name": "baseline-ram-fallback",
+      "status": "complete",
+      "generations": 26,
+      "failed_arms": 0,
+      "cache_mode": "ram-fallback"
+    }
+  ],
+  "phase": "complete",
+  "candidate_binary_sha256": "188d51fe37c1319f66ebc0bf7c7d5c1009f959c838430465457ea6d46e170cac",
+  "finished": 1791603475.3845153
+}

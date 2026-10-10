@@ -1,0 +1,48 @@
+{
+  "phase": "complete",
+  "runs": [
+    {
+      "name": "candidate-effective-pin-disk",
+      "status": "complete",
+      "generations": 28,
+      "failed_arms": 0,
+      "cache_mode": "disk"
+    },
+    {
+      "name": "candidate-effective-pin-ram",
+      "status": "complete",
+      "generations": 28,
+      "failed_arms": 0,
+      "cache_mode": "ram"
+    },
+    {
+      "name": "candidate-effective-pin-ram-fallback",
+      "status": "complete",
+      "generations": 28,
+      "failed_arms": 0,
+      "cache_mode": "ram-fallback"
+    },
+    {
+      "name": "baseline-effective-pin-disk",
+      "status": "complete",
+      "generations": 14,
+      "failed_arms": 0,
+      "cache_mode": "disk"
+    },
+    {
+      "name": "baseline-effective-pin-ram",
+      "status": "complete",
+      "generations": 14,
+      "failed_arms": 0,
+      "cache_mode": "ram"
+    },
+    {
+      "name": "baseline-effective-pin-ram-fallback",
+      "status": "complete",
+      "generations": 14,
+      "failed_arms": 0,
+      "cache_mode": "ram-fallback"
+    }
+  ],
+  "finished": 1791603808.1221752
+}

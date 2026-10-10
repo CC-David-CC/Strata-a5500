@@ -1,0 +1,6 @@
+{
+  "status": "complete",
+  "generations": 28,
+  "failed_arms": 2,
+  "cache_mode": "disk"
+}
