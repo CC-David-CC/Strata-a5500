@@ -4265,9 +4265,9 @@ def make_handler(svc: Service):
                 if self.rfile.read(2) != b"\r\n":
                     raise BadBody(400, "malformed chunked request body")
 
-        def _body(self) -> bytes:
+        def _body(self, limit=None) -> bytes:
             self.body_read = True
-            limit = body_limit()
+            limit = body_limit() if limit is None else min(limit, body_limit())
             if self._chunked():
                 return self._read_chunked(limit)
             try:
@@ -4617,6 +4617,18 @@ def make_handler(svc: Service):
                 return
             path = self.path.split("?")[0].rstrip("/")   # issue #55: Claude Code posts /v1/messages?beta=true
             if path.startswith("/v1/") and self._foreign_page():
+                return
+            if path == "/web/math/render":
+                if not self._own_page("math can be compiled"):
+                    return
+                from serve import tex_math
+                try:
+                    data = self._body(65536)
+                    req = json.loads(data) if len(data) <= 65536 else None
+                    result = tex_math.render(req) if isinstance(req, dict) else {"ok": False, "reason": "invalid"}
+                except (ValueError, UnicodeError):
+                    result = {"ok": False, "reason": "invalid"}
+                self._json(200, result)
                 return
             if path == "/settings":
                 self._settings()
