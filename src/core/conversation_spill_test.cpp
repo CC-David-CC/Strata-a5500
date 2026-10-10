@@ -268,6 +268,26 @@ int main() {
         // without keep the same rule would drop the new copy too (its deepest checkpoint is on the live path)
         check(str_dir.drop_superseded(longer.live.ids, {}, longer.checkpoints, longer.cvec) == 1 && str_dir.size() == 0,
               "keep: the rule alone drops the new copy");
+
+        // Real disk_save_live saves only the deepest checkpoint, not the full RAM chain above.
+        // Turn-back cleanup must still remove turn 0 even though its checkpoint is absent from turn 1's file.
+        SavedConversation turn0 = meta;
+        turn0.checkpoints = session_checkpoints_to_save(c.checkpoints);
+        check(turn0.checkpoints.size() == 1 && turn0.checkpoints[0].ids.size() == 750,
+              "streamed turns: turn 0 keeps only its deepest checkpoint");
+        check(str_dir.spill_streamed(turn0, make_sources(c), written, error), "streamed turns: save turn 0");
+        const std::string old_turn = str_dir.newest_path();
+        SavedConversation turn1 = longer_meta;
+        turn1.checkpoints = session_checkpoints_to_save(longer.checkpoints);
+        check(turn1.checkpoints.size() == 1 && turn1.checkpoints[0].ids.size() == 1500,
+              "streamed turns: turn 1 omits turn 0's checkpoint");
+        check(str_dir.spill_streamed(turn1, make_sources(longer), written, error), "streamed turns: save turn 1");
+        const std::string new_turn = str_dir.newest_path();
+        check(str_dir.drop_superseded(longer.live.ids, {}, longer.checkpoints, longer.cvec, new_turn) == 1 &&
+              str_dir.size() == 1 && str_dir.newest_path() == new_turn,
+              "streamed turns: stale turn-back removed, replacement retained");
+        check(!fs::exists(old_turn) && !fs::exists(fs::path(old_turn).replace_extension(".meta")),
+              "streamed turns: stale payload and sidecar removed");
         fs::remove_all(sdir);
     }
 
@@ -323,6 +343,15 @@ int main() {
         check(tight.prefix_count() == 1, "prefix: still a prefix after reopen");
         check(tight.size() == 2, "prefix: budget evicted an ordinary conversation, not the prefix");
         check(tight.has_prefix(root.live.ids, {}, root.cvec), "prefix: dedupe sees the reopened prefix");
+        // Both cleanup call sites must retain the root: disk-only passes keep; RAM parking does not.
+        // Reopening also has to preserve that distinction before any new prefix is written.
+        const std::string replacement = tight.newest_path();
+        tight.drop_superseded(conv.live.ids, {}, conv.checkpoints, conv.cvec, replacement);
+        check(tight.has_prefix(root.live.ids, {}, root.cvec), "prefix: keep cleanup after reopen retains root");
+        tight.drop_superseded(conv.live.ids, {}, conv.checkpoints, conv.cvec);
+        check(tight.has_prefix(root.live.ids, {}, root.cvec), "prefix: RAM cleanup after reopen retains root");
+        const auto root_again = tight.best(new_chat, {}, root.cvec, 0.0, 0);
+        check(bool(root_again) && root_again.tokens == 600, "prefix: root still resumes a sibling after both cleanups");
         fs::remove_all(pdir);
     }
 
