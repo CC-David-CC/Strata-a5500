@@ -2744,6 +2744,16 @@ class Service:
         self.fit_max_tokens = fit_max_tokens          # --fit-max-tokens: clamp the output cap instead of 400
         self.aliases: list[str] = []                  # #297: other names of the model (the config's `aliases`)
         self.reasoning_close_retry = False            # #1053 (opt-in): close the thinking once when a reply ends inside it
+        self.literal_think_guard = False               # #1814: opt-in repair of special tags quoted as text
+        think_end = tokenizer.encode("</think>", parse_special=True)
+        self.think_end_id = think_end[0] if len(think_end) == 1 else None
+        self.think_literal_ids = {}
+        for tag in ("<think>", "</think>"):
+            special = tokenizer.encode(tag, parse_special=True)
+            if len(special) == 1:
+                plain = tokenizer.encode(tag, plain=[(0, len(tag))])
+                if special[0] not in plain and tokenizer.decode(plain) == tag:
+                    self.think_literal_ids[special[0]] = plain
         self.codex_compaction_cache = False           # #924 (opt-in): a Codex compaction is rendered with its conversation's tools
         self.codex_thread_titles = False              # #923 (opt-in): answer Codex's thread-title turns without the engine
         self.sampling_defaults = dict(sampling_defaults or {})   # the run config's `sampling` block
@@ -3636,10 +3646,22 @@ class Service:
                 print(f"[strata] thinking capped at {max_new - reserve} of max_tokens {max_new} to leave room for "
                       f"the answer (budget {budget})", flush=True)
                 budget = max(1, max_new - reserve)
-        parser = OutputParser(thinking=thinking, tools=tools, stream_tools=True, recover=self.tool_call_recovery)
+        parser = OutputParser(thinking=thinking, tools=tools, stream_tools=True, recover=self.tool_call_recovery,
+                              token_aware=self.think_end_id is not None)
         detok, n, finish = Detokenizer(self.tok), 0, "length"
         run_tok, run_len, repeated = None, 0, False     # #606: the current run of one repeated token
         thinking_n = 0                                  # tokens written while thinking (Responses' reasoning_tokens)
+        literal_swaps = 0
+
+        def feed_token(t):
+            nonlocal tail
+            piece = detok.push(t)
+            tail = (tail + piece)[-2:]
+            if t == self.think_end_id:
+                # A special token is ASCII; flush any preceding incomplete UTF-8 before its boundary.
+                prefix = piece[:-len("</think>")]
+                return parser.feed(prefix) + parser.end_thinking()
+            return parser.feed(piece)
         stop_list = stop_strings(sampling)
         stops = StopMatcher(stop_list) if stop_list else None
 
@@ -3759,6 +3781,7 @@ class Service:
                         gen = self.engine.generate(prompt, max_new - n, sampling, cancel, embeddings=emb) if emb \
                             else self.engine.generate(prompt, max_new - n, sampling, cancel)
                         recover_prompt = None
+                        literal_extra = None
                         seg, wrap, leaving = [], False, False   # this pass's tokens; the budget is reached; closed
                         opens = False                   # the thinking is over: write the forced call's opening
                         try:
@@ -3784,6 +3807,14 @@ class Service:
                                     finish = "stop"
                                     raw_ids.append(t)
                                     break
+                                if (self.literal_think_guard and literal_swaps < 64
+                                        and t in self.think_literal_ids and not parser.buf
+                                        and (parser.state == "content"
+                                             or parser.state == "reasoning" and parser._in_code())):
+                                    extra = self.think_literal_ids[t]
+                                    if max_new - n - len(extra) >= 1 and not cancel.is_set():
+                                        literal_extra = extra
+                                        break
                                 raw_ids.append(t)
                                 seg.append(t)
                                 thinking_n += parser.state in ("reasoning", "rcall")
@@ -3792,9 +3823,7 @@ class Service:
                                 if self.repeat_stop_tokens and run_len >= self.repeat_stop_tokens:
                                     repeated = True     # #606: a degenerate output, not an answer: end it here
                                     break
-                                piece = detok.push(t)
-                                tail = (tail + piece)[-2:]
-                                evs = cut(parser.feed(piece))
+                                evs = cut(feed_token(t))
                                 self._note(n, evs, st, rate)
                                 last_print = self._progress(last_print, st=st)
                                 for ev in evs:
@@ -3860,6 +3889,22 @@ class Service:
                             segment_done = getattr(self.engine, "last", None)
                             if segment_done is not None and segment_done is not segment_before:
                                 segments.append(dict(segment_done))
+                        if literal_extra is not None and not cancel.is_set():
+                            literal_swaps += 1
+                            for t in literal_extra:
+                                n += 1
+                                raw_ids.append(t)
+                                thinking_n += parser.state in ("reasoning", "rcall")
+                                evs = cut(feed_token(t))
+                                self._note(n, evs, st, rate)
+                                for ev in evs:
+                                    answered |= ev.kind in ("content", "tool_start", "tool_call")
+                                    yield "event", ev
+                            if stops is not None and stops.hit is not None:
+                                finish = "stop"
+                                break
+                            prompt = prompt + seg + literal_extra
+                            continue
                         if recover_prompt is not None and not cancel.is_set() and n < max_new:
                             recovery_count += 1
                             # Only the two settings that keep the same words coming are raised (temperature to at
@@ -3952,7 +3997,7 @@ class Service:
                                     n += 1
                                     raw_ids.append(t)
                                     thinking_n += parser.state in ("reasoning", "rcall")
-                                    evs = cut(parser.feed(detok.push(t)))
+                                    evs = cut(feed_token(t))
                                     self._note(n, evs, st, rate)
                                     for ev in evs:
                                         yield "event", ev
@@ -3982,7 +4027,7 @@ class Service:
                             n += 1
                             raw_ids.append(t)
                             thinking_n += parser.state in ("reasoning", "rcall")
-                            evs = cut(parser.feed(detok.push(t)))
+                            evs = cut(feed_token(t))
                             self._note(n, evs, st, rate)
                             for ev in evs:
                                 yield "event", ev
