@@ -129,8 +129,15 @@ Unsloth Q8_0: greedy and fixed-seed sampling (temperature 0.7, top-k 20, top-p 0
 RAM cache, disk-only restore, and a 1 MiB RAM cache that spills the roughly 252 MiB snapshot to disk. The prompt
 was 1,957 tokens and each cached return reused 1,950; sampled runs generated 64 tokens, while greedy stopped at
 50 tokens for IQ3_XXS and 32 for Q8_0. All first, returned, and repeated answers matched token-for-token against
-fresh runs. These retests did not load an MTP drafter (logs reported 0 accepted drafts), so they validate cache
-parity for ordinary decoding; MTP-enabled cache parity remains a separate check.
+fresh runs. These particular retests did not load an MTP drafter (logs reported 0 accepted drafts), so they validate
+cache parity for ordinary decoding.
+
+**MTP-enabled retest (2026-10-10):** repeated the same 12 checks on llm-60 with the `rt` drafter loaded, `--spec 2`,
+and the same reproducible routing settings. Both IQ3_XXS and Q8_0 loaded MTP in the fresh and cached engines and
+accepted drafts; across the main A replies, observed acceptance ranged from 72% to 85%. Greedy and fixed-seed
+sampled token IDs still matched across RAM, disk-only, and RAM-fallback, with 1,950 prompt tokens reused. The disk
+and fallback logs each show a 252 MiB disk restore. This verifies MTP cache continuation for these model/config
+pairs on llm-60; it is not a cross-device determinism guarantee.
 
 **Coupled drafts with Gumbel-max picks (opt-in, `STRATA_SPEC_COUPLED=1` and `STRATA_SPEC_GUMBEL=1`):** for a request
 that samples (temperature above 0), `STRATA_SPEC_COUPLED=1` lets the draft layer sample its guesses with the target's own
