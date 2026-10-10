@@ -1,0 +1,74 @@
+[strata] 2026-10-09 23:36:41 engine started: /home/dflanag3/disk-tier-root-20261009/strata-baseline --serve --pack /home/dflanag3/fleet-tool-eval-20261007/packs/ista-iq3-llm60-main --native /home/dflanag3/models/ISTA-IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00001-of-00002.gguf --ple-gguf /home/dflanag3/models/ISTA-IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf --expert-profile /home/dflanag3/strata-cache-bench-20261008/pr1489/data/expert-profile.bin --expert-cache auto --prefill auto:8192 --spec 4 --suffix-draft 0 --max-context 32768 --kv int8 --stats --vram-reserve-mib 1024 --conversation-cache-mib 4096 --conversation-cache-slots 1 --conversation-cache-spill-dir /home/dflanag3/disk-tier-root-20261009/baseline-ram/mtp-pinned/kv --conversation-cache-disk-mib 4096 --mtp /home/dflanag3/Strata-data/mtp/rt
+strata generate: PCIe probe: 28.9 GB/s host->device (best of 28.8 28.9 28.8 28.9) -> pcie_frac 0.55 (default 0.55)
+strata generate: native pack: /home/dflanag3/fleet-tool-eval-20261007/packs/ista-iq3-llm60-main experts (largest blob 2.33 MB), token embedding IQ3_S in mapped host memory (260 MiB, 0.2 s)
+strata generate: 1466 MiB of weights loaded from /home/dflanag3/fleet-tool-eval-20261007/packs/ista-iq3-llm60-main in 0.2 s (302 canonical tensors skipped: served natively)
+strata generate: 300 native projection matrices, 1781.11 MiB of weights, in 0.3 s
+strata generate: the SSD is kept awake while rows are read: one page of the table after 100 ms without a read, until 60 s after the last request (STRATA_SSD_KEEPALIVE=0 turns it off)
+strata generate: profile /home/dflanag3/strata-cache-bench-20261008/pr1489/data/expert-profile.bin: 24576 ranked pairs, built for 24576 slots
+strata generate: PLE on, table 320001536 rows of /home/dflanag3/models/ISTA-IQ3_XXS/Qwen3.8-Flash-Next-GSQ-RCO-IQ3_XXS-00002-of-00002.gguf
+strata mtp: draft layer loaded, 838 MiB of VRAM (experts 675, dense 111), files read in 0.23 s (3366 MiB/s)
+strata generate: experimental native Q5_K head, 437043200 bytes, in 0.1 s
+strata generate: GPU 0: NVIDIA RTX PRO 6000 Blackwell Workstation Edition, compute capability 12.0
+strata generate: expert arena read through the file cache (buffered (not Windows))
+strata generate: expert arena: cudaHostRegister PORTABLE ok; MAP_HUGETLB unavailable (needed 20464 2 MiB pages, vm.nr_hugepages=0); transparent huge pages requested (MADV_HUGEPAGE)
+strata generate: loaded 39.97 GiB at 9.33 GiB/s
+strata generate: CPU pool tasks/phase: 48 (automatic), participating threads: 16
+strata generate: 15 pool workers on logical processors 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15, the host thread on 0 (draining too) (--host-core first)
+strata generate: expert cache auto: 89.08 GiB free, 1024 MiB reserved (+71 MiB for the draft head) -> 24576 slots
+strata generate: expert cache 24576 slots, 39.97 GiB of VRAM; policy is
+strata generate: the GPU computes the experts in the cache; it rounds differently from the CPU,
+                 so a reply can differ slightly from a run without the cache (same quality:
+                 bench/results/2026-09-27-cache-parity).
+                 PROFILE, ranked by routing frequency, no eviction.
+strata generate: pre-filled 24576 of 24576 slots from the profile in 1.8 s (23612 MB/s); slot 0 verified
+strata generate: R4 hit path ON - resident experts are computed on the GPU
+strata generate: 15 expert-pool workers + the host thread
+strata generate: session is up (engine 0.1.41)
+strata generate: token graph hit path: 24576 resident experts, decided on the device
+prefill: the CPU share is ON by default for prompt chunks below 1024 tokens (the idle CPU takes some of the experts the GPU would stream; answers can differ slightly from 0.1.40.3, mean KL ~0.004). STRATA_PREFILL_CPU_SHARE=0 turns it off.
+strata serve: prompt chunk auto: 8192 tokens, a 384-slot ring
+strata serve: the prompt path borrows 2484 CUDA0 cache slots (3.99 GiB)
+strata hc: CUDA0: the hyper-connection read runs as staged (the norm per token and stream, the down projection's activations staged ahead by cp.async); checked bit for bit against the plain read on this card (STRATA_HC_SPLIT=1 or 0 for the earlier ones)
+strata verify: window up to 4 tokens, 58.2 MiB of device buffers (100% VRAM resident: zero-doorbell graph)
+strata mtp: draft head over 40525 tokens (68.0 MiB)
+strata serve: conversation cache: spill dir ready (0 conversations, 0 MiB, 0 stale files wiped, 0 disk evictions)
+strata serve: 49868 MiB of VRAM free with everything loaded
+strata serve: pin=8191 ignored: the prefix must be shorter than the prompt (8191 tokens)
+strata verify: capturing the 4-token window (49820 MiB of VRAM free)
+strata verify: captured the 4-token window (upload no error, sync no error)
+strata verify: capturing the 2-token window (49816 MiB of VRAM free)
+strata verify: captured the 2-token window (upload no error, sync no error)
+strata verify: capturing the 1-token window (49810 MiB of VRAM free)
+strata verify: captured the 1-token window (upload no error, sync no error)
+strata serve: prompt 8191 tokens = 0 reused + 8191 read in 1458 ms (5616.7 tok/s), 1 generated in 13 ms (76.1 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: session saved 8191 tokens, 1 of 1 checkpoints, 361236100 bytes to /home/dflanag3/disk-tier-root-20261009/baseline-ram/mtp-pinned/base.session in 386.1 ms (state 126.8 ms)
+strata serve: conversation cache: parked 8191 tokens in 130.0 ms; parked=1 bytes=361239012 evictions=0 snapshot_bytes=361239012 reused_kv_bytes=0
+strata serve: prompt 15 tokens = 0 reused + 15 read in 216 ms (69.6 tok/s), 1 generated in 6 ms (164.4 tok/s), drafts accepted 0 of 0, 1 checkpoints
+strata serve: conversation cache: parked 15 tokens in 85.5 ms; parked=1 bytes=236375172 evictions=0 snapshot_bytes=236375172 reused_kv_bytes=0
+strata serve: conversation cache: restored 8191 tokens (live) in 26.4 ms; parked=1 bytes=361422204
+strata serve: pin=8191: the cache has no checkpoint there to pin (it resumed from 8191)
+strata serve: prompt 8303 tokens = 8191 reused + 112 read in 279 ms (402.1 tok/s), 128 generated in 471 ms (271.9 tok/s), drafts accepted 86 of 129, 2 checkpoints
+strata serve: conversation cache: parked 8432 tokens in 166.7 ms; parked=1 bytes=729423432 evictions=1 snapshot_bytes=729423432 reused_kv_bytes=124981632
+strata verify: capturing the 3-token window (49802 MiB of VRAM free)
+strata verify: captured the 3-token window (upload no error, sync no error)
+strata serve: prompt 8303 tokens = 8176 reused + 127 read in 434 ms (292.7 tok/s), 128 generated in 469 ms (273.1 tok/s), drafts accepted 85 of 129, 3 checkpoints
+strata serve: conversation cache: spilled 15 tokens (225 MiB) in 190.0 ms in the background (waited 9.8 ms); disk=225 MiB disk_evictions=0
+strata serve: prompt 8303 tokens = 8191 reused + 112 read in 185 ms (606.5 tok/s), 128 generated in 436 ms (293.8 tok/s), drafts accepted 88 of 120, 3 checkpoints
+strata serve: prompt 8303 tokens = 8191 reused + 112 read in 173 ms (648.8 tok/s), 128 generated in 446 ms (286.8 tok/s), drafts accepted 87 of 123, 3 checkpoints
+strata serve: prompt 8303 tokens = 8191 reused + 112 read in 173 ms (648.9 tok/s), 128 generated in 503 ms (254.5 tok/s), drafts accepted 81 of 138, 3 checkpoints
+strata serve: prompt 8303 tokens = 8191 reused + 112 read in 169 ms (662.9 tok/s), 128 generated in 578 ms (221.3 tok/s), drafts accepted 76 of 159, 3 checkpoints
+strata serve: prompt 8303 tokens = 8191 reused + 112 read in 172 ms (651.5 tok/s), 128 generated in 531 ms (241.0 tok/s), drafts accepted 79 of 144, 3 checkpoints
+strata serve: prompt 8303 tokens = 8191 reused + 112 read in 169 ms (662.9 tok/s), 128 generated in 553 ms (231.4 tok/s), drafts accepted 77 of 150, 3 checkpoints
+strata serve: conversation cache: parked 8430 tokens in 282.6 ms; parked=1 bytes=601095996 evictions=2 snapshot_bytes=601095996 reused_kv_bytes=0
+strata serve: prompt 23 tokens = 0 reused + 23 read in 399 ms (57.7 tok/s), 8 generated in 37 ms (213.6 tok/s), drafts accepted 6 of 9, 1 checkpoints
+strata serve: conversation cache: spilled 8432 tokens (460 MiB) in 186.8 ms in the background (waited 15.6 ms); disk=686 MiB disk_evictions=0
+strata serve: conversation cache: parked 32 tokens in 52.3 ms; parked=1 bytes=236625640 evictions=2 snapshot_bytes=236625640 reused_kv_bytes=0
+strata serve: conversation cache: restored 8191 tokens (checkpoint) in 27.3 ms; parked=1 bytes=365336032
+strata serve: prompt 8212 tokens = 8191 reused + 21 read in 209 ms (100.5 tok/s), 97 generated in 373 ms (260.2 tok/s), drafts accepted 64 of 102, 3 checkpoints
+strata serve: session restored 8191 tokens, 1 checkpoints, 361236100 bytes from /home/dflanag3/disk-tier-root-20261009/baseline-ram/mtp-pinned/base.session in 335.4 ms (read+check 147.3 ms)
+strata serve: pin=8191: the cache has no checkpoint there to pin (it resumed from 8191)
+strata serve: prompt 8212 tokens = 8191 reused + 21 read in 66 ms (320.2 tok/s), 97 generated in 361 ms (268.5 tok/s), drafts accepted 65 of 99, 2 checkpoints
+strata serve: conversation cache: parked 8310 tokens in 208.4 ms; parked=1 bytes=481167348 evictions=3 snapshot_bytes=481167348 reused_kv_bytes=0
+strata serve: conversation cache: spilled 32 tokens (225 MiB) in 121.3 ms in the background (waited 0.1 ms); disk=911 MiB disk_evictions=0
+strata serve: conversation cache: spilled 8310 tokens (458 MiB) in 105.7 ms in the background (waited 123.9 ms); disk=1370 MiB disk_evictions=0
+strata serve: conversation cache: shutdown spilled 1 parked conversations; disk=1370 MiB disk_evictions=0
