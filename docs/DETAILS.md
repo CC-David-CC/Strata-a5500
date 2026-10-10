@@ -124,6 +124,14 @@ fallback run diverged at token 12 on one prompt; the opt-in disk verifier found 
 the recurrent running state byte-identical after restore, pointing to execution-path arithmetic rather than a
 corrupt snapshot. These are single-machine measurements, not a cross-platform determinism claim.
 
+**Two-quant retest (2026-10-10):** the same probe passed all 12 combinations on llm-60 for ISTA IQ3_XXS and
+Unsloth Q8_0: greedy and fixed-seed sampling (temperature 0.7, top-k 20, top-p 0.95, seed 12345), each against
+RAM cache, disk-only restore, and a 1 MiB RAM cache that spills the roughly 252 MiB snapshot to disk. The prompt
+was 1,957 tokens and each cached return reused 1,950; sampled runs generated 64 tokens, while greedy stopped at
+50 tokens for IQ3_XXS and 32 for Q8_0. All first, returned, and repeated answers matched token-for-token against
+fresh runs. These retests did not load an MTP drafter (logs reported 0 accepted drafts), so they validate cache
+parity for ordinary decoding; MTP-enabled cache parity remains a separate check.
+
 **Coupled drafts with Gumbel-max picks (opt-in, `STRATA_SPEC_COUPLED=1` and `STRATA_SPEC_GUMBEL=1`):** for a request
 that samples (temperature above 0), `STRATA_SPEC_COUPLED=1` lets the draft layer sample its guesses with the target's own
 chain and random draw instead of taking its most likely token. `STRATA_SPEC_GUMBEL=1` changes how both of them pick from
