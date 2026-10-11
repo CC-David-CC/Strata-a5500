@@ -14,6 +14,8 @@ Uniform fully mapped/pinned complement only, rotation enabled, no lent slots. Th
 
 The native `commit_flip` must delegate active rotation to the shared batch commit, including retained ownership. A missing delegation caused an early refusal during extraction; the corrected branch was rebuilt and all model/cancellation cases below rerun successfully. The failed attempt is not performance evidence.
 
+Fresh current-main validation, full records and limitations: [2026-10-11 refresh](current-main-refresh/README.md). The initial observations below retain their historical source and settings.
+
 ## Initial request observations
 
 | Input / mode | Control tok/s | Retained tok/s | Output/work | D2H payload avoided | Counterfactual eviction reduction |
