@@ -1,6 +1,6 @@
 # Native async refills from immutable secondary copies
 
-Based on current upstream main `82f46a8c8f475f001ad76d92f58f4a4f8ffb0253` and the accompanying read-only cache contribution. The feature-only source diff is 246 added / one removed line across six files before documentation. This branch shares the cache foundation commit with `perf/q8-compact-fill-main`; it does not import the former duplex, per-layer admission, PDL, DeepGEMM or other research changes.
+Historical source: upstream main `82f46a8c8f475f001ad76d92f58f4a4f8ffb0253` and the accompanying read-only cache contribution. The feature-only source diff is 246 added / one removed line across six files before documentation. This branch shares the cache foundation commit with `perf/q8-compact-fill-main`; it does not import the former duplex, per-layer admission, PDL, DeepGEMM or other research changes.
 
 RTX PRO 6000 Blackwell Workstation Edition 96GB; Ryzen 9 7950X; 128GB RAM; Ubuntu 24.04.5; CUDA 13.2, driver 595.91.07.
 
@@ -12,7 +12,7 @@ Default off. `STRATA_Q8_ASYNC_REFILL=1` requires native `--adapt-async 1`, a Q8 
 
 Single device/request, host planning and unsplit mapped-RAM copies only. The feature refuses peer/remote helpers, layer splits, batched slots, pipelined windows and device planning. The conservative whole-window read fence is intentional; finer layer overlap is a separate contribution.
 
-## Fresh main-based measurements
+## Historical main-based measurements
 
 | Input / mode | Control tok/s | D2D tok/s | Observed change | Exact 1K tokens | Reported work | Primary H2D avoided |
 |---|---:|---:|---:|---|---|---:|
@@ -32,3 +32,11 @@ Full engine build, cache byte/capture/abandoned-fill fixture and dedicated sourc
 ## Reproduce
 
 Build with CUDA/native experts and `STRATA_BUILD_TESTS=ON`. Run `readonly_miss_cache_fixture --quick`, `secondary_refill_lifetime_fixture` and its Compute Sanitizer memcheck. Use the accompanying recorded plan/case script after replacing local paths. Keep both arms' cache/snapshot settings equal and toggle only `STRATA_Q8_ASYNC_REFILL`. No network listener is opened.
+
+## Current-main refresh
+
+The [2026-10-11 refresh](current-main-refresh/README.md) records the current async
+scheduler integration, all-secondary lifetime checks, refreshed backend builds
+and fresh model/STOP tests. Unlike the historical pairs above, current width-1
+off/on output differs at32K and128K. Read the exactness limits before interpreting
+the descriptive timings; no general parity or speedup is claimed.
