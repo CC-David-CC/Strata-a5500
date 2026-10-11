@@ -73,3 +73,19 @@ restart interrupted one private case; completed rows were preserved and all
 remaining cases ran detached in a fresh scratch directory. The corrected full
 matrix took 1165.735 seconds unattended, and four same-arm repeats took 453.369
 seconds. Setup/engineering time was not instrumented and is excluded.
+
+## Tail-skip-off follow-up (2026-10-11)
+
+A fresh four-case width-1 replay keeps the same current-main candidate binary,
+inputs and settings, adding only `STRATA_ROUTE_TAIL_SKIP=0` to each arm. The 32K
+off/on pair now matches all 1024 output IDs. The 128K pair still differs at
+zero-based token 7. All four requests complete and pass their function checks;
+full records, logs, exact configuration and comparisons are retained under
+`tail-skip-off-followup/`.
+
+This control removes the CUDA policy whose expert decisions depend on all rows
+in a window. It supports a narrower statement for the 32K case; it does not
+establish that tail skipping caused the remaining 128K difference. The original
+rank-7 results and same-arm repeats remain above, with their original settings.
+Async placement/admission and CPU/GPU execution remain separate factors. No
+unconditional token parity, timing gain or answer-quality equivalence is claimed.
