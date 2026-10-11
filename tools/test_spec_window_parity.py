@@ -62,6 +62,31 @@ class ParityTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(manifest)
 
+    def test_matched_history_protocol_run_retains_audit_mode(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fake = root / 'engine.py'
+            fake.write_text('''import sys
+print('READY', flush=True)
+count = 0
+for line in sys.stdin:
+    if not line.startswith('GEN '): continue
+    count += 1
+    print(f'T {count}', flush=True)
+    print('DONE 1 2 1.0 2.0 length 3 4 0', flush=True)
+''', encoding='utf-8')
+            manifest = dict(reference_mode='matched-history', repeats=2, max_new=1,
+                            prompts=[dict(name='code', ids=[1])], arms=[
+                                dict(name=name, exe=sys.executable, prefix_args=[str(fake)], args=[],
+                                     cases=[dict(name=name)]) for name in ('serial', 'pipeline')])
+            result = run(manifest, root / 'matched', timeout=5)
+            self.assertTrue(result['passed'], result)
+            saved = json.loads((root / 'matched/result.json').read_text())
+            self.assertTrue(audit(saved['rows'], saved['expected'], saved['requirements'],
+                                  saved['reference_mode'])['passed'])
+            manifest.pop('reference_mode')
+            self.assertFalse(run(manifest, root / 'stable', timeout=5)['passed'])
+
     def test_missing_rollback_cannot_pass_on_equal_tokens(self):
         result = audit([self.row([1], 'forced')], 1, {'forced': {'rollbacks': 1}})
         self.assertFalse(result['passed'])
