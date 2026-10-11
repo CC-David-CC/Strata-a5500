@@ -2,7 +2,7 @@
 import argparse,hashlib,json,os,pathlib,re,signal,subprocess,time,urllib.request,urllib.error,traceback
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--workdir',type=pathlib.Path,required=True,help='Disposable test directory containing server.json, runtime.json and source/')
-options=parser.add_argument('--source-commit',help='Exact source commit when source/ is an exported archive rather than a Git checkout')
+parser.add_argument('--source-commit',help='Exact source commit when source/ is an exported archive rather than a Git checkout')
 options=parser.parse_args()
 if options.source_commit is not None and not re.fullmatch(r'[0-9a-fA-F]{40}',options.source_commit):
     parser.error('--source-commit must be a full 40-digit commit ID')
@@ -19,9 +19,11 @@ if spill_path != R/'spill':
 if cfg.get('host') != '127.0.0.1' or cfg.get('port') != 18210:
     raise ValueError('probe requires localhost:18210')
 source=options.source_commit or subprocess.check_output(['git','-C',str(S),'rev-parse','HEAD'],text=True).strip()
+with pathlib.Path(cfg['exe']).open('rb') as engine_file:
+    engine_sha256=hashlib.file_digest(engine_file,'sha256').hexdigest()
 report={'started':time.time(),'checks':[],'requests':[],'host':subprocess.check_output(['hostname'],text=True).strip(),
         'source':source,'source_provenance':'explicit archive commit' if options.source_commit else 'git checkout',
-        'engine_sha256':hashlib.file_digest(pathlib.Path(cfg['exe']).open('rb'),'sha256').hexdigest()}
+        'engine_sha256':engine_sha256}
 def persist(phase):
  report['phase']=phase;(R/'live-results.json').write_text(json.dumps(report,indent=2));print(phase,flush=True)
 def check(name,ok,**detail):
