@@ -39,6 +39,29 @@ class ParityTests(unittest.TestCase):
         a['input_sha256'], b['input_sha256'] = 'a', 'b'
         self.assertFalse(audit([a, b], 2, {})['passed'])
 
+    def test_matched_adaptive_history_keeps_each_round_reference(self):
+        rows = [self.row([token], arm=arm, repeat=repeat) for arm in ('serial', 'pipeline')
+                for repeat, token in enumerate((1, 2))]
+        self.assertFalse(audit(rows, 4, {})['passed'])
+        self.assertTrue(audit(rows, 4, {}, 'matched-history')['passed'])
+        rows[-1]['output_ids'] = [3]
+        self.assertFalse(audit(rows, 4, {}, 'matched-history')['passed'])
+
+    def test_matched_history_rejects_wrong_order_and_duplicate_keys(self):
+        rows = [self.row([1], arm=arm, repeat=repeat) for arm in ('serial', 'pipeline')
+                for repeat in (0, 1)]
+        rows[-1]['repeat'] = 2
+        self.assertFalse(audit(rows, 4, {}, 'matched-history')['passed'])
+        for row in rows:
+            row['repeat'] = 0
+        self.assertFalse(audit(rows, 4, {}, 'matched-history')['passed'])
+
+    def test_matched_history_requires_separate_single_case_arms(self):
+        manifest = dict(reference_mode='matched-history', prompts=[dict(name='code', ids=[1])],
+                        arms=[dict(cases=[dict(name='serial'), dict(name='pipeline')])])
+        with self.assertRaises(ValueError):
+            validate(manifest)
+
     def test_missing_rollback_cannot_pass_on_equal_tokens(self):
         result = audit([self.row([1], 'forced')], 1, {'forced': {'rollbacks': 1}})
         self.assertFalse(result['passed'])

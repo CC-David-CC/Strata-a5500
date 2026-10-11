@@ -59,6 +59,14 @@ the engine to confirm the requested `pw` value. `theta=1.1` disables the bonus g
 first token of every speculative window to exercise undo. These controls require an engine that implements them.
 Coverage counts come from DONE and the `STRATA_DECODE_TIMING=1` pipeline summaries, not from flags alone.
 
+For adaptive-placement comparisons, set `"reference_mode": "matched-history"` and use at least two separate
+arms with exactly one case each. Each arm must begin with the same resident experts and execute the same
+ordered prompts and repeats. This compares a candidate with the first arm at the same `(repeat, prompt)`;
+later repeats may differ from earlier ones as placement evolves. The audit rejects reordered histories and
+duplicate request keys. It still requires complete output, matching input IDs and finish reasons, zero prompt
+reuse, and all requested coverage. Residency and accepted-routing hashes need a separate comparison. The
+default `"stable"` mode continues to require every repeat to match the first reference.
+
 ## A useful matrix
 
 Use code, prose, counting, repetitive copying and multi-chunk prompts. Compare draft floors 0, 0.5 and 0.95,

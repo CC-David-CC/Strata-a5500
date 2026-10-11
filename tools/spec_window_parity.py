@@ -25,18 +25,29 @@ def difference(a, b):
     return min(len(a), len(b)) if len(a) != len(b) else None
 
 
-def audit(rows, expected, requirements):
+def audit(rows, expected, requirements, reference_mode='stable'):
+    if reference_mode not in ('stable', 'matched-history'):
+        raise ValueError('invalid reference_mode')
     failures = []
     if len(rows) != expected:
         failures.append(f"incomplete: {len(rows)} of {expected} requests")
     references = {}
     coverage = {}
+    if reference_mode == 'matched-history':
+        histories = {}
+        for row in rows:
+            histories.setdefault(row['arm'], []).append((row['repeat'], row['prompt'], row.get('input_sha256')))
+        first = next(iter(histories.values()), [])
+        if len(histories) < 2 or any(history != first for history in histories.values()):
+            failures.append('matched-history: arms do not have identical request histories')
+        if len({(repeat, prompt) for repeat, prompt, _ in first}) != len(first):
+            failures.append('matched-history: repeated request key within an arm')
     for row in rows:
         name = row['case']
         totals = coverage.setdefault(name, dict(drafts=0, speculative=0, rollbacks=0, suffix_windows=0))
         for key in totals:
             totals[key] += row.get(key, 0)
-        key = row['prompt']
+        key = (row['repeat'], row['prompt']) if reference_mode == 'matched-history' else row['prompt']
         ref = references.setdefault(key, row)
         if row.get('input_sha256') != ref.get('input_sha256'):
             failures.append(f"{name}/{key}: input IDs differ from reference")
@@ -133,6 +144,12 @@ class Engine:
 
 
 def validate(manifest):
+    reference_mode = manifest.get('reference_mode', 'stable')
+    if reference_mode not in ('stable', 'matched-history'):
+        raise ValueError('invalid reference_mode')
+    if reference_mode == 'matched-history' and (len(manifest['arms']) < 2 or
+            any(len(arm['cases']) != 1 for arm in manifest['arms'])):
+        raise ValueError('matched-history requires at least two arms with one case each')
     prompts = manifest['prompts']
     if not prompts or any(not p['ids'] or any(type(t) is not int or t < 0 for t in p['ids']) for p in prompts):
         raise ValueError('prompts need nonempty, nonnegative integer token IDs')
@@ -163,7 +180,8 @@ def run(manifest, output, timeout=600):
     repeats = manifest.get('repeats', 2)
     expected = len(manifest['prompts']) * repeats * sum(len(a['cases']) for a in manifest['arms'])
     requirements = {c['name']: c.get('require', {}) for a in manifest['arms'] for c in a['cases']}
-    report = dict(complete=False, expected=expected, rows=[], arms=[], requirements=requirements)
+    report = dict(complete=False, expected=expected, rows=[], arms=[], requirements=requirements,
+                  reference_mode=manifest.get('reference_mode', 'stable'))
     def save():
         temp = output / 'result.tmp'
         temp.write_text(json.dumps(report, indent=2), encoding='utf-8')
@@ -214,7 +232,7 @@ def run(manifest, output, timeout=600):
                                   f"drafts={row['drafts']} speculative={row['speculative']} rollbacks={row['rollbacks']}", flush=True)
             finally:
                 engine.close()
-        report.update(audit(report['rows'], expected, requirements), complete=True)
+        report.update(audit(report['rows'], expected, requirements, report['reference_mode']), complete=True)
     except Exception as exc:
         report.update(passed=False, error=repr(exc))
     save()
@@ -233,7 +251,7 @@ def main():
         parser.error('--timeout must be positive')
     if args.audit:
         saved = json.loads(args.audit.read_text(encoding='utf-8'))
-        result = audit(saved['rows'], saved['expected'], saved['requirements'])
+        result = audit(saved['rows'], saved['expected'], saved['requirements'], saved.get('reference_mode', 'stable'))
         result['complete'] = saved.get('complete', False)
         if not result['complete'] or saved.get('error'):
             result['passed'] = False
