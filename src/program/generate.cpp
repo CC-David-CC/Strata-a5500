@@ -24,6 +24,9 @@
 #ifdef STRATA_BRANCH_DRIVER
 #include "strata/core/branch_driver.hpp"
 #endif
+#ifdef STRATA_FRESH_DRIVER
+#include "strata/core/fresh_driver.hpp"
+#endif
 #include "strata/core/conversation_file.hpp"
 #include "strata/core/conversation_memory.hpp"
 #include "strata/core/conversation_spill.hpp"
@@ -6136,7 +6139,7 @@ int main(int argc, char** argv) {
 #endif
     }
     if (o.adapt_async && !src.complement_ready()) adapt_async_off("the resident RAM mode is not running");
-#ifdef STRATA_BRANCH_DRIVER
+#if defined(STRATA_BRANCH_DRIVER) || defined(STRATA_FRESH_DRIVER)
     {
         if (o.serve || o.kv_grow || o.kv_resident || !stages.empty() || o.adapt_async || o.batch > 1) {
             std::fprintf(stderr, "strata branch: requires one synchronous, fully resident inference session\n");
@@ -6147,8 +6150,14 @@ int main(int argc, char** argv) {
         hits.h_res = host_res.empty() ? nullptr : host_res.data();
         hits.cache_base = thits.cache_base; hits.blob = thits.blob;
         hits.slot_off = xcache.slot_offsets(); hits.n_slots = xcache.slots();
+#ifdef STRATA_BRANCH_DRIVER
         return strata::core::branch_driver(wt, g, ss, hits, native_head.loaded() ? &native_head : nullptr,
                                            &drive_pool_multi, &drive, drive.d.failed);
+#else
+        const char* output = std::getenv("STRATA_DUMP_FIRST_LOGITS");
+        return strata::core::fresh_driver(wt, g, ss, hits, native_head.loaded() ? &native_head : nullptr,
+                                          &drive_pool_multi, &drive, drive.d.failed, o.tokens, output ? output : "");
+#endif
     }
 #endif
     if (o.serve) {
