@@ -501,6 +501,12 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
       target_link_libraries(branch_audit_test PRIVATE strata_engine)
       add_test(NAME branch_audit_test COMMAND branch_audit_test)
       set_tests_properties(branch_audit_test PROPERTIES TIMEOUT 120)
+      # Explicitly scheduled by the branching certification queue, never by
+      # parallel CTest: these tests deliberately exhaust device allocations.
+      add_executable(branch_pressure_test tests/core/branch_pressure_test.cpp)
+      target_link_libraries(branch_pressure_test PRIVATE strata_engine)
+      add_executable(branch_pressure_helper tests/core/branch_pressure_helper.cpp)
+      target_link_libraries(branch_pressure_helper PRIVATE strata_engine)
     endif()
   endif()
   # #477: the learned expert profile (--expert-profile-save): its order and make_profile.py's file format (CPU only)

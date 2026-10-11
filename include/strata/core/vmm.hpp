@@ -16,10 +16,20 @@ using VmmChunk = unsigned long long;
 bool vmm_available();
 /// The chunk size (0 when not available).
 uint64_t vmm_granularity();
-/// A new physical chunk on the current device (0: out of memory), and its release.
+/// A new physical chunk on the current device (0 on failure), and its release.
 VmmChunk vmm_chunk_new();
 void vmm_chunk_free(VmmChunk h);
 bool vmm_chunk_release(VmmChunk h);
+
+// Direct results from VMM driver operations, separate from rejected local
+// arguments or host allocation failures. Successful calls do not erase the
+// last failure. Operation names are static strings owned by the implementation.
+struct VmmFailureCounters {
+    uint64_t driver_failures = 0, out_of_memory_failures = 0;
+    int last_error = 0;
+    const char* last_operation = "";
+};
+VmmFailureCounters vmm_failure_counters();
 
 // A borrowed mapping: allocation ownership belongs to the caller. Unlike
 // VmmRange this never releases a physical allocation handle.

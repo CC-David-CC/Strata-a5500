@@ -161,6 +161,7 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
         } else if (command == "stats") {
             const auto p = BranchPages::counters();
             const auto s = session.counters();
+            const auto e = vmm_failure_counters();
             std::cout << "{\"status\":\"ok\",\"consumed\":" << session.ids().size()
                       << ",\"forward_tokens\":" << forward.completed_forward_tokens
                       << ",\"windows\":" << forward.windows
@@ -170,6 +171,10 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
                       << ",\"unmappings\":" << p.unmappings
                       << ",\"address_reservations\":" << p.address_reservations
                       << ",\"address_releases\":" << p.address_releases
+                      << ",\"vmm_driver_failures\":" << e.driver_failures
+                      << ",\"vmm_out_of_memory_failures\":" << e.out_of_memory_failures
+                      << ",\"vmm_last_driver_error\":" << e.last_error
+                      << ",\"vmm_last_failed_operation\":\"" << e.last_operation << "\""
                       << ",\"audit_read_bytes\":" << p.audit_read_bytes
                       << ",\"binding_copy_bytes\":" << s.binding_copy_bytes
                       << ",\"saved_running_bytes\":" << s.saved_running_bytes
