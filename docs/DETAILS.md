@@ -1142,6 +1142,11 @@ write in flight); a spilled file holding two checkpoints was 603-699 MiB against
 A streamed save took 0.37-0.68 s and a streamed restore 0.59-0.97 s (read pass 0.27-0.50 s). A clean shutdown took
 3.1-4.0 s.
 
+The [2026-10-11 current-main refresh](../bench/results/2026-10-11-cache-refresh/README.md)
+records fresh RAM, disk-only and disk-fallback exact-token checks with MTP width 2,
+greedy and seeded sampling, and combined Responses/checkpoint integration with #1667.
+The historical measurements elsewhere retain their original source/settings.
+
 **The conversation cache on disk only (`--conversation-cache-disk-only`).** With `--conversation-cache-spill-dir DIR`
 and this flag, the conversation cache needs no RAM budget (`--conversation-cache-mib` is not used). When a request
 switches to another conversation, the outgoing one is written to DIR the way a session SAVE writes it: the running
