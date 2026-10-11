@@ -77,3 +77,10 @@ select the same staging profile before interpreting a speed comparison.
 See [measurements and validation](measurements/p4-layer-cache/README.md) for
 the initial experiment, and the [cross-GPU follow-up](measurements/p4-layer-cache/cross-gpu/README.md)
 for repeated measurements, per-run data, backend build details and limitations.
+
+## Current-main 20K P4 check
+
+The [2026-10-11 follow-up](measurements/p4-layer-cache/current-main-20k/README.md)
+records three-repeat 20K main/enabled and candidate off/on comparisons, full
+64-token parity, matched staging/CPU-share settings and STOP recovery. The
+measured prefill-time reductions were 8.695% and 9.168% on this one workload.
