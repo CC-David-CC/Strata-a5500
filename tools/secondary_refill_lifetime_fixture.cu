@@ -30,18 +30,26 @@ int main() {
         const uint8_t first=(uint8_t)(31+round),second=(uint8_t)(81+round);
         const int32_t ids[2]={2,5};std::memset(host,second,bytes);
         CU(cudaMemsetAsync(cache,first,bytes,compute));
+        CU(cudaMemsetAsync(cache+bytes,second,bytes,compute));
         CU(cudaMemcpyAsync(tags,ids,sizeof(ids),cudaMemcpyHostToDevice,compute));
         CU(snapshot.enqueue(compute));REQUIRE(!snapshot.find(0,2));
         REQUIRE(snapshot.complete_after_stream_sync(cudaStreamSynchronize(compute)));
         const uint8_t* source=snapshot.find(0,2);REQUIRE(source==cache);
         REQUIRE(!snapshot.find(0,1));REQUIRE(!snapshot.find(1,2));
         CU(cudaMemcpyAsync(primary,source,bytes,cudaMemcpyDeviceToDevice,refill));
+        // Alternate mixed H2D/D2D and all-secondary rounds. The all-secondary case still needs a refill
+        // completion event, even though the worker has no host upload to enqueue.
+        const bool all_secondary=(round&1)!=0;
+        if(all_secondary) {
+            const uint8_t* other=snapshot.find(0,5);REQUIRE(other==cache+bytes);
+            CU(cudaMemcpyAsync(primary+bytes,other,bytes,cudaMemcpyDeviceToDevice,refill));
+        }
         CU(cudaEventRecord(read_done,refill));
         CU(cudaStreamWaitEvent(compute,read_done,0));
         REQUIRE(snapshot.invalidate());REQUIRE(!snapshot.find(0,2));
         // A later window may overwrite the cache immediately after the fence.
         CU(cudaMemsetAsync(cache,0xee,bytes,compute));
-        CU(cudaMemcpyAsync(primary+bytes,host,bytes,cudaMemcpyHostToDevice,refill));
+        if(!all_secondary) CU(cudaMemcpyAsync(primary+bytes,host,bytes,cudaMemcpyHostToDevice,refill));
         CU(cudaStreamSynchronize(refill));CU(cudaStreamSynchronize(compute));
         CU(cudaMemcpy(got.data(),primary,got.size(),cudaMemcpyDeviceToHost));
         for(size_t i=0;i<bytes;++i) REQUIRE(got[i]==first && got[bytes+i]==second);
