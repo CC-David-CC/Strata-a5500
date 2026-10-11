@@ -139,6 +139,9 @@ it does not require a second GPU KV pool. Reading the source and staging it
 still require substantial RAM. Admission conservatively reserves twice the
 session read estimate plus 4 GiB; the mainline restore subsequently reads the
 converted session into host memory. Insufficient resources fail explicitly.
+Admission uses upstream's available-host-memory sampler, including visible
+cgroup limits and the operator's memory cap. Unknown telemetry refuses the
+operation; it is not treated as unlimited RAM.
 A device-transfer failure during native restore stops the engine rather than
 continuing from partially replaced state.
 

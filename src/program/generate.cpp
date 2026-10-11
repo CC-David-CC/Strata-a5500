@@ -9637,7 +9637,7 @@ int main(int argc, char** argv) {
                         limits.max_kv_layers = (uint64_t) g.n_qsa_layers() + (use_mtp ? 1 : 0);
                         limits.admit = [&](uint64_t need, std::string& why) {
                             // Full saved state plus staged K/indexer buffers, no second GPU cache.
-                            const auto available = strata::core::conversation_available_memory();
+                            const auto available = strata::core::available_host_bytes();
                             if (need <= UINT64_MAX/2 && strata::core::conversation_memory_admit(available, need*2, uint64_t(4)<<30)) return true;
                             why = "migration needs RAM for the source plus changed keys and a 4 GiB reserve"; return false;
                         };
