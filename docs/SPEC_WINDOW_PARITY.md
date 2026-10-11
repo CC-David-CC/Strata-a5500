@@ -40,7 +40,7 @@ Minimal manifest (replace paths and IDs with those for your model):
              "--layer-split", "24", "--split-device", "1", "--pipeline-windows", "2",
              "--prompt-cache", "0", "--conversation-cache-mib", "0",
              "--pcie-frac", "0", "--adapt-every", "0"],
-    "env": {"STRATA_IQ_MT_MIN": "1", "STRATA_DECODE_TIMING": "1"},
+    "env": {"STRATA_IQ_MT_MIN": "1", "STRATA_ROUTE_TAIL_SKIP": "0", "STRATA_DECODE_TIMING": "1"},
     "cases": [
       {"name": "serial", "keys": {"spec_min_p": 0.5}, "switch": {"pw": 0}},
       {"name": "pipeline", "keys": {"spec_min_p": 0.95}, "switch": {"pw": 2},
@@ -69,6 +69,11 @@ Require nonzero drafts, speculative launches and forced rollbacks where those pa
 is also available as a coverage requirement, parsed from the engine's suffix summary. Inspect
 offered/accepted draft counts to confirm that changing the draft floor actually changed windows. A suffix-enabled
 arm does not by itself prove that suffix drafting supplied a window; require nonzero `suffix_windows`.
+
+Disable approximate expert tail skipping for an exact window comparison: set `STRATA_ROUTE_TAIL_SKIP=0`
+on every participating process. The eligible CUDA rank-7 default uses minimum expert rank across the whole
+window, so adding draft rows can change contributions to the target row. Preserve that default as a separate
+approximate-policy control rather than calling its divergence a rollback defect.
 
 First control expert arithmetic and placement: `STRATA_IQ_MT_MIN=1`, no PCIe sharing, no adaptive swaps, identical
 resident expert identities, not only slot counts. Disable both prompt and conversation caches. Compare dynamic
