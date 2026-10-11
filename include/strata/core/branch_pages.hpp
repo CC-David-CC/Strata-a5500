@@ -16,6 +16,7 @@ struct BranchPageInfo {
 struct BranchPageCounters {
     uint64_t allocations=0,releases=0,live_bytes=0,cow_pages=0,copied_bytes=0,mappings=0,unmappings=0;
     uint64_t address_reservations=0,address_releases=0;
+    uint64_t audit_read_bytes=0; // completed device-to-host audit transfers, separate from COW
 };
 
 // Derived GPU materialization only: never a replacement for authoritative input
@@ -38,6 +39,9 @@ public:
     bool release();
     uint8_t* data() const { return mapping_.base(); }
     std::vector<BranchPageInfo> ownership() const;
+    static std::vector<BranchPageInfo> ownership(const BranchPageSnapshot& snapshot);
+    // Borrow one saved physical page read-only, without changing any live lease.
+    static bool read_page(const BranchPageSnapshot& snapshot, size_t index, std::vector<uint8_t>& bytes);
     static BranchPageCounters counters();
 private:
     bool private_table();

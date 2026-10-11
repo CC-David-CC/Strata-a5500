@@ -9,6 +9,7 @@ namespace strata::core {
 namespace {
 struct Counters {
     std::atomic<uint64_t> next_id{1},allocations{0},releases{0},live_bytes{0},cow_pages{0},copied_bytes{0};
+    std::atomic<uint64_t> audit_read_bytes{0};
 };
 Counters& counts() { static auto* c=new Counters; return *c; }
 struct PhysicalPage {
@@ -139,15 +140,32 @@ bool BranchPages::prepare_write(uint64_t offset,uint64_t bytes) {
     } catch (...) { return false; }
 }
 std::vector<BranchPageInfo> BranchPages::ownership() const {
+    return ownership(table_);
+}
+std::vector<BranchPageInfo> BranchPages::ownership(const BranchPageSnapshot& snapshot) {
     std::vector<BranchPageInfo> out;
-    if (table_) for (const auto& page:table_->pages)
+    if (snapshot) for (const auto& page:snapshot->pages)
         out.push_back({page->id,page->handle,(uint64_t)page.use_count(),page->bytes});
     return out;
+}
+bool BranchPages::read_page(const BranchPageSnapshot& snapshot, size_t index, std::vector<uint8_t>& bytes) {
+    if (!snapshot || index >= snapshot->pages.size()) return false;
+    const auto& page = snapshot->pages[index];
+    try {
+        std::vector<uint8_t> result(page->bytes);
+        VmmMapping borrow;
+        if (!borrow.reserve(page->bytes) || !borrow.map(0, page->handle, false)) return false;
+        if (cudaMemcpy(result.data(), borrow.base(), result.size(), cudaMemcpyDeviceToHost) != cudaSuccess)
+            return false;
+        counts().audit_read_bytes += result.size();
+        bytes.swap(result);
+        return true;
+    } catch (...) { return false; }
 }
 BranchPageCounters BranchPages::counters() {
     const auto& c=counts();
     const auto m=vmm_mapping_counters();
     return {c.allocations.load(),c.releases.load(),c.live_bytes.load(),c.cow_pages.load(),c.copied_bytes.load(),
-        m.mappings,m.unmappings,m.reservations,m.address_releases};
+        m.mappings,m.unmappings,m.reservations,m.address_releases,c.audit_read_bytes.load()};
 }
 } // namespace strata::core

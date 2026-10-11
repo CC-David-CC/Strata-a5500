@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cuda_runtime.h>
 #include <exception>
+#include <fstream>
 
 namespace strata::core {
 namespace {
@@ -266,5 +267,61 @@ std::vector<BranchPageInfo> BranchSession::ownership() const {
         out.insert(out.end(), pages.begin(), pages.end());
     }
     return out;
+}
+bool BranchSession::audit(const BranchSessionImage& image, const std::string& path,
+                          BranchSessionAudit& report, std::string& error) const {
+    if (!image || image->contract != contract_ || image->layout != layout_ ||
+        image->pages.size() != bindings_.size()) return fail(error, "invalid audit image");
+    if (!sync(error)) return false;
+    try {
+        std::ofstream output(path, std::ios::binary | std::ios::trunc);
+        if (!output) return fail(error, "cannot open audit output");
+        BranchSessionAudit result;
+        result.consumed = image->running.ids.size();
+        const auto shape = strata::kernels::qsa_real_shapes();
+        result.qsa_page_cells = shape.page_size; result.index_block_cells = shape.idx_block;
+        auto append = [&](BranchAuditRegion region, const void* data, size_t bytes) {
+            if (!bytes) return true;
+            region.offset = result.bytes; region.bytes = bytes;
+            output.write((const char*)data, (std::streamsize)bytes);
+            if (!output) return false;
+            result.bytes += bytes;
+            result.regions.push_back(std::move(region));
+            return true;
+        };
+        const char* kinds[] = {"k", "v", "k_scale", "v_scale", "indexer_pool"};
+        for (size_t i = 0; i < bindings_.size(); ++i) {
+            const auto& binding = bindings_[i];
+            const auto pages = BranchPages::ownership(image->pages[i]);
+            uint64_t pool_offset = 0;
+            const auto complete = binding->part == 4 ? result.consumed / shape.idx_block :
+                result.consumed / shape.page_size * shape.page_size;
+            const auto filled = complete * binding->per_cell;
+            for (size_t p = 0; p < pages.size(); ++p) {
+                std::vector<uint8_t> bytes;
+                if (!BranchPages::read_page(image->pages[i], p, bytes)) return fail(error, "cannot read saved physical page");
+                BranchAuditRegion region;
+                region.kind = kinds[binding->part]; region.pool = (int64_t)i;
+                region.qsa_ordinal = binding->state - session_.qsa_states;
+                region.pool_offset = pool_offset; region.bytes_per_cell = binding->per_cell;
+                region.filled_prefix_bytes = pool_offset < filled ? std::min(pages[p].bytes, filled - pool_offset) : 0;
+                region.page = pages[p];
+                if (!append(region, bytes.data(), bytes.size())) return fail(error, "cannot write page audit bytes");
+                pool_offset += pages[p].bytes;
+            }
+        }
+        auto field = [&](const char* kind, const auto& values) {
+            BranchAuditRegion region; region.kind = kind;
+            return append(region, values.data(), values.size() * sizeof(values[0]));
+        };
+        const auto& running = image->running;
+        if (!field("gdn", running.gdn) || !field("ple", running.ple) || !field("tails", running.tails) ||
+            !field("dead", running.dead) || !field("block_pos", running.block_pos) ||
+            !field("ids", running.ids) || !field("logits", image->logits)) return fail(error, "cannot write running audit bytes");
+        output.close();
+        if (!output) return fail(error, "incomplete audit output");
+        report = std::move(result);
+        return true;
+    } catch (const std::exception& e) { return fail(error, e.what()); }
 }
 } // namespace strata::core

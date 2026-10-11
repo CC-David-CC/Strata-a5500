@@ -124,6 +124,30 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
             if (!frontier) { error_reply("incomplete cold frontier"); continue; }
             if (!session.load(path, ids, next_logits, error)) { error_reply(error); continue; }
             std::cout << "{\"status\":\"ok\",\"consumed\":" << session.ids().size() << "}" << std::endl;
+        } else if (command == "audit") {
+            size_t index;
+            std::string path, extra;
+            if (!(in >> index >> std::quoted(path)) || (in >> extra) || index >= images.size() || !images[index]) {
+                error_reply("audit requires a retained handle and output path"); continue;
+            }
+            BranchSessionAudit result;
+            if (!session.audit(images[index], path, result, error)) { error_reply(error); continue; }
+            std::cout << "{\"status\":\"ok\",\"bytes\":" << result.bytes << ",\"consumed\":" << result.consumed
+                      << ",\"qsa_page_cells\":" << result.qsa_page_cells
+                      << ",\"index_block_cells\":" << result.index_block_cells
+                      << ",\"allocation_page_bytes\":" << vmm_granularity() << ",\"regions\":[";
+            bool first = true;
+            for (const auto& r : result.regions) {
+                if (!first) std::cout << ',';
+                first = false;
+                std::cout << "{\"kind\":\"" << r.kind << "\",\"offset\":" << r.offset << ",\"bytes\":" << r.bytes
+                          << ",\"pool\":" << r.pool << ",\"qsa_ordinal\":" << r.qsa_ordinal
+                          << ",\"pool_offset\":" << r.pool_offset << ",\"bytes_per_cell\":" << r.bytes_per_cell
+                          << ",\"filled_prefix_bytes\":" << r.filled_prefix_bytes
+                          << ",\"allocation_id\":" << r.page.allocation_id << ",\"driver_handle\":" << r.page.driver_handle
+                          << ",\"owners\":" << r.page.owners << '}';
+            }
+            std::cout << "]}" << std::endl;
         } else if (command == "pages") {
             std::cout << "{\"status\":\"ok\",\"pages\":[";
             bool first = true;
@@ -143,6 +167,9 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
                       << ",\"live_bytes\":" << p.live_bytes << ",\"cow_pages\":" << p.cow_pages
                       << ",\"copied_bytes\":" << p.copied_bytes << ",\"mappings\":" << p.mappings
                       << ",\"unmappings\":" << p.unmappings
+                      << ",\"address_reservations\":" << p.address_reservations
+                      << ",\"address_releases\":" << p.address_releases
+                      << ",\"audit_read_bytes\":" << p.audit_read_bytes
                       << ",\"binding_copy_bytes\":" << s.binding_copy_bytes
                       << ",\"saved_running_bytes\":" << s.saved_running_bytes
                       << ",\"restored_running_bytes\":" << s.restored_running_bytes

@@ -18,6 +18,20 @@ struct BranchSessionCounters {
     uint64_t captures = 0, restores = 0;
     uint64_t written_file_bytes = 0, loaded_file_bytes = 0;
 };
+struct BranchAuditRegion {
+    std::string kind;
+    uint64_t offset = 0, bytes = 0;
+    int64_t pool = -1, qsa_ordinal = -1;
+    uint64_t pool_offset = 0, bytes_per_cell = 0;
+    // Contiguous, completely consumed QSA blocks only. Excludes a partial
+    // logical block, the indexer's moving spare row and unused capacity.
+    uint64_t filled_prefix_bytes = 0;
+    BranchPageInfo page;
+};
+struct BranchSessionAudit {
+    uint64_t bytes = 0, consumed = 0, qsa_page_cells = 0, index_block_cells = 0;
+    std::vector<BranchAuditRegion> regions;
+};
 
 // One synchronized, private inference lease. Bind once to an empty, initialized
 // session BEFORE any graph capture. The original arena remains allocated and is
@@ -48,6 +62,10 @@ public:
     const std::vector<float>& logits() const { return logits_; }
     std::vector<BranchSessionPool> pools() const;
     std::vector<BranchPageInfo> ownership() const;
+    // Diagnostic byte export only; cannot be imported as a checkpoint. Reads
+    // the retained image itself without restoring it or changing the frontier.
+    bool audit(const BranchSessionImage& image, const std::string& path,
+               BranchSessionAudit& report, std::string& error) const;
     const BranchSessionCounters& counters() const { return counters_; }
 private:
     struct Binding;
