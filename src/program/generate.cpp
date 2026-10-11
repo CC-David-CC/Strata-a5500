@@ -7762,6 +7762,9 @@ int main(int argc, char** argv) {
                     {"keep_canonical", o.keep_canonical}, {"no_fused_gr", o.no_fused_gr},
                     {"no_fast_attn", o.no_fast_attn}, {"no_fused_gdn", o.no_fused_gdn},
                     {"no_fast_select", o.no_fast_select}, {"vision", o.vision}};
+                // Older --reproducible files could include window-dependent tail skipping. Never
+                // import that unversioned state into the stronger policy; default fingerprints stay unchanged.
+                if (o.reproducible) c.switches.emplace_back("reproducible_policy", 2);
                 config_fp = strata::core::session_config_fingerprint(c);
             }
             id.model = *model_fp;
