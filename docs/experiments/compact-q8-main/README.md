@@ -32,3 +32,7 @@ No full-model sanitizer, internal state-digest equality, broad quality score or 
 ## Reproduce
 
 Build with CUDA/native experts and `STRATA_BUILD_TESTS=ON`. Run `readonly_miss_cache_fixture --quick` and `compact_miss_fill_bench` with the compact flag 0/1. Run Compute Sanitizer memcheck on the fixture. The accompanying recorded plan and case script reproduce the engine request after replacing local model/build/client paths. No network listener is opened.
+
+The [current-main refresh](current-main-refresh/README.md) records fresh CUDA
+model parity, default-off comparison and refreshed backend/component builds.
+Its single-observation timings are separate from the historical measurements.
