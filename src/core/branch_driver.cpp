@@ -154,7 +154,8 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
             for (const auto& page : session.ownership()) {
                 if (!first) std::cout << ',';
                 first = false;
-                std::cout << '[' << page.allocation_id << ',' << page.driver_handle << ',' << page.owners << ',' << page.bytes << ']';
+                std::cout << '[' << page.allocation_id << ',' << page.driver_handle << ',' << page.owners << ',' << page.bytes
+                          << ",\"" << page.kind << "\"," << page.pool << ']';
             }
             std::cout << "]}" << std::endl;
         } else if (command == "stats") {

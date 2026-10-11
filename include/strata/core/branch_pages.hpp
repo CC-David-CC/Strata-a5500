@@ -12,6 +12,10 @@ struct BranchPageInfo {
     VmmChunk driver_handle = 0;
     uint64_t owners = 0; // owning page tables, excluding temporary instrumentation references
     uint64_t bytes = 0;
+    // Session ownership annotates the actual bound pool. Raw allocations have
+    // no model role; the allocator leaves these fields unset.
+    const char* kind = nullptr;
+    int64_t pool = -1;
 };
 struct BranchPageCounters {
     uint64_t allocations=0,releases=0,live_bytes=0,cow_pages=0,copied_bytes=0,mappings=0,unmappings=0;

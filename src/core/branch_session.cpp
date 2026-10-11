@@ -8,6 +8,7 @@
 
 namespace strata::core {
 namespace {
+const char* pool_kinds[] = {"k", "v", "k_scale", "v_scale", "indexer_pool"};
 bool fail(std::string& error, const char* message) {
     error = std::string("branch session: ") + message;
     return false;
@@ -262,9 +263,13 @@ std::vector<BranchSessionPool> BranchSession::pools() const {
 }
 std::vector<BranchPageInfo> BranchSession::ownership() const {
     std::vector<BranchPageInfo> out;
-    for (const auto& b : bindings_) {
-        const auto pages = b->memory.ownership();
-        out.insert(out.end(), pages.begin(), pages.end());
+    for (size_t i = 0; i < bindings_.size(); ++i) {
+        const auto& b = bindings_[i];
+        for (auto page : b->memory.ownership()) {
+            page.kind = pool_kinds[b->part];
+            page.pool = (int64_t)i;
+            out.push_back(page);
+        }
     }
     return out;
 }
@@ -289,7 +294,6 @@ bool BranchSession::audit(const BranchSessionImage& image, const std::string& pa
             result.regions.push_back(std::move(region));
             return true;
         };
-        const char* kinds[] = {"k", "v", "k_scale", "v_scale", "indexer_pool"};
         for (size_t i = 0; i < bindings_.size(); ++i) {
             const auto& binding = bindings_[i];
             const auto pages = BranchPages::ownership(image->pages[i]);
@@ -301,7 +305,7 @@ bool BranchSession::audit(const BranchSessionImage& image, const std::string& pa
                 std::vector<uint8_t> bytes;
                 if (!BranchPages::read_page(image->pages[i], p, bytes)) return fail(error, "cannot read saved physical page");
                 BranchAuditRegion region;
-                region.kind = kinds[binding->part]; region.pool = (int64_t)i;
+                region.kind = pool_kinds[binding->part]; region.pool = (int64_t)i;
                 region.qsa_ordinal = binding->state - session_.qsa_states;
                 region.pool_offset = pool_offset; region.bytes_per_cell = binding->per_cell;
                 region.filled_prefix_bytes = pool_offset < filled ? std::min(pages[p].bytes, filled - pool_offset) : 0;
