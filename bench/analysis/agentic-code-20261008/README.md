@@ -5,7 +5,9 @@ weight for all 15 categories, and the original preference weights for tool
 selection and recovery. Both use the Q8 retest on the same RTX PRO 6000, labeled
 **Reference**. The underlying measurements remain in
 [#1491](https://github.com/Niko1221/Strata/pull/1491); no new inference or test
-rescoring is involved.
+rescoring is involved. PR #1491 now includes this analysis alongside the original
+measurements, superseding its separate presentation in PR #1497. Both scoring
+views and their source data are preserved.
 
 Benchmark and scenario credit: **[Tool-Eval-Bench](https://github.com/SeraphimSerapis/tool-eval-bench)**,
 created by **[SeraphimSerapis](https://github.com/SeraphimSerapis)**. Existing scoring

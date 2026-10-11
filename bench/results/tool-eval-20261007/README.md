@@ -3,6 +3,13 @@
 Measured 2026-10-07/08. All twelve requested variants now have completed results.
 These single trials are not a general model ranking; runtime and hardware cohorts differ.
 
+The report and its [scoring analysis](../../analysis/agentic-code-20261008/README.md)
+are now carried together in PR #1491. The analysis retains both equal-category
+and preference-weighted views, their exact calculations, and their limitations;
+it does not change the original benchmark scoring or add inference runs.
+The branch was updated against upstream `61b3fb5d` on 2026-10-11. Measurements
+remain historical and pinned to the recorded engines, not the current build.
+
 ## Visual results
 
 Benchmark: **[Tool-Eval-Bench](https://github.com/SeraphimSerapis/tool-eval-bench)**,
@@ -25,7 +32,7 @@ and [category SVG](figures/category-scores-and-examples.svg). Rebuild with
 The current table and figures use the fresh Q8 run on the same RTX PRO 6000 as
 ISTA/Swift, with the identical pinned mainline engine binary. The older three-P4
 receipts remain unchanged as historical evidence; they are no longer the reference
-in the figures or the [weighted analysis in #1497](https://github.com/Niko1221/Strata/pull/1497).
+in the figures or the [scoring analysis](../../analysis/agentic-code-20261008/README.md).
 
 | Run | Earned / available | Score /100 | Pass / partial / fail | Sum of scenario wall times |
 |---|---:|---:|---:|---:|
