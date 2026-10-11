@@ -2,6 +2,11 @@
 
 Based on [Niko1221/Strata](https://github.com/Niko1221/Strata) main `82f46a8c8f475f001ad76d92f58f4a4f8ffb0253`. Default off: `STRATA_Q8_DENSE_T8_MMQ=1`. Only Q8_0 weights with 2,560 inputs, 10,240 outputs and exactly eight activation columns use the MMQ path. Other types/shapes/window lengths retain the native vector path. CUDA SM120 only; no other research changes included.
 
+The branch is now refreshed to main `61b3fb5d`. See the
+[current refresh](current-main-refresh/README.md) for fresh backend checks and
+eight full model cases. Its T8 on/off outputs differ, and the earlier apparent
+request-speed gain did not reproduce. The measurements below are historical.
+
 RTX PRO 6000 Blackwell Workstation Edition 96GB; Ryzen 9 7950X; 128GB RAM; Ubuntu 24.04.5; CUDA 13.2, driver 595.91.07.
 
 ![Initial measured results](results.png)
