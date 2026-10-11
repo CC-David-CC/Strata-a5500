@@ -2156,7 +2156,8 @@ int main(int argc, char** argv) {
     }
     if (o.reproducible) {
         // These sources can change IQ results without changing the model or prompt: CPU dot vs multi-token
-        // grouping, expert migration between CPU/GPU, and mapped-PCIe execution of misses. Keep the cache lifecycle
+        // grouping, expert migration between CPU/GPU, mapped-PCIe execution, and window-dependent tail skipping.
+        // Keep the cache lifecycle
         // intact; use this policy for exact-token A/B checks across fresh, parked, and disk-restored sessions.
         o.adapt_every = 0;
         o.adapt_swaps = 0;
@@ -2164,11 +2165,13 @@ int main(int argc, char** argv) {
         o.pcie_frac = 0.0;
 #if defined(_WIN32)
         _putenv_s("STRATA_IQ_MT_MIN", "1");
+        _putenv_s("STRATA_ROUTE_TAIL_SKIP", "0");
 #else
         setenv("STRATA_IQ_MT_MIN", "1", 1);
+        setenv("STRATA_ROUTE_TAIL_SKIP", "0", 1);
 #endif
         std::fprintf(stderr, "strata: reproducible execution policy on (IQ multi-token grouping, adaptive swaps off, "
-                             "PCIe miss share 0; conversation caching remains enabled)\n");
+                             "PCIe miss share 0, tail skipping off; conversation caching remains enabled)\n");
     }
 #if defined(STRATA_USE_HIP)
     {   // gfx1151 (Strix Halo): the switches that are exact there are on by default (strata/core/arch_defaults.hpp); before
