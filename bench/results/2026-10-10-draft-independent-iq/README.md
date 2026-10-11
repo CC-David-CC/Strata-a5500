@@ -89,3 +89,9 @@ The full-ID cross-check is recorded in [cross-arm.json](cross-arm.json).
 These model runs are serial across windows (`--pipeline-windows 0`). They do not validate remote TCP overlap,
 deep speculative pipelines, rollback state, sampled decoding, changing CPU/GPU placement, or every prompt/model.
 The CPU fix removes the tested group-size-dependent dispatch; those other correctness requirements remain.
+
+## Current-main refresh
+
+The [2026-10-11 record](../2026-10-11-draft-independent-iq/README.md) keeps new
+CPU costs, current model successes and remaining mixed-placement/pipeline
+failures separate from the historical measurements above.

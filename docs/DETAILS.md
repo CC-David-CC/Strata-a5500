@@ -102,7 +102,10 @@ when the accepted prefix and rollback were correct (issue #152). The default now
 restores the old dispatch for comparisons, including its dependence on draft grouping. This correctness choice
 can cost throughput ([dispatch tests and timing](../bench/results/2026-10-10-draft-independent-iq/README.md)):
 the earlier Ryzen 7600 (AVX-512) IQ3_S measurement was -1..-3% decode. It does not make CPU
-and GPU arithmetic identical or replace correct speculative-state rollback.
+and GPU arithmetic identical or replace correct speculative-state rollback. The
+[current-main checks](../bench/results/2026-10-11-draft-independent-iq/README.md)
+record format-dependent one-token costs and remaining mixed-placement/pipeline
+output mismatches; this CPU fix is not a blanket end-to-end parity guarantee.
 
 Through the server, two more things carry
 over from one request to the next (#410): the adaptive tier moves experts between RAM and VRAM (the GPU and the CPU
