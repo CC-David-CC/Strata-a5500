@@ -216,3 +216,10 @@ switching policy is proposed.
 
 Measured CUDA/HIP lifecycle checks and timing/quality differences are documented
 in the [migration report](../bench/results/2026-10-09-rope-cache-migration/README.md).
+
+## Current-main refresh
+
+The [2026-10-11 measurements](../bench/results/2026-10-11-yarn-main-refresh/README.md)
+record fresh CUDA 4K and full 1M-sequence validation after merging current main,
+including approximate migration differences and refreshed HIP/SYCL build checks.
+Earlier measurements retain their original source and hardware scope.
