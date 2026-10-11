@@ -18,6 +18,12 @@ struct BranchSessionCounters {
     uint64_t captures = 0, restores = 0;
     uint64_t written_file_bytes = 0, loaded_file_bytes = 0;
 };
+struct BranchSnapshotCounters {
+    uint64_t allocations = 0, releases = 0, live_images = 0;
+    // Actual vector capacities of published running/history/frontier payloads.
+    // Excludes allocator rounding, control blocks, layout strings and page tables.
+    uint64_t payload_capacity_bytes = 0, peak_payload_capacity_bytes = 0;
+};
 struct BranchAuditRegion {
     std::string kind;
     uint64_t offset = 0, bytes = 0;
@@ -67,6 +73,7 @@ public:
     bool audit(const BranchSessionImage& image, const std::string& path,
                BranchSessionAudit& report, std::string& error) const;
     const BranchSessionCounters& counters() const { return counters_; }
+    static BranchSnapshotCounters snapshot_counters();
 private:
     struct Binding;
     enum class State { unbound, ready, writing, failed };

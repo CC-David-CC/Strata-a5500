@@ -5,9 +5,37 @@
 #include <cuda_runtime.h>
 #include <exception>
 #include <fstream>
+#include <mutex>
 
 namespace strata::core {
 namespace {
+std::mutex snapshot_mutex;
+BranchSnapshotCounters snapshot_work;
+struct SnapshotLifetime {
+    uint64_t payload_bytes = 0;
+    SnapshotLifetime() {
+        std::lock_guard<std::mutex> lock(snapshot_mutex);
+        ++snapshot_work.allocations;
+        ++snapshot_work.live_images;
+    }
+    SnapshotLifetime(const SnapshotLifetime&) = delete;
+    SnapshotLifetime& operator=(const SnapshotLifetime&) = delete;
+    void publish(uint64_t bytes) {
+        std::lock_guard<std::mutex> lock(snapshot_mutex);
+        payload_bytes = bytes;
+        snapshot_work.payload_capacity_bytes += bytes;
+        snapshot_work.peak_payload_capacity_bytes = std::max(snapshot_work.peak_payload_capacity_bytes,
+                                                            snapshot_work.payload_capacity_bytes);
+    }
+    ~SnapshotLifetime() {
+        // This member is declared first and destroyed last, after the image's
+        // vectors and page owners have actually released their resources.
+        std::lock_guard<std::mutex> lock(snapshot_mutex);
+        ++snapshot_work.releases;
+        --snapshot_work.live_images;
+        snapshot_work.payload_capacity_bytes -= payload_bytes;
+    }
+};
 const char* pool_kinds[] = {"k", "v", "k_scale", "v_scale", "indexer_pool"};
 bool fail(std::string& error, const char* message) {
     error = std::string("branch session: ") + message;
@@ -47,12 +75,17 @@ SessionFileIdentity file_identity(const std::string& contract, const std::vector
 }
 
 struct BranchSessionSnapshot {
+    SnapshotLifetime lifetime;
     std::string contract;
     std::vector<int64_t> layout;
     std::vector<BranchPageSnapshot> pages;
     ConversationCheckpoint running;
     std::vector<float> logits;
 };
+BranchSnapshotCounters BranchSession::snapshot_counters() {
+    std::lock_guard<std::mutex> lock(snapshot_mutex);
+    return snapshot_work;
+}
 struct BranchSession::Binding {
     QsaState* state = nullptr;
     size_t part = 0;
@@ -194,6 +227,7 @@ BranchSessionImage BranchSession::freeze(std::string& error) {
             if (!pages) { fail(error, "cannot protect captured pages"); return {}; }
             image->pages.push_back(std::move(pages));
         }
+        image->lifetime.publish(image->running.bytes() + image->logits.capacity() * sizeof(float));
         ++counters_.captures;
         return image;
     } catch (const std::exception& e) { fail(error, e.what()); return {}; }

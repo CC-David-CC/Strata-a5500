@@ -1,9 +1,14 @@
 #include "strata/core/branch_driver.hpp"
 #include "strata/core/branch_session.hpp"
+#include "strata/core/branch_handles.hpp"
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#if defined(__GLIBC__)
+#include <malloc.h>
+#endif
 
 namespace strata::core {
 namespace {
@@ -29,7 +34,8 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
     // just one. The actual forced forward below always passes T=1.
     if (!forward.init(weights, geometry, state, hits, head, 2, error)) { error_reply(error); return 1; }
     forward.set_head_sampling(false); // forced inputs; the API owns RNG/grammar
-    std::vector<BranchSessionImage> images;
+    BranchHandleCounters handle_work;
+    BranchHandles<BranchSessionImage> images(handle_work);
     std::vector<float> logits((size_t)forward.vocab());
     std::cout << "{\"status\":\"ready\",\"vocab\":" << forward.vocab()
               << ",\"capacity\":" << state.max_cells << "}" << std::endl;
@@ -72,17 +78,24 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
         } else if (command == "capture") {
             auto image = session.freeze(error);
             if (!image) { error_reply(error); continue; }
-            images.push_back(std::move(image));
-            std::cout << "{\"status\":\"ok\",\"handle\":" << images.size()-1
-                      << ",\"consumed\":" << session.ids().size() << "}" << std::endl;
+            try {
+                const auto handle = images.insert(std::move(image));
+                std::cout << "{\"status\":\"ok\",\"handle\":" << handle
+                          << ",\"consumed\":" << session.ids().size() << "}" << std::endl;
+            } catch (const std::exception& e) { error_reply(e.what()); }
         } else if (command == "restore" || command == "drop") {
-            size_t index;
+            uint64_t index;
             std::string extra;
-            if (!(in >> index) || (in >> extra) || index >= images.size() || !images[index]) {
+            if (!(in >> index) || (in >> extra)) {
                 error_reply("missing derived checkpoint handle"); continue;
             }
-            if (command == "drop") images[index].reset();
-            else if (!session.restore(images[index], error)) { error_reply(error); continue; }
+            if (command == "drop") {
+                if (!images.drop(index)) { error_reply("missing derived checkpoint handle"); continue; }
+            } else {
+                const auto* image = images.find(index);
+                if (!image) { error_reply("missing derived checkpoint handle"); continue; }
+                if (!session.restore(*image, error)) { error_reply(error); continue; }
+            }
             std::cout << "{\"status\":\"ok\",\"consumed\":" << session.ids().size() << "}" << std::endl;
         } else if (command == "logits") {
             std::string path, extra;
@@ -125,13 +138,15 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
             if (!session.load(path, ids, next_logits, error)) { error_reply(error); continue; }
             std::cout << "{\"status\":\"ok\",\"consumed\":" << session.ids().size() << "}" << std::endl;
         } else if (command == "audit") {
-            size_t index;
+            uint64_t index;
             std::string path, extra;
-            if (!(in >> index >> std::quoted(path)) || (in >> extra) || index >= images.size() || !images[index]) {
+            if (!(in >> index >> std::quoted(path)) || (in >> extra)) {
                 error_reply("audit requires a retained handle and output path"); continue;
             }
+            const auto* image = images.find(index);
+            if (!image) { error_reply("audit requires a retained handle and output path"); continue; }
             BranchSessionAudit result;
-            if (!session.audit(images[index], path, result, error)) { error_reply(error); continue; }
+            if (!session.audit(*image, path, result, error)) { error_reply(error); continue; }
             std::cout << "{\"status\":\"ok\",\"bytes\":" << result.bytes << ",\"consumed\":" << result.consumed
                       << ",\"qsa_page_cells\":" << result.qsa_page_cells
                       << ",\"index_block_cells\":" << result.index_block_cells
@@ -163,6 +178,7 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
             const auto s = session.counters();
             const auto e = vmm_failure_counters();
             const auto h = branch_digest_counters();
+            const auto snapshots = BranchSession::snapshot_counters();
             std::cout << "{\"status\":\"ok\",\"consumed\":" << session.ids().size()
                       << ",\"forward_tokens\":" << forward.completed_forward_tokens
                       << ",\"windows\":" << forward.windows
@@ -190,7 +206,31 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
                       << ",\"restored_running_bytes\":" << s.restored_running_bytes
                       << ",\"written_file_bytes\":" << s.written_file_bytes
                       << ",\"loaded_file_bytes\":" << s.loaded_file_bytes
-                      << ",\"captures\":" << s.captures << ",\"restores\":" << s.restores << "}" << std::endl;
+                      << ",\"captures\":" << s.captures << ",\"restores\":" << s.restores
+                      << ",\"handle_allocations\":" << handle_work.allocations
+                      << ",\"handle_releases\":" << handle_work.releases
+                      << ",\"handle_live_entries\":" << handle_work.live_entries
+                      << ",\"handle_live_bytes\":" << handle_work.live_bytes
+                      << ",\"handle_peak_bytes\":" << handle_work.peak_bytes
+                      << ",\"handle_issued\":" << handle_work.issued
+                      << ",\"handle_lookup_steps\":" << handle_work.lookup_steps
+                      << ",\"snapshot_allocations\":" << snapshots.allocations
+                      << ",\"snapshot_releases\":" << snapshots.releases
+                      << ",\"snapshot_live_images\":" << snapshots.live_images
+                      << ",\"snapshot_payload_capacity_bytes\":" << snapshots.payload_capacity_bytes
+                      << ",\"snapshot_peak_payload_capacity_bytes\":" << snapshots.peak_payload_capacity_bytes
+                      << ",\"host_heap_allocated_bytes\":";
+#if defined(__GLIBC__)
+#if __GLIBC_PREREQ(2, 33)
+            const auto heap = mallinfo2();
+            std::cout << heap.uordblks + heap.hblkhd;
+#else
+            std::cout << "null";
+#endif
+#else
+            std::cout << "null";
+#endif
+            std::cout << "}" << std::endl;
         } else error_reply("unknown command");
     }
     return 0;
