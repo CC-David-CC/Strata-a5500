@@ -17,30 +17,36 @@ build and its CPU dispatch/default and legacy-negative controls passed; no SYCL
 GPU numerical test is claimed. Synthetic GPU checks use numerical tolerances,
 not an end-to-end speculative-output identity guarantee.
 
-## Current model gates: distinguish the fix from remaining failures
+## Current model gates and approximate routing control
 
-The current-main P4 confidence-floor gate failed two prose requests at token 123.
-With this fix, that 12-request floor-0/floor-0.95 comparison passed. However, the
-separate 14-request comparison that includes no-draft and single-token reference
-arms still failed in the mixed CPU/GPU configuration at token 30. Full native
-output records, hashes and gate results are retained; this is not reported as an
-all-model parity pass.
+The initial current-main P4 confidence-floor gate failed two prose requests at
+ token 123. With this CPU fix, its 12-request floor comparison passed, while the
+separate 14-request mixed CPU/GPU comparison still differed at token 30. Those
+original results remain in this report as observations of the default routing
+policy, rather than evidence of an unresolved GPU state defect.
 
-The same mixed-placement discrepancy reproduced on RTX PRO 6000 Blackwell with
-645 cached experts, at token 30 (floor 0) or 62 (floor 0.95). Disabling one-token
-self-commit, head mixing, or grouped GR/KV updates did not resolve it. With the
-same input/cases and **zero GPU experts**, CPU-only checks passed; the automatic
-all-GPU expert-cache code-prompt control also passed. Broader CPU-only controls
-passed 18 requests across three prompts on main, this fix and the legacy setting.
-Those legacy model probes happen not to flip output IDs; they do not override
-the failing direct raw-row negative control.
+The follow-up identified `STRATA_ROUTE_TAIL_SKIP=7`, enabled by default for
+eligible CUDA configurations with missed experts. The dispatch policy uses an
+expert's minimum rank across the whole token window to decide whether to skip
+it. Adding draft rows can therefore change contributions to a target row.
+This intentional approximation must be disabled for an exact draft-window
+comparison. CPU-only and fully resident GPU controls avoid the same missed-
+expert decision; their passing results did not isolate an arithmetic defect.
 
-This isolates the observed problem to the mixed placement in these probes,
-without proving its exact cause. CPU and GPU arithmetic need not be identical;
-this change does not promise full drafting/pipeline parity. The broader pipeline
-gate continues to fail with the same token differences before and after this
-CPU fix, and suffix-on-pipeline coverage remains zero. Those are separately
-visible findings, not tests silently removed to obtain a passing report.
+With only `STRATA_ROUTE_TAIL_SKIP=0` added to the mixed-placement configuration,
+all 14 P4 no-draft, single-token and drafted reference outputs now match exactly.
+The 12-request confidence-floor gate also passes. Full records and explicit
+manifests are under `1818-exact-model/` and `1818-exact-single-token/`; the combined
+comparison is `1818-exact-cross-arm.json`. The engine source remains
+`d4cc56ca071b584d4cc32c96e4a745bf15db12a4`. A separate six-request Blackwell
+mixed-placement diagnostic also passed after disabling tail skipping.
+
+The current-main 48-request pipeline matrix also passes with tail skipping off;
+TCP comparisons use the separate current #1748 branch. These controls distinguish
+the approximate routing policy from CPU dispatch consistency. This PR does not
+change ordinary tail-skip defaults or guarantee equality across arbitrary CPU
+and GPU arithmetic, formats or placements. Pipeline suffix coverage is still
+zero and is recorded as a coverage failure in #1813.
 
 ## Current CPU cost
 
