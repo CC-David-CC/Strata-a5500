@@ -16,6 +16,7 @@ struct BranchSessionPool {
 struct BranchSessionCounters {
     uint64_t binding_copy_bytes = 0, saved_running_bytes = 0, restored_running_bytes = 0;
     uint64_t captures = 0, restores = 0;
+    uint64_t written_file_bytes = 0, loaded_file_bytes = 0;
 };
 
 // One synchronized, private inference lease. Bind once to an empty, initialized
@@ -36,6 +37,13 @@ public:
     bool finish(const std::vector<int32_t>& tokens, const std::vector<float>& logits, std::string& error);
     BranchSessionImage freeze(std::string& error);
     bool restore(const BranchSessionImage& image, std::string& error);
+    // Optional cold state uses the existing session file. That file excludes
+    // logits: the caller must SHA-256 bind its frontier and exact history in the
+    // outer checkpoint manifest before calling load. Neither call publishes an
+    // authoritative history snapshot or includes decoder/RNG/grammar state.
+    bool write(const std::string& path, size_t& bytes, std::string& error);
+    bool load(const std::string& path, const std::vector<int32_t>& expected_ids,
+              const std::vector<float>& frontier, std::string& error);
     const std::vector<int32_t>& ids() const { return ids_; }
     const std::vector<float>& logits() const { return logits_; }
     std::vector<BranchSessionPool> pools() const;

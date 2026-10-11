@@ -36,6 +36,12 @@ void set_pointer(QsaState& q, size_t part, void* p) {
 uint64_t running_bytes(const ConversationCheckpoint& c) {
     return c.gdn.size() + c.ple.size() + c.tails.size() + c.dead.size() + c.block_pos.size();
 }
+SessionFileIdentity file_identity(const std::string& contract, const std::vector<int64_t>& layout) {
+    // Native format detects accidental corruption. Cryptographic file, model
+    // and execution fingerprints are checked by the outer API manifest.
+    return {session_hash64(contract.data(), contract.size(), 0),
+            session_hash64(layout.data(), layout.size()*sizeof(int64_t), 0)};
+}
 }
 
 struct BranchSessionSnapshot {
@@ -205,6 +211,48 @@ bool BranchSession::restore(const BranchSessionImage& image, std::string& error)
     catch (const std::exception& e) { return fail(error, e.what()); }
     pending_ = 0; state_ = State::ready; ++counters_.restores;
     return true;
+}
+bool BranchSession::write(const std::string& path, size_t& bytes, std::string& error) {
+    bytes = 0;
+    if (state_ != State::ready || ids_.empty() || !sync(error))
+        return fail(error, "cold write requires a consumed, synchronized frontier");
+    try {
+        const std::vector<ConversationImageKey> images;
+        const std::vector<ConversationCheckpoint> checkpoints;
+        SavedConversation meta;
+        std::vector<SessionKvSource> sources;
+        const ConversationView view{ids_, images, checkpoints, false};
+        if (!conversation_snapshot_sources(meta, sources, view, session_, geometry_, nullptr, error) ||
+            !session_file_write(path, meta, sources, file_identity(contract_, layout_), bytes, error)) return false;
+        counters_.written_file_bytes += bytes;
+        return true;
+    } catch (const std::exception& e) { return fail(error, e.what()); }
+}
+bool BranchSession::load(const std::string& path, const std::vector<int32_t>& expected_ids,
+                         const std::vector<float>& frontier, std::string& error) {
+    if (state_ == State::unbound || expected_ids.empty() || expected_ids.size() > (size_t)session_.max_cells ||
+        std::any_of(expected_ids.begin(), expected_ids.end(), [](int32_t t) { return t < 0; }) ||
+        frontier.empty() || std::any_of(frontier.begin(), frontier.end(), [](float x) { return !std::isfinite(x); }))
+        return fail(error, "invalid cold history or frontier");
+    try {
+        SessionReadLimits limits;
+        SavedConversation image;
+        size_t bytes = 0;
+        if (!conversation_session_read_limits(limits, session_, geometry_, nullptr, session_.max_cells, 0, error) ||
+            !session_file_read(path, file_identity(contract_, layout_), image, bytes, error, limits)) return false;
+        if (image.live.ids != expected_ids || !image.live.imgs.empty() || !image.checkpoints.empty() || image.cvec)
+            return fail(error, "cold checkpoint history differs");
+        if (!conversation_snapshot_validate(image, session_, geometry_, nullptr, error)) return false;
+        auto next_logits = frontier; // Allocate before touching private device state.
+        if (!reset(error)) return false;
+        state_ = State::failed;
+        if (conversation_snapshot_restore(image, session_, geometry_, nullptr, error) != ConversationRestore::restored ||
+            !sync(error)) return false;
+        ids_.swap(image.live.ids); logits_.swap(next_logits);
+        pending_ = 0; state_ = State::ready;
+        counters_.loaded_file_bytes += bytes;
+        return true;
+    } catch (const std::exception& e) { return fail(error, e.what()); }
 }
 std::vector<BranchSessionPool> BranchSession::pools() const {
     std::vector<BranchSessionPool> out;

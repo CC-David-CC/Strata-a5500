@@ -3,6 +3,10 @@
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <cstdlib>
+#include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <limits>
 #include <vector>
 
 using namespace strata::core;
@@ -117,6 +121,48 @@ static void exercise(int format) {
         check(read(address, root_bytes.size()) == root_bytes, "reset did not mutate retained root pages");
         check(session.restore(a, error), "restore retained A after reset");
         check(read(ss.gdn_state, sizes.gdn) == std::vector<unsigned char>(sizes.gdn, 91), "reset did not mutate retained recurrence");
+        // Optional offload must restore a complete consumed frontier. Validate
+        // corruption and identity before touching the currently active child.
+        check(session.restore(root, error), "activate root for cold checkpoint");
+        const auto path = std::filesystem::temp_directory_path() /
+            ("strata-branch-cold-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+        size_t saved_bytes = 0;
+        check(session.write(path.string(), saved_bytes, error), "write actual optional checkpoint bytes");
+        check(std::filesystem::file_size(path) == saved_bytes && saved_bytes > sizes.gdn,
+              "offload reports measured file bytes");
+        check(session.restore(a, error), "activate A before refused cold loads");
+        auto wrong_ids = ids;
+        wrong_ids.back() = 77;
+        check(!session.load(path.string(), wrong_ids, {1.25f, -0.5f}, error), "refuse wrong cold history");
+        check(!session.load(path.string(), ids, {std::numeric_limits<float>::infinity()}, error),
+              "refuse nonfinite cold frontier before mutation");
+        check(session.ids().back() == 43 && session.logits() == std::vector<float>({2.5f, -3.0f}),
+              "refused cold identity leaves active child unchanged");
+        std::ifstream input(path, std::ios::binary);
+        std::vector<char> raw((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+        input.close();
+        raw.back() ^= 1;
+        const auto corrupt = path.string() + ".corrupt";
+        std::ofstream output(corrupt, std::ios::binary);
+        output.write(raw.data(), (std::streamsize)raw.size());
+        output.close();
+        check(!session.load(corrupt, ids, {1.25f, -0.5f}, error), "refuse actual corrupt checkpoint bytes");
+        check(read(ss.gdn_state, sizes.gdn) == std::vector<unsigned char>(sizes.gdn, 91),
+              "corrupt cold load never mutates active recurrence");
+        check(session.load(path.string(), ids, {1.25f, -0.5f}, error), "load complete cold root");
+        check(session.pools().front().address == address, "cold load keeps captured addresses");
+        check(session.ids() == ids && session.logits() == std::vector<float>({1.25f, -0.5f}),
+              "cold load restores exact consumed history and frontier");
+        check(read(ss.gdn_state, sizes.gdn) == recurrent && read(ss.ple_hist, sizes.ple) == ple,
+              "cold load restores recurrence and PLE");
+        check(read(address, 4097 * session.pools().front().bytes_per_cell) ==
+                  std::vector<unsigned char>(root_bytes.begin(), root_bytes.begin() + 4097 * session.pools().front().bytes_per_cell),
+              "cold load restores consumed KV bytes");
+        check(session.restore(a, error), "hot child survives cold root load");
+        check(read(ss.gdn_state, sizes.gdn) == std::vector<unsigned char>(sizes.gdn, 91),
+              "cold load never overwrites retained child");
+        std::filesystem::remove(corrupt);
+        std::filesystem::remove(path);
     }
     check((q.k_pool ? (void*) q.k_pool : q.k_q ? (void*) q.k_q : (void*) q.k_q4) == original,
           "release restores borrowed session pointers");
