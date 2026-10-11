@@ -74,7 +74,8 @@ globalThis.StrataMath = (() => {
         initialization ||= Promise.race([adapter.initialize(), new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Math initialization timed out")), 10000))]);
         await initialization;
-        const signal = AbortSignal.timeout(15000);
+        const signal = adapter.renderTimeoutMs === null ? new AbortController().signal :
+          AbortSignal.timeout(adapter.renderTimeoutMs ?? 15000);
         let onAbort;
         const deadline = new Promise(resolve => {
           onAbort = () => resolve({ok: false, reason: "limit"});

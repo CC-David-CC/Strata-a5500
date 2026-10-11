@@ -9,7 +9,6 @@ import resource
 import subprocess
 import sys
 import tempfile
-import time
 import xml.etree.ElementTree as ET
 
 LIMIT = 16384
@@ -24,19 +23,13 @@ PREAMBLE = r"""\documentclass[border=0pt]{standalone}
 
 def limits():
     resource.setrlimit(resource.RLIMIT_FSIZE, (4 * 1024 * 1024,) * 2)
-    resource.setrlimit(resource.RLIMIT_CPU, (5, 5))
     os.setsid()
 
 
-def command(args, directory, deadline):
+def command(args, directory):
     proc = subprocess.Popen(args, cwd=directory, stdin=subprocess.DEVNULL,
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=limits)
-    try:
-        proc.wait(timeout=max(.01, deadline - time.monotonic()))
-    except subprocess.TimeoutExpired:
-        os.killpg(proc.pid, 9)
-        proc.wait()
-        raise
+    proc.wait()
     return proc.returncode == 0
 
 
@@ -49,7 +42,6 @@ def render(req):
         return {"ok": False, "reason": "invalid"}
     if len(source.encode()) > LIMIT:
         return {"ok": False, "reason": "limit"}
-    deadline = time.monotonic() + 5
     with tempfile.TemporaryDirectory(prefix="equation-", dir="/tmp") as tmp:
         directory = Path(tmp)
         # A real TeX compiler; packages are fixed by the image, not generated source.
@@ -61,13 +53,11 @@ def render(req):
         try:
             # XeTeX supports Unicode math without exposing a Lua interpreter to model output.
             if not command(["xelatex", "--no-shell-escape", "--interaction=batchmode", "--halt-on-error",
-                            "--jobname=equation", "equation.tex"], tmp, deadline):
+                            "--jobname=equation", "equation.tex"], tmp):
                 return {"ok": False, "reason": "invalid"}
             if not command(["dvisvgm", "--pdf", "--no-fonts", "--bbox=min", "--page=1",
-                            "--output=equation.svg", "equation.pdf"], tmp, deadline):
+                            "--output=equation.svg", "equation.pdf"], tmp):
                 return {"ok": False, "reason": "invalid"}
-        except subprocess.TimeoutExpired:
-            return {"ok": False, "reason": "limit"}
         finally:
             os.environ.clear(); os.environ.update(env_before)
         path = directory / "equation.svg"

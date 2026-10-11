@@ -27,11 +27,10 @@ class Transport(unittest.TestCase):
             self.assertFalse(tex_math.render({"source": source, "display": False})["ok"])
             self.assertNotIn(source, run.call_args.args[0])
             self.assertEqual(json.loads(run.call_args.kwargs["input"])["source"], source)
+            self.assertNotIn("timeout", run.call_args.kwargs)
 
-    def test_timeout_missing_and_bad_output(self):
+    def test_missing_and_bad_output(self):
         with patch.dict(os.environ, {"STRATA_TEX_CONTAINER": "strata-math"}), patch.object(subprocess, "run") as run:
-            run.side_effect = subprocess.TimeoutExpired("docker", 7)
-            self.assertEqual(tex_math.render({"source": "x", "display": False})["reason"], "limit")
             run.side_effect = FileNotFoundError()
             self.assertEqual(tex_math.render({"source": "x", "display": False})["reason"], "unavailable")
             run.side_effect = None

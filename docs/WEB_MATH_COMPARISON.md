@@ -9,7 +9,7 @@ The adapter and dependencies change; chat messages and model requests do not.
 |---|---|---:|---:|
 | `feat/web-math-katex` | Browser HTML + MathML | about 0.56 MB | 345,581 bytes |
 | `feat/web-math-mathjax` | Browser CommonHTML + assistive MathML | about 3.20 MB | 1,138,821 bytes |
-| `feat/web-math-tex` | Isolated XeLaTeX → PDF → filtered SVG image | about 4.37 GB | no vendor assets; SVG responses per equation |
+| `feat/web-math-tex` | Isolated XeLaTeX → PDF → filtered SVG image | about 7.04 GB (current archived runtime) | no vendor assets; SVG responses per equation |
 
 Sizes use decimal units. Browser footprints include all vendored fonts, licenses and provenance, not Strata's
 existing fonts or the small shared scripts. The TeX number is Docker's uncompressed built-image size, not a
@@ -33,6 +33,13 @@ chat source and use the same opt-in setting. Installing a full TeX distribution 
 document compilation or every installed package through this adapter.
 
 ## Measurements
+
+The measurements below describe the original 2026-10-10 implementation. The current
+branch removes the compiler's five-second CPU/wall budget, the host's twelve-second
+transport cutoff, and the TeX adapter's fifteen-second browser cutoff. Browser-only
+adapters retain their conversion deadlines. The recursive macro-loop acceptance
+case is now explicitly skipped; it requires operator cancellation by restarting
+the worker container. Memory, process, filesystem and output limits remain in place.
 
 Measured on 2026-10-10 with Playwright 1.63.0. Browser tests ran on Windows with an Intel i7-8650U, at a
 390 × 844 viewport. The TeX worker ran on `middle-child`, Linux with an Intel i7-2600, limited to one CPU and
@@ -67,13 +74,14 @@ The Linux-local path removes Windows and SSH overhead. Keep those numbers separa
 - External requests are blocked during browser tests. Assets and fonts load from the Strata server.
 - Screenshots were inspected; equation geometry and completed SVG image loading are also asserted.
 - The TeX server passed 37 endpoint, transport, request-origin, authentication and body-handling tests.
-- The isolated compiler rejects file reads and Lua commands, and stops an infinite TeX macro loop at five seconds.
+- The original isolated compiler rejected file reads and Lua commands and stopped an infinite TeX macro loop at five seconds. The current branch has no compilation time budget.
 
 KaTeX and MathJax provide semantic MathML. The TeX image has the source as its accessible description; it does not
 provide equivalent mathematical navigation. The tests inspect markup, not a manual screen-reader session.
 Playwright WebKit is engine coverage, not a physical Safari/iPhone test. Docker Desktop 4.94.0 was installed
 on Windows using its per-user WSL 2 backend; the local Docker Engine 29.8.2 passed hello-world. Native full-TeX
-image build and renderer validation are still pending. The recorded TeX results below use the Windows
+image and renderer now pass the current-main Chromium, Firefox and WebKit refresh in
+`web-math-results/current-main-refresh/`. The original recorded TeX timings use the Windows
 server/client with the Linux container worker, not a native Docker Desktop worker.
 
 The full TeX image uses a pinned Debian base digest, pinned TeX Live distribution package, installed-package lock

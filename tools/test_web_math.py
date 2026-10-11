@@ -39,6 +39,28 @@ def run(browser_name, output):
             assert not page.evaluate("settings.math")
             assert not any("/vendor/" in url for url in requests)
             assert page.request.get(base + "web/vendor/../../server.py").status == 404
+            # The compiler continues after a browser cancellation. The adapter
+            # must keep its promise pending until that RPC finishes, preventing
+            # a new conversion from racing the still-busy server worker.
+            page.evaluate("""async () => {
+              const savedFetch = globalThis.fetch;
+              let finish, settled = false;
+              globalThis.fetch = (_url, options) => new Promise((resolve, reject) => {
+                finish = resolve;
+                options.signal?.addEventListener('abort', () => reject(new Error('aborted')));
+              });
+              const controller = new AbortController();
+              try {
+                const work = StrataMathAdapter.render('x', {display:false, signal:controller.signal});
+                work.then(() => settled = true);
+                controller.abort();
+                await new Promise(resolve => setTimeout(resolve, 30));
+                if (settled) throw Error('cancelled compiler RPC released its queue slot early');
+                finish({ok:true, json:async()=>({ok:true, svg:'<svg/>', width:1, height:1})});
+                const result = await work;
+                if (result.ok) throw Error('cancelled compiler result must not be displayed');
+              } finally { globalThis.fetch = savedFetch; }
+            }""")
             # Parser facts and every possible streamed prefix of representative equations.
             page.evaluate(r"""() => {
               const assert = (x, label) => { if (!x) throw Error(label); };
@@ -88,6 +110,9 @@ def run(browser_name, output):
             # while Unicode coverage can differ between the real TeX and browser engines.
             fixtures = json.loads((ROOT / "serve/fixtures/math.json").read_text())
             for fixture in fixtures:
+                if fixture["name"] == "loop":
+                    report["equations"].append({"name": "loop", "skipped": "TeX compilation has no time limit."})
+                    continue
                 result = page.evaluate("""async f => {
                   const start = performance.now();
                   const result = await StrataMath.result(f.source, f.display);
@@ -121,6 +146,20 @@ def run(browser_name, output):
               // Conversion may ignore AbortSignal (e.g. font loading). The caller
               // must settle at the deadline without starting overlapping work.
               const timeout = AbortSignal.timeout;
+              // Full TeX opts out of the browser deadline as well as the host
+              // compiler deadline. Other adapters retain the default cutoff.
+              globalThis.StrataMathAdapter = {renderTimeoutMs:null, initialize:async()=>{},
+                render:async(_source, {signal})=>{
+                  await new Promise(resolve=>setTimeout(resolve, 50));
+                  assert(!signal.aborted, 'unbounded adapter signal');
+                  return {ok:false, reason:'invalid'};
+                }};
+              AbortSignal.timeout = () => { throw Error('unexpected render deadline'); };
+              StrataMath.reset();
+              try {
+                const unlimited = await StrataMath.result('unlimited', false);
+                assert(unlimited.reason === 'invalid', 'adapter opts out of deadline');
+              } finally { AbortSignal.timeout = timeout; }
               let finish, calls = 0;
               globalThis.StrataMathAdapter = {initialize:async()=>{}, render:()=>{
                 calls++; return new Promise(resolve => finish = resolve);
@@ -152,7 +191,15 @@ def run(browser_name, output):
 
             page.reload()
             page.wait_for_function("settings.math && document.querySelector('[data-math]')")
-            page.wait_for_function("[...document.querySelectorAll('[data-math]')].every(e => e.firstElementChild && !e.dataset.mathError)")
+            try:
+                page.wait_for_function("[...document.querySelectorAll('[data-math]')].every(e => e.firstElementChild && !e.dataset.mathError)")
+            except Exception:
+                if output:
+                    output.mkdir(parents=True, exist_ok=True)
+                    state = page.evaluate("[...document.querySelectorAll('[data-math]')].map(e => ({dataset:{...e.dataset}, html:e.outerHTML}))")
+                    (output / f"{browser_name}-reload-failure.json").write_text(json.dumps(state, indent=2))
+                    page.screenshot(path=str(output / f"{browser_name}-reload-failure.png"))
+                raise
             assert page.evaluate("messages[0].text") == original
             # No late result may replace a newer message, or render after disabling.
             page.evaluate("""async () => {

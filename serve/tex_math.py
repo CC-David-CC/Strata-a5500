@@ -27,15 +27,13 @@ def render(req):
         proc = subprocess.run([os.environ.get("STRATA_TEX_DOCKER", "docker"), "exec", "--interactive", container,
                                "python3", "/opt/strata-math/worker.py"],
                               input=json.dumps({"source": source, "display": display}).encode(),
-                              capture_output=True, timeout=12)
+                              capture_output=True)
         if proc.returncode or len(proc.stdout) > 3 * 1024 * 1024:
             return {"ok": False, "reason": "unavailable"}
         result = json.loads(proc.stdout)
         if not isinstance(result, dict) or not isinstance(result.get("ok"), bool):
             return {"ok": False, "reason": "unavailable"}
         return result
-    except subprocess.TimeoutExpired:
-        return {"ok": False, "reason": "limit"}
     except (OSError, ValueError):
         return {"ok": False, "reason": "unavailable"}
     finally:

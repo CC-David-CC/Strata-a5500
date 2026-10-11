@@ -1,7 +1,7 @@
 # Chat math comparison
 
 This branch supplies TeX Live 2022 with XeLaTeX and dvisvgm. The other comparison branches supply MathJax 4.1.3 and a full TeX Live
-compiler. All start at upstream main `fb58e0dbc8399662c0e47c76578c6e878b14f6cf` and use the same parser,
+compiler. This branch is refreshed to upstream main `61b3fb5dd3f1e8ec09cf7e4e05208bc6d3c46406` and shared core `253ea8cf`. The comparison branches use the same parser,
 settings, cache and acceptance corpus. No GPU engine or chat API changes are needed.
 
 Open Chat's sampling drawer, enable **Render math**, and Apply. This browser remembers the choice. Rendering
@@ -23,6 +23,7 @@ Each branch replaces `serve/web/math-adapter.js`; engine details stay out of the
 
 ```ts
 initialize(): Promise<void>
+renderTimeoutMs?: number | null // default: 15000; null: no conversion deadline
 render(source: string, options: {display: boolean; signal: AbortSignal}): Promise<
   {ok: true; element: HTMLElement} |
   {ok: false; reason: "invalid" | "unsupported" | "unavailable" | "limit"}
@@ -32,8 +33,8 @@ render(source: string, options: {display: boolean; signal: AbortSignal}): Promis
 The adapter returns an unattached element. Shared code clones it into the current equation placeholder; a result
 from an older message paint cannot replace newer content. Rendering is serialized. Up to 256 results are cached
 by exact source and display mode; an equation is limited to 16 KiB of UTF-8. Queued work evicted from the cache
-or invalidated by a settings change is skipped. Initialization is limited to ten seconds. An asynchronous conversion returns source fallback after fifteen
-seconds; if an engine ignores cancellation, subsequent conversions wait for it to finish to avoid overlapping
+or invalidated by a settings change is skipped. Initialization is limited to ten seconds. Browser-engine adapters default to source fallback after fifteen
+seconds; this full-TeX adapter sets `renderTimeoutMs: null` and waits for compilation without a deadline. If an engine ignores cancellation, subsequent conversions wait for it to finish to avoid overlapping
 macro state. Browser timers cannot interrupt synchronous JavaScript; engine macro limits remain necessary. Macro definitions do
 not carry across equations. Complete equations render while the answer streams, without retypesetting unchanged
 source on each token.
@@ -45,7 +46,7 @@ trusted-origin checks and JSON content-type checks apply. Requests are limited t
 The optional worker runs in a read-only container with no network or host mounts, dropped capabilities, a
 512 MiB memory limit, one CPU, 64 processes and a 128 MiB temporary filesystem. XeLaTeX runs with shell escape
 disabled and restricted file reads/writes. Choosing XeTeX avoids a Lua interpreter in generated equations.
-Each compilation and SVG conversion together get five seconds; all temporary files are removed. SVG output is
+Compilation and SVG conversion have no CPU-time or elapsed-time cutoff, including in the host transport and browser adapter. Temporary files are removed when the worker exits. SVG output is
 limited to 2 MiB and filtered to vector geometry and internal references, then displayed as an image.
 The accessible description is the equation source; it lacks the semantic MathML of the browser adapters.
 
@@ -87,7 +88,7 @@ Semantic markup checks are not a manual screen-reader audit.
 
 Run python -m unittest serve.test_tex_math -q for endpoint and transport failure tests. With the worker
 configured, python tools/test_tex_worker.py /path/to/results.json checks real compilation, restricted file
-reads, disabled Lua commands and the timeout. Run browser tests one at a time: the compiler accepts only one
+reads and disabled Lua commands. The unbounded recursive-macro fixture is explicitly skipped: without a time limit it needs operator cancellation by stopping and restarting the worker container. Such a job occupies the compiler until cancelled. Run browser tests one at a time: the compiler accepts only one
 job at a time, and concurrent clients receive a readable source fallback.
 
 See `WEB_MATH_COMPARISON.md` for the measured results and their limits.
