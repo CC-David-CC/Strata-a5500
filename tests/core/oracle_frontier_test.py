@@ -11,8 +11,10 @@ import unittest
 
 
 class FreshFrontierTest(unittest.TestCase):
-    def check_history(self, ids):
+    def check_history(self, ids, capacity=None):
         command = json.loads(os.environ['STRATA_ORACLE_COMMAND'])
+        if capacity is not None:
+            command += ['--max-context', str(capacity)]
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)/'frontier.f32'
             env = os.environ.copy()
@@ -33,6 +35,9 @@ class FreshFrontierTest(unittest.TestCase):
 
     def test_two_token_fresh_forward(self):
         self.check_history([100, 117])
+
+    def test_exact_context_frontier(self):
+        self.check_history([100, 117, 134, 151], capacity=4)
 
 
 if __name__ == '__main__':

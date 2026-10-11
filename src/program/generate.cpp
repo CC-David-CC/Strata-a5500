@@ -2262,8 +2262,11 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "strata generate: --max-context must be below 2^31\n");
         return 2;
     }
+    // The final selected token is not consumed by this CLI. Capacity therefore
+    // covers prompt + max_new - 1 inputs, including a prompt exactly at capacity
+    // when only its next-token logits are requested.
     if (o.max_new <= 0 || o.max_context <= 0 || o.max_new > o.max_context ||
-        o.tokens.size() > (size_t) (o.max_context - o.max_new)) {
+        o.tokens.size() > (size_t) (o.max_context - o.max_new + 1)) {
         std::fprintf(stderr, "strata generate: positive --max-new and --max-context must fit the prompt and generation\n");
         return 2;
     }
@@ -2775,7 +2778,7 @@ int main(int argc, char** argv) {
             return 2;
         }
     }
-    if (o.max_context < (int64_t) o.tokens.size() + o.max_new) {
+    if (o.max_context < (int64_t) o.tokens.size() + o.max_new - 1) {
         std::fprintf(stderr, "strata generate: --max-context %lld cannot hold %zu prompt + %lld new tokens\n",
                      (long long) o.max_context, o.tokens.size(), (long long) o.max_new);
         return 2;
