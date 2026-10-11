@@ -11783,7 +11783,10 @@ int main(int argc, char** argv) {
     // round emits (accepted drafts + 1) tokens.  `commit` keeps the state of the tokens that were emitted.
     const bool ended = o.stop_eos && !produced.empty() &&
                        std::find(o.eos_ids.begin(), o.eos_ids.end(), (int64_t) produced.back()) != o.eos_ids.end();
-    if (spec_pos > 0 && (int64_t) produced.size() < o.max_new && !ended) {
+    // A native pack enters here at its last prompt token, including position 0
+    // for a one-token prompt. Zero is only the unused sentinel for the legacy
+    // per-token path; applying it to native packs silently consumed nothing.
+    if ((native_pack || spec_pos > 0) && (int64_t) produced.size() < o.max_new && !ended) {
         auto read_ids = [](const std::string& path, std::vector<int64_t>& ids) {
             std::ifstream in(path);
             std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
@@ -12260,6 +12263,8 @@ int main(int argc, char** argv) {
             std::printf("%-24s %.3f ms/round drafting (%lld rounds), MTP prompt %.1f ms, %.0f MiB of VRAM\n", "mtp",
                         mtp.ms_draft / (double) mtp.rounds, (long long) mtp.rounds, mtp.ms_prefill,
                         (double) mtp.vram_bytes() / 1048576.0);
+        std::fprintf(stderr, "strata forward: prefill_tokens=%lld verifier_tokens=%llu\n",
+                     (long long)prefill.stats().tokens, (unsigned long long)ver.completed_forward_tokens);
     }
 
     if (dump != nullptr && std::fclose(dump) != 0) {
