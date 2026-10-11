@@ -411,7 +411,14 @@ class ProcessRestart(unittest.TestCase):
                     time.sleep(0.05)
                 yield port
             finally:
-                process.kill()  # exercise recovery and release of the OS ownership lock after an abrupt exit
+                # Keep the abrupt-exit recovery check, but end any telemetry children too: on Windows an
+                # inherited server.log handle otherwise survives the parent and prevents temp-dir cleanup.
+                if os.name == "nt":
+                    subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                   creationflags=subprocess.CREATE_NO_WINDOW)
+                if process.poll() is None:
+                    process.kill()
                 process.wait(timeout=10)
 
     def http(self, port, method, path, body=None):
