@@ -1,5 +1,6 @@
 #pragma once
 #include "strata/core/vmm.hpp"
+#include "strata/core/branch_digest.hpp"
 #include <memory>
 #include <vector>
 
@@ -21,6 +22,7 @@ struct BranchPageCounters {
     uint64_t allocations=0,releases=0,live_bytes=0,cow_pages=0,copied_bytes=0,mappings=0,unmappings=0;
     uint64_t address_reservations=0,address_releases=0;
     uint64_t audit_read_bytes=0; // completed device-to-host audit transfers, separate from COW
+    uint64_t integrity_checked_pages=0, integrity_mismatches=0;
 };
 
 // Derived GPU materialization only: never a replacement for authoritative input
@@ -49,8 +51,13 @@ public:
     static BranchPageCounters counters();
 private:
     bool private_table();
+    bool reserve_verification();
+    bool verify_current();
+    bool verify_snapshot(const BranchPageSnapshot& snapshot);
     std::shared_ptr<BranchPageTable> table_;
     VmmMapping mapping_; // destroyed before table_ releases physical handles
+    VmmMapping verification_; // one borrowed page, reserved before restore/append
+    BranchDigestWorkspace digest_; // private scratch, never part of a snapshot
 };
 
 } // namespace strata::core

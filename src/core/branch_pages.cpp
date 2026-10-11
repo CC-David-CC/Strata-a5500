@@ -10,11 +10,15 @@ namespace {
 struct Counters {
     std::atomic<uint64_t> next_id{1},allocations{0},releases{0},live_bytes{0},cow_pages{0},copied_bytes{0};
     std::atomic<uint64_t> audit_read_bytes{0};
+    std::atomic<uint64_t> integrity_checked_pages{0}, integrity_mismatches{0};
 };
 Counters& counts() { static auto* c=new Counters; return *c; }
 struct PhysicalPage {
     VmmChunk handle=0;
     uint64_t id=0,bytes=0;
+    // Ordered SHA-256 digests of fixed 4096-byte tiles. Empty means private,
+    // writable state that has not yet been published as a numerical image.
+    std::vector<BranchDigest> seal;
     PhysicalPage() {
         handle=vmm_chunk_new();
         if (!handle) throw std::bad_alloc();
@@ -41,7 +45,7 @@ struct BranchPageTable {
 BranchPages::BranchPages() = default;
 BranchPages::~BranchPages() { if (!release()) std::terminate(); }
 bool BranchPages::release() {
-    if (!mapping_.release()) return false;
+    if (!verification_.release() || !mapping_.release()) return false;
     table_.reset();
     return true;
 }
@@ -57,7 +61,7 @@ bool BranchPages::clear() {
 }
 bool BranchPages::reserve(uint64_t bytes) {
     const auto g=vmm_granularity();
-    if (!g || !bytes || bytes>std::numeric_limits<uint64_t>::max()-g+1 || !release()) return false;
+    if (!g || !bytes || bytes>std::numeric_limits<uint64_t>::max()-g+1 || !release() || !reserve_verification()) return false;
     try {
         auto table=std::make_shared<BranchPageTable>();
         table->capacity=((bytes+g-1)/g)*g;
@@ -65,6 +69,10 @@ bool BranchPages::reserve(uint64_t bytes) {
         table_=std::move(table);
         return true;
     } catch (...) { return false; }
+}
+bool BranchPages::reserve_verification() {
+    const auto g=vmm_granularity();
+    return g && digest_.reserve(g) && (verification_.base() || verification_.reserve(g));
 }
 bool BranchPages::private_table() {
     if (!table_) return false;
@@ -92,12 +100,42 @@ bool BranchPages::grow(uint64_t bytes) {
     } catch (...) { return false; }
 }
 BranchPageSnapshot BranchPages::freeze() {
-    if (!table_) return {};
+    if (!table_ || !verify_current()) return {};
+    for (size_t i=0;i<table_->pages.size();++i) {
+        auto& page=table_->pages[i];
+        if (page->seal.empty() && !digest_.digest(data()+i*page->bytes,page->bytes,page->seal)) return {};
+    }
     for (size_t i=0;i<table_->pages.size();++i) if (!mapping_.protect(i,false)) return {};
     return table_;
 }
+bool BranchPages::verify_current() {
+    if (!table_) return false;
+    for (size_t i=0;i<table_->pages.size();++i) {
+        const auto& page=table_->pages[i];
+        if (page->seal.empty()) continue;
+        std::vector<BranchDigest> actual;
+        if (!digest_.digest(data()+i*page->bytes,page->bytes,actual)) return false;
+        ++counts().integrity_checked_pages;
+        if (actual!=page->seal) { ++counts().integrity_mismatches; return false; }
+    }
+    return true;
+}
+bool BranchPages::verify_snapshot(const BranchPageSnapshot& snapshot) {
+    if (!snapshot || !reserve_verification()) return false;
+    for (const auto& page:snapshot->pages) {
+        if (page->seal.empty()) return false;
+        std::vector<BranchDigest> actual;
+        if (!verification_.map(0,page->handle,false)) return false;
+        const bool complete=digest_.digest(verification_.base(),page->bytes,actual);
+        if (!verification_.unmap(0) || !complete) return false;
+        ++counts().integrity_checked_pages;
+        if (actual!=page->seal) { ++counts().integrity_mismatches; return false; }
+    }
+    return true;
+}
 bool BranchPages::restore(const BranchPageSnapshot& snapshot) {
-    if (!snapshot) return false;
+    // Validate the saved allocation before changing any active mappings.
+    if (!verify_snapshot(snapshot)) return false;
     // Keep it alive even when restoring a snapshot of this range itself.
     std::shared_ptr<BranchPageTable> table;
     try { table=std::make_shared<BranchPageTable>(*snapshot); }
@@ -105,7 +143,7 @@ bool BranchPages::restore(const BranchPageSnapshot& snapshot) {
     if (mapping_.capacity()==table->capacity && mapping_.base()) {
         if (!mapping_.clear()) return false;
         table_.reset();
-    } else if (!release() || !mapping_.reserve(table->capacity)) return false;
+    } else if (!mapping_.release() || !mapping_.reserve(table->capacity)) return false;
     table_=std::move(table);
     for (size_t i=0;i<table_->pages.size();++i)
         if (!mapping_.map(i,table_->pages[i]->handle,false)) { release(); return false; }
@@ -115,13 +153,14 @@ bool BranchPages::prepare_write(uint64_t offset,uint64_t bytes) {
     if (!table_) return false;
     const auto g=vmm_granularity();
     const auto extent=table_->pages.size()*g;
-    if (offset>extent || bytes>extent-offset || !private_table()) return false;
+    if (offset>extent || bytes>extent-offset || !verify_current() || !private_table()) return false;
     if (!bytes) return true;
     const auto last=(offset+bytes-1)/g;
     try {
         for (auto i=offset/g;i<=last;++i) {
             if (table_->pages[i].use_count()==1) {
                 if (!mapping_.protect(i,true)) return false;
+                table_->pages[i]->seal.clear();
                 continue;
             }
             auto replacement=std::make_shared<PhysicalPage>();
@@ -166,6 +205,7 @@ BranchPageCounters BranchPages::counters() {
     const auto& c=counts();
     const auto m=vmm_mapping_counters();
     return {c.allocations.load(),c.releases.load(),c.live_bytes.load(),c.cow_pages.load(),c.copied_bytes.load(),
-        m.mappings,m.unmappings,m.reservations,m.address_releases,c.audit_read_bytes.load()};
+        m.mappings,m.unmappings,m.reservations,m.address_releases,c.audit_read_bytes.load(),
+        c.integrity_checked_pages.load(),c.integrity_mismatches.load()};
 }
 } // namespace strata::core

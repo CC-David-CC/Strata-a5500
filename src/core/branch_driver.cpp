@@ -162,6 +162,7 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
             const auto p = BranchPages::counters();
             const auto s = session.counters();
             const auto e = vmm_failure_counters();
+            const auto h = branch_digest_counters();
             std::cout << "{\"status\":\"ok\",\"consumed\":" << session.ids().size()
                       << ",\"forward_tokens\":" << forward.completed_forward_tokens
                       << ",\"windows\":" << forward.windows
@@ -176,6 +177,14 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
                       << ",\"vmm_last_driver_error\":" << e.last_error
                       << ",\"vmm_last_failed_operation\":\"" << e.last_operation << "\""
                       << ",\"audit_read_bytes\":" << p.audit_read_bytes
+                      << ",\"integrity_checked_pages\":" << p.integrity_checked_pages
+                      << ",\"integrity_mismatches\":" << p.integrity_mismatches
+                      << ",\"integrity_device_hashed_bytes\":" << h.device_hashed_bytes
+                      << ",\"integrity_digest_copy_bytes\":" << h.digest_copy_bytes
+                      << ",\"integrity_kernel_calls\":" << h.kernel_calls
+                      << ",\"integrity_workspace_allocations\":" << h.workspace_allocations
+                      << ",\"integrity_workspace_releases\":" << h.workspace_releases
+                      << ",\"integrity_workspace_live_bytes\":" << h.workspace_live_bytes
                       << ",\"binding_copy_bytes\":" << s.binding_copy_bytes
                       << ",\"saved_running_bytes\":" << s.saved_running_bytes
                       << ",\"restored_running_bytes\":" << s.restored_running_bytes
