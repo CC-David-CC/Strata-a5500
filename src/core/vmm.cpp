@@ -5,6 +5,9 @@
 #include <cuda_runtime.h>
 
 #include <mutex>
+#include <atomic>
+#include <exception>
+#include <limits>
 
 namespace strata::core {
 namespace {
@@ -71,6 +74,69 @@ const Api& api() {
 bool vmm_available() { return api().ok; }
 uint64_t vmm_granularity() { return api().ok ? api().gran : 0; }
 
+namespace {
+std::atomic<uint64_t> mapping_events{0}, unmapping_events{0};
+std::atomic<uint64_t> reservation_events{0}, address_release_events{0};
+}
+VmmMappingCounters vmm_mapping_counters() {
+    return {mapping_events.load(),unmapping_events.load(),reservation_events.load(),address_release_events.load()};
+}
+VmmMapping::~VmmMapping() { if (!release()) std::terminate(); }
+bool VmmMapping::reserve(uint64_t bytes) {
+    const auto& a = api();
+    if (!a.ok || !bytes || bytes>std::numeric_limits<uint64_t>::max()-a.gran+1 || !release()) return false;
+    const auto n = (bytes+a.gran-1)/a.gran;
+    std::vector<VmmChunk> handles;
+    try { handles.resize(n,0); } catch (...) { return false; }
+    CUdeviceptr p = 0;
+    if (a.reserve(&p,n*a.gran,0,0,0)!=CUDA_SUCCESS) return false;
+    ++reservation_events;
+    handles_.swap(handles);
+    base_ = p;
+    return true;
+}
+bool VmmMapping::map(int64_t index, VmmChunk handle, bool writable) {
+    if (!base_ || index<0 || (size_t)index>=handles_.size() || handles_[index] || !handle) return false;
+    const auto& a = api();
+    if (a.map(base_+index*a.gran,a.gran,0,handle,0)!=CUDA_SUCCESS) return false;
+    handles_[index]=handle;
+    ++mapping_events;
+    if (protect(index,writable)) return true;
+    if (!unmap(index)) std::terminate(); // never let a failed borrow release a still-mapped handle
+    return false;
+}
+bool VmmMapping::protect(int64_t index, bool writable) {
+    if (index<0 || (size_t)index>=handles_.size() || !handles_[index]) return false;
+    const auto& a = api();
+    CUmemAccessDesc access{};
+    access.location.type=CU_MEM_LOCATION_TYPE_DEVICE;
+    access.location.id=a.dev;
+    access.flags=writable?CU_MEM_ACCESS_FLAGS_PROT_READWRITE:CU_MEM_ACCESS_FLAGS_PROT_READ;
+    return a.access(base_+index*a.gran,a.gran,&access,1)==CUDA_SUCCESS;
+}
+bool VmmMapping::unmap(int64_t index) {
+    if (index<0 || (size_t)index>=handles_.size()) return false;
+    if (!handles_[index]) return true;
+    const auto& a=api();
+    if (a.unmap(base_+index*a.gran,a.gran)!=CUDA_SUCCESS) return false;
+    handles_[index]=0;
+    ++unmapping_events;
+    return true;
+}
+bool VmmMapping::release() {
+    if (!base_) return true;
+    if (!clear()) return false;
+    if (api().free_va(base_,handles_.size()*api().gran)!=CUDA_SUCCESS) return false;
+    ++address_release_events;
+    base_=0;
+    handles_.clear();
+    return true;
+}
+bool VmmMapping::clear() {
+    for (size_t i=0;i<handles_.size();++i) if (!unmap(i)) return false;
+    return true;
+}
+
 VmmChunk vmm_chunk_new() {
     const Api& a = api();
     if (!a.ok) return 0;
@@ -84,7 +150,10 @@ VmmChunk vmm_chunk_new() {
 }
 
 void vmm_chunk_free(VmmChunk h) {
-    if (h != 0 && api().ok) api().release((CUmemGenericAllocationHandle) h);
+    (void)vmm_chunk_release(h);
+}
+bool vmm_chunk_release(VmmChunk h) {
+    return h==0 || (api().ok && api().release((CUmemGenericAllocationHandle)h)==CUDA_SUCCESS);
 }
 
 bool VmmRange::reserve(uint64_t bytes) {
@@ -155,9 +224,18 @@ VmmChunk VmmRange::unmap(int64_t i) {
 
 namespace strata::core {
 bool vmm_available() { return false; }
+VmmMappingCounters vmm_mapping_counters() { return {}; }
+VmmMapping::~VmmMapping() = default;
+bool VmmMapping::reserve(uint64_t) { return false; }
+bool VmmMapping::release() { return true; }
+bool VmmMapping::clear() { return true; }
+bool VmmMapping::map(int64_t,VmmChunk,bool) { return false; }
+bool VmmMapping::unmap(int64_t) { return false; }
+bool VmmMapping::protect(int64_t,bool) { return false; }
 uint64_t vmm_granularity() { return 0; }
 VmmChunk vmm_chunk_new() { return 0; }
 void vmm_chunk_free(VmmChunk) {}
+bool vmm_chunk_release(VmmChunk h) { return h==0; }
 bool VmmRange::reserve(uint64_t) { return false; }
 void VmmRange::release() {}
 int64_t VmmRange::mapped_count() const { return 0; }
