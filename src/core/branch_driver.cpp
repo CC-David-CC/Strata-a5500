@@ -42,7 +42,10 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
             std::cout << "{\"status\":\"closed\"}" << std::endl;
             return 0;
         }
-        if (command == "feed") {
+        if (command == "reset") {
+            if (!session.reset(error)) { error_reply(error); continue; }
+            std::cout << "{\"status\":\"ok\",\"consumed\":0}" << std::endl;
+        } else if (command == "feed") {
             std::vector<int32_t> tokens;
             int64_t token;
             bool valid = true;

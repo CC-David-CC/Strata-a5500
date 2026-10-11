@@ -31,6 +31,7 @@ public:
     BranchPages& operator=(const BranchPages&) = delete;
     bool reserve(uint64_t capacity_bytes);
     bool grow(uint64_t mapped_bytes);
+    bool clear(); // remove this lease's pages, preserving its virtual address
     BranchPageSnapshot freeze();
     bool restore(const BranchPageSnapshot& snapshot);
     bool prepare_write(uint64_t offset,uint64_t bytes);

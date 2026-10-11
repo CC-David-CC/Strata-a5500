@@ -30,6 +30,7 @@ public:
     BranchSession(const BranchSession&) = delete;
     BranchSession& operator=(const BranchSession&) = delete;
     bool bind(std::string& error);
+    bool reset(std::string& error);
     bool begin(int64_t position, int64_t count, std::string& error);
     // Call only after the real forward AND recurrent commit have succeeded.
     bool finish(const std::vector<int32_t>& tokens, const std::vector<float>& logits, std::string& error);

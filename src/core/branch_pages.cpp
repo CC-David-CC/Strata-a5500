@@ -44,6 +44,16 @@ bool BranchPages::release() {
     table_.reset();
     return true;
 }
+bool BranchPages::clear() {
+    if (!table_) return false;
+    try {
+        auto empty = std::make_shared<BranchPageTable>();
+        empty->capacity = table_->capacity;
+        if (!mapping_.clear()) return false;
+        table_ = std::move(empty);
+        return true;
+    } catch (...) { return false; }
+}
 bool BranchPages::reserve(uint64_t bytes) {
     const auto g=vmm_granularity();
     if (!g || !bytes || bytes>std::numeric_limits<uint64_t>::max()-g+1 || !release()) return false;

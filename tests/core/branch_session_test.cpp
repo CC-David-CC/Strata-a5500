@@ -102,6 +102,21 @@ static void exercise(int format) {
         check(session.ids().back() == 43 && session.ids().size() == 4098, "A consumed frontier isolated");
         check(read(ss.gdn_state, sizes.gdn) == std::vector<unsigned char>(sizes.gdn, 91), "A recurrence isolated");
         check(!session.begin(ss.max_cells, 1, error), "capacity overflow refused");
+        const auto reset_before = BranchPages::counters();
+        check(session.reset(error), "reset private lease without discarding snapshots");
+        check(session.ids().empty() && session.logits().empty(), "reset has no consumed frontier");
+        check(!session.freeze(error), "empty reset cannot publish logits");
+        check(session.pools().front().address == address, "reset keeps captured kernel addresses");
+        check(read(address, root_bytes.size()) == std::vector<unsigned char>(root_bytes.size(), 0), "fresh KV is zero");
+        check(read(ss.gdn_state, sizes.gdn) == std::vector<unsigned char>(sizes.gdn, 0), "fresh recurrence is zero");
+        check(ss.ple_prev[0] == -1 && ss.ple_prev[1] == -1, "reset clears PLE token window");
+        check(BranchPages::counters().copied_bytes == reset_before.copied_bytes, "reset does not copy a discarded prefix");
+        check(session.begin(0, 1, error), "new independent history after reset");
+        check(session.finish({99}, {5.0f, 6.0f}, error), "consume new history");
+        check(session.restore(root, error), "restore retained root after reset");
+        check(read(address, root_bytes.size()) == root_bytes, "reset did not mutate retained root pages");
+        check(session.restore(a, error), "restore retained A after reset");
+        check(read(ss.gdn_state, sizes.gdn) == std::vector<unsigned char>(sizes.gdn, 91), "reset did not mutate retained recurrence");
     }
     check((q.k_pool ? (void*) q.k_pool : q.k_q ? (void*) q.k_q : (void*) q.k_q4) == original,
           "release restores borrowed session pointers");

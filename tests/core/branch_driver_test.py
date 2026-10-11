@@ -39,6 +39,12 @@ class BranchDriverTest(unittest.TestCase):
                 self.assertEqual(request('stats')['forward_tokens'], 5)
                 self.assertEqual(request('restore 999999')['status'], 'error')
                 self.assertEqual(request('stats')['consumed'], 4)
+                before_reset = request('stats')['forward_tokens']
+                self.assertEqual(request('reset')['consumed'], 0)
+                self.assertEqual(request('capture')['status'], 'error')
+                self.assertEqual(request('feed 8 9')['consumed'], 2)
+                self.assertEqual(request('restore ' + str(a))['consumed'], 4)
+                self.assertEqual(request('stats')['forward_tokens'], before_reset + 2)
                 self.assertEqual(request('quit')['status'], 'closed')
                 self.assertEqual(p.wait(timeout=30), 0)
             finally:

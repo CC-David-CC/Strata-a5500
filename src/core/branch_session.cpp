@@ -130,6 +130,30 @@ bool BranchSession::begin(int64_t position, int64_t count, std::string& error) {
     state_ = State::writing;
     return true;
 }
+bool BranchSession::reset(std::string& error) {
+    if (state_ == State::unbound) return fail(error, "cannot reset an unbound session");
+    if (!sync(error)) { state_ = State::failed; return false; }
+    state_ = State::failed;
+    for (const auto& b : bindings_)
+        if (!b->memory.clear() || !b->memory.grow(b->bytes))
+            return fail(error, "cannot allocate fresh private pages");
+    ConversationStateSizes sizes;
+    if (!conversation_session_sizes(geometry_, session_, sizes, error)) return false;
+    auto zero = [&](void* p, size_t bytes) {
+        return !bytes || (p && cudaMemset(p, 0, bytes) == cudaSuccess);
+    };
+    if (!zero(session_.gdn_state, sizes.gdn) || !zero(session_.ple_hist, session_.ple_hist ? sizes.ple : 0))
+        return fail(error, "cannot clear recurrent state");
+    for (int64_t i = 0; i < session_.qsa_alloc; ++i) {
+        const auto& q = session_.qsa_states[session_.qsa_ord0 + i];
+        if (!zero(q.idx_tail, sizes.tail) || !zero(q.idx_dead, sizes.dead) || !zero(q.idx_block_pos, sizes.block_pos))
+            return fail(error, "cannot clear indexer state");
+    }
+    if (!sync(error)) return false;
+    session_.ple_prev[0] = session_.ple_prev[1] = session_.ple_token = -1;
+    ids_.clear(); logits_.clear(); pending_ = 0; state_ = State::ready;
+    return true;
+}
 bool BranchSession::finish(const std::vector<int32_t>& tokens, const std::vector<float>& logits, std::string& error) {
     if (state_ != State::writing || (int64_t)tokens.size() != pending_ || logits.empty() ||
         std::any_of(tokens.begin(), tokens.end(), [](int32_t t) { return t < 0; }) ||
