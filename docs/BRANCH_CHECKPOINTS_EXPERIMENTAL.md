@@ -155,3 +155,12 @@ raw responses and a chart. Hardware calibration of a real RAID tier and repeated
 latency distributions remain separate validation work. Do not infer p95/p99 or a
 universal speedup from these samples. Keep this experimental until larger workloads
 and broader storage-pressure traces have been measured.
+
+## Current-main integration refresh
+
+The [2026-10-11 report](../bench/results/2026-10-11-cache-refresh/README.md)
+records the combined #1667/#1810 validation: six exact native cache comparisons,
+33 Responses lifecycle checks, and the corrected 32K checkpoint benchmark.
+This branch preserves #1446 Responses groundwork and #1489 probe/evidence;
+#1810 retains the native disk/snapshot implementation. Earlier results above
+retain their original source and date.
