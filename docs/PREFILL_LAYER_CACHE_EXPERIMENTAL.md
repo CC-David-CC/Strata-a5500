@@ -83,4 +83,4 @@ for repeated measurements, per-run data, backend build details and limitations.
 The [2026-10-11 follow-up](measurements/p4-layer-cache/current-main-20k/README.md)
 records three-repeat 20K main/enabled and candidate off/on comparisons, full
 64-token parity, matched staging/CPU-share settings and STOP recovery. The
-measured prefill-time reductions were 8.695% and 9.168% on this one workload.
+measured prefill-time reductions were 8.695% and 9.170% on this one workload.

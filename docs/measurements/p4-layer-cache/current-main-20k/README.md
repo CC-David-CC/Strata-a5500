@@ -18,7 +18,7 @@ CPU sharing enabled.
 | Comparison | Off/main median prefill | Enabled median prefill | Time reduction |
 |---|---:|---:|---:|
 | Current main / candidate enabled | 199.9948s | 182.6055s | 8.695% |
-| Candidate off / candidate enabled | 201.2198s | 182.7688s | 9.168% |
+| Candidate off / candidate enabled | 201.2198s | 182.7688s | 9.170% |
 
 All twelve measured requests returned identical complete 64-token output
 streams, with zero reused prompt tokens. Candidate-off also matches current
