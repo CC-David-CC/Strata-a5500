@@ -53,3 +53,29 @@ suite 253.783s, six token-parity configurations 172.195s, Responses live probe
 82.247s. The corrected checkpoint/HTTP plus 32K campaign took 189.478s.
 Engineering/setup time was not instrumented and is excluded. These sequential
 operation durations must not be treated as hands-on work time.
+
+## Strengthened reproducible policy follow-up (2026-10-11)
+
+`--reproducible` now also forces `STRATA_ROUTE_TAIL_SKIP=0`. The ordinary eligible
+CUDA default rank 7 is approximate and uses expert ranks across the token window;
+changing draft rows can change a target row's missed-expert contribution. This
+follow-up controls that source of variation without changing ordinary defaults.
+
+Reproducible saved-state configuration fingerprints now include policy version
+2. Older unversioned reproducible files are refused as an invalid configuration;
+non-reproducible fingerprints remain unchanged. Real native SAVE/RESTORE tests
+verified an ordinary old snapshot restores, an unversioned reproducible snapshot
+is refused with the process still alive and able to generate again, and a new
+versioned snapshot saves/restores successfully. The pre-version binary already
+contains tail-skip disabling, isolating the fingerprint-version change.
+
+The final combined native binary (source `c2ee849433c65524597ec2ad67ec91f20c4b5c0c`)
+has SHA-256 `cd0efebf01f5a8058ece0e596f634f8cf8b701d27949cb4cd67008d5b5a33835`.
+Snapshot records and both binary hashes are in `session-policy/`.
+Seeded disk-only and RAM-to-disk fallback checks passed again after versioning
+(temperature 0.7, seed 12345, MTP width 2); full IDs and restored-prefix counts
+are retained. Before versioning, the same strengthened routing policy also
+passed RAM, disk and fallback checks, plus a six-request mixed-placement floor
+comparison with an explicit rank-7 environment override. HIP gfx1012 native
+cache tests and SYCL build/host cache tests passed after the fingerprint change.
+These checks do not establish model execution on HIP or SYCL.

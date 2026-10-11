@@ -112,7 +112,7 @@ three switches 1 answer of 4, without `--pcie-frac 0` 2 of 4 (the first one diff
 `--pcie-frac 0` costs decode speed (the missed experts all run on the CPU), so keep it for A/B runs.
 
 **Reproducible token comparisons with caching kept on (0.1.41, opt-in, `--reproducible`):** this flag bundles
-`STRATA_IQ_MT_MIN=1`, disables adaptive expert swaps, and sets `--pcie-frac 0`. It leaves the prompt and conversation
+`STRATA_IQ_MT_MIN=1` and `STRATA_ROUTE_TAIL_SKIP=0`, disables adaptive expert swaps, and sets `--pcie-frac 0`. It leaves the prompt and conversation
 caches enabled, so it can compare fresh reads with RAM parking, disk-only restore, and disk fallback. Use it for
 exact-token evaluations; it can reduce throughput when requests need experts outside VRAM, and it is not a promise
 that outputs match across different hardware, drivers, or builds. The probe `tools/conversation_token_parity.py`
@@ -124,6 +124,15 @@ temperature 0.7 / top-k 20 / top-p 0.95 / seed 12345. A separate baseline/candid
 fallback run diverged at token 12 on one prompt; the opt-in disk verifier found every main and draft K/V layer and
 the recurrent running state byte-identical after restore, pointing to execution-path arithmetic rather than a
 corrupt snapshot. These are single-machine measurements, not a cross-platform determinism claim.
+
+**Strengthened policy (2026-10-11):** exact comparison also disables approximate expert tail skipping.
+The eligible CUDA rank-7 default can change target contributions when draft rows change the window's minimum
+expert ranks. `--reproducible` overrides an explicit tail-skip environment value; ordinary execution keeps its
+existing default. Saved reproducible sessions include policy version 2 in their configuration fingerprint.
+Unversioned reproducible sessions are refused rather than importing state computed under the older policy;
+ordinary non-reproducible fingerprints remain unchanged. Fresh native tests verified ordinary old-file restore,
+refusal without killing the engine, and versioned save/restore. The new policy passed seeded disk/fallback token
+checks; see [current validation](../bench/results/2026-10-11-cache-refresh/README.md).
 
 **Two-quant retest (2026-10-10):** the same probe passed all 12 combinations on llm-60 for ISTA IQ3_XXS and
 Unsloth Q8_0: greedy and fixed-seed sampling (temperature 0.7, top-k 20, top-p 0.95, seed 12345), each against
