@@ -89,3 +89,37 @@ establish that tail skipping caused the remaining 128K difference. The original
 rank-7 results and same-arm repeats remain above, with their original settings.
 Async placement/admission and CPU/GPU execution remain separate factors. No
 unconditional token parity, timing gain or answer-quality equivalence is claimed.
+
+## Async admission diagnostic follow-up
+
+The reproduction harness runs a 128-token function check before the long
+benchmark, with adaptive placement active during that first request. A sparse
+analysis-only CUDA build buffered eviction/admission event windows and selected-
+swap hashes, emitting them after requests. It reproduced the 128K off/on output
+difference at token 7 while exposing different history before the benchmark:
+round 10 admitted the same 79-expert plan at window 43 in the off arm versus
+42 in the enabled arm. At window 49, round 12 selected 10 versus 11 swaps with
+different plan hashes. Both initial function outputs were identical (128 tokens)
+and passed the arithmetic check. Placement history was therefore not held fixed
+by this throughput comparison; the difference cannot be interpreted as a
+same-placement numerical comparison.
+
+A heavier diagnostic that printed full residency hashes every window made the
+two 1024-token outputs and 1152 logged residency rows match; both matched the
+original enabled arm. With logging disabled on that exact same diagnostic
+binary, token-7 divergence returned. The observer changes timing. This control
+supports timing sensitivity but does not prove that admission differences are
+the sole cause, or rule out every possible engine-state defect.
+
+All six diagnostic requests completed and passed their function checks. Full
+plans, outputs, events, executable hashes, status records and the two minimal
+analysis-only source patches are under `async-admission-diagnostics/`. They are
+CUDA diagnostic builds, separate from the production PR source. The sparse
+patch removes per-window I/O; it still adds instrumentation and does not prove
+unobserved execution follows an identical schedule. The existing byte-copy
+lifetime fixture and sanitizer results remain separate memory/fence evidence.
+
+The opt-in async feature is retained as experimental. Exact output or quality
+equivalence and a general speedup remain unestablished; disabling adaptation to
+obtain equality would also remove the feature being measured and is not used
+as its correctness certification.
