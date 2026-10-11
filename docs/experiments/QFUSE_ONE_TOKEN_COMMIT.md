@@ -1,6 +1,18 @@
 # Supporting evidence for PR #1209: QFUSE one-token state commit
 
-Independent regression evidence supporting the one-token commit eligibility guard in [PR #1209](https://github.com/Niko1221/Strata/pull/1209). The seven recorded cases used current upstream `82f46a8c8f475f001ad76d92f58f4a4f8ffb0253` and an isolated equivalent guard correction, `e8b3c453e6685a7f1779177ee73f8b26c27201e0`. The reproduction patch has four added and two removed lines. This documentation branch changes no engine code. The full #1209 branch, its quantizer changes and concurrent-generation features were not tested by this evidence package.
+Independent regression evidence supporting the one-token commit eligibility guard in [PR #1209](https://github.com/Niko1221/Strata/pull/1209). The seven recorded cases used upstream at the time, `82f46a8c8f475f001ad76d92f58f4a4f8ffb0253`, and an isolated equivalent guard correction, `e8b3c453e6685a7f1779177ee73f8b26c27201e0`. The reproduction patch has four added and two removed lines. This documentation branch changes no engine code. The full #1209 branch, its quantizer changes and concurrent-generation features were not tested by this evidence package.
+
+## Current upstream assessment
+
+Source inspection on 2026-10-11 at upstream `61b3fb5d` still finds different
+eligibility rules: `record_window` excludes QFUSE from one-token self-commit,
+while the one-token shortcut in `commit` does not exclude it, and the shared
+`one_token_self_commit()` predicate does not check QFUSE. The newer
+`!always_publish_` pipeline guard addresses a different condition.
+
+This is a source-level assessment, not a fresh GPU reproduction on 0.1.42. The
+historical measurements below remain pinned to their original binaries. The
+report update adds no runtime patch or new speed/quality claim.
 
 ## What went wrong
 
