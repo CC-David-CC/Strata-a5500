@@ -23,6 +23,15 @@ Warm-ups and requests used to switch conversations are kept in the raw logs
 but excluded from the measured population. Build/mode order reverses on alternate
 blocks; prefix-length order is deterministically shuffled within each block.
 
+## Baseline date
+
+This branch now includes upstream `61b3fb5d`, but the attached timing data remain
+from the two commits listed below. The old native non-MTP SAVE error is an
+observation of `d5ea713`, not a fresh regression test of current main. Preserve
+the old data when reproducing with a newer engine and report the new source,
+binary, model and routing settings separately. #1810 maintains the native disk
+work and #1667 maintains the API/history integration formerly combined in #1489.
+
 ## Fixed comparison
 
 | Item | Setting |

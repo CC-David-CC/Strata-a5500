@@ -1,5 +1,27 @@
 # Completed 1K–8K prefix-reuse campaign: 6,400 requests
 
+## Historical baseline and current branch (2026-10-11)
+
+This report branch is refreshed onto upstream `61b3fb5d`. The measurements and
+charts remain from main `d5ea713` versus integration `b299af0` on 2026-10-08.
+They are not timings of the merged branch. In particular, the recorded non-MTP
+SAVE failures must not be described as newly measured failures of current main.
+The native work is now maintained in #1810 and the API/history work in #1667;
+#1489 is the historical integrated source for these observations.
+
+The short live-reuse campaign completed 6,400 requests; the separate disk study
+still has three short observations and one example per long size. Its smaller
+population does not inherit the percentile campaign's sample count. The raw
+completed-job manifest independently reproduces all 32 short-campaign summary
+cells, with zero request errors; the 128K disk ratio recomputes to 11.6x.
+See [the numeric audit](../2026-10-11-numeric-audit.json).
+
+Fresh #1810/#1667 correctness and lifecycle checks are separately reported in
+those PRs. Their different model/configuration and shorter saved-prefix probes
+are not a replacement current-main 128K timing baseline. These historical data
+support the measured workload, not current universal speedups or quality claims.
+
+
 At 8K, pinned live reuse reduced median time to first token from **1.574 s to
 0.219 s (7.2x)**. Main and integration #1489 were effectively equal. This is
 the benefit of existing prefix reuse, not an additional speedup from #1489.

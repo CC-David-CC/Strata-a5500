@@ -1,5 +1,27 @@
 # Disk restore: 11.6x faster first token in the 128K example
 
+## Historical baseline and current branch (2026-10-11)
+
+This report branch is refreshed onto upstream `61b3fb5d`. The measurements and
+charts remain from main `d5ea713` versus integration `b299af0` on 2026-10-08.
+They are not timings of the merged branch. In particular, the recorded non-MTP
+SAVE failures must not be described as newly measured failures of current main.
+The native work is now maintained in #1810 and the API/history work in #1667;
+#1489 is the historical integrated source for these observations.
+
+The short live-reuse campaign completed 6,400 requests; the separate disk study
+still has three short observations and one example per long size. Its smaller
+population does not inherit the percentile campaign's sample count. The raw
+completed-job manifest independently reproduces all 32 short-campaign summary
+cells, with zero request errors; the 128K disk ratio recomputes to 11.6x.
+See [the numeric audit](../2026-10-11-numeric-audit.json).
+
+Fresh #1810/#1667 correctness and lifecycle checks are separately reported in
+those PRs. Their different model/configuration and shorter saved-prefix probes
+are not a replacement current-main 128K timing baseline. These historical data
+support the measured workload, not current universal speedups or quality claims.
+
+
 With #1489, restoring a saved 128K prefix and generating the first text token took
 **1.956 seconds**, versus **22.611 seconds** for full prefill: **11.6x faster**.
 This is one measured example with warm OS page cache; it includes restore time
