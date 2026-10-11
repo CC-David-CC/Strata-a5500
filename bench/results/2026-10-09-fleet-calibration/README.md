@@ -4,6 +4,33 @@ Measured 2026-10-09 on six Linux hosts. This is a results-only report of `tools/
 
 The tuner found faster individual stages on the P4s, RTX 3070, RX 5500 XT and RX 7900 XTX. A separate full-configuration check rejected the RTX 4090 candidate despite its apparent calibration wins. Treat the other selections as workload-specific candidates, not fleet-wide defaults. The original launch configurations were preserved.
 
+## Current-main qualification (2026-10-11)
+
+This branch is refreshed onto upstream `61b3fb5d`; all numbers below remain the
+2026-10-09 measurements from their recorded binaries. They are not fresh timing
+comparisons against the merged branch. The numerical audit recomputed all seven
+confirmation medians and percentage gains from the attached arrays; see
+[the audit](2026-10-11-numeric-audit.json).
+
+Since these runs, CUDA commit `aa7b0cb1` changed the unspecified single-GPU PCIe
+share: eligible native serve configurations refine it in the first decode
+windows using measured CPU-pool speed. Thus an old candidate's improvement over
+its old startup default is not evidence of the same gain over current main.
+Explicit `--pcie-frac` comparisons, HIP and layer splits have distinct policies;
+this does not retroactively change their recorded results. Recalibrate on the
+actual current build before selecting a production candidate.
+
+`STRATA_PCIE_FRAC_DEFAULT=old` preserves the earlier startup rule for a diagnostic
+comparison, but is not a recommendation to replace current defaults. Approximate
+expert tail skipping and adaptive placement also mean this throughput tuner does
+not establish output identity or quality. Use explicit exact-routing and matched-
+placement controls for a separate correctness study; no such gate is inferred
+from faster stage timings here.
+
+The full RTX 4090 configuration was rejected, and stage improvements on the
+other hosts remain candidates rather than additive, verified deployment gains.
+This PR changes only report material relative to current main.
+
 ## PCIe share and draft confidence
 
 Three interleaved confirmation rounds, median decode tok/s across three prompts per round, answers capped at 128 generated tokens. These comparisons start from product defaults. In particular, the earlier manually tuned three-P4 setup already used PCIe share zero, so its percentage below is not an additional gain over that earlier report.
