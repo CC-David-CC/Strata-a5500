@@ -1,5 +1,11 @@
 # Experimental branch history and execution checkpoints
 
+PR #1667 is the consolidated Responses implementation: it retains the replay,
+persistence and independently controlled summary generation from #1446 and adds
+branch history and bookmark/checkpoint retention. Native automatic disk spill is
+separate in #1810. The preserved #1489 integration record and probe are described
+in [RESPONSES_DISK_INTEGRATION.md](RESPONSES_DISK_INTEGRATION.md).
+
 History determines what can be continued. Checkpoints determine how quickly.
 Enable this explicitly with `--experimental-branch-checkpoints` and
 `--responses-store-path DIR`. It implies Responses persistence and requires a
