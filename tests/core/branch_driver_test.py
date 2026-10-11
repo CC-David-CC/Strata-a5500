@@ -1,0 +1,54 @@
+"""Real model protocol test. Requires an actual built Strata executable and model."""
+import json
+import os
+from pathlib import Path
+import subprocess
+import unittest
+
+
+class BranchDriverTest(unittest.TestCase):
+    def test_consumed_frontier_and_direct_work(self):
+        command = json.loads(os.environ['STRATA_BRANCH_COMMAND'])
+        with open(os.environ['STRATA_BRANCH_STDERR'], 'w') as log:
+            transcript = []
+            p = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                 stderr=log, text=True, bufsize=1)
+            def request(line):
+                p.stdin.write(line + '\n')
+                p.stdin.flush()
+                result = p.stdout.readline()
+                transcript.append(dict(command=line, response=result))
+                self.assertTrue(result, 'native process ended; inspect stderr')
+                return json.loads(result)
+            try:
+                ready = json.loads(p.stdout.readline())
+                transcript.append(dict(command='startup', response=ready))
+                self.assertEqual(ready['status'], 'ready')
+                self.assertEqual(request('capture')['status'], 'error')
+                self.assertEqual(request('feed 1 2 3')['consumed'], 3)
+                root = request('capture')['handle']
+                work = request('stats')
+                self.assertEqual(work['forward_tokens'], 3)
+                self.assertEqual(request('feed 4')['consumed'], 4)
+                a = request('capture')['handle']
+                self.assertEqual(request('restore ' + str(root))['consumed'], 3)
+                restored = request('stats')
+                self.assertEqual(restored['forward_tokens'], 4, 'restore recomputed a prefix')
+                self.assertEqual(request('feed 5')['consumed'], 4)
+                self.assertEqual(request('restore ' + str(a))['consumed'], 4)
+                self.assertEqual(request('stats')['forward_tokens'], 5)
+                self.assertEqual(request('restore 999999')['status'], 'error')
+                self.assertEqual(request('stats')['consumed'], 4)
+                self.assertEqual(request('quit')['status'], 'closed')
+                self.assertEqual(p.wait(timeout=30), 0)
+            finally:
+                if p.poll() is None:
+                    p.kill()
+                    p.wait()
+                p.stdin.close()
+                p.stdout.close()
+                Path(os.environ['STRATA_BRANCH_STDERR'] + '.transcript.json').write_text(json.dumps(transcript, indent=2))
+
+
+if __name__ == '__main__':
+    unittest.main()

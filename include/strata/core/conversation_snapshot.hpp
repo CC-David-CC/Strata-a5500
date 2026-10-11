@@ -86,6 +86,10 @@ bool conversation_checkpoint_save(ConversationCheckpoint& checkpoint, const Sess
                                   const ModelGeometry& g, std::string& error);
 bool conversation_checkpoint_restore(const ConversationCheckpoint& checkpoint, SessionState& session,
                                      const ModelGeometry& g, std::string& error);
+// Restore GDN, PLE, indexer tail/dead/cursor and the PLE token window. Does not
+// rewrite the pooled spare row: a full immutable page image already contains it.
+bool conversation_checkpoint_restore_running(const ConversationCheckpoint& checkpoint, SessionState& session,
+                                              const ModelGeometry& g, std::string& error);
 
 struct ConversationView {
     const std::vector<int32_t>& ids;

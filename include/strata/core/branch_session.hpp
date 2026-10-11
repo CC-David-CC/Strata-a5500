@@ -1,0 +1,57 @@
+#pragma once
+#include "strata/core/branch_pages.hpp"
+#include "strata/core/session.hpp"
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace strata::core {
+struct BranchSessionSnapshot;
+using BranchSessionImage = std::shared_ptr<const BranchSessionSnapshot>;
+struct BranchSessionPool {
+    void* address = nullptr;
+    uint64_t bytes = 0, bytes_per_cell = 0;
+    bool pooled = false;
+};
+struct BranchSessionCounters {
+    uint64_t binding_copy_bytes = 0, saved_running_bytes = 0, restored_running_bytes = 0;
+    uint64_t captures = 0, restores = 0;
+};
+
+// One synchronized, private inference lease. Bind once to an empty, initialized
+// session BEFORE any graph capture. The original arena remains allocated and is
+// reported as binding_copy_bytes, not hidden from resource accounting. A logical
+// fork is a copy of BranchSessionImage; it does not call restore or copy pages.
+// This is an optional derived checkpoint, never the authoritative history store.
+class BranchSession {
+public:
+    BranchSession(SessionState& session, const ModelGeometry& geometry, std::string contract);
+    ~BranchSession();
+    BranchSession(const BranchSession&) = delete;
+    BranchSession& operator=(const BranchSession&) = delete;
+    bool bind(std::string& error);
+    bool begin(int64_t position, int64_t count, std::string& error);
+    // Call only after the real forward AND recurrent commit have succeeded.
+    bool finish(const std::vector<int32_t>& tokens, const std::vector<float>& logits, std::string& error);
+    BranchSessionImage freeze(std::string& error);
+    bool restore(const BranchSessionImage& image, std::string& error);
+    const std::vector<int32_t>& ids() const { return ids_; }
+    const std::vector<float>& logits() const { return logits_; }
+    std::vector<BranchSessionPool> pools() const;
+    std::vector<BranchPageInfo> ownership() const;
+    const BranchSessionCounters& counters() const { return counters_; }
+private:
+    struct Binding;
+    enum class State { unbound, ready, writing, failed };
+    SessionState& session_;
+    ModelGeometry geometry_;
+    std::string contract_;
+    std::vector<int64_t> layout_;
+    std::vector<std::unique_ptr<Binding>> bindings_;
+    std::vector<int32_t> ids_;
+    std::vector<float> logits_;
+    BranchSessionCounters counters_;
+    State state_ = State::unbound;
+    int64_t pending_ = 0;
+};
+} // namespace strata::core
