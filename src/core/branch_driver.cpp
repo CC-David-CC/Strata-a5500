@@ -1,6 +1,7 @@
 #include "strata/core/branch_driver.hpp"
 #include "strata/core/branch_session.hpp"
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -91,6 +92,38 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
             out.close();
             if (!out) { error_reply("frontier write failed"); continue; }
             std::cout << "{\"status\":\"ok\",\"bytes\":" << session.logits().size()*sizeof(float) << "}" << std::endl;
+        } else if (command == "write") {
+            std::string path, extra;
+            if (!(in >> std::quoted(path)) || (in >> extra)) { error_reply("missing checkpoint path"); continue; }
+            size_t bytes = 0;
+            if (!session.write(path, bytes, error)) { error_reply(error); continue; }
+            std::cout << "{\"status\":\"ok\",\"bytes\":" << bytes << "}" << std::endl;
+        } else if (command == "load") {
+            std::string path, ids_path, logits_path, extra;
+            if (!(in >> std::quoted(path) >> std::quoted(ids_path) >> std::quoted(logits_path)) || (in >> extra)) {
+                error_reply("cold load requires state, exact history and frontier paths"); continue;
+            }
+            std::ifstream inputs(ids_path);
+            std::vector<int32_t> ids;
+            int64_t token;
+            bool valid = bool(inputs);
+            while (inputs >> token) {
+                if (token < 0 || token >= forward.vocab() || ids.size() >= (size_t)state.max_cells) {
+                    valid = false; break;
+                }
+                ids.push_back((int32_t)token);
+            }
+            std::ifstream frontier(logits_path, std::ios::binary | std::ios::ate);
+            const auto bytes = (std::streamsize)forward.vocab()*sizeof(float);
+            if (!valid || !inputs.eof() || ids.empty() || !frontier || frontier.tellg() != bytes) {
+                error_reply("invalid cold history or frontier extent"); continue;
+            }
+            std::vector<float> next_logits((size_t)forward.vocab());
+            frontier.seekg(0);
+            frontier.read((char*)next_logits.data(), bytes);
+            if (!frontier) { error_reply("incomplete cold frontier"); continue; }
+            if (!session.load(path, ids, next_logits, error)) { error_reply(error); continue; }
+            std::cout << "{\"status\":\"ok\",\"consumed\":" << session.ids().size() << "}" << std::endl;
         } else if (command == "pages") {
             std::cout << "{\"status\":\"ok\",\"pages\":[";
             bool first = true;
@@ -113,6 +146,8 @@ int branch_driver(const WeightTable& weights, const ModelGeometry& geometry, Ses
                       << ",\"binding_copy_bytes\":" << s.binding_copy_bytes
                       << ",\"saved_running_bytes\":" << s.saved_running_bytes
                       << ",\"restored_running_bytes\":" << s.restored_running_bytes
+                      << ",\"written_file_bytes\":" << s.written_file_bytes
+                      << ",\"loaded_file_bytes\":" << s.loaded_file_bytes
                       << ",\"captures\":" << s.captures << ",\"restores\":" << s.restores << "}" << std::endl;
         } else error_reply("unknown command");
     }

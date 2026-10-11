@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import tempfile
 import unittest
 
 
@@ -45,6 +46,34 @@ class BranchDriverTest(unittest.TestCase):
                 self.assertEqual(request('feed 8 9')['consumed'], 2)
                 self.assertEqual(request('restore ' + str(a))['consumed'], 4)
                 self.assertEqual(request('stats')['forward_tokens'], before_reset + 2)
+                with tempfile.TemporaryDirectory() as directory:
+                    checkpoint = Path(directory)/'native.state'
+                    frontier = Path(directory)/'frontier.f32'
+                    ids = Path(directory)/'ids.txt'
+                    ids.write_text('1 2 3 4')
+                    self.assertEqual(request('logits '+str(frontier))['status'], 'ok')
+                    original_logits = frontier.read_bytes()
+                    saved = request('write '+str(checkpoint))
+                    self.assertEqual(saved['status'], 'ok')
+                    self.assertEqual(saved['bytes'], checkpoint.stat().st_size)
+                    self.assertGreater(saved['bytes'], 1024*1024)
+                    self.assertEqual(request('reset')['consumed'], 0)
+                    load = 'load '+str(checkpoint)+' '+str(ids)+' '+str(frontier)
+                    self.assertEqual(request(load)['consumed'], 4)
+                    self.assertEqual(request('stats')['forward_tokens'], before_reset + 2)
+                    self.assertEqual(request('feed 6')['consumed'], 5)
+                    self.assertEqual(request('restore '+str(a))['consumed'], 4)
+                    self.assertEqual(request('logits '+str(frontier))['status'], 'ok')
+                    self.assertEqual(frontier.read_bytes(), original_logits)
+                    raw = bytearray(checkpoint.read_bytes())
+                    raw[-1] ^= 1
+                    checkpoint.write_bytes(raw)
+                    self.assertEqual(request(load)['status'], 'error')
+                    self.assertEqual(request('stats')['consumed'], 4)
+                    self.assertEqual(request('logits '+str(frontier))['status'], 'ok')
+                    self.assertEqual(frontier.read_bytes(), original_logits)
+                    self.assertGreater(request('stats')['written_file_bytes'], 0)
+                    self.assertGreater(request('stats')['loaded_file_bytes'], 0)
                 self.assertEqual(request('quit')['status'], 'closed')
                 self.assertEqual(p.wait(timeout=30), 0)
             finally:
