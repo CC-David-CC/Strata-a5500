@@ -3,12 +3,34 @@ import copy
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 from serve.branch_store import BranchStore
 from serve.checkpoint_store import CheckpointStore, CacheFull
 from serve.responses import ResponsesError, new_id
+from serve.branch_runtime import execution_identity
+
+
+class ExecutionIdentity(unittest.TestCase):
+    def test_current_engine_restart_metadata_and_shards_are_fingerprinted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / 'engine').write_bytes(b'engine binary')
+            first = root / 'model-00001-of-00002.gguf'
+            second = root / 'model-00002-of-00002.gguf'
+            first.write_bytes(b'first shard')
+            second.write_bytes(b'second shard')
+            engine = SimpleNamespace(spawn=('engine', ['--native', str(first)], tmp, None,
+                                           {'STRATA_IQ_MT_MIN': '1'}, False, '0-3'),
+                                     model_path=str(first))
+            svc = SimpleNamespace(engine=engine, template=SimpleNamespace(source='template'))
+            identity = execution_identity(svc, {})
+            self.assertEqual(identity['environment']['STRATA_IQ_MT_MIN'], '1')
+            self.assertEqual(len(identity['artifacts']), 3)
+            second.write_bytes(b'changed second shard')
+            self.assertNotEqual(identity['artifacts'], execution_identity(svc, {})['artifacts'])
 
 
 class History(unittest.TestCase):

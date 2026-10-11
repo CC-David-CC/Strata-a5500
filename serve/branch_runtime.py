@@ -23,7 +23,8 @@ def execution_identity(svc, cfg):
     spawn = getattr(svc.engine, "spawn", None)
     if spawn is None:
         return {"mock": type(svc.engine).__name__, "template": svc.template.source}
-    exe, args, cwd, _, _ = spawn
+    # Restart metadata also carries unload/CPU-affinity fields on current engines.
+    exe, args, cwd = spawn[:3]
     root = Path(cwd or os.getcwd())
     paths = [root / exe]
     native = Path(svc.engine.model_path)
