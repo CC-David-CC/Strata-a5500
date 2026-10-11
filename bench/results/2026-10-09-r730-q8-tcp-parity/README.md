@@ -1,5 +1,10 @@
 # R730 Q8: exact-token parity over TCP loopback
 
+This is the recorded 2026-10-09 hardware/transport control. The report branch was
+updated against upstream `61b3fb5d` on 2026-10-11, preserving the original receipts.
+The measured binaries and timings below are historical; no current-main rerun or
+new runtime fix is claimed by this report update.
+
 On the same three Tesla P4s, PR #1748's TCP stages produced exactly the same
 128 output tokens as the in-process layer split for all nine matched requests.
 TCP decode throughput was 21.6–22.6% lower. This is a controlled same-host
