@@ -3278,6 +3278,16 @@ int main(int argc, char** argv) {
         }
     }
     strata::core::Verifier::set_commit_async(!multi_gpu);   // see Verifier::set_commit_async
+    const int64_t adapt_barrier_tokens = [] {
+        const char* v = std::getenv("STRATA_ADAPT_BARRIER_TOKENS");
+        if (v == nullptr || *v == '\0') return int64_t{0};
+        char* end = nullptr;
+        const long n = std::strtol(v, &end, 10);
+        return end != v && *end == '\0' && n >= 0 && n <= 1048576 ? (int64_t) n : int64_t{-1};
+    }();
+    // Accepted-token barriers serialize adaptation. Resolve that policy before pipeline admission
+    // checks three-stage async incompatibility and before stages reserve their pipeline buffers.
+    if (adapt_barrier_tokens > 0) o.adapt_async = 0;
     // --pipeline-windows (opt-in): one conversation's windows with the two stages of a layer split overlapped.  Decided
     // here, before any stage sizes its expert cache (the second verifier per stage and the snapshots are allocated
     // after the caches, so their room is kept out of them).  What it does not support turns it off, said once.
@@ -6727,13 +6737,6 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "strata generate: the mapped view of the experts %s (%s)\n",
                      dropped ? "is closed" : "stays open", why.c_str());
     }
-    const int64_t adapt_barrier_tokens = [] {
-        const char* v = std::getenv("STRATA_ADAPT_BARRIER_TOKENS");
-        if (v == nullptr || *v == '\0') return int64_t{0};
-        char* end = nullptr;
-        const long n = std::strtol(v, &end, 10);
-        return end != v && *end == '\0' && n >= 0 && n <= 1048576 ? (int64_t) n : int64_t{-1};
-    }();
     if (adapt_barrier_tokens < 0 ||
         (adapt_barrier_tokens > 0 && (!o.serve || o.batch > 0 || !multi_gpu || split_same ||
                                      peer.valid() || remote_opt || remote_caches || o.pcie_frac != 0.0 ||
