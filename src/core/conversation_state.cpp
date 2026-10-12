@@ -169,8 +169,8 @@ bool conversation_checkpoint_save(ConversationCheckpoint& c, const SessionState&
     return true;
 }
 
-bool conversation_checkpoint_restore(const ConversationCheckpoint& c, SessionState& ss,
-                                     const ModelGeometry& g, std::string& error) {
+bool conversation_checkpoint_restore_running(const ConversationCheckpoint& c, SessionState& ss,
+                                              const ModelGeometry& g, std::string& error) {
     if (!conversation_checkpoint_validate(c, ss, g, error)) return false;
     ConversationStateSizes z;
     if (!conversation_session_sizes(g, ss, z, error)) return false;
@@ -181,14 +181,24 @@ bool conversation_checkpoint_restore(const ConversationCheckpoint& c, SessionSta
         if (!copy(st.idx_tail, c.tails.data() + j * z.tail, z.tail, error) ||
             !copy(st.idx_dead, c.dead.data() + j * z.dead, z.dead, error) ||
             !copy(st.idx_block_pos, c.block_pos.data() + j * z.block_pos, z.block_pos, error)) return false;
-        if (!c.ids.empty()) {
-            const size_t row = c.ids.size() / strata::kernels::qsa_real_shapes().idx_block;
-            if (!copy(st.idx_pooled + row * g.idx_key_dim, c.dead.data() + j * z.dead, z.dead, error)) return false;
-        }
     }
     const size_t tokens = c.ids.size();
     ss.ple_prev[0] = tokens >= 2 ? c.ids[tokens - 2] : -1;
     ss.ple_prev[1] = tokens >= 1 ? c.ids[tokens - 1] : -1;
+    return sync(error);
+}
+
+bool conversation_checkpoint_restore(const ConversationCheckpoint& c, SessionState& ss,
+                                     const ModelGeometry& g, std::string& error) {
+    if (!conversation_checkpoint_restore_running(c, ss, g, error)) return false;
+    ConversationStateSizes z;
+    if (!conversation_session_sizes(g, ss, z, error)) return false;
+    if (!c.ids.empty()) {
+        const size_t row = c.ids.size() / strata::kernels::qsa_real_shapes().idx_block;
+        for (size_t j = 0; j < owned_qsa(ss); ++j)
+            if (!copy(owned(ss, j).idx_pooled + row * g.idx_key_dim,
+                      c.dead.data() + j * z.dead, z.dead, error)) return false;
+    }
     return sync(error);
 }
 

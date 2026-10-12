@@ -21,6 +21,12 @@
 #include "strata/core/remote_expert_opt.hpp"
 #include "strata/core/expert_cache.hpp"
 #include "strata/core/conversation_snapshot.hpp"
+#ifdef STRATA_BRANCH_DRIVER
+#include "strata/core/branch_driver.hpp"
+#endif
+#ifdef STRATA_FRESH_DRIVER
+#include "strata/core/fresh_driver.hpp"
+#endif
 #include "strata/core/conversation_file.hpp"
 #include "strata/core/conversation_memory.hpp"
 #include "strata/core/conversation_spill.hpp"
@@ -2259,8 +2265,11 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "strata generate: --max-context must be below 2^31\n");
         return 2;
     }
+    // The final selected token is not consumed by this CLI. Capacity therefore
+    // covers prompt + max_new - 1 inputs, including a prompt exactly at capacity
+    // when only its next-token logits are requested.
     if (o.max_new <= 0 || o.max_context <= 0 || o.max_new > o.max_context ||
-        o.tokens.size() > (size_t) (o.max_context - o.max_new)) {
+        o.tokens.size() > (size_t) (o.max_context - o.max_new + 1)) {
         std::fprintf(stderr, "strata generate: positive --max-new and --max-context must fit the prompt and generation\n");
         return 2;
     }
@@ -2772,7 +2781,7 @@ int main(int argc, char** argv) {
             return 2;
         }
     }
-    if (o.max_context < (int64_t) o.tokens.size() + o.max_new) {
+    if (o.max_context < (int64_t) o.tokens.size() + o.max_new - 1) {
         std::fprintf(stderr, "strata generate: --max-context %lld cannot hold %zu prompt + %lld new tokens\n",
                      (long long) o.max_context, o.tokens.size(), (long long) o.max_new);
         return 2;
@@ -6130,6 +6139,27 @@ int main(int argc, char** argv) {
 #endif
     }
     if (o.adapt_async && !src.complement_ready()) adapt_async_off("the resident RAM mode is not running");
+#if defined(STRATA_BRANCH_DRIVER) || defined(STRATA_FRESH_DRIVER)
+    {
+        if (o.serve || o.kv_grow || o.kv_resident || !stages.empty() || o.adapt_async || o.batch > 1) {
+            std::fprintf(stderr, "strata branch: requires one synchronous, fully resident inference session\n");
+            return 2;
+        }
+        strata::core::VerifyHits hits;
+        hits.d_res = thits.d_res;
+        hits.h_res = host_res.empty() ? nullptr : host_res.data();
+        hits.cache_base = thits.cache_base; hits.blob = thits.blob;
+        hits.slot_off = xcache.slot_offsets(); hits.n_slots = xcache.slots();
+#ifdef STRATA_BRANCH_DRIVER
+        return strata::core::branch_driver(wt, g, ss, hits, native_head.loaded() ? &native_head : nullptr,
+                                           &drive_pool_multi, &drive, drive.d.failed);
+#else
+        const char* output = std::getenv("STRATA_DUMP_FIRST_LOGITS");
+        return strata::core::fresh_driver(wt, g, ss, hits, native_head.loaded() ? &native_head : nullptr,
+                                          &drive_pool_multi, &drive, drive.d.failed, o.tokens, output ? output : "");
+#endif
+    }
+#endif
     if (o.serve) {
         if (o.spec < 2 || o.prefill_chunk <= 0 ||
             (graph_hits && (thits.d_res == nullptr || host_res.empty()))) {
@@ -11765,7 +11795,10 @@ int main(int argc, char** argv) {
     // round emits (accepted drafts + 1) tokens.  `commit` keeps the state of the tokens that were emitted.
     const bool ended = o.stop_eos && !produced.empty() &&
                        std::find(o.eos_ids.begin(), o.eos_ids.end(), (int64_t) produced.back()) != o.eos_ids.end();
-    if (spec_pos > 0 && (int64_t) produced.size() < o.max_new && !ended) {
+    // A native pack enters here at its last prompt token, including position 0
+    // for a one-token prompt. Zero is only the unused sentinel for the legacy
+    // per-token path; applying it to native packs silently consumed nothing.
+    if ((native_pack || spec_pos > 0) && (int64_t) produced.size() < o.max_new && !ended) {
         auto read_ids = [](const std::string& path, std::vector<int64_t>& ids) {
             std::ifstream in(path);
             std::string text((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
@@ -12242,6 +12275,8 @@ int main(int argc, char** argv) {
             std::printf("%-24s %.3f ms/round drafting (%lld rounds), MTP prompt %.1f ms, %.0f MiB of VRAM\n", "mtp",
                         mtp.ms_draft / (double) mtp.rounds, (long long) mtp.rounds, mtp.ms_prefill,
                         (double) mtp.vram_bytes() / 1048576.0);
+        std::fprintf(stderr, "strata forward: prefill_tokens=%lld verifier_tokens=%llu\n",
+                     (long long)prefill.stats().tokens, (unsigned long long)ver.completed_forward_tokens);
     }
 
     if (dump != nullptr && std::fclose(dump) != 0) {
