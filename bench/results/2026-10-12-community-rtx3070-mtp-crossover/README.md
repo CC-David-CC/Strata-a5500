@@ -1,5 +1,21 @@
 # RTX 3070: when does MTP repay its prefill cost?
 
+## Follow-up: known-length control outputs
+
+The [control-decision report](control-decisions/README.md) adds eight complete
+1,000-token requests at 48K / 64K / 96K / 128K fresh input, with a fixed 133,120
+capacity and 32K-resident INT8 KV. Off reduced measured completion time by
+39.7–47.5%. It includes 10/100-token prefix observations, clearly labeled
+10K/100K projections, separate-call estimates, and context-capacity checks.
+Projected long-output crossings are approximately 8.2K / 11.0K / 16.0K / 21.9K
+output tokens; these are not measured crossings. For this cohort the crossing
+is approximately fresh input divided by six, with cached-prefix cost needing a
+separate calibration. The 128K crossing exceeds the tested capacity.
+
+![Measured long-input control latency and capacity-aware estimated MTP decisions.](control-decisions/control-decisions.png)
+
+## Earlier cohort: recorded 4K and 16K crossings
+
 Measured October 11–12, 2026, by CC-David-CC. This is an exploratory latency
 report for **Qwen3.8-Flash-Next GSQ-RCO IQ3_S**, not an Unsloth Q4 measurement.
 One fresh request was measured per condition on a pinned source build.
