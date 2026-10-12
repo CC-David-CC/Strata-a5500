@@ -13,6 +13,10 @@ and their limits. Report what you actually measured and label estimates separate
 
 ## Community reports
 
+- [2026-10-11–12: RTX 3070 8 GB, Ryzen 7 5800X, 64 GB RAM — MTP latency crossover](../bench/results/2026-10-12-community-rtx3070-mtp-crossover/README.md):
+  pinned `61b3fb5d` source build, Flash-Next GSQ-RCO IQ3_S / INT8 KV; one fresh request per mode at 4K, 16K and 64K input.
+  Recorded completion-time crossovers near 522 and 1,426 output tokens at 4K/16K; 64K baseline ended early, so its long-output crossover is unverified.
+
 - [2026-09-30: RTX 5090, Core Ultra 9 285K, 64 GB RAM](../bench/results/2026-09-30-community-rtx-5090/README.md):
   Strata 0.1.29, original Flash-Next IQ2_XS, 131,072-token context; three runs
   each at 4,096, 32,768, and 128,000 prompt tokens, plus six recall checks.
