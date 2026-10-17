@@ -1,0 +1,435 @@
+{
+  "base_commit": "477ac13cbe8e582c20484871ce459d20d82df09d",
+  "model_revision": "5bc3e238d916f48a861bac2f8a1990a0e9b7e98d",
+  "model_sha256": "55983c5a75a1ab969824077b3bb3de4146e82a9234072b48ad4e8f92ad3fe9f1",
+  "baseline_binary_sha256": "010162f4855b25e57643675adc6f85b3e6f56296baf3391752c400e3e4bcdd54",
+  "fallback_binary_sha256": "7509f5526d8e86bfe0a7e4c6920576f611ccae157eb7570e1c7da3cbab65713e",
+  "runs": [
+    {
+      "variant": "manual_q8_packed_0",
+      "mtp": 0,
+      "arithmetic_pass": true,
+      "peak_process_tree_rss_gib": 41.174285888671875,
+      "peak_gpu_mib": {
+        "0": 6871,
+        "1": 5,
+        "2": 5
+      },
+      "requests": [
+        {
+          "label": "warmup",
+          "wall_s": 1.5411995989998104,
+          "ttft_s": 0.4416798129968811,
+          "timing": {
+            "prompt_tokens": 20.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 20.0,
+            "prompt_ms": 433.0,
+            "prompt_tps": 46.2,
+            "generated_tokens": 32.0,
+            "decode_ms": 1092.0,
+            "decode_tps": 29.3,
+            "accepted_drafts": 0.0,
+            "proposed_drafts": 0.0
+          },
+          "answer": "A queue is a fundamental linear data structure that operates on the First-In, First-Out (FIFO) principle, meaning the first element added to the queue is"
+        },
+        {
+          "label": "arithmetic",
+          "wall_s": 0.43426165400160244,
+          "ttft_s": 0.359408368000004,
+          "timing": {
+            "prompt_tokens": 28.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 28.0,
+            "prompt_ms": 353.0,
+            "prompt_tps": 79.4,
+            "generated_tokens": 3.0,
+            "decode_ms": 70.0,
+            "decode_tps": 43.1,
+            "accepted_drafts": 0.0,
+            "proposed_drafts": 0.0
+          },
+          "answer": "42"
+        },
+        {
+          "label": "short-0",
+          "wall_s": 4.817525917002058,
+          "ttft_s": 0.4419637460014201,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 435.0,
+            "prompt_tps": 91.9,
+            "generated_tokens": 128.0,
+            "decode_ms": 4369.0,
+            "decode_tps": 29.3,
+            "accepted_drafts": 0.0,
+            "proposed_drafts": 0.0
+          },
+          "answer": "A bounded work queue serves as a critical synchronization mechanism in concurrent systems, primarily designed to prevent resource exhaustion by enforcing a strict limit on the number of pending tasks. When the queue reaches its maximum capacity, it effectively applies backpressure to the producer threads. Instead of allowing unbounded memory growth, which could lead to OutOfMemory errors or system instability, the queue forces the producer to either block, wait, or actively reject new submissions. This backpressure mechanism ensures that the system remains stable under load by signaling to upstream components that they are producing work faster than the downstream consumers can process it.\n\nRegarding retries, the interaction between the bounded queue"
+        },
+        {
+          "label": "short-1",
+          "wall_s": 4.538342375999491,
+          "ttft_s": 0.43328038299659966,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 427.0,
+            "prompt_tps": 93.6,
+            "generated_tokens": 128.0,
+            "decode_ms": 4099.0,
+            "decode_tps": 31.2,
+            "accepted_drafts": 0.0,
+            "proposed_drafts": 0.0
+          },
+          "answer": "A bounded work queue serves as a critical flow-control mechanism in concurrent systems, primarily by enforcing a strict capacity limit on the number of tasks it can hold at any given time. When the queue reaches its maximum capacity, it effectively triggers a backpressure signal to the producer threads. Unlike unbounded queues, which might lead to memory exhaustion under high load, a bounded queue forces the system to make immediate decisions about how to handle incoming work that cannot be accommodated. This backpressure is not merely a passive state; it is an active signal that propagates upstream, informing producers that they must slow down, pause, or adapt their output rate to"
+        },
+        {
+          "label": "short-2",
+          "wall_s": 4.510129693000636,
+          "ttft_s": 0.39995467600238044,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 392.0,
+            "prompt_tps": 102.0,
+            "generated_tokens": 128.0,
+            "decode_ms": 4104.0,
+            "decode_tps": 31.2,
+            "accepted_drafts": 0.0,
+            "proposed_drafts": 0.0
+          },
+          "answer": "A bounded work queue serves as a critical flow-control mechanism in concurrent systems, primarily by enforcing a strict capacity limit on the number of pending tasks. When this limit is reached, the queue effectively signals backpressure to the producer, preventing the system from being overwhelmed by an excessive influx of work that could lead to memory exhaustion or catastrophic performance degradation. The specific handling of this backpressure depends on the underlying implementation, but it generally falls into two categories: blocking or rejecting. In a blocking scenario, such as with a `java.util.concurrent.ArrayBlockingQueue`, the producer thread is suspended until space becomes available, thereby naturally throttling the rate of incoming"
+        },
+        {
+          "label": "long-0",
+          "wall_s": 20.947932425995532,
+          "ttft_s": 15.100036751995503,
+          "timing": {
+            "prompt_tokens": 3945.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 3945.0,
+            "prompt_ms": 15088.0,
+            "prompt_tps": 261.5,
+            "generated_tokens": 128.0,
+            "decode_ms": 5842.0,
+            "decode_tps": 21.9,
+            "accepted_drafts": 0.0,
+            "proposed_drafts": 0.0
+          },
+          "answer": "The provided records illustrate a systematic performance or load-testing trial for \"service alpha.\" The common design across all 182 records is a controlled experiment where the number of active workers is varied in a cyclic pattern from 2 to 8, while the task queue configuration remains constant as a \"bounded queue.\" This structure suggests an attempt to determine the optimal concurrency level for the service. By cycling through worker counts (2, 3, 4, 5, 6, 7, 8) repeatedly, the trial likely aims to observe how throughput, latency, or error rates change as the system approaches its capacity limits."
+        },
+        {
+          "label": "long-1",
+          "wall_s": 20.879613851000613,
+          "ttft_s": 14.983192179002799,
+          "timing": {
+            "prompt_tokens": 3945.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 3945.0,
+            "prompt_ms": 14971.0,
+            "prompt_tps": 263.5,
+            "generated_tokens": 128.0,
+            "decode_ms": 5891.0,
+            "decode_tps": 21.7,
+            "accepted_drafts": 0.0,
+            "proposed_drafts": 0.0
+          },
+          "answer": "The records provided illustrate a systematic performance or load-testing trial for \"service alpha.\" The common design is a repetitive, cyclical stress test where the number of active workers is incrementally increased from 2 to 8, then reset to 2, and repeated multiple times. Throughout all 183 records, the service consistently uses a bounded queue for tasks. This setup suggests an investigation into how the service handles varying levels of concurrency and potential queue saturation. The bounded queue is a critical component here, as it implies that if the task submission rate exceeds the processing capacity of the workers, the queue will eventually fill up, potentially leading to"
+        }
+      ]
+    },
+    {
+      "variant": "manual_q8_packed_0",
+      "mtp": 2,
+      "arithmetic_pass": true,
+      "peak_process_tree_rss_gib": 41.17469024658203,
+      "peak_gpu_mib": {
+        "0": 6871,
+        "1": 5,
+        "2": 5
+      },
+      "requests": [
+        {
+          "label": "warmup",
+          "wall_s": 1.2461635479994584,
+          "ttft_s": 0.4268627699930221,
+          "timing": {
+            "prompt_tokens": 20.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 20.0,
+            "prompt_ms": 419.0,
+            "prompt_tps": 47.8,
+            "generated_tokens": 32.0,
+            "decode_ms": 810.0,
+            "decode_tps": 39.5,
+            "accepted_drafts": 20.0,
+            "proposed_drafts": 24.0
+          },
+          "answer": "A queue is a fundamental linear data structure that operates on the First-In, First-Out (FIFO) principle, meaning the first element added to the queue is"
+        },
+        {
+          "label": "arithmetic",
+          "wall_s": 0.4407822520006448,
+          "ttft_s": 0.36320936500123935,
+          "timing": {
+            "prompt_tokens": 28.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 28.0,
+            "prompt_ms": 356.0,
+            "prompt_tps": 78.6,
+            "generated_tokens": 3.0,
+            "decode_ms": 70.0,
+            "decode_tps": 42.9,
+            "accepted_drafts": 2.0,
+            "proposed_drafts": 2.0
+          },
+          "answer": "42"
+        },
+        {
+          "label": "short-0",
+          "wall_s": 4.338063633003912,
+          "ttft_s": 0.44177944600232877,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 435.0,
+            "prompt_tps": 91.9,
+            "generated_tokens": 128.0,
+            "decode_ms": 3886.0,
+            "decode_tps": 32.9,
+            "accepted_drafts": 69.0,
+            "proposed_drafts": 116.0
+          },
+          "answer": "A bounded work queue serves as a critical circuit breaker in distributed systems, fundamentally altering how backpressure is managed compared to unbounded alternatives. When the queue reaches its predefined capacity limit, it ceases to accept new tasks, thereby triggering a backpressure mechanism. This is not merely a passive state but an active signal to the upstream producers that the system is saturated. In this scenario, the queue typically employs one of several strategies: it may reject the incoming request immediately by throwing an exception (such as `RejectedExecutionException` in Java), block the producer thread until space becomes available, or apply a drop policy where the oldest or newest items are"
+        },
+        {
+          "label": "short-1",
+          "wall_s": 3.9332233460008865,
+          "ttft_s": 0.42484965799667407,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 418.0,
+            "prompt_tps": 95.6,
+            "generated_tokens": 128.0,
+            "decode_ms": 3500.0,
+            "decode_tps": 36.6,
+            "accepted_drafts": 71.0,
+            "proposed_drafts": 114.0
+          },
+          "answer": "A bounded work queue serves as a critical flow-control mechanism in concurrent systems, primarily by enforcing a strict capacity limit on the number of pending tasks. When this limit is reached, the queue effectively signals backpressure to the producer threads, preventing the system from being overwhelmed by an excessive influx of work that could lead to memory exhaustion or catastrophic performance degradation. The specific handling of this backpressure depends on the blocking strategy employed by the queue implementation. In many standard implementations, such as Java\u00e2\u0080\u0099s `ArrayBlockingQueue`, if the queue is full, the producer thread attempting to add an element will block until space becomes available. This synchronous blocking acts as a"
+        },
+        {
+          "label": "short-2",
+          "wall_s": 4.16582535100315,
+          "ttft_s": 0.4153964229990379,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 407.0,
+            "prompt_tps": 98.2,
+            "generated_tokens": 128.0,
+            "decode_ms": 3742.0,
+            "decode_tps": 34.2,
+            "accepted_drafts": 67.0,
+            "proposed_drafts": 122.0
+          },
+          "answer": "A bounded work queue serves as a critical circuit breaker in concurrent systems, fundamentally altering how backpressure is managed compared to unbounded alternatives. When the queue reaches its predefined capacity limit, it enforces backpressure by refusing to accept new tasks. This refusal is not passive; it is an active signal to the producer that the system is saturated. The specific mechanism for handling this rejection depends on the configured policy, such as `CallerRunsPolicy`, `AbortPolicy`, or custom implementations. In a typical robust implementation, the producer thread itself may execute the task synchronously if the queue is full. This effectively slows down the producer, creating a natural"
+        },
+        {
+          "label": "long-0",
+          "wall_s": 22.526675276996684,
+          "ttft_s": 15.532833074998052,
+          "timing": {
+            "prompt_tokens": 3945.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 3945.0,
+            "prompt_ms": 15519.0,
+            "prompt_tps": 254.2,
+            "generated_tokens": 128.0,
+            "decode_ms": 6984.0,
+            "decode_tps": 18.3,
+            "accepted_drafts": 63.0,
+            "proposed_drafts": 128.0
+          },
+          "answer": "The provided records illustrate a systematic performance or load-testing trial for \"service alpha.\" The common design is a controlled experiment where the number of active workers is varied in a cyclic pattern from 2 to 8, while the task queue configuration remains constant (bounded). This structure suggests an intent to measure how the service scales or behaves under different levels of concurrency. The repetition of this cycle (records 0\u00e2\u0080\u00936, 7\u00e2\u0080\u009313, etc.) indicates a need for statistical significance or stability checks across multiple iterations. However, the data is purely descriptive of the setup and lacks critical outcome metrics such as latency, error rates, throughput,"
+        },
+        {
+          "label": "long-1",
+          "wall_s": 22.086451270995894,
+          "ttft_s": 15.347234150998702,
+          "timing": {
+            "prompt_tokens": 3945.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 3945.0,
+            "prompt_ms": 15333.0,
+            "prompt_tps": 257.3,
+            "generated_tokens": 128.0,
+            "decode_ms": 6734.0,
+            "decode_tps": 19.0,
+            "accepted_drafts": 67.0,
+            "proposed_drafts": 122.0
+          },
+          "answer": "The records provided illustrate a systematic performance or load-testing trial for \"service alpha.\" The common design across all 182 records is a controlled variation of the number of active workers, ranging cyclically from 2 to 8, while keeping the task queue configuration constant as a \"bounded queue.\" This pattern suggests an experiment to determine the optimal concurrency level for the service. By cycling through worker counts (2, 3, 4, 5, 6, 7, 8) repeatedly, the trial likely aims to identify the \"knee\" of the performance curve\u00e2\u0080\u0094where increasing workers yields diminishing returns or causes degradation"
+        }
+      ]
+    },
+    {
+      "variant": "automatic_fallback",
+      "mtp": 2,
+      "arithmetic_pass": true,
+      "peak_process_tree_rss_gib": 41.174495697021484,
+      "peak_gpu_mib": {
+        "0": 6871,
+        "1": 5,
+        "2": 5
+      },
+      "requests": [
+        {
+          "label": "warmup",
+          "wall_s": 1.301366814004723,
+          "ttft_s": 0.5361456419996102,
+          "timing": {
+            "prompt_tokens": 20.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 20.0,
+            "prompt_ms": 527.0,
+            "prompt_tps": 37.9,
+            "generated_tokens": 32.0,
+            "decode_ms": 752.0,
+            "decode_tps": 42.5,
+            "accepted_drafts": 20.0,
+            "proposed_drafts": 24.0
+          },
+          "answer": "A queue is a fundamental linear data structure that operates on the First-In, First-Out (FIFO) principle, meaning the first element added to the queue is"
+        },
+        {
+          "label": "arithmetic",
+          "wall_s": 0.4514584990029107,
+          "ttft_s": 0.38377494599990314,
+          "timing": {
+            "prompt_tokens": 28.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 28.0,
+            "prompt_ms": 375.0,
+            "prompt_tps": 74.6,
+            "generated_tokens": 3.0,
+            "decode_ms": 63.0,
+            "decode_tps": 47.7,
+            "accepted_drafts": 2.0,
+            "proposed_drafts": 2.0
+          },
+          "answer": "42"
+        },
+        {
+          "label": "short-0",
+          "wall_s": 3.9197379409961286,
+          "ttft_s": 0.46079658899543574,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 453.0,
+            "prompt_tps": 88.3,
+            "generated_tokens": 128.0,
+            "decode_ms": 3448.0,
+            "decode_tps": 37.1,
+            "accepted_drafts": 69.0,
+            "proposed_drafts": 116.0
+          },
+          "answer": "A bounded work queue serves as a critical circuit breaker in distributed systems, fundamentally altering how backpressure is managed compared to unbounded alternatives. When the queue reaches its predefined capacity limit, it ceases to accept new tasks, thereby triggering a backpressure mechanism. This is not merely a passive state but an active signal to the upstream producers that the system is saturated. In this scenario, the queue typically employs one of several strategies: it may reject the incoming request immediately by throwing an exception (such as `RejectedExecutionException` in Java), block the producer thread until space becomes available, or apply a drop policy where the oldest or newest items are"
+        },
+        {
+          "label": "short-1",
+          "wall_s": 3.5074942350038327,
+          "ttft_s": 0.44889329200668726,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 443.0,
+            "prompt_tps": 90.4,
+            "generated_tokens": 128.0,
+            "decode_ms": 3044.0,
+            "decode_tps": 42.0,
+            "accepted_drafts": 71.0,
+            "proposed_drafts": 114.0
+          },
+          "answer": "A bounded work queue serves as a critical flow-control mechanism in concurrent systems, primarily by enforcing a strict capacity limit on the number of pending tasks. When this limit is reached, the queue effectively signals backpressure to the producer threads, preventing the system from being overwhelmed by an excessive influx of work that could lead to memory exhaustion or catastrophic performance degradation. The specific handling of this backpressure depends on the blocking strategy employed by the queue implementation. In many standard implementations, such as Java\u00e2\u0080\u0099s `ArrayBlockingQueue`, if the queue is full, the producer thread attempting to add an element will block until space becomes available. This synchronous blocking acts as a"
+        },
+        {
+          "label": "short-2",
+          "wall_s": 3.701130594999995,
+          "ttft_s": 0.42926259199884953,
+          "timing": {
+            "prompt_tokens": 40.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 40.0,
+            "prompt_ms": 420.0,
+            "prompt_tps": 95.2,
+            "generated_tokens": 128.0,
+            "decode_ms": 3264.0,
+            "decode_tps": 39.2,
+            "accepted_drafts": 67.0,
+            "proposed_drafts": 122.0
+          },
+          "answer": "A bounded work queue serves as a critical circuit breaker in concurrent systems, fundamentally altering how backpressure is managed compared to unbounded alternatives. When the queue reaches its predefined capacity limit, it enforces backpressure by refusing to accept new tasks. This refusal is not passive; it is an active signal to the producer that the system is saturated. The specific mechanism for handling this rejection depends on the configured policy, such as `CallerRunsPolicy`, `AbortPolicy`, or custom implementations. In a typical robust implementation, the producer thread itself may execute the task synchronously if the queue is full. This effectively slows down the producer, creating a natural"
+        },
+        {
+          "label": "long-0",
+          "wall_s": 21.872440885003016,
+          "ttft_s": 15.342012763998355,
+          "timing": {
+            "prompt_tokens": 3945.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 3945.0,
+            "prompt_ms": 15328.0,
+            "prompt_tps": 257.4,
+            "generated_tokens": 128.0,
+            "decode_ms": 6520.0,
+            "decode_tps": 19.6,
+            "accepted_drafts": 63.0,
+            "proposed_drafts": 128.0
+          },
+          "answer": "The provided records illustrate a systematic performance or load-testing trial for \"service alpha.\" The common design is a controlled experiment where the number of active workers is varied in a cyclic pattern from 2 to 8, while the task queue configuration remains constant (bounded). This structure suggests an intent to measure how the service scales or behaves under different levels of concurrency. The repetition of this cycle (records 0\u00e2\u0080\u00936, 7\u00e2\u0080\u009313, etc.) indicates a need for statistical significance or stability checks across multiple iterations. However, the data is purely descriptive of the setup and lacks critical outcome metrics such as latency, error rates, throughput,"
+        },
+        {
+          "label": "long-1",
+          "wall_s": 21.633613769998192,
+          "ttft_s": 15.34728328899655,
+          "timing": {
+            "prompt_tokens": 3945.0,
+            "reused_tokens": 0.0,
+            "fresh_tokens": 3945.0,
+            "prompt_ms": 15334.0,
+            "prompt_tps": 257.3,
+            "generated_tokens": 128.0,
+            "decode_ms": 6280.0,
+            "decode_tps": 20.4,
+            "accepted_drafts": 67.0,
+            "proposed_drafts": 122.0
+          },
+          "answer": "The records provided illustrate a systematic performance or load-testing trial for \"service alpha.\" The common design across all 182 records is a controlled variation of the number of active workers, ranging cyclically from 2 to 8, while keeping the task queue configuration constant as a \"bounded queue.\" This pattern suggests an experiment to determine the optimal concurrency level for the service. By cycling through worker counts (2, 3, 4, 5, 6, 7, 8) repeatedly, the trial likely aims to identify the \"knee\" of the performance curve\u00e2\u0080\u0094where increasing workers yields diminishing returns or causes degradation"
+        }
+      ]
+    }
+  ],
+  "manual_mtp2_vs_fallback_utf8_match": {
+    "warmup": true,
+    "arithmetic": true,
+    "short-0": true,
+    "short-1": true,
+    "short-2": true,
+    "long-0": true,
+    "long-1": true
+  }
+}

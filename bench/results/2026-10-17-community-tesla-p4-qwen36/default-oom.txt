@@ -1,0 +1,6 @@
+[strata] 2026-10-17 10:59:20 engine started: <checkout>/build-p4-v2/strata --serve --native <model.gguf> --max-context 8192 --prefill auto --mtp 0 --pool-workers 14
+strata-q36: <model.gguf>: 753 tensors (layout checked), 4.40 GiB on the GPU in 1.9 s (the routed experts are placed after the engine's buffers)
+strata: K-quant prompt kernels from <checkout>/build-p4-v2/libstrata_kq.so (STRATA_MMQ_KQ=1)
+strata-q36: prompt experts on MMQ (int8)
+strata-q36: context 8192 cells, prompt chunk 512, MTP block loaded, 1.16 GiB of VRAM free
+strata-q36: cudaMalloc(&E.stage[b], max_layer + kMmqTail) failed: out of memory (<checkout>/src/qwen35/q36_engine.cu:2989)

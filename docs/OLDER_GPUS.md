@@ -217,6 +217,22 @@ Setup does not build these; build by hand and run `serve/server.py` with a confi
   `__syncwarp` are version-gated, and RDNA1's missing signed dot4 uses llama.cpp's SDWA sequence
   (`-DSTRATA_GFX1012_PORTABLE_DOT=ON`: the portable one).
 
+## Qwen3.6 Q4 on a Tesla P4 with 8 GB
+
+The Qwen3.6 hybrid path can run on one Tesla P4 with its experts in system RAM. The 0.1.45 default kept optional
+packed Q8 decode copies even when they left too little room for the prompt staging buffers: an 8,192-token context
+failed at `cudaMalloc(&E.stage[b], ...)`. Expert placement now gives those copies back when staging and CPU-output
+scratch cannot fit beside the existing VRAM reserve. The decode kernels then read the original GGUF weights.
+Explicit `--expert-vram`, `--expert-slots`, and `STRATA_Q36_KEEP_PACKED=1` keep their existing behavior.
+
+Before this fix, `"env": {"STRATA_Q8_PACKED": "0"}` in the model config is the measured workaround. With the fix,
+that setting is unnecessary for the tested configuration. Older CUDA 12.0 toolkits also need the separate host
+half-bit debug-print compile fix.
+
+The [single-P4 report](../bench/results/2026-10-17-community-tesla-p4-qwen36/README.md) records the failed default,
+the manual workaround and the automatic recovery. This is a short text-only test on a machine with 251 GiB RAM;
+it does not establish a minimum system-RAM requirement, full 8K prompt performance, vision or multi-GPU support.
+
 ## Reports welcome
 
 These paths stay experimental until more people run them. A report with the card, the driver / ROCm version, the

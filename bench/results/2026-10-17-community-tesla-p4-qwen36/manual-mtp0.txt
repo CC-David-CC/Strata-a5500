@@ -1,0 +1,14 @@
+[strata] 2026-10-17 11:05:37 engine started: <checkout>/build-p4-v2/strata --serve --native <model.gguf> --max-context 8192 --prefill auto --mtp 0 --pool-workers 14
+strata-q36: <model.gguf>: 753 tensors (layout checked), 2.62 GiB on the GPU in 1.0 s (the routed experts are placed after the engine's buffers)
+strata: K-quant prompt kernels from <checkout>/build-p4-v2/libstrata_kq.so (STRATA_MMQ_KQ=1)
+strata-q36: prompt experts on MMQ (int8)
+strata-q36: context 8192 cells, prompt chunk 512, MTP block loaded, 3.09 GiB of VRAM free
+strata-q36: hybrid experts: 16 of 256 per layer in VRAM (1.17 GiB), all 18.75 GiB in pinned host memory, the rest of a batch of <= 128 rows on 15 CPU threads, bigger prompt chunks streamed (1.10 GiB staging); 17.5 s
+strata-q36: warmed up in 2.1 s (one prompt chunk, a decode step)
+strata serve: session 0: prompt 20 tokens = 0 reused + 20 read in 433 ms (46.2 tok/s), 32 generated in 1092 ms (29.3 tok/s), drafts accepted 0 of 0 (length)
+strata serve: session 0: prompt 28 tokens = 0 reused + 28 read in 353 ms (79.4 tok/s), 3 generated in 70 ms (43.1 tok/s), drafts accepted 0 of 0 (stop)
+strata serve: session 0: prompt 40 tokens = 0 reused + 40 read in 435 ms (91.9 tok/s), 128 generated in 4369 ms (29.3 tok/s), drafts accepted 0 of 0 (length)
+strata serve: session 0: prompt 40 tokens = 0 reused + 40 read in 427 ms (93.6 tok/s), 128 generated in 4099 ms (31.2 tok/s), drafts accepted 0 of 0 (length)
+strata serve: session 0: prompt 40 tokens = 0 reused + 40 read in 392 ms (102.0 tok/s), 128 generated in 4104 ms (31.2 tok/s), drafts accepted 0 of 0 (length)
+strata serve: session 0: prompt 3945 tokens = 0 reused + 3945 read in 15088 ms (261.5 tok/s), 128 generated in 5842 ms (21.9 tok/s), drafts accepted 0 of 0 (length)
+strata serve: session 0: prompt 3945 tokens = 0 reused + 3945 read in 14971 ms (263.5 tok/s), 128 generated in 5891 ms (21.7 tok/s), drafts accepted 0 of 0 (length)
