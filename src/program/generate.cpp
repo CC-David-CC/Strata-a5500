@@ -3373,7 +3373,12 @@ int main(int argc, char** argv) {
                 const char* d1 = std::getenv("STRATA_GFX1151_DEFAULTS");
                 if (!(c1 != nullptr && c1[0] == '0') && !(d1 != nullptr && d1[0] == '0')) {
                     o.prefill_auto_cap = 0;
-                    o.prefill_chunk = std::max<int64_t>(o.prefill_chunk, 8192);
+                    // 0.2.8: 16,384 rather than 8,192.  The prompt reads every expert once per chunk, so a bigger chunk
+                    // reads them fewer times: measured on strix (engine 0.1.52, own prompt buffers, IQ3_S) 32K 1,260.0 ->
+                    // 1,307.9 tok/s and 64K 1,191.0 -> 1,238.2 (+3.8% / +4.0%); at 4K and 8K the chunk is the prompt, so
+                    // nothing changes there.  The buffers' reserve grows to ~10.9 GiB and the cache keeps all 24,576 slots
+                    // (the box reports 84.7 GiB free at a 64K context).  STRATA_GFX1151_CHUNK=0 keeps 6,144.
+                    o.prefill_chunk = std::max<int64_t>(o.prefill_chunk, 16384);
                 }
             }
             // 0.2.8: the Strix Halo prompt path keeps its own buffers instead of lending cache slots.  A lent slot's expert
