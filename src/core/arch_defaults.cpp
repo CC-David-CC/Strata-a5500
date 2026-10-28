@@ -102,6 +102,13 @@ bool igpu_prompt_set_enabled(const char* gcn_arch, bool windows) {
     const char* e = std::getenv("STRATA_IGPU_PROMPT_SET");
     if (e != nullptr && e[0] == '1') return true;
     if (e != nullptr && e[0] == '0') return false;
+    // 0.2.8: Strix Halo (gfx1151) gets the matrix-core prompt set on Windows by default.  Measured on the strix box
+    // (Qwen3.8-Flash-Next IQ3_S, engine 0.1.52, ids prompts of 4,095 / 8,191 tokens, interleaved pairs, one engine at a
+    // time): 4K 690 -> 1,090 and 8K 785 -> 1,183 on the f-024-strix-pp branch (0.2.3 engine, the same switches as
+    // environment variables), i.e. x1.58 / x1.51; the first-token KL against the accepted HC_Q8 bar was 0.0088 mean
+    // (0.0228 allowed), top-1 the same on every prompt.  Linux gfx1151 stays opt-in until it is measured there; gfx1103
+    // keeps its own rule below.
+    if (windows && strata::kernels::gfx_arch_is(gcn_arch, "gfx1151")) return true;
     return kIgpuPromptSetDefaultOn && !windows && strata::kernels::gfx_arch_is(gcn_arch, "gfx1103");
 }
 
@@ -135,6 +142,18 @@ std::vector<std::pair<std::string, std::string>> igpu_default_env(const char* gc
         {"STRATA_SELECT_WMMA", "1"},   // the block scorer on matrix cores
         {"STRATA_HC_UPMIX", "1"},      // the hyper-connection up projection with its epilogue
     };
+    // gfx1151 (Strix Halo) on Windows: SELECT_WMMA measured x1.003 at 8K on the branch and is left out, and PF_FUSED (the
+    // fused int8 gate/up prompt experts, #136) measured x1.12 there and joins the set.  The 780M and the 890M keep the
+    // table above exactly as measured on them.
+    if (win && strata::kernels::gfx_arch_is(gcn_arch, "gfx1151")) {
+        t = {
+            {"STRATA_HIP_WMMA", "1"},
+            {"STRATA_PF_GEMM", "1"},
+            {"STRATA_PA_FAST", "1"},
+            {"STRATA_HC_UPMIX", "1"},
+            {"STRATA_PF_FUSED", "1"},
+        };
+    }
     return t;
 }
 

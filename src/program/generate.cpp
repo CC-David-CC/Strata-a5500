@@ -706,6 +706,10 @@ struct Options {
     int64_t prefill_auto_cap = 0;
     /// a bare `--prefill auto` (no ":N", no STRATA_PREFILL_AUTO_MAX): the gfx12 Linux rule below may raise its ceiling
     bool prefill_auto_bare = false;
+    /// 0.2.8 (Strix Halo on Windows): the prompt path keeps its own buffers by default (no lending), so `--prefill auto`
+    /// must not fall back to 2048 ("reserved buffers, keep them small") - the gfx1151 rule above has already chosen a
+    /// chunk that fits this box's carve-out.
+    bool prefill_own_keep_chunk = false;
     bool prefill_gfx12_16k = false;   ///< the gfx12 default raised the auto chunk ceiling to 16384 (a layer split takes 8192 back, 0.1.44)
     /// --prefill-pipe (opt-in): a layer split's prompt chunks sized for its pipeline (Prefill::pipeline_chunk): 0 off,
     /// 1 today's chunk count evened out, a number > 1 the rig's b/a in tokens (setup's --calibrate measures it).
@@ -3372,6 +3376,21 @@ int main(int argc, char** argv) {
                     o.prefill_chunk = std::max<int64_t>(o.prefill_chunk, 8192);
                 }
             }
+            // 0.2.8: the Strix Halo prompt path keeps its own buffers instead of lending cache slots.  A lent slot's expert
+            // is re-read from the host arena during every chunk, and on this box that copy runs at ~0.5 GB/s (the arena is
+            // unregistered in UMA mode): measured on strix, engine 0.1.52, IQ3_S, 2026-10-27 - 823 slots = 2.75 s of a
+            // 3.3 s 4K prompt, 1,408 slots = 5.5 s of a 6.1 s 8K prompt.  Without lending every expert stays in the cache
+            // (24,576 slots) and the prompt reads VRAM only; the buffers' VRAM is reserved up front instead (the cache
+            // still fits: 46.84 GiB of experts against a 63.6 GB carve-out).  STRATA_PREFILL_BORROW=1 keeps 0.2.7's
+            // lending, STRATA_GFX1151_DEFAULTS=0 turns the whole gfx1151 block off.
+            if (win_host && all_igpu && std::strncmp(ad.gcnArchName, "gfx1151", 7) == 0) {
+                const char* pb = std::getenv("STRATA_PREFILL_BORROW");
+                const char* pd = std::getenv("STRATA_GFX1151_DEFAULTS");
+                if (!(pb != nullptr && pb[0] == '1') && !(pd != nullptr && pd[0] == '0')) {
+                    o.no_prefill_borrow = true;
+                    o.prefill_own_keep_chunk = true;
+                }
+            }
         } else (void) cudaGetLastError();
     }
 #endif
@@ -3703,7 +3722,9 @@ int main(int argc, char** argv) {
 #endif
     if (o.prefill_auto && (o.no_prefill_borrow || o.expert_profile.empty())) {
         o.prefill_auto = false;       // nothing to lend from: the buffers are reserved for the session, so keep them small
-        o.prefill_chunk = 2048;
+        // 0.2.8 Strix Halo: the gfx1151 rule above chose a chunk that fits this box; the "keep them small" 2048 would throw
+        // the whole 8K prompt back into 4 chunks (measured: 2048 against 8192 costs ~26% of an 8K prompt on this box).
+        o.prefill_chunk = o.prefill_own_keep_chunk ? o.prefill_chunk : 2048;
     }
     if (!have_tokens && o.serve) {   // plan v0.3 P8: requests bring their own tokens
         o.tokens = {248045};
