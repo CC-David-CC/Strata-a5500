@@ -85,6 +85,15 @@ class SixShardSplit(unittest.TestCase):
             self.assertEqual(PG.engram_is_last_shard(str(CONVERTED), 6, shards), 1)
             self.assertEqual(PG.engram_is_last_shard(None, 6, shards), 0)                # no --engram: the five are five of six
 
+    def test_the_pinned_four_shard_releases_engram_counts_too_it_has_the_same_tables(self):
+        with tempfile.TemporaryDirectory() as d:
+            shards = self.model_shards(Path(d))
+            g = PG.Gguf(FIXTURE)
+            self.assertTrue(PG.is_engram_file(g))                                       # general.architecture deepseek41-engram
+            self.assertEqual(PG.engram_is_last_shard(str(FIXTURE), 6, shards), 1)       # six-shard shards with the Engram of the pinned four-shard release
+            self.assertEqual(PG.engram_is_last_shard(str(FIXTURE), 6, self.model_shards(Path(d), 4)), 0)    # still five of six when a shard is missing
+            self.assertEqual(PG.engram_is_last_shard(str(FIXTURE), 4, self.model_shards(Path(d), 4)), 0)    # the four-shard sets do not need it counted
+
     def test_it_never_counts_when_a_shard_is_missing_the_split_differs_or_the_path_is_no_file(self):
         with tempfile.TemporaryDirectory() as d:
             d = Path(d)

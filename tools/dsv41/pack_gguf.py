@@ -366,14 +366,17 @@ def is_engram_file(g) -> bool:
 def engram_is_last_shard(explicit: str | None, split: int, shards: list) -> int:
     """1 when the model's split ends in the Engram table: ISTA-DASLab's six-shard sets (llama.cpp b11870 and newer) declare split.count 6 with five
     model shards, and the sixth is the Engram file shared by all their sets, passed as --engram (a single file) instead of in --shards.  It counts only
-    when it is one file that is not already among the shards, declares the same split as number count-1, and holds exactly one tensor,
-    per_layer_token_embd.weight (the converted Engram has no general.architecture, so is_engram_file cannot tell it).  Else 0."""
+    when it is one file that is not already among the shards and is either the Engram of the pinned four-shard release (general.architecture
+    deepseek41-engram: the same tables, so it serves the six-shard shards too) or the converted one: no general.architecture, the same split as number
+    count-1, exactly one tensor, per_layer_token_embd.weight.  Else 0."""
     if not explicit or len(shards) != split - 1:
         return 0
     path = pathlib.Path(explicit).expanduser().resolve()
     if not path.is_file() or any(os.path.samefile(path, p) for p in shards):
         return 0
     g = Gguf(path)
+    if is_engram_file(g):
+        return 1
     return int(int(g.kv.get("split.count", 0)) == split and int(g.kv.get("split.no", -1)) == split - 1
                and [t[0] for t in g.tensors] == ["per_layer_token_embd.weight"])
 
