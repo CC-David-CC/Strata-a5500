@@ -1970,7 +1970,8 @@ __global__ void __launch_bounds__(GW_NW * 32) gdn_wmma_scan_kernel(float* __rest
 #pragma unroll
         for (int v = 0; v < 8; ++v) state[(size_t) (16 * j + 2 * v + hi) * rs + (size_t) vh * S + col] = s[j][v];
 }
-// The opt-in chunked recurrence on gfx11 (STRATA_GDN_CHUNKED=1): false (nothing launched) on another part.  y, the
+#include "gdn_wmma12.inc"
+// The opt-in chunked recurrence on gfx11 and gfx12 (STRATA_GDN_CHUNKED=1): false (nothing launched) on another part.  y, the
 // FP32 scratch of the other kernels (T x 6144 floats), holds T and P (1 KB per chunk and value head: T x 3 KB).
 bool gdn_rec_wmma(float* state, const float* h, const float* gate, const float* beta, const float* z, const float* gamma,
                   float eps, float* y, uint16_t* y16, int64_t T, cudaStream_t s, int64_t ld16) {
@@ -1978,18 +1979,25 @@ bool gdn_rec_wmma(float* state, const float* h, const float* gate, const float* 
     // A layer-split worker can change devices: a process-wide answer for the first card can launch a trapping
     // gfx11 kernel on a later gfx12 card.  Cache only the current thread's last device, as properties are not cheap.
     static thread_local int last_device = -1;
-    static thread_local bool gfx11 = false;
+    static thread_local bool gfx11 = false, gfx12 = false;
     int dev = 0;
     if (cudaGetDevice(&dev) != cudaSuccess) return false;
     if (dev != last_device) {
         cudaDeviceProp p{};
         if (cudaGetDeviceProperties(&p, dev) != cudaSuccess) return false;
         gfx11 = strata::kernels::gfx_arch_is_gfx11_wmma(p.gcnArchName);
+        gfx12 = strata::kernels::gfx_arch_is_gfx12_wmma(p.gcnArchName);
         last_device = dev;
     }
-    if (!gfx11) return false;
+    if (!gfx11 && !gfx12) return false;
     const int64_t nch = (T + GW_CK - 1) / GW_CK;
     _Float16* tp = reinterpret_cast<_Float16*>(y);
+    if (gfx12) {
+        gdn_w12_prep_kernel<<<dim3(HK, (unsigned) nch), 32 * GW_VPK, 0, s>>>(h, gate, beta, tp, T);
+        gdn_w12_scan_kernel<<<HV, GW_NW * 32, 0, s>>>(state, h, gate, beta, z, gamma, reinterpret_cast<const unsigned*>(tp), eps,
+                                                      y16, T, ld16);
+        return true;
+    }
     gdn_wmma_prep_kernel<<<dim3(HK, (unsigned) nch), 32 * GW_VPK, 0, s>>>(h, gate, beta, tp, T);
     gdn_wmma_scan_kernel<<<HV, GW_NW * 32, 0, s>>>(state, h, gate, beta, z, gamma, reinterpret_cast<const unsigned*>(tp),
                                                    eps, y16, T, ld16);
