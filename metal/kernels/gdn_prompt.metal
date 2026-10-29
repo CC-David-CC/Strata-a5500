@@ -321,6 +321,12 @@ template [[host_name("gdn_scanr_2")]] kernel decltype(gdn_scan_r<2, 16>) gdn_sca
 template [[host_name("gdn_scanr_4")]] kernel decltype(gdn_scan_r<4, 16>) gdn_scan_r<4, 16>;
 template [[host_name("gdn_scanr_8")]] kernel decltype(gdn_scan_r<8, 16>) gdn_scan_r<8, 16>;
 template [[host_name("gdn_scanr_4_8")]] kernel decltype(gdn_scan_r<4, 8>) gdn_scan_r<4, 8>;
+template [[host_name("gdn_scanr_4_4")]] kernel decltype(gdn_scan_r<4, 4>) gdn_scan_r<4, 4>;
+template [[host_name("gdn_scanr_4_2")]] kernel decltype(gdn_scan_r<4, 2>) gdn_scan_r<4, 2>;
+template [[host_name("gdn_scanr_8_8")]] kernel decltype(gdn_scan_r<8, 8>) gdn_scan_r<8, 8>;
+template [[host_name("gdn_scanr_8_4")]] kernel decltype(gdn_scan_r<8, 4>) gdn_scan_r<8, 4>;
+template [[host_name("gdn_scanr_2_8")]] kernel decltype(gdn_scan_r<2, 8>) gdn_scan_r<2, 8>;
+template [[host_name("gdn_scanr_2_4")]] kernel decltype(gdn_scan_r<2, 4>) gdn_scan_r<2, 4>;
 
 // ---- the chunked form (chunks of GC = 32 tokens), the WY / UT form of the gated delta rule.  With G_t the product
 // of the chunk's gates up to t (log space: lg_t) and S0 the state entering the chunk:

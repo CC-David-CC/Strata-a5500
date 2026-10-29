@@ -50,6 +50,18 @@ namespace strata::gpu { uint64_t purge_device_allocations(size_t min_bytes); }  
 
 namespace strata::metal_engine {
 
+// The prompt GDN scan kernel.  STRATA_METAL_GDN_SCAN names an instantiation of gdn_scan_r<IB, TB> in gdn_prompt.metal
+// (gdn_scanr_4_8, gdn_scanr_4_4, ...): IB simdgroups a threadgroup (the thread count is read from the name), TB tokens staged.
+// Unset: gdn_scanr_4 (IB 4, TB 16), the production default.  Only the four-simdgroup names are accepted here.
+static const char* gdn_scan_name() {
+    static const std::string name = [] {
+        const char* e = std::getenv("STRATA_METAL_GDN_SCAN");
+        const std::string s = e ? e : "";
+        return (s == "gdn_scanr_4_8" || s == "gdn_scanr_4_4" || s == "gdn_scanr_4_2") ? s : std::string("gdn_scanr_4");
+    }();
+    return name.c_str();
+}
+
 namespace {
 
 constexpr int N = 2560, HC = 4, LR = 320, NFF = 640, TOPK = 10, NEXP = 512, MAXT = 8, NVOCAB_MAX = 248320;
@@ -2358,7 +2370,7 @@ bool Window::prompt_chunk(const int32_t* tokens, int Tn, int64_t pos0, std::stri
                mtl::Arg::B(p.al), mtl::Arg::B(p.be), mtl::Arg::B(W_, TN(b + "ssm_dt.bias").offset), mtl::Arg::B(W_, TN(b + "ssm_a").offset),
                mtl::Arg::B(p.gqn), mtl::Arg::B(p.gkn), mtl::Arg::B(p.gvc), mtl::Arg::B(p.ggb), mtl::Arg::B(p.gkq),
                mtl::Arg::B(ghist_[1 - hp_][(size_t) gi]), mtl::Arg::V(ga)}, 16 + 24, T, 256);
-            D(PP(p.lgdn, "gdn_scanr_4", mtl::Constants().i(6, 0), "gdn_scanr_4"),
+            D(PP(p.lgdn, gdn_scan_name(), mtl::Constants().i(6, 0), gdn_scan_name()),
               {mtl::Arg::B(gst_[(size_t) gi]), mtl::Arg::B(p.gqn), mtl::Arg::B(p.gkn), mtl::Arg::B(p.gvc), mtl::Arg::B(p.ggb),
                mtl::Arg::B(p.gkq), mtl::Arg::B(p.go), mtl::Arg::V(ga)}, 48 * 4, 1, 32 * 4);
             D(PP(p.lgdn, "gdn_post"), {mtl::Arg::B(p.go), mtl::Arg::B(p.z), mtl::Arg::B(W_, TN(b + "ssm_norm.weight").offset),
