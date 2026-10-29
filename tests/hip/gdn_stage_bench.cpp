@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
         const double cm = conv_ms[conv_ms.size() / 2], rm = rec_ms[rec_ms.size() / 2];
         // hashes of one clean whole-prompt run (the state is the one-call result)
         reset(); layer(0, T); ck(cudaDeviceSynchronize(), "sync");
-        const auto y16 = down(dy16, T * ld), st = down(dstate, S * ROW);
+        const auto y16 = down(dy16, T * ld); const auto st = down(dstate, S * ROW);
         uint64_t hy = 1469598103934665603ull;
         for (int64_t t = 0; t < T; ++t) hy = fnv(y16.data() + t * ld, ROW * 2, hy);   // padding columns excluded
         const uint64_t hs = fnv(st.data(), st.size() * 4);
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
         if (do_split) {
             const int64_t cut = (T / 2) | 1;   // unaligned (odd) split point
             reset(); layer(0, cut); layer(cut, T - cut); ck(cudaDeviceSynchronize(), "sync");
-            const auto y2 = down(dy16, T * ld), s2 = down(dstate, S * ROW);
+            const auto y2 = down(dy16, T * ld); const auto s2 = down(dstate, S * ROW);
             uint64_t hy2 = 1469598103934665603ull;
             for (int64_t t = 0; t < T; ++t) hy2 = fnv(y2.data() + t * ld, ROW * 2, hy2);
             same = hy == hy2 && hs == fnv(s2.data(), s2.size() * 4);
