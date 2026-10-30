@@ -37,15 +37,45 @@ void quant_x(const std::vector<float>& x, int k, int ncol, std::vector<int8_t>& 
 }
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
+    const bool bench = argc > 1 && std::string(argv[1]) == "--bench";
     mtl::Context cx;
     std::printf("device %s\n", cx.device_name().c_str());
     const int lib = cx.compile({"../src/engine/msl/ds4_iq.metal", "../tests/dsu_job.metal"}, "#define DSU_MKJOB 1\n");
     mtl::Pipeline mk = cx.pipeline(lib, "dsu_mkjob");
 
     struct Case { const char* kern; int type; int nc; };
+    const std::vector<Case> dummy;
     const std::vector<Case> cases = {{"ds4_iq1s_mvn1", 19, 1}, {"ds4_iq1s_mvn2", 19, 2}, {"ds4_iq1s_mvn4", 19, 4}, {"ds4_iq1s_mvn8", 19, 8},
                                      {"ds4_iq1m_mvn4", 29, 4}, {"ds4_iq2xxs_mvn4", 16, 4}, {"ds4_iq_mv_k", 14, 8}, {"ds4_iq_mv_k", 14, 1}};
+    if (bench) {   // dense decode matvec speed on a real attention-sized matrix: Q5_K (the 2.00 set's) against Q6_K (the Unsloth sets')
+        for (const Case& cs : std::vector<Case>{{"ds4_q5k_mvn1", 13, 1}, {"ds4_iq_mv_k", 14, 1}, {"ds4_iq1s_mvn1", 19, 1}, {"ds4_iq2xxs_mvn1", 16, 1}, {"ds4_iq_mv_k", 14, 8}, {"ds4_q5k_mvn8", 13, 8}}) {
+            const int k = 4096, n = 16384, nc = cs.nc;
+            const size_t rb = ref::row_bytes(cs.type, k);
+            std::vector<uint8_t> w(rb * n);
+            ref::random_blocks(cs.type, w.data(), n, k, 3, 0.05f);
+            const size_t o_w = al(80), o_xq = al(o_w + w.size()), o_xd = al(o_xq + (size_t)nc * k), o_y = al(o_xd + (size_t)nc * k / 8);
+            mtl::Buffer mem = cx.alloc(al(o_y + (size_t)nc * n * 4)), offs = cx.alloc(64), args = cx.alloc(64);
+            std::memcpy(mem.as<uint8_t>() + o_w, w.data(), w.size());
+            std::memset(mem.as<uint8_t>() + o_xq, 3, (size_t)nc * k);
+            unsigned long ov[5] = {0, o_w, o_xq, o_xd, o_y};
+            int av[5] = {cs.type, k, n, nc, (int)rb};
+            std::memcpy(offs.ptr, ov, sizeof ov);
+            std::memcpy(args.ptr, av, sizeof av);
+            mtl::Pipeline pk = cx.pipeline(lib, cs.kern);
+            mtl::Dispatch d0;
+            d0.p = &mk; d0.args = {mtl::Arg::B(mem), mtl::Arg::B(offs), mtl::Arg::B(args)}; d0.grid[0] = 1; d0.tg[0] = 1;
+            mtl::Dispatch d1;
+            d1.p = &pk; d1.args = {mtl::Arg::B(mem, 0)}; d1.grid[0] = (n + 7) / 8; d1.grid[1] = 1; d1.tg[0] = 256;
+            cx.run({d0});
+            std::vector<mtl::Dispatch> ds(20, d1);
+            cx.warm(ds, 0.3);
+            double best = 1e9;
+            for (int i = 0; i < 7; ++i) best = std::fmin(best, cx.run(ds) / 20);
+            std::printf("bench %-16s %-7s ncol %d: %.1f us  %.0f GB/s of weights\n", cs.kern, ref::type_name(cs.type), nc, best * 1e6, (double)w.size() / best / 1e9);
+        }
+        return 0;
+    }
     for (const Case& cs : cases) {
         for (int k : {512, 4096}) {
             const int n = 83;   // not a multiple of 8: the last threadgroup's tail rows
@@ -92,6 +122,15 @@ int main() {
             char nm[128];
             std::snprintf(nm, sizeof nm, "%s %s k=%d n=%d ncol=%d", cs.kern, ref::type_name(cs.type), k, n, nc);
             report(nm, e < 2e-6, e);
+        }
+    }
+
+    // 1b. the engine's own prompt-tile library compiles with the IQ1_S instantiation
+    {
+        const int libm = cx.compile({"quant.metal", "units.metal", "mma.metal", "moe_mm.metal", "../src/engine/msl/ds4_mm.metal"});
+        for (const char* fn : {"ds4_mm_gu_19", "ds4_mm_dn_19", "ds4_mm_gu_29", "ds4_mm_gu_16"}) {
+            mtl::Pipeline pp = cx.pipeline(libm, fn);
+            report(fn, pp.handle != nullptr, 0);
         }
     }
 
