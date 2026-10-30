@@ -514,6 +514,7 @@ MAC_PACKS: dict[str, dict[str, Any]] = {
     "IQ1_M": {"name": "1.75 bpw (IQ1_M)", "routed_gb": 114.56, "backbone_gb": 120.72, "bpw": 1.75},
     "IQ2_XXS": {"name": "2.00 bpw (IQ2_XXS), the default for most users", "routed_gb": 132.07, "backbone_gb": 138.24, "bpw": 2.00},
     "IQ2_XS": {"name": "2.25 bpw (IQ2_XS), the quality one", "routed_gb": 149.06, "backbone_gb": 155.23, "bpw": 2.25},
+    "UD-IQ1_S": {"name": "Unsloth UD-IQ1_S (1-bit experts)", "routed_gb": 115.23, "backbone_gb": 122.38, "bpw": 1.75},
 }
 MAC_ENGRAM_GB = 110.60          # the same Engram table for all three, read row by row off the SSD
 MAC_ENGINE_FOOTPRINT_GB = 12.0  # the process' anonymous memory after the load (Metal buffers, host buffers, the KV cache)
@@ -530,6 +531,8 @@ MAC_MEASURED_PACK = {
     "IQ2_XXS": ("M5 Max, 128 GB, 2.00 bpw: 15-16 tokens/s for a short answer (14-15 after a long prompt), a 3,000-token prompt at about 240 "
                 "tokens/s, 32,000 at about 610; the engine kept about 69 GB of the experts resident and read about 48 MB a token from the SSD"),
     "IQ2_XS": MAC_MEASURED,
+    "UD-IQ1_S": ("M5 Max, 128 GB, Unsloth UD-IQ1_S: 15-18 tokens/s for a short answer (16-18 after a 3,000-token prompt), a 3,000-token prompt at "
+                 "about 230-310 tokens/s, 14,000 at about 520; the engine kept about 68 GB of the experts resident and the process used about 79 GB"),
 }
 
 
@@ -608,12 +611,13 @@ def mac_plan(ram_gb: float, quant: str = "IQ2_XS", disk_free_gb: float | None = 
 # for any other computer, from mac_plan's numbers.  The official sets that were run on a Mac (2.00 and 2.25 bpw, 2026-10-25);
 # the 1.75 bpw set shares the 2.00 set's IQ1_M kernel but was never run there, so it is not offered on a Mac.
 
-MAC_SET_PACK = {"IST-DAS-2.00bpw": "IQ2_XXS", "IST-DAS-2.25bpw": "IQ2_XS"}
-# Unsloth's UD-IQ1_S / UD-IQ1_M (0.2.9) carry IQ1_S experts, which the Metal DeepSeek engine has no kernel for yet (metal/src/engine/msl/ds4_iq.metal:
-# IQ1_S and IQ4_NL are CUDA / HIP only).  They are kept off the Mac everywhere: the model lists (MAC_SET_PACK above does that on its own), setup, the
-# launch and the "I already have the model" check, with this one line.  Remove a name here when its Metal kernel lands.
-MAC_NOT_YET = ("UD-IQ1_S", "UD-IQ1_M")
-MAC_NOT_YET_LINE = "Unsloth's 1-bit DeepSeek sets don't run on a Mac yet; the 2.00 and 2.25 sets do."
+
+MAC_SET_PACK = {"IST-DAS-2.00bpw": "IQ2_XXS", "IST-DAS-2.25bpw": "IQ2_XS", "UD-IQ1_S": "UD-IQ1_S"}
+# Unsloth's UD-IQ1_S runs on the Metal engine since the IQ1_S kernels (f-039-mac-dsu).  UD-IQ1_M has the same kernels but was never run on a Mac, so it is kept off
+# the Mac everywhere: the model lists (MAC_SET_PACK above does that on its own), setup, the launch and the "I already have the model" check, with this one line.
+# Remove a name here when its set has run on a Mac.
+MAC_NOT_YET = ("UD-IQ1_M",)
+MAC_NOT_YET_LINE = "Unsloth's UD-IQ1_M set doesn't run on a Mac yet; the UD-IQ1_S, 2.00 and 2.25 sets do."
 # The same two sets were never run on a DGX Spark (linux-aarch64, GB10) either: kept off it the same way until a Spark run passes (remove the names then).
 AARCH64_NOT_YET = ("UD-IQ1_S", "UD-IQ1_M")
 AARCH64_NOT_YET_LINE = "Unsloth's 1-bit DeepSeek sets were not tested on a DGX Spark yet; the 2.00 and 2.25 sets were."
