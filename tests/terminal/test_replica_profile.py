@@ -80,12 +80,18 @@ class Apply(unittest.TestCase):
         self.assertEqual(c["layer_split"], "auto")
         self.assertTrue(notes and "layer split stays" in notes[0])
 
-    def test_windows_cannot_share_so_the_private_copies_must_fit(self):
+    def test_windows_shares_through_a_section(self):
         c = cfg(gpu=[0, 1])
-        self.assertEqual(P.apply(cards(2), c, 100.0, platform="win32", environ={})[0].split(":")[0], "replica profile")
+        P.apply(cards(2), c, 80.0, platform="win32", environ={})
+        self.assertEqual(len(c["replicas"]), 2)
+        self.assertIs(c["replica_shared_arena"], True)
+
+    def test_an_os_that_cannot_share_needs_the_private_copies_to_fit(self):
+        c = cfg(gpu=[0, 1])
+        self.assertEqual(P.apply(cards(2), c, 100.0, platform="darwin", environ={})[0].split(":")[0], "replica profile")
         self.assertNotIn("replicas", c)
         c = cfg(gpu=[0, 1])
-        P.apply(cards(2), c, 160.0, platform="win32", environ={})
+        P.apply(cards(2), c, 160.0, platform="darwin", environ={})
         self.assertEqual(len(c["replicas"]), 2)
         self.assertNotIn("replica_shared_arena", c)
 

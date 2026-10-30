@@ -60,7 +60,7 @@ def quant_of(cfg: dict) -> str | None:
 
 
 def shared_arena_possible(platform: str | None = None) -> bool:
-    return (sys.platform if platform is None else platform).startswith("linux")
+    return (sys.platform if platform is None else platform).startswith(("linux", "win"))
 
 
 def replicas_for(n_cards: int, arena_gb: float, ram_gb: float, shared: bool) -> int:

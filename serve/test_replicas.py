@@ -335,9 +335,15 @@ class SharedArena(unittest.TestCase):
             self.assertTrue(path2)
             self.assertEqual(path, path2)      # (one server: one file)
 
+    def test_windows_gets_a_named_section(self):
+        with tempfile.TemporaryDirectory() as d:
+            path, note = self.plan(tmp=d, platform="win32")
+            self.assertTrue(path and path.startswith("win:Local") and "strata-replicas-" in path, path)
+            self.assertIn("Windows section", note)
+            remove_arena(path)                 # (nothing to remove: harmless)
+
     def test_only_where_there_is_an_arena_to_share(self):
         with tempfile.TemporaryDirectory() as d:
-            self.assertIsNone(self.plan(tmp=d, platform="win32")[0])
             self.assertIsNone(self.plan(tmp=d, platform="darwin")[0])
             for flag in ("--mmap-experts", "--resident-experts", "--resident-budget-gib", "--shared-expert-arena"):
                 self.assertIsNone(self.plan({**self.CFG, "args": ["--pack", "/p", flag]}, tmp=d)[0], flag)

@@ -23,7 +23,7 @@ replicas need two copies and four need four.  "replica_shared_arena": true (or S
 backs the experts' arena of all replicas with ONE shared memory object (the engine's --shared-expert-arena, MAP_SHARED):
 the experts are in RAM once, whatever the number of replicas.  On Linux the object is a memfd the server creates
 (os.memfd_create): it is not a file on a mount, so the size of /dev/shm does not limit it; the engines open it as
-/proc/<server pid>/fd/<n>.  Without memfd (an old kernel, a sandbox that refuses it) a file in /dev/shm is used instead.
+/proc/<server pid>/fd/<n>.  On Windows it is a named section (CreateFileMapping) the engines open by name.  Without memfd (an old kernel, a sandbox that refuses it) a file in /dev/shm is used instead.
 The pack hash in the header refuses another model; the first engine to start reads the experts into it and the others
 wait for it and skip the read (a state word in the header: nobody / a pid reading / filled; an engine whose reader died
 takes the read over); the server closes the memfd (or unlinks the file) when it ends - an engine that still maps it
@@ -171,8 +171,13 @@ def shared_arena_plan(cfg: dict, n_replicas: int, *, shm: str = "/dev/shm", plat
         want = str(environ.get("STRATA_REPLICA_SHARED_ARENA", "")).strip().lower() in ("1", "true", "on", "yes")
     if not want or n_replicas < 2:
         return None, ""
+    if platform.startswith("win"):
+        # a named pagefile-backed section the engines open by name (src/core/pinned.cu); it lives while any engine holds it
+        name = f"Local{chr(92)}strata-replicas-{os.getpid()}"
+        return f"win:{name}", (f"one shared expert arena for {n_replicas} replicas (a Windows section, {name}): "
+                               "the experts are in RAM once")
     if not platform.startswith("linux"):
-        return None, "shared expert arena: Linux only; each replica keeps its own copy of the experts in RAM"
+        return None, "shared expert arena: Linux and Windows only; each replica keeps its own copy of the experts in RAM"
     args = [str(a) for a in cfg.get("args") or []]
     if isinstance(cfg.get("replicas"), list):
         for e in cfg["replicas"]:
@@ -222,7 +227,7 @@ def shared_arena_plan(cfg: dict, n_replicas: int, *, shm: str = "/dev/shm", plat
 def remove_arena(path: str | None) -> None:
     """Close the memfd / unlink the arena file (the server's end, or a start that fell back): engines that map it keep
     their pages."""
-    if not path:
+    if not path or path.startswith("win:"):      # (a Windows section goes with its last handle)
         return
     fd = _MEMFDS.pop(path, None)
     if fd is not None:

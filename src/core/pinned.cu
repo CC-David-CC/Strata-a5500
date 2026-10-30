@@ -58,6 +58,12 @@ struct SharedArenaHeader {
 };
 static_assert(sizeof(SharedArenaHeader) <= kSharedArenaHeaderBytes);
 
+#ifdef _WIN32
+// Shared-section views: MapViewOfFile address -> the section handle, so release() unmaps and closes instead of VirtualFree.
+std::mutex g_views_mu;
+std::map<void*, HANDLE> g_views;
+#endif
+
 #ifndef _WIN32
 // MemAvailable and, in a cgroup v2 group with a limit, the room left under it; ~0 when neither can be read
 uint64_t free_ram_room() {
@@ -137,8 +143,102 @@ void* reserve(uint64_t bytes, PageBacking& got, std::string& note, const std::st
 
 #ifdef _WIN32
     if (!shared_file.empty()) {
-        note = "shared-file arena backing is not implemented on Windows";
-        return nullptr;
+        // The shared arena on Windows is a named, pagefile-backed section (CreateFileMappingW) that every engine of the
+        // replicas opens by name: "win:Local\\strata-replicas-<server pid>" (a name without the prefix is used as it is).
+        // The first engine creates it at the full size, the others open it; it lives while any process holds a handle or
+        // a view, so a replica that restarts joins the same pages.  The first 4 KiB are the same header as on Linux (the
+        // pack hash, the size, the load state word); a new section is all zeros, so "no magic" means "nobody has been
+        // here" - two engines that both find it empty write the same header.
+        if (shared_pack_hash == 0) {
+            note = "shared arena requires a nonzero pack hash";
+            return nullptr;
+        }
+        if (bytes > UINT64_MAX - kSharedArenaHeaderBytes) {
+            note = "shared arena size overflows its header";
+            return nullptr;
+        }
+        const uint64_t file_bytes = bytes + kSharedArenaHeaderBytes;
+        std::string nm = shared_file.rfind("win:", 0) == 0 ? shared_file.substr(4) : shared_file;
+        std::wstring wname(nm.begin(), nm.end());
+        // the section is committed memory (RAM plus pagefile) from the moment it exists: say so before taking it
+        MEMORYSTATUSEX ms{};
+        ms.dwLength = sizeof ms;
+        if (GlobalMemoryStatusEx(&ms) && file_bytes + (2ull << 30) > ms.ullAvailPageFile) {
+            HANDLE probe = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, wname.c_str());   // (already there: nothing new is committed)
+            if (probe == nullptr) {
+                note = "not enough free memory (RAM + pagefile) for the shared arena " + nm + ": it needs " +
+                       std::to_string((unsigned long long) (file_bytes >> 20)) + " MiB and " +
+                       std::to_string((unsigned long long) (ms.ullAvailPageFile >> 20)) + " MiB are available (2 GiB are kept back)";
+                return nullptr;
+            }
+            CloseHandle(probe);
+        }
+        HANDLE h = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, (DWORD) (file_bytes >> 32),
+                                      (DWORD) (file_bytes & 0xffffffffu), wname.c_str());
+        if (h == nullptr) {
+            note = "cannot create shared arena section " + nm + ": Windows error " + std::to_string((unsigned long long) GetLastError());
+            return nullptr;
+        }
+        void* view = MapViewOfFile(h, FILE_MAP_ALL_ACCESS, 0, 0, 0);   // (0: the whole section, as big as it was created)
+        if (view == nullptr) {
+            const DWORD e = GetLastError();
+            CloseHandle(h);
+            note = "cannot map shared arena section " + nm + ": Windows error " + std::to_string((unsigned long long) e);
+            return nullptr;
+        }
+        MEMORY_BASIC_INFORMATION mbi{};
+        if (VirtualQuery(view, &mbi, sizeof mbi) == 0 || (uint64_t) mbi.RegionSize < file_bytes) {
+            UnmapViewOfFile(view);
+            CloseHandle(h);
+            note = "shared arena section " + nm + " is smaller than the " + std::to_string((unsigned long long) file_bytes) +
+                   " B this engine needs (including its header)";
+            return nullptr;
+        }
+        auto* hdr = static_cast<SharedArenaHeader*>(view);
+        bool empty = true;
+        for (char c : hdr->magic) empty = empty && c == 0;
+        if (empty) {
+            SharedArenaHeader fresh{};
+            std::memcpy(fresh.magic, kSharedArenaMagic, sizeof fresh.magic);
+            fresh.version = 1;
+            fresh.header_bytes = (uint32_t) kSharedArenaHeaderBytes;
+            fresh.arena_bytes = bytes;
+            fresh.pack_hash = shared_pack_hash;
+            // fields after the magic first, the magic last: an engine that sees the magic sees a complete header (the
+            // state word, reserved[0], stays zero)
+            std::memcpy(reinterpret_cast<char*>(hdr) + sizeof fresh.magic, reinterpret_cast<char*>(&fresh) + sizeof fresh.magic,
+                        sizeof fresh - sizeof fresh.magic);
+            MemoryBarrier();
+            std::memcpy(hdr->magic, fresh.magic, sizeof fresh.magic);
+        } else {
+            // (an engine that arrives in the instant between another one's header fields and its magic never sees a
+            // half header: the magic is written last)
+            if (std::memcmp(hdr->magic, kSharedArenaMagic, sizeof hdr->magic) != 0 || hdr->version != 1 ||
+                hdr->header_bytes != kSharedArenaHeaderBytes || hdr->arena_bytes != bytes) {
+                UnmapViewOfFile(view);
+                CloseHandle(h);
+                note = "shared arena section " + nm + " has an incompatible or missing header";
+                return nullptr;
+            }
+            if (hdr->pack_hash != shared_pack_hash) {
+                char b[256];
+                std::snprintf(b, sizeof b, "shared arena %s was written for pack hash %016llx, expected %016llx", nm.c_str(),
+                              (unsigned long long) hdr->pack_hash, (unsigned long long) shared_pack_hash);
+                UnmapViewOfFile(view);
+                CloseHandle(h);
+                note = b;
+                return nullptr;
+            }
+        }
+        {
+            std::lock_guard<std::mutex> lk(g_views_mu);
+            g_views[view] = h;
+        }
+        mapping_base = view;
+        mapping_bytes = file_bytes;
+        got = PageBacking::NormalPages;
+        note = "shared section " + nm + " (pack hash checked)";
+        return static_cast<uint8_t*>(view) + kSharedArenaHeaderBytes;
     }
     // MEM_LARGE_PAGES needs SeLockMemoryPrivilege.  Having it assigned to the account is not enough: the
     // PROCESS must enable it in its own token (AdjustTokenPrivileges) before VirtualAlloc, or the call fails.
@@ -413,6 +513,20 @@ void release(void* p, uint64_t bytes) {
     if (!p) return;
 #ifdef _WIN32
     (void) bytes;
+    HANDLE section = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(g_views_mu);
+        auto it = g_views.find(p);
+        if (it != g_views.end()) {
+            section = it->second;
+            g_views.erase(it);
+        }
+    }
+    if (section != nullptr) {          // a shared-section view: the pages stay while another engine has the section
+        UnmapViewOfFile(p);
+        CloseHandle(section);
+        return;
+    }
     VirtualFree(p, 0, MEM_RELEASE);
 #else
     munmap(p, bytes);

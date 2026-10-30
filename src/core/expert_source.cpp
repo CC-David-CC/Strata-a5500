@@ -76,6 +76,27 @@
 #endif
 #endif
 
+// The pid of this process and whether a pid still exists (the shared arena's reader election, both OSes)
+static uint64_t arena_this_pid() {
+#ifdef _WIN32
+    return (uint64_t) GetCurrentProcessId();
+#else
+    return (uint64_t) getpid();
+#endif
+}
+static bool arena_pid_alive(uint64_t pid) {
+#ifdef _WIN32
+    HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, (DWORD) pid);
+    if (h == nullptr) return GetLastError() == ERROR_ACCESS_DENIED;     // (denied: it exists; invalid parameter: it does not)
+    DWORD code = 0;
+    const bool alive = GetExitCodeProcess(h, &code) && code == STILL_ACTIVE;
+    CloseHandle(h);
+    return alive;
+#else
+    return !(kill((pid_t) pid, 0) != 0 && errno == ESRCH);
+#endif
+}
+
 namespace strata::core {
 
 namespace detail {
@@ -6011,9 +6032,8 @@ bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int6
     constexpr uint64_t kArenaFilled = ~uint64_t{0};
     std::atomic<uint64_t>* arena_state = padded_ ? nullptr : a->shared_state;
     bool arena_leader = false, arena_skip = false;
-#ifndef _WIN32
     if (arena_state != nullptr) {
-        const uint64_t me = (uint64_t) getpid();
+        const uint64_t me = arena_this_pid();
         const auto t_begin = std::chrono::steady_clock::now();
         bool said = false;
         for (;;) {
@@ -6023,7 +6043,7 @@ bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int6
                 if (arena_state->compare_exchange_strong(cur, me, std::memory_order_acq_rel)) { arena_leader = true; break; }
                 continue;
             }
-            const bool alive = !(kill((pid_t) cur, 0) != 0 && errno == ESRCH);
+            const bool alive = arena_pid_alive(cur);
             if (!alive) {
                 if (arena_state->compare_exchange_strong(cur, me, std::memory_order_acq_rel)) {
                     std::fprintf(stderr, "strata generate: shared expert arena: engine %llu died while reading it; reading it again\n",
@@ -6042,7 +6062,6 @@ bool ArenaExpertSource::open(const std::string& pack_dir, int64_t n_layers, int6
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
-#endif
     std::atomic<int> ready{0};
     std::thread reg;
     if (deferred) {
