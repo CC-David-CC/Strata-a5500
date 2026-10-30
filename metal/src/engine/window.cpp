@@ -1392,11 +1392,11 @@ bool Window::finish_rows(int Tn, const int32_t* tokens, int32_t* out, double t0)
         SeqSet& s = *sets_[(size_t) rows_set_[t]];
         s.hp = 1 - s.hp;
         if (ple_on_) {
-            const float* norm = normW_.as<float>() + (size_t) t * NG_HC_DIM;
-            for (int c = 0; c < NG_HC_DIM; ++c) {
-                float* col = s.pleHist.as<float>() + (size_t) c * NG_HIST;
-                for (int r = 0; r + 1 < NG_HIST; ++r) col[r] = col[r + 1];
-                col[NG_HIST - 1] = norm[c];
+            const float* norm = normW_.as<float>() + (size_t) t * strata::kernels::NG_HC_DIM;
+            for (int c = 0; c < strata::kernels::NG_HC_DIM; ++c) {
+                float* col = s.pleHist.as<float>() + (size_t) c * strata::kernels::NG_HIST;
+                for (int r = 0; r + 1 < strata::kernels::NG_HIST; ++r) col[r] = col[r + 1];
+                col[strata::kernels::NG_HIST - 1] = norm[c];
             }
         }
         s.ss->ple_prev[0] = s.ss->ple_prev[1];
