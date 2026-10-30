@@ -42,7 +42,57 @@ template<bool LB> __device__ __forceinline__ void gw12_barrier() {
 }
 __device__ __forceinline__ gw_h8 gw_ld8(const _Float16* p) { return *reinterpret_cast<const gw_h8*>(p); }   // 16 bytes of LDS
 
-__global__ void __launch_bounds__(32 * GW_VPK) gdn_w12_prep_kernel(const float* __restrict__ h, const float* __restrict__ gate,
+// The causal conv + SiLU + q/k L2 norm (gdn_conv_l2_kernel's arithmetic) with the result written as FP16: half the traffic of
+// the FP32 h in the conv and in both chunked kernels.  One block per (head of 128 channels, tile of 64 tokens).
+__global__ void __launch_bounds__(128) gdn_conv_l2_h16_kernel(const float* __restrict__ hist, const float* __restrict__ qkv,
+                                                              const float* __restrict__ w, _Float16* __restrict__ h, int64_t T,
+                                                              float eps) {
+    const int c = blockIdx.x * blockDim.x + threadIdx.x;
+    const int64_t t0 = (int64_t) blockIdx.y * CONV_TILE;
+    if (t0 >= T) return;
+    const int64_t t1 = t0 + CONV_TILE < T ? t0 + CONV_TILE : T;
+    auto input = [&](int64_t t) -> float { return t >= 0 ? qkv[t * C + c] : hist[c * 3 + (int) (t + 3)]; };
+    float v0 = input(t0 - 3), v1 = input(t0 - 2), v2 = input(t0 - 1);
+    const float w0 = w[c * 4], w1 = w[c * 4 + 1], w2 = w[c * 4 + 2], w3 = w[c * 4 + 3];
+    const bool norm = blockIdx.x < 2 * HK;   // q and k heads; v channels are not normalised
+    __shared__ float part[16][4];
+    for (int64_t tb = t0; tb < t1; tb += 16) {
+        const int n = (int) (t1 - tb < 16 ? t1 - tb : 16);
+        float val[16];
+#pragma unroll
+        for (int j = 0; j < 16; ++j) {
+            val[j] = 0.0f;
+            if (j < n) {
+                const float x = qkv[(tb + j) * C + c];
+                const float s = v0 * w0 + v1 * w1 + v2 * w2 + x * w3;
+                val[j] = s / (1.0f + __expf(-s));
+                v0 = v1; v1 = v2; v2 = x;
+            }
+        }
+        if (norm) {
+#pragma unroll
+            for (int j = 0; j < 16; ++j) {
+                float sq = val[j] * val[j];
+#pragma unroll
+                for (int o = 16; o > 0; o >>= 1) sq += __shfl_xor(sq, o);
+                if ((threadIdx.x & 31) == 0) part[j][threadIdx.x >> 5] = sq;
+            }
+            __syncthreads();
+#pragma unroll
+            for (int j = 0; j < 16; ++j) val[j] *= rsqrtf(part[j][0] + part[j][1] + part[j][2] + part[j][3] + eps);
+            __syncthreads();
+        }
+#pragma unroll
+        for (int j = 0; j < 16; ++j)
+            if (j < n) h[(tb + j) * C + c] = (_Float16) val[j];
+    }
+}
+
+// H16: h is the FP16 conv output of gdn_conv_l2_h16_kernel (the matrix-core operands are FP16 anyway; v keeps 11 bits, the
+// same rounding the y operand takes a step later), else the FP32 h of gdn_conv.
+template<bool H16>
+__global__ void __launch_bounds__(32 * GW_VPK) gdn_w12_prep_kernel(const float* __restrict__ hf, const _Float16* __restrict__ hh,
+                                                                const float* __restrict__ gate,
                                                                 const float* __restrict__ beta, _Float16* __restrict__ tp,
                                                                 int64_t T) {
     __shared__ float sa[GW_VPK][GW_CK * GW_CK], sg[GW_VPK][GW_CK], sb[GW_VPK][GW_CK];
@@ -52,18 +102,25 @@ __global__ void __launch_bounds__(32 * GW_VPK) gdn_w12_prep_kernel(const float* 
     gw_f8 kk = {}, qk = {};   // k_t.k_i and q_t.k_i (lane: column i = c, rows t = 8 * hi + v)
     {
         const bool ok = t0 + c < T;   // past the end: zero rows
-        const float* ht = h + (ok ? t0 + c : 0) * C;
+        const float* ht = hf + (ok ? t0 + c : 0) * C;
+        const _Float16* hth = hh + (ok ? t0 + c : 0) * C;
 #pragma unroll
         for (int j = 0; j < S / 16; ++j) {
             gw_h8 ka, qa;
+            if (H16) {
+                ka = *reinterpret_cast<const gw_h8*>(hth + HK * S + qh * S + 16 * j + 8 * hi);
+                qa = *reinterpret_cast<const gw_h8*>(hth + qh * S + 16 * j + 8 * hi);
+                if (!ok) { ka = gw_h8{}; qa = gw_h8{}; }
+            } else {
 #pragma unroll
-            for (int i = 0; i < 2; ++i) {
-                const gw_f4 k4 = *reinterpret_cast<const gw_f4*>(ht + HK * S + qh * S + 16 * j + 8 * hi + 4 * i);
-                const gw_f4 q4 = *reinterpret_cast<const gw_f4*>(ht + qh * S + 16 * j + 8 * hi + 4 * i);
+                for (int i = 0; i < 2; ++i) {
+                    const gw_f4 k4 = *reinterpret_cast<const gw_f4*>(ht + HK * S + qh * S + 16 * j + 8 * hi + 4 * i);
+                    const gw_f4 q4 = *reinterpret_cast<const gw_f4*>(ht + qh * S + 16 * j + 8 * hi + 4 * i);
 #pragma unroll
-                for (int e = 0; e < 4; ++e) {
-                    ka[4 * i + e] = (_Float16) (ok ? k4[e] : 0.0f);
-                    qa[4 * i + e] = (_Float16) (ok ? q4[e] : 0.0f);
+                    for (int e = 0; e < 4; ++e) {
+                        ka[4 * i + e] = (_Float16) (ok ? k4[e] : 0.0f);
+                        qa[4 * i + e] = (_Float16) (ok ? q4[e] : 0.0f);
+                    }
                 }
             }
             kk = gw_mma12(ka, ka, kk);   // B = K^T: lane i holds column i of K^T = row i of K, the A operand itself
@@ -103,8 +160,42 @@ __global__ void __launch_bounds__(32 * GW_VPK) gdn_w12_prep_kernel(const float* 
     }
 }
 
-template<bool LB>
-__global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restrict__ state, const float* __restrict__ h,
+// gw_load / gw_touch for the FP16 h (a thread's 8 channels of k, q, v are one 16-byte load each)
+__device__ __forceinline__ void gw12_load16(GwChunk& in, const _Float16* __restrict__ hh, const float* __restrict__ gate,
+                                            const float* __restrict__ beta, const unsigned* __restrict__ tp, int64_t t0, int64_t T,
+                                            int vh, int qh) {
+    const int t = threadIdx.x >> 4, r = (threadIdx.x & 15) * 8;
+    const _Float16* ht = hh + std::min<int64_t>(t0 + t, T - 1) * C;
+    in.tp = tp[((t0 / GW_CK) * HV + vh) * (GW_CK * GW_CK) + threadIdx.x];
+    const gw_h8 k = *reinterpret_cast<const gw_h8*>(ht + HK * S + qh * S + r);
+    const gw_h8 q = *reinterpret_cast<const gw_h8*>(ht + qh * S + r);
+    const gw_h8 v = *reinterpret_cast<const gw_h8*>(ht + 2 * HK * S + vh * S + r);
+    in.k0 = gw_f4{(float) k[0], (float) k[1], (float) k[2], (float) k[3]};
+    in.k1 = gw_f4{(float) k[4], (float) k[5], (float) k[6], (float) k[7]};
+    in.q0 = gw_f4{(float) q[0], (float) q[1], (float) q[2], (float) q[3]};
+    in.q1 = gw_f4{(float) q[4], (float) q[5], (float) q[6], (float) q[7]};
+    in.v0 = gw_f4{(float) v[0], (float) v[1], (float) v[2], (float) v[3]};
+    in.v1 = gw_f4{(float) v[4], (float) v[5], (float) v[6], (float) v[7]};
+    if (threadIdx.x < GW_CK) {
+        const int64_t tl = std::min<int64_t>(t0 + threadIdx.x, T - 1);
+        in.g = gate[tl * HV + vh];
+        in.b = beta[tl * HV + vh];
+    }
+}
+__device__ __forceinline__ unsigned gw12_touch16(const _Float16* __restrict__ hh, const float* __restrict__ z, int64_t t0, int64_t T,
+                                                 int vh, int qh) {
+    const int t = threadIdx.x >> 4, part = threadIdx.x & 15, kind = part >> 2;
+    if (t0 + t >= T) return 0u;
+    if (kind == 3) return __float_as_uint((z + (t0 + t) * HV * S + vh * S)[32 * (part & 3)]);
+    const _Float16* p = kind == 0 ? hh + (t0 + t) * C + HK * S + qh * S
+                      : kind == 1 ? hh + (t0 + t) * C + qh * S
+                                  : hh + (t0 + t) * C + 2 * HK * S + vh * S;
+    return *reinterpret_cast<const unsigned*>(p + 64 * (part & 1));   // 256 bytes of FP16: two lines
+}
+
+template<bool LB, bool H16>
+__global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restrict__ state, const float* __restrict__ hf,
+                                                                  const _Float16* __restrict__ hh,
                                                                   const float* __restrict__ gate, const float* __restrict__ beta,
                                                                   const float* __restrict__ z, const float* __restrict__ gamma,
                                                                   const unsigned* __restrict__ tp, float eps,
@@ -126,7 +217,7 @@ __global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restr
     if (threadIdx.x < S) sgam[threadIdx.x] = gamma[threadIdx.x];
     const float out_scale = rsqrtf((float) S);
     GwChunk cur;
-    gw_load(cur, h, gate, beta, tp, 0, T, vh, qh);
+    if (H16) gw12_load16(cur, hh, gate, beta, tp, 0, T, vh, qh); else gw_load(cur, hf, gate, beta, tp, 0, T, vh, qh);
     unsigned touched = 0;
     gw_f4 z0 = {}, z1 = {};
     auto store_rows = [&](int64_t c0) {
@@ -163,8 +254,12 @@ __global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restr
                 sb[l] = ok ? cur.b : 0.0f;
             }
         }
-        if (t0 + GW_CK < T) gw_load(cur, h, gate, beta, tp, t0 + GW_CK, T, vh, qh);
-        const unsigned touch_now = gw_touch(h, z, t0 + GW_AHEAD * GW_CK, T, vh, qh);
+        if (t0 + GW_CK < T) {
+            if (H16) gw12_load16(cur, hh, gate, beta, tp, t0 + GW_CK, T, vh, qh);
+            else gw_load(cur, hf, gate, beta, tp, t0 + GW_CK, T, vh, qh);
+        }
+        const unsigned touch_now = H16 ? gw12_touch16(hh, z, t0 + GW_AHEAD * GW_CK, T, vh, qh)
+                                       : gw_touch(hf, z, t0 + GW_AHEAD * GW_CK, T, vh, qh);
         gw12_barrier<LB>();   // (1) this chunk staged; the previous chunk's norm in so
         if (t0 > 0) store_rows(t0 - GW_CK);
         __asm__ volatile("" ::"v"(touched));

@@ -3811,9 +3811,9 @@ bool Prefill::run_impl(const int64_t* tokens, int64_t n, int64_t pos0, std::stri
                     const int64_t ld_y = pf_pad() && T >= std::max<int64_t>(pf_switch_min_t(), 64) ? ZV + ZV_PAD : 0;
                     bool fused_gdn = false;
 #if defined(STRATA_USE_HIP)
-                    // gfx12, STRATA_GDN_CHUNKED=1: the conv is read inside the chunked recurrence (this stage's time then moves into "gdn conv+gates")
+                    // gfx12, STRATA_GDN_CHUNKED=1: conv and recurrence together, the conv output as FP16 (their time then shows in "gdn conv+gates")
                     if (!kva_state_only)
-                        fused_gdn = gdn_conv_recurrence_fused(conv, m.qkv, (const float*) wc->data, state, m.gate, m.beta, m.z,
+                        fused_gdn = gdn_conv_recurrence_fused(conv, m.qkv, (const float*) wc->data, m.hbuf, state, m.gate, m.beta, m.z,
                                                               (const float*) wnm->data, EPS, EPS, m.y, m.y_h, T, m.cs, ld_y);
 #endif
                     if (!fused_gdn) gdn_conv(conv, m.qkv, (const float*) wc->data, m.hbuf, T, EPS, m.cs);
@@ -6816,7 +6816,7 @@ bool Prefill::run_layer_major(const int64_t* tokens, int64_t n, int64_t pos0, st
                         gdn_gates(m.ab, (const float*) wdt->data, (const float*) wsa->data, m.gate, m.beta, T, cs);
                         bool fused_gdn = false;
 #if defined(STRATA_USE_HIP)
-                        fused_gdn = gdn_conv_recurrence_fused(conv, m.qkv, (const float*) wc->data, state, m.gate, m.beta, m.z,
+                        fused_gdn = gdn_conv_recurrence_fused(conv, m.qkv, (const float*) wc->data, m.hbuf, state, m.gate, m.beta, m.z,
                                                               (const float*) wnm->data, EPS, EPS, m.y, m.y_h, T, cs, 0);
 #endif
                         if (!fused_gdn) gdn_conv(conv, m.qkv, (const float*) wc->data, m.hbuf, T, EPS, cs);

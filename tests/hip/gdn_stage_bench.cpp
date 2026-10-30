@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     };
     auto layer = [&](int64_t t0, int64_t n) {   // the prompt-path order: gates, conv, recurrence (+ norm)
         strata::prefill::gdn_gates(dab + t0 * 2 * HV, ddt, dssm, dgate + t0 * HV, dbeta + t0 * HV, n, nullptr);
-        if (strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv + t0 * C, dcw, dstate, dgate + t0 * HV, dbeta + t0 * HV,
+        if (strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv + t0 * C, dcw, dh, dstate, dgate + t0 * HV, dbeta + t0 * HV,
                                                        dz + t0 * ROW, dgamma, 1e-6f, 1e-6f, dy, dy16 + t0 * ld, n, nullptr, ld))
             return;
         strata::prefill::gdn_conv(dhist, dqkv + t0 * C, dcw, dh + t0 * C, n, 1e-6f, nullptr);
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
             ck(cudaDeviceSynchronize(), "sync");
             const R unf = grab();
             prep();
-            const bool f = strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv, dcw, dstate, dgate, dbeta, dz, dgamma, 1e-6f,
+            const bool f = strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv, dcw, dh, dstate, dgate, dbeta, dz, dgamma, 1e-6f,
                                                                       1e-6f, dy, dy16, T, nullptr, ld);
             ck(cudaDeviceSynchronize(), "sync");
             const R fus = grab();
@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
                 const int64_t cut = (T / 2) | 1;
                 auto call = [&](int64_t t0, int64_t n) {
                     strata::prefill::gdn_gates(dab + t0 * 2 * HV, ddt, dssm, dgate + t0 * HV, dbeta + t0 * HV, n, nullptr);
-                    strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv + t0 * C, dcw, dstate, dgate + t0 * HV, dbeta + t0 * HV,
+                    strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv + t0 * C, dcw, dh, dstate, dgate + t0 * HV, dbeta + t0 * HV,
                                                                dz + t0 * ROW, dgamma, 1e-6f, 1e-6f, dy, dy16 + t0 * ld, n, nullptr, ld);
                 };
                 call(0, cut); call(cut, T - cut);
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
             reset();
             ck(cudaEventRecord(e0), "ev");
             strata::prefill::gdn_gates(dab, ddt, dssm, dgate, dbeta, T, nullptr);
-            const bool fused = strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv, dcw, dstate, dgate, dbeta, dz, dgamma,
+            const bool fused = strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv, dcw, dh, dstate, dgate, dbeta, dz, dgamma,
                                                                           1e-6f, 1e-6f, dy, dy16, T, nullptr, ld);
             if (!fused) strata::prefill::gdn_conv(dhist, dqkv, dcw, dh, T, 1e-6f, nullptr);
             ck(cudaEventRecord(e1), "ev");   // fused: conv and recurrence are both inside the FIRST piece
