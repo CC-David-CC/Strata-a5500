@@ -415,7 +415,7 @@ def dsv41_engine_version(exe) -> tuple:
     if version:
         return version
     try:
-        done = subprocess.run([str(exe), "--version"], capture_output=True, text=True, timeout=10, stdin=subprocess.DEVNULL)
+        done = subprocess.run([str(exe), "--version"], capture_output=True, text=True, errors="replace", timeout=10, stdin=subprocess.DEVNULL)
         found = re.search(r"(\d+\.\d+\.\d+(?:\.\d+)?)", (done.stdout or "") + (done.stderr or ""))
         return tuple(int(x) for x in found.group(1).split(".")) if found else ()
     except (OSError, subprocess.SubprocessError, ValueError):

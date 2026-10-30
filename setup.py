@@ -906,7 +906,7 @@ def run(cmd, cwd=None, env=None, check=True, quiet=False):
     env.setdefault("STRATA_EXIT_WITH_PARENT", "1")     # tools/mtp_fetch.py ends when setup ends (#3257: a cancel left it writing)
     r = subprocess.run([str(c) for c in cmd], cwd=cwd, env=env,
                        stdout=subprocess.PIPE if quiet else None, stderr=subprocess.STDOUT if quiet else None,
-                       text=True)
+                       text=True, errors="replace")
     if check and r.returncode != 0:
         if quiet and r.stdout:
             say(r.stdout[-4000:])
@@ -935,7 +935,7 @@ def fetch_mtp(mtp: Path, env: dict, tries: int = 3):
 
 def out(cmd):
     try:
-        return subprocess.run(cmd, capture_output=True, text=True, timeout=60).stdout
+        return subprocess.run(cmd, capture_output=True, text=True, errors="replace", timeout=60).stdout or ""
     except (OSError, subprocess.TimeoutExpired):
         return ""
 
@@ -975,7 +975,7 @@ def ram_gb():
     if sys.platform == "darwin":
         try:
             value = subprocess.run(["sysctl", "-n", "hw.memsize"], capture_output=True,
-                                   text=True, timeout=3, check=True).stdout.strip()
+                                   text=True, errors="replace", timeout=3, check=True).stdout.strip()
             return int(value) / 2**30
         except (OSError, ValueError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
             return 0.0
@@ -2215,7 +2215,7 @@ CMAKE_MIN = (3, 24)                    # CMakeLists.txt: cmake_minimum_required(
 def _tool_version(path, name):
     """(ok, version tuple) of `path --version`: ok False when it does not run (a pip launcher whose Python is gone)."""
     try:
-        done = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=30)
+        done = subprocess.run([path, "--version"], capture_output=True, text=True, errors="replace", timeout=30)
     except (OSError, subprocess.SubprocessError):
         return False, ()
     if done.returncode != 0:
@@ -4209,11 +4209,12 @@ _DISPLAY_CLASS = r"SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bf
 
 def _win_display_adapters() -> list[dict]:
     """The display adapters present ({"name", "pnp"}), from Win32_VideoController."""
-    ps = ("Get-CimInstance Win32_VideoController | ForEach-Object { $_.Name + '|' + $_.PNPDeviceID + '|' + "
+    ps = ("[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; "      # the pipe is read as UTF-8 (#4675)
+          "Get-CimInstance Win32_VideoController | ForEach-Object { $_.Name + '|' + $_.PNPDeviceID + '|' + "
           "$_.AdapterRAM }")
     text = out(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps])
     found = []
-    for line in text.splitlines():
+    for line in (text or "").splitlines():
         parts = line.strip().split("|")
         if len(parts) >= 2 and parts[1]:
             ram = parts[2] if len(parts) > 2 else ""
@@ -4285,7 +4286,8 @@ def amd_gpus_windows(adapters=None, registry=None) -> list[dict]:
         for k, r in enumerate(registry):               # the same card's driver instance: its 64-bit VRAM size
             if k in used or _pci_device_id(r.get("MatchingDeviceId")) != did:
                 continue
-            if r.get("DriverDesc") and ad.get("name") and r["DriverDesc"].strip() != ad["name"].strip():
+            if (r.get("DriverDesc") and ad.get("name") and "\ufffd" not in ad["name"]
+                    and r["DriverDesc"].strip() != ad["name"].strip()):
                 continue
             used.add(k)
             mem = r.get("HardwareInformation.qwMemorySize")
@@ -4353,7 +4355,7 @@ def hip_devices(probe: Path | None = None, text: str | None = None) -> list[dict
             return None
         try:
             hip_runtime_beside_exe(probe.parent)       # #468 #461: not the driver's System32 copy
-            r = subprocess.run([str(probe), "--list-devices"], capture_output=True, text=True, timeout=120,
+            r = subprocess.run([str(probe), "--list-devices"], capture_output=True, text=True, errors="replace", timeout=120,
                                cwd=str(probe.parent), env=engine_env(probe.parent))
         except (OSError, subprocess.TimeoutExpired):
             return None
@@ -4479,7 +4481,7 @@ def engine_from_feed(eng: Path, updating: bool = False) -> Path | None:
     say("  Fetching the ready-made engine from the signed update feed ...")
     try:
         run = subprocess.run([sys.executable, str(ROOT / "strata.py"), "update", "--no-control", "--output", "json"],
-                             env=env, cwd=str(ROOT), capture_output=True, text=True, timeout=3600)
+                             env=env, cwd=str(ROOT), capture_output=True, text=True, errors="replace", timeout=3600)
     except (OSError, subprocess.SubprocessError) as e:
         warn(f"the update feed could not be run ({e})")
         return None
@@ -7406,7 +7408,7 @@ def mtp_corrupt(mtp: Path, env=None) -> bool:
     if not (mtp / "tensors").is_dir():
         return False
     r = subprocess.run([sys.executable, str(ROOT / "tools" / "mtp_fetch.py"), "verify", "--out", str(mtp)], env=env,
-                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
     return r.returncode == 3
 
 
@@ -7686,7 +7688,7 @@ def engine_step(a, gpu, hip, amd, cuda_tk, vision):
 def engine_families(eng: Path) -> set:
     """The model families an engine runs (`strata --families`; an engine from before it: Flash-Next's only)."""
     try:
-        text = subprocess.run([str(eng / EXE), "--families"], capture_output=True, text=True, timeout=60,
+        text = subprocess.run([str(eng / EXE), "--families"], capture_output=True, text=True, errors="replace", timeout=60,
                               env=engine_env(eng)).stdout      # #2372: with the engine's rocm/bin on PATH
     except (OSError, subprocess.SubprocessError):
         return {"qwen4exp"}
