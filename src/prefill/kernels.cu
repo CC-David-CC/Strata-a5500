@@ -1681,6 +1681,11 @@ constexpr int GW_VPK = HV / HK;    // value heads per key head: the prep's waves
 constexpr int GW_KP = S + 8;       // the scan's padded FP16 k / q rows
 constexpr int GW_AHEAD = 3;        // the scan warms the cache this many chunks ahead
 constexpr int64_t kGdnWmmaMin = 64;   // STRATA_GDN_CHUNKED=1 takes prompt chunks of this many tokens and more
+// gfx12: the chunked kernels are faster than the sequential ones at every call length from 64 tokens up (1.7x to 2.5x on the
+// layer), but the prompt-speed gain depends on the prompt: IQ3_S on an R9700, +3.9% at 4K, +5.2% at 8K, +6.9% at 16K, +10.1% at
+// 32K.  The owner's bar for a non-bitwise path is +5%, so gfx12 takes the chunked path only from calls of this many tokens (a
+// prompt of 12K and more; longer prompts arrive in calls of up to 16K).  gfx11 keeps kGdnWmmaMin (not measured at model level).
+constexpr int64_t kGdnW12MinT = 12000;
 typedef _Float16 gw_h16 __attribute__((ext_vector_type(16)));
 typedef _Float16 gw_h8 __attribute__((ext_vector_type(8)));
 typedef _Float16 gw_h2 __attribute__((ext_vector_type(2)));
@@ -1990,6 +1995,7 @@ bool gdn_rec_wmma(float* state, const float* h, const float* gate, const float* 
         last_device = dev;
     }
     if (!gfx11 && !gfx12) return false;
+    if (gfx12 && T < kGdnW12MinT) return false;
     const int64_t nch = (T + GW_CK - 1) / GW_CK;
     _Float16* tp = reinterpret_cast<_Float16*>(y);
     if (gfx12) {
@@ -2032,7 +2038,7 @@ bool gdn_fused_impl(float* history, const float* qkv, const float* conv_w, float
         gfx12 = strata::kernels::gfx_arch_is_gfx12_wmma(p.gcnArchName);
         last_device = dev;
     }
-    if (!gfx12) return false;
+    if (!gfx12 || T < kGdnW12MinT) return false;
     cudaStream_t s = (cudaStream_t) stream;
     const int64_t nch = (T + GW_CK - 1) / GW_CK;
     _Float16* tp = reinterpret_cast<_Float16*>(y);
