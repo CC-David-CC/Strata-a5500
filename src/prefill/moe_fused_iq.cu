@@ -1241,7 +1241,7 @@ constexpr bool nw_capped(int wt) {
 #if defined(STRATA_W_LB) || !defined(__clang_major__) || __clang_major__ < 22
     (void) wt;
     return true;
-#elif defined(__gfx1151__) && __clang_major__ == 23
+#elif defined(__gfx1151__) && (__clang_major__ == 23 || (__clang_major__ >= 24 && !defined(STRATA_W_NOCAP24)))
     return wt != T_IQ2_XS && wt != T_Q8_0;
 #else
     (void) wt;
