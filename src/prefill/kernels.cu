@@ -1239,7 +1239,9 @@ cudaError_t gdn_rec_tc(float* state, const float* h, const float* gate, const fl
             cudaGetLastError();
             return cudaErrorNotSupported;
         }
-        if (strata::cc_major_of(major) < 8 || sms < HV ||
+        const GdnProbe* pr = gdn_probe_get();   // tests only: fewer SMs than value heads run the 48 blocks in several waves
+        const bool any_sms = pr != nullptr && pr->any_sms;
+        if (strata::cc_major_of(major) < 8 || (!any_sms && sms < HV) ||
             (size_t) strata::smem_optin_of(smem) < (split ? kTcScanSmemSplit : kTcScanSmem<false>))
             return cudaErrorNotSupported;
     }
@@ -1284,7 +1286,7 @@ const char* gdn_chunk_why(bool tc, cudaError_t e, bool any_sms, bool split = fal
     if (cc < 8) std::snprintf(buf, sizeof buf, "compute capability %d < 8 (cp.async)", cc);
     else if (!tc && !any_sms && sms < sm_need)
         std::snprintf(buf, sizeof buf, "%d SMs < %d: the scan would run in several waves (STRATA_GDN_CHUNKED=2 bypasses)", sms, sm_need);
-    else if (tc && sms < sm_need) std::snprintf(buf, sizeof buf, "%d SMs < %d (one block per value head)", sms, sm_need);
+    else if (tc && !any_sms && sms < sm_need) std::snprintf(buf, sizeof buf, "%d SMs < %d (one block per value head)", sms, sm_need);
     else if ((size_t) strata::smem_optin_of(smem) < need)
         std::snprintf(buf, sizeof buf, "shared memory per block %d B < %zu B needed", strata::smem_optin_of(smem), need);
     else std::snprintf(buf, sizeof buf, "not supported (%s)", cudaGetErrorString(e));
