@@ -129,7 +129,12 @@
 
 #include <cuda_runtime.h>
 #if defined(STRATA_GPU_METAL)
-namespace strata::metal_engine { void set_model_shard(const char* shard1); }   // metal/src/engine/window.cpp
+namespace strata::metal_engine {
+void set_model_shard(const char* shard1);   // metal/src/engine/window.cpp
+void set_batch_slots(int n);   // metal/src/engine/window.cpp: how many --batch slots the window keeps state for
+// batch slot b <-> the main sequence: the running state (unless kv_only) and the first `upto` cells of K/V
+bool window_slot_copy_main(bool into_slot, int slot, int64_t upto, bool kv_only, std::string& err);
+}
 #endif
 
 #include <array>
@@ -3971,6 +3976,7 @@ int main(int argc, char** argv) {
     const char* isa_floor = strata::kernels::cpu::isa_floor_build();
 #if defined(STRATA_GPU_METAL)   // Apple Silicon: every expert is on the GPU; ggml-cpu (NEON) is the only CPU expert code
     strata::metal_engine::set_model_shard(o.native_preset.c_str());   // the decode window reads the model GGUF itself
+    strata::metal_engine::set_batch_slots(o.batch);
     o.mmap_experts = true;   // ... experts included: no resident copy of them (the GGUF shards in place)
     if (false) {
 #else
@@ -12541,6 +12547,10 @@ int main(int argc, char** argv) {
         };
         auto copy_to_slot = [&](int b, const std::vector<int32_t>& ids, std::string& e) -> bool {
             const int64_t upto = (int64_t) ids.size();
+#if defined(STRATA_GPU_METAL)
+            // the running state and the K/V of the Metal window, not the session's device buffers
+            return strata::metal_engine::window_slot_copy_main(true, b, upto, false, e);
+#endif
             if (slot_copy_direct) {
                 if (!direct_slot_copy(true, b, ids, e)) return false;
             } else
@@ -12588,6 +12598,10 @@ int main(int argc, char** argv) {
             conversations.take_reuse();
             const int64_t upto = at != nullptr ? (int64_t) at->ids.size() : (int64_t) bs[(size_t) b].ids.size();
             if (at != nullptr && at->stage_parts.size() != stages.size()) { e = "a checkpoint without its stage parts"; return false; }
+#if defined(STRATA_GPU_METAL)
+            if (!strata::metal_engine::window_slot_copy_main(false, b, upto, at != nullptr, e)) return false;
+            return at == nullptr || strata::core::conversation_checkpoint_restore(*at, ss, g, e);   // (the checkpoint's running state)
+#endif
             if (slot_copy_direct && at == nullptr) {
                 if (!direct_slot_copy(false, b, bs[(size_t) b].ids, e)) return false;
             } else
