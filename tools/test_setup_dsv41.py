@@ -50,9 +50,9 @@ def run(fn, *a, **kw):
 class Entries(unittest.TestCase):
     def test_pinned_and_hashed(self):
         fam = setup.MULTI_FILE_FAMILIES["deepseek41"]
-        self.assertEqual(setup.HF_REVISIONS[REPO], "f924b94f19c1fea02c06a65c8475b0a45e2b88b1")
+        self.assertEqual(setup.HF_REVISIONS[REPO], "8a6ec9cf118e785a362ea94ee123c61c70553be6")
         self.assertRegex(fam["hf"], SHA)
-        self.assertTrue(fam["hf"].endswith(f"{REPO}/resolve/f924b94f19c1fea02c06a65c8475b0a45e2b88b1/UD-Q8_K_XL/"))
+        self.assertTrue(fam["hf"].endswith(f"{REPO}/resolve/8a6ec9cf118e785a362ea94ee123c61c70553be6/UD-Q8_K_XL/"))
         self.assertIs(setup.REPO_PINS[REPO], setup.DSV41_FILES)
         shards = fam["models"]["UD-Q8_K_XL"]["shards"]
         self.assertEqual(len(shards), 9)
@@ -306,7 +306,7 @@ class Catalog(unittest.TestCase):
         s = M.Strata(ROOT)
         fam = next(f for f in s.model_table({"ram_gb": 251.0, "gpus": [{**c, "usable": True} for c in FOUR], "engine_vendor": "amd"})
                    if f["family"] == "deepseek41")
-        self.assertEqual([x["model"] for x in fam["sizes"]], ["IST-DAS-2.00bpw", "IST-DAS-2.25bpw", "IST-DAS-1.75bpw", "UD-Q8_K_XL"])
+        self.assertEqual([x["model"] for x in fam["sizes"]], ["IST-DAS-2.00bpw", "IST-DAS-2.25bpw", "IST-DAS-1.75bpw", "UD-IQ1_S", "UD-IQ1_M", "UD-Q8_K_XL"])
         small_sets = {x["model"]: x for x in fam["sizes"]}
         self.assertEqual((small_sets["IST-DAS-2.00bpw"]["download_gb"], small_sets["IST-DAS-2.25bpw"]["download_gb"]), (256.8, 273.8))
         self.assertTrue(small_sets["IST-DAS-2.00bpw"]["on_this_pc"].startswith("fits"))
@@ -418,7 +418,7 @@ class OfficialSets(unittest.TestCase):
 
     def test_the_pinned_files(self):
         fam = setup.MULTI_FILE_FAMILIES["deepseek41"]
-        self.assertEqual(list(fam["models"]), ["IST-DAS-2.00bpw", "IST-DAS-2.25bpw", "IST-DAS-1.75bpw", "UD-Q8_K_XL"])         # the official sets first
+        self.assertEqual(list(fam["models"]), ["IST-DAS-2.00bpw", "IST-DAS-2.25bpw", "IST-DAS-1.75bpw", "UD-IQ1_S", "UD-IQ1_M", "UD-Q8_K_XL"])         # the official sets first
         repo = "ISTA-DASLab/DeepSeek-V4.1-Flash-1017-GSQ-RCO-GGUF"
         self.assertEqual(setup.HF_REVISIONS[repo], "cb02422c900df489cea5833e8a92171224059b3c")
         self.assertIs(setup.REPO_PINS[repo], setup.DSV41_ISTA_FILES)
