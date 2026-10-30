@@ -154,6 +154,11 @@ std::vector<std::pair<std::string, std::string>> igpu_default_env(const char* gc
             {"STRATA_PF_FUSED", "1"},
             {"STRATA_SELECT_WMMA", "1"},   // 0.2.9: the block scorer on matrix cores; not bitwise (about 10 of 2,051 selected cells flip at the cutoff
                                            // for queries past ~5K tokens), x1.008 at 8K, x1.037 at 32K, x1.077 at 64K (STRIX-Q-RESULTS.md)
+            // 0.2.9 (owner, 10-30: a consistent Strix Halo speed gain goes on by default): the prompt experts of every covered
+            // format on the F16 matrix-core kernels (the Q8_0 down layers of the Unsloth files included).  Windows gfx1151,
+            // interleaved x3, same 16 greedy ids: IQ3_S 4K 1,187 -> 1,296 and 8K 1,285 -> 1,399 tok/s (x1.09), UD-IQ4_XS 4K 1,119 ->
+            // 1,221 and 8K 1,180 -> 1,270; decode unchanged.  The rounding differs from the int8 kernels (KL is information only).
+            {"STRATA_PF_F16", "1"},
         };
     }
     return t;
