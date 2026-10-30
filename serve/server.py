@@ -343,6 +343,12 @@ ADMIT_MAX_WAIT_S = _timeout_env("STRATA_ADMIT_MAX_WAIT_S", 30.0) or 0.0
 COALESCE_PREFILL = max(0, int(os.environ.get("STRATA_COALESCE_PREFILL") or 0))
 COALESCE_TOKENS = max(256, int(os.environ.get("STRATA_COALESCE_TOKENS") or 16384))   # prompt tokens read together at most
 COALESCE_WAIT_MS = max(0, int(os.environ.get("STRATA_COALESCE_WAIT_MS") or 0))       # a burst's later requests register within this long
+# Adaptive: a read is shared (and the leader waits for its followers) only when this engine has seen at least
+# COALESCE_MIN_REQS requests arrive within COALESCE_BURST_MS (the leader's own included).  Fewer than that - one or two
+# requests per engine, as 8 requests on 4 replicas - read plainly, with no wait: nothing to share, and the wait and the
+# longer pass only cost (measured 4 x 1 replicas at 8 requests: 168 against 196 tok/s with an unconditional wait).
+COALESCE_MIN_REQS = max(2, int(os.environ.get("STRATA_COALESCE_MIN_REQS") or 3))
+COALESCE_BURST_MS = max(10, int(os.environ.get("STRATA_COALESCE_BURST_MS") or 250))
 STALL_CPU_EPS_S = 0.5       # CPU seconds the engine may use in the whole stall window and still count as frozen
 STALL_IO_EPS_B = 1 << 20    # bytes read or written in that window
 
@@ -1201,6 +1207,7 @@ class StrataEngine:
             self.waiting = 0                            # requests waiting for the control lines (ctl)
             self.admitting = 0                          # #1603: ... and those that gave the lines back to wait for a slot
             self.wait_lens: list[list[int]] = []        # ... their prompt lengths (a long read gives way to short ones)
+            self.arrivals = collections.deque(maxlen=64)   # monotonic times of the last requests that came for the control lines (STRATA_COALESCE_*)
             self.ctl_epoch = 0                          # how often the control lines were taken
             self.ctl = threading.Lock()                 # one admission or solo request on the control lines at a time
         self.gen = self.__dict__.get("gen", 0) + 1      # which engine process this is (a request notes its own)
@@ -1743,6 +1750,7 @@ class StrataEngine:
         with self.slot_cv:
             self.waiting += 1
             self.wait_lens.append(entry)
+            self.arrivals.append(entry[1])
         beat = time.monotonic()
         try:
             while True:
@@ -1810,6 +1818,11 @@ class StrataEngine:
         same layer-major pass as the BGEN's prompt.  Each follower finds its slot in cancel._strata_preslot."""
         picked = []
         total = len(lead_prompt)
+        now = time.monotonic()
+        with self.slot_cv:
+            recent = max(sum(1 for t in self.arrivals if now - t <= COALESCE_BURST_MS / 1000.0), 1 + len(self.wait_lens))
+        if recent < COALESCE_MIN_REQS:
+            return                                   # one or two requests on this engine: a plain read, no wait
         if COALESCE_WAIT_MS > 0:
             time.sleep(COALESCE_WAIT_MS / 1000.0)    # the requests of a burst reach the server a few ms apart
         with self.slot_cv:
