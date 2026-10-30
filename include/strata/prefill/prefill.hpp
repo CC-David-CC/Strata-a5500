@@ -301,6 +301,7 @@ private:
     bool lm_run(const std::vector<Seg>& segs, int depth, const std::vector<LmSub>* given_super, std::string& err);
     void lm_release();
     bool lm_mid_ = false;
+    bool lm_force_ = false;        ///< run_multi: the walk even for a short total
     bool lm_by_default_ = false;   ///< the walk is on because nothing was set (a wider VRAM margin, the measured super-chunk size)
     // Stage-1 pipeline: intermediate stages return after handing their chunk to
     // the direct successor. The public run() drains the chain once at prompt end.
