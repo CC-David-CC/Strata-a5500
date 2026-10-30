@@ -531,8 +531,8 @@ MAC_MEASURED_PACK = {
     "IQ2_XXS": ("M5 Max, 128 GB, 2.00 bpw: 15-16 tokens/s for a short answer (14-15 after a long prompt), a 3,000-token prompt at about 240 "
                 "tokens/s, 32,000 at about 610; the engine kept about 69 GB of the experts resident and read about 48 MB a token from the SSD"),
     "IQ2_XS": MAC_MEASURED,
-    "UD-IQ1_S": ("M5 Max, 128 GB, Unsloth UD-IQ1_S: 13-18 tokens/s for a short answer (12-18 after a 3,000-token prompt), a 3,000-token prompt at "
-                 "about 210-320 tokens/s; one session, ten answers and a tool call checked by eye, nothing else measured"),
+    "UD-IQ1_S": ("M5 Max, 128 GB, Unsloth UD-IQ1_S: 15-18 tokens/s for a short answer (16-18 after a 3,000-token prompt), a 3,000-token prompt at "
+                 "about 230-310 tokens/s, 14,000 at about 520; the engine kept about 68 GB of the experts resident and the process used about 79 GB"),
 }
 
 
