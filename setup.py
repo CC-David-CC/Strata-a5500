@@ -5817,6 +5817,18 @@ def prebuilt_vision(meta: dict, gpu: dict, vision: str) -> str:
     return vision
 
 
+def local_build_archs(archs, found) -> list:
+    """#4662: the architectures a compiled engine gets code for: the cards this install uses AND every other card Strata can run on in the PC.
+    A PC with a TITAN RTX (sm_75) and an RTX 3080 (sm_86) was updated with archs [75] (the pair was not picked as a split by setup), and the
+    layer-split run on both cards then launched kernels the sm_75 build holds only a trap for: "unspecified launch failure" on every long prompt.
+    One more architecture is a few more minutes of compile, once; a card Strata cannot use (older than sm_75) is left out."""
+    try:
+        present = {int(g["arch"]) for g in found or [] if gpu_problem(g) is None}
+    except (KeyError, TypeError, ValueError):
+        present = set()
+    return sorted({int(x) for x in archs} | present)
+
+
 def build_engine(gpu, vision, yes, llama, toolkit=None) -> Path:
     """Compile the engine (and, for images, the encoder) for this GPU; the results go to engine/.  A compiled
     engine whose source files changed since (a `git pull`) is compiled again: only the changed files, a few minutes.
@@ -5834,6 +5846,7 @@ def build_engine(gpu, vision, yes, llama, toolkit=None) -> Path:
     local = meta.get("source") == "local"
     src, vsrc = source_hash(ENGINE_SOURCES), source_hash(VISION_SOURCES)
     archs = sorted({int(x) for x in gpu.get("archs", [gpu["arch"]])})    # every card the model runs on
+    archs = local_build_archs(archs, gpus())                             # #4662: and every other card in the PC
     built = set(arch_numbers(meta.get("archs")))
     # a card the engine has no code for (a GPU added with --gpus, #128) needs a compile even when the source is the
     # same; the compile keeps the generations it was built for
