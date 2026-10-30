@@ -452,13 +452,49 @@ struct Pack {
         auto it = t.find(n);
         return it == t.end() ? nullptr : &it->second;
     }
+    bool direct_reads = false;   // (after drop_views: the reads go unbuffered, the cached ones are what the slow path is)
     bool read_at(int file, uint64_t off, uint64_t n, void* dst) const {   // (any thread; side by side where pfds is)
+        if (direct_reads && (size_t) file < dfds.size() && dfds[(size_t) file] != os::kBadFd) {
+            thread_local std::vector<uint8_t> bounce;
+            const uint64_t span = os::direct_span(off, n);
+            if (bounce.size() < span + 2 * os::kDirectAlign) bounce.resize((size_t) span + 2 * os::kDirectAlign);
+            uint8_t* bp = (uint8_t*) (((uintptr_t) bounce.data() + os::kDirectAlign - 1) & ~(uintptr_t) (os::kDirectAlign - 1));
+            if (os::pread_direct(dfds[(size_t) file], bp, n, off)) {
+                std::memcpy(dst, bp + off % os::kDirectAlign, (size_t) n);
+                return true;
+            }
+        }
         if ((size_t) file < pfds.size() && pfds[(size_t) file] != os::kBadFd)
             return os::pread_par(pfds[(size_t) file], dst, n, off);
         return os::pread_full(fds[(size_t) file], dst, n, off);
     }
     bool read(const Tensor& x, void* dst) const { return read_at(x.file, x.off, x.bytes, dst); }
-    const uint8_t* at(int file, uint64_t off) const { return maps[(size_t) file].first + off; }   // (gguf: mapped)
+    const uint8_t* at(int file, uint64_t off) const {   // (gguf: mapped; null once the views are dropped)
+        return (size_t) file < maps.size() && maps[(size_t) file].first != nullptr ? maps[(size_t) file].first + off : nullptr;
+    }
+    // Windows: unbuffered reads of a file that has ANY view in this process run at half the drive's rate (a probe on this
+    // box: 6.5 GB/s with no view, 3.2 with a view of the whole file or of its first 1 GB, 6.7 on a copy while the original
+    // is mapped).  Once the load is done the experts reach the CPU lane through the store's slots, so the views go.
+    // A file with cached (buffered) reads and a handle still open is slow the same way (probe: 3.3 GB/s with a buffered
+    // handle held open after one read, 6.5 once it is closed), so the load's buffered handles are closed and fresh ones
+    // (never read from) stand in for the fallbacks; the reads that remain go unbuffered (direct_reads).
+    void drop_views() {
+        for (auto& m : maps)
+            if (m.first != nullptr) {
+                os::unmap(m.first, m.second);
+                m = {nullptr, 0};
+            }
+        for (size_t i = 0; i < fds.size(); ++i) {
+            const std::string path = model_dir + "/" + files[i];
+            os::close_fd(fds[i]);
+            fds[i] = os::open_ro(path);
+            if (i < pfds.size()) {
+                os::close_fd(pfds[i]);
+                pfds[i] = os::open_par(path);
+            }
+        }
+        direct_reads = true;
+    }
 };
 
 // ------------------------------------------------------------------ geometry
@@ -1033,6 +1069,7 @@ struct Model::Impl {
     // the CPU lane's experts read in place from the model's files (one part, the files' layout; the page cache keeps
     // what fits) instead of copied into RAM, and how much of them the load reads ahead (the most-routed first)
     bool file_experts = false;
+    bool views = true;   // false: the shards' views are dropped after the load (DS4_NO_VIEW=1)
     uint64_t warm_bytes = 0;
     static constexpr uint64_t kRamMargin = 8ull << 30;   // RAM left to the rest (the system, the page cache's churn)
     uint8_t* file_part(const Layer& l, int e) const {
@@ -3146,6 +3183,12 @@ struct Model::Impl {
         calibrate_paths();
         init_store();      // (last: the store's arena is registered with the driver - page-locked memory the other pinned allocations must come before)
         preload_store();
+        if (std::getenv("DS4_NO_VIEW") != nullptr && std::atoi(std::getenv("DS4_NO_VIEW")) != 0 && store && pk.gguf) {
+            pk.drop_views();
+            store->set_pfds(pk.pfds);
+            views = false;
+            std::fprintf(stderr, "ds4: no view of the model's files after the load: unbuffered reads at the drive's rate\n");
+        }
         if (o.verbose) std::fprintf(stderr, "ds4: loaded in %.1f s\n%s", (now_ms() - t0) / 1000.0, describe().c_str());
         if (chunk > 0) (void) pick_flow_min();   // (the startup line)
         reset();
@@ -6722,13 +6765,38 @@ struct Model::Impl {
             const int i = idx(e);
             return i < 0 || m->store->loaded(sl[(size_t) i]);
         }
+        // (no view of the files is left to fall back on: an expert without a slot is read again, one at a time, until it has one)
+        void rescue(int a, int b) {
+            if (!m || m->views) return;
+            for (int i = a; i < b; ++i) {
+                for (int tries = 0; !ok[(size_t) i]; ++tries) {
+                    std::vector<char> o2;
+                    m->store->ensure(layer, &es[(size_t) i], 1, o2);
+                    if (!o2.empty() && o2[0]) {
+                        ok[(size_t) i] = 1;
+                        break;
+                    }
+                    if (tries > 2000) {
+                        std::fprintf(stderr, "ds4: layer %d expert %d: no store slot and no view of the files\n", layer, es[(size_t) i]);
+                        std::exit(3);
+                    }
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                }
+            }
+        }
         void wait_expert(int e) {
             if (!m) return;
             const int i = idx(e);
-            if (i >= 0) m->store->wait_slots(sl, ok, i, i + 1);
+            if (i >= 0) {
+                m->store->wait_slots(sl, ok, i, i + 1);
+                rescue(i, i + 1);
+            }
         }
         void wait_all() {
-            if (m) m->store->wait_slots(sl, ok, 0, (int) es.size());
+            if (m) {
+                m->store->wait_slots(sl, ok, 0, (int) es.size());
+                rescue(0, (int) es.size());
+            }
         }
         ~StoreHold() {
             if (m) m->store->release(layer, es.data(), (int) es.size(), ok);
