@@ -30,6 +30,7 @@ struct GdnProbe {
     // in
     int force = kGdnAuto;      // kGdnAuto: dispatch as production does; otherwise only this path may run
     bool any_sms = false;      // chunked: skip the 128-SM test, as STRATA_GDN_CHUNKED=2 does
+    int tc_tiles = 0;          // tcs: value tiles a head (1, 2; 0 = STRATA_GDN_TC_TILES, else automatic: 2 on cards with >= 96 SMs)
     int gsb = 0;               // chunked: tokens per scratch super-block (a multiple of 32, at most 2048; 0 = 2048)
     // out (set by every gdn_recurrence call made on the thread that installed the probe)
     int selected = kGdnNone;   // the path that launched
