@@ -198,9 +198,9 @@ kernel void ds4_iq_mv_k(device const uchar* jobs [[buffer(0)]], uint2 tgp [[thre
                 const int s0 = int(((const device char*) scl)[8u * h + 2u * quarter]);
                 const int s1 = int(((const device char*) scl)[8u * h + 2u * quarter + 1u]);
                 for (uint t = 0; t < 8u; ++t) {
-                    // (packed_uint: a 210-byte block starts only 2-byte aligned - a plain uint load reads the wrong word on odd blocks)
-                    const uint x = ((uint(*(const device packed_uint*) (qlp + 4u * t)) >> sh) & 0x0f0f0f0fu) |
-                                   (((uint(*(const device packed_uint*) (qhp + 4u * t)) >> (2u * quarter)) & 0x03030303u) << 4);
+                    // (packed_uchar4: a 210-byte block starts only 2-byte aligned - a plain uint load reads the wrong word on odd blocks)
+                    const uint x = ((as_type<uint>(uchar4(*(const device packed_uchar4*) (qlp + 4u * t))) >> sh) & 0x0f0f0f0fu) |
+                                   (((as_type<uint>(uchar4(*(const device packed_uchar4*) (qhp + 4u * t))) >> (2u * quarter)) & 0x03030303u) << 4);
                     const uint off = blk * 256u + ib * 32u + t * 4u;
                     const float s = float(t < 4u ? s0 : s1);
                     for (uint c = 0; c < 16u; ++c) {
