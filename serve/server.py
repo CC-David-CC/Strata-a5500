@@ -1818,11 +1818,16 @@ class StrataEngine:
         same layer-major pass as the BGEN's prompt.  Each follower finds its slot in cancel._strata_preslot."""
         picked = []
         total = len(lead_prompt)
-        now = time.monotonic()
-        with self.slot_cv:
-            recent = max(sum(1 for t in self.arrivals if now - t <= COALESCE_BURST_MS / 1000.0), 1 + len(self.wait_lens))
+        def seen() -> int:
+            now = time.monotonic()
+            with self.slot_cv:
+                return max(sum(1 for t in self.arrivals if now - t <= COALESCE_BURST_MS / 1000.0), 1 + len(self.wait_lens))
+        recent = seen()
+        if recent < COALESCE_MIN_REQS and COALESCE_WAIT_MS > 0:
+            time.sleep(0.010)                        # (the first request of a burst holds the lines before its neighbours have arrived)
+            recent = seen()
         if recent < COALESCE_MIN_REQS:
-            return                                   # one or two requests on this engine: a plain read, no wait
+            return                                   # one or two requests on this engine: a plain read, at most 10 ms lost
         if COALESCE_WAIT_MS > 0:
             time.sleep(COALESCE_WAIT_MS / 1000.0)    # the requests of a burst reach the server a few ms apart
         with self.slot_cv:
