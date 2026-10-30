@@ -11,6 +11,8 @@ from strata_control import dsv41_sets, models
 T = dsv41_sets.tables()
 
 
+ISTA = [m for m in T["sets"] if m.startswith("IST-DAS")]      # the Unsloth UD-IQ1 sets have no legacy, six-shard or re-published layouts (tools/test_setup_udlow.py)
+
 def files_of(model, legacy=False, engram="official", drop=(), wrong=(), layout=None):
     entry = T["sets"][model]
     pinned = dict(entry["six"] if layout == "six" else entry["legacy"] if legacy else entry["shards"])
@@ -35,11 +37,11 @@ class DeepSeekPreview(unittest.TestCase):
                 return models.plan_import(str(target)), folder
 
     def test_the_tables_come_from_setup_and_cover_the_three_official_sizes(self):
-        self.assertEqual(sorted(T["sets"]), ["IST-DAS-1.75bpw", "IST-DAS-2.00bpw", "IST-DAS-2.25bpw"])
+        self.assertEqual(sorted(T["sets"]), ["IST-DAS-1.75bpw", "IST-DAS-2.00bpw", "IST-DAS-2.25bpw", "UD-IQ1_M", "UD-IQ1_S"])
         self.assertEqual(len(T["engram"]), 2)
 
     def test_each_official_set_is_recognised_with_its_size_name(self):
-        for model in T["sets"]:
+        for model in ISTA:
             for legacy in (False, True):
                 if legacy and not T["sets"][model]["legacy"]:
                     continue                                    # 1.75 has no first-release names
@@ -88,7 +90,7 @@ class DeepSeekPreview(unittest.TestCase):
         self.assertFalse(any("not supported" in m for m in plan["messages"]))
 
     def test_the_four_shard_files_with_the_republished_first_shard_are_the_set_4237(self):
-        for model in T["sets"]:
+        for model in ISTA:
             plan, folder = self.preview(files_of(model, layout="four-newer-first"))
             self.assertEqual(plan["file_set_status"], "plausible", (model, plan["issues"]))
             self.assertEqual(plan["candidate_selection"]["model"], model)
@@ -102,7 +104,7 @@ class DeepSeekPreview(unittest.TestCase):
         self.assertEqual(plan["missing_shards"], [first])
 
     def test_the_six_shard_files_are_the_set(self):
-        for model in T["sets"]:
+        for model in ISTA:
             plan, folder = self.preview(files_of(model, layout="six"))
             self.assertEqual(plan["file_set_status"], "plausible", (model, plan["issues"]))
             self.assertEqual((plan["candidate_selection"]["family"], plan["candidate_selection"]["model"]), ("deepseek41", model))
