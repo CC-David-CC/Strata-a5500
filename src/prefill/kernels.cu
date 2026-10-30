@@ -1,6 +1,7 @@
 // src/prefill/kernels.cu - see include/strata/prefill/kernels.hpp.
 #include "strata/prefill/kernels.hpp"
 #include "strata/prefill/gdn_chunk.hpp"
+#include "strata/prefill/gdn_probe.hpp"
 #include "strata/kernels/mrope.hpp"
 #include "strata/kernels/gfx_arch.hpp"
 #include "strata/kernels/router_top10.hpp"
@@ -1191,13 +1192,19 @@ cudaError_t gdn_rec_chunked(float* state, const float* h, const float* gate, con
         // STRATA_GDN_CHUNKED=2 skips the SM-count test (measurement on a card under 128 SMs: the scan then runs in
         // several waves and is expected to be slower than the default kernel; the architecture and shared-memory
         // tests stay)
-        static const bool any_sms = [] { const char* v = std::getenv("STRATA_GDN_CHUNKED"); return v != nullptr && std::atoi(v) >= 2; }();
+        static const bool any_sms_env = [] { const char* v = std::getenv("STRATA_GDN_CHUNKED"); return v != nullptr && std::atoi(v) >= 2; }();
+        const GdnProbe* pr = gdn_probe_get();   // tests only: the same as =2, per call
+        const bool any_sms = any_sms_env || (pr != nullptr && pr->any_sms);
         if (strata::cc_major_of(major) < 8 || (!any_sms && sms < HK * (S / GDV)) || (size_t) strata::smem_optin_of(smem) < kChunkScanSmem)
             return cudaErrorNotSupported;
     }
     float* scratch = gdn_chunk_scratch();
     if (scratch == nullptr) return cudaErrorMemoryAllocation;
-    const int nb = (int) ((std::min<int64_t>(GSB, T) + GCH - 1) / GCH);
+    // the scratch segment: a test may ask for a smaller one than GSB (a multiple of GCH); production always GSB
+    int64_t gsb = GSB;
+    if (const GdnProbe* pr = gdn_probe_get())
+        if (pr->gsb >= GCH && pr->gsb < GSB) gsb = (pr->gsb / GCH) * GCH;
+    const int nb = (int) ((std::min<int64_t>(gsb, T) + GCH - 1) / GCH);
     const size_t tsz = (size_t) nb * HV * GCH * GCH;
     float *tm = scratch, *pm = tm + tsz, *gm = pm + tsz;
     {   // once a device
@@ -1210,8 +1217,8 @@ cudaError_t gdn_rec_chunked(float* state, const float* h, const float* gate, con
             attrs[dev] = true;
         }
     }
-    for (int64_t t0 = 0; t0 < T; t0 += GSB) {
-        const int nch = (int) ((std::min<int64_t>(GSB, T - t0) + GCH - 1) / GCH);
+    for (int64_t t0 = 0; t0 < T; t0 += gsb) {
+        const int nch = (int) ((std::min<int64_t>(gsb, T - t0) + GCH - 1) / GCH);
         gdn_chunk_prep_kernel<<<dim3((unsigned) nch, HK), 256, kChunkPrepSmem, s>>>(h, gate, beta, tm, pm, gm, t0, T);
         gdn_chunk_scan_kernel<<<dim3(HK, S / GDV), 128 * VPK, kChunkScanSmem, s>>>(state, h, beta, tm, pm, gm, y, t0, nch, T);
     }
@@ -1221,7 +1228,7 @@ cudaError_t gdn_rec_chunked(float* state, const float* h, const float* gate, con
 // that also writes its f16 images (gdn_tc_prep_kernel, scratch gdn_tc_scratch), 48 blocks of 256 threads in one wave.  An error return means nothing was launched: the card is below
 // sm_80, has fewer than 48 SMs, or less than 122 KB of shared memory a block.
 cudaError_t gdn_rec_tc(float* state, const float* h, const float* gate, const float* beta, float* y, int64_t T,
-                       cudaStream_t s) {
+                       cudaStream_t s, bool split = false) {
     if (T <= 0) return cudaSuccess;
     {
         int dev = 0, major = 0, sms = 0, smem = 0;
@@ -1232,26 +1239,56 @@ cudaError_t gdn_rec_tc(float* state, const float* h, const float* gate, const fl
             cudaGetLastError();
             return cudaErrorNotSupported;
         }
-        if (strata::cc_major_of(major) < 8 || sms < HV || (size_t) strata::smem_optin_of(smem) < kTcScanSmem<false>)
+        if (strata::cc_major_of(major) < 8 || sms < HV ||
+            (size_t) strata::smem_optin_of(smem) < (split ? kTcScanSmemSplit : kTcScanSmem<false>))
             return cudaErrorNotSupported;
     }
     const GtcScratch sc = gdn_tc_scratch();
     if (sc.ti == nullptr) return cudaErrorMemoryAllocation;
     {   // once a device
-        static bool attrs[64] = {};
+        static bool attrs[2][64] = {};
         int dev = 0;
         cudaGetDevice(&dev);
-        if (dev >= 0 && dev < 64 && !attrs[dev]) {
-            cudaFuncSetAttribute(gdn_tc_scan_kernel<false>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmem<false>);
-            attrs[dev] = true;
+        if (dev >= 0 && dev < 64 && !attrs[split][dev]) {
+            if (split) cudaFuncSetAttribute(gdn_tc_scan_kernel<false, true>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplit);
+            else cudaFuncSetAttribute(gdn_tc_scan_kernel<false>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmem<false>);
+            attrs[split][dev] = true;
         }
     }
     for (int64_t t0 = 0; t0 < T; t0 += GSB) {
         const int nch = (int) ((std::min<int64_t>(GSB, T - t0) + GCH - 1) / GCH);
         gdn_tc_prep_kernel<<<dim3((unsigned) nch, HK), 256, kTcPrepSmem, s>>>(h, gate, beta, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, t0, T);
-        gdn_tc_scan_kernel<false><<<HV, GTC_CW * 32, kTcScanSmem<false>, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T);
+        if (split)
+            gdn_tc_scan_kernel<false, true><<<HV, GTC_CW * 32, kTcScanSmemSplit, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T);
+        else
+            gdn_tc_scan_kernel<false><<<HV, GTC_CW * 32, kTcScanSmem<false>, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T);
     }
     return cudaSuccess;
+}
+// Why gdn_rec_chunked (tc false) or gdn_rec_tc (tc true) launched nothing, in words: the same tests asked again.  Only
+// the gdn_probe.hpp `reason` uses it (a test says what it timed); the dispatch itself never calls it.
+const char* gdn_chunk_why(bool tc, cudaError_t e, bool any_sms, bool split = false) {
+    static thread_local char buf[200];
+    if (e == cudaErrorMemoryAllocation) return "scratch allocation failed";
+    int dev = 0, major = 0, sms = 0, smem = 0;
+    if (cudaGetDevice(&dev) != cudaSuccess ||
+        cudaDeviceGetAttribute(&major, cudaDevAttrComputeCapabilityMajor, dev) != cudaSuccess ||
+        cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, dev) != cudaSuccess ||
+        cudaDeviceGetAttribute(&smem, cudaDevAttrMaxSharedMemoryPerBlockOptin, dev) != cudaSuccess) {
+        cudaGetLastError();
+        return "device attributes unavailable";
+    }
+    const int cc = strata::cc_major_of(major);
+    const size_t need = tc ? (split ? kTcScanSmemSplit : (size_t) kTcScanSmem<false>) : kChunkScanSmem;
+    const int sm_need = tc ? HV : HK * (S / GDV);
+    if (cc < 8) std::snprintf(buf, sizeof buf, "compute capability %d < 8 (cp.async)", cc);
+    else if (!tc && !any_sms && sms < sm_need)
+        std::snprintf(buf, sizeof buf, "%d SMs < %d: the scan would run in several waves (STRATA_GDN_CHUNKED=2 bypasses)", sms, sm_need);
+    else if (tc && sms < sm_need) std::snprintf(buf, sizeof buf, "%d SMs < %d (one block per value head)", sms, sm_need);
+    else if ((size_t) strata::smem_optin_of(smem) < need)
+        std::snprintf(buf, sizeof buf, "shared memory per block %d B < %zu B needed", strata::smem_optin_of(smem), need);
+    else std::snprintf(buf, sizeof buf, "not supported (%s)", cudaGetErrorString(e));
+    return buf;
 }
 #endif
 #if defined(__HIPCC__)   // the Aurora (gfx11) recurrence kernels: AMD builds only
@@ -2777,16 +2814,74 @@ static void gdn_recurrence_impl(int variant, float* state, const float* h, const
         // chunks of kGdnTcMin+ tokens: within 1e-4 of the kernels below (gdn_rec_parity), 3.75x gdn_rec_kh_kernel on a
         // CMP 170HX; a shorter chunk, a card it does not fit or a failed scratch allocation takes the kernels below
         static const bool tc = [] { const char* v = std::getenv("STRATA_GDN_TC"); return v != nullptr && std::atoi(v) != 0; }();
-        if (tc && T >= kGdnTcMin && gdn_rec_tc(state, h, gate, beta, y, T, (cudaStream_t) stream) == cudaSuccess) {
-        } else if (chunked && T >= kGdnChunkedMin && gdn_rec_chunked(state, h, gate, beta, y, T, (cudaStream_t) stream) == cudaSuccess) {
-        } else if (pipe && gdn_keyhead_ok())   // the value heads of a key head in one thread (same bits)
-            gdn_rec_kh_kernel<<<HK * NCB, dim3(CB, RG), 0, (cudaStream_t) stream>>>(state, h, gate, beta, y, T);
-        else
-#endif
+        // A test's probe (gdn_probe.hpp) reads back the path that ran and may force one; without a probe this is the
+        // dispatch it was.  A forced path that cannot run launches nothing (selected = none, reason says why).
+        GdnProbe* pr = gdn_probe_get();
+        const int force = pr ? pr->force : (int) kGdnAuto;
+        int sel = kGdnNone, wanted = force;
+        const char* why = "";
+        const cudaStream_t cs = (cudaStream_t) stream;
+        if (force != kGdnAuto) {
+            if (force == kGdnTc || force == kGdnTcSplit) {
+                const bool sp = force == kGdnTcSplit;
+                cudaError_t e = T >= kGdnTcMin ? gdn_rec_tc(state, h, gate, beta, y, T, cs, sp) : cudaErrorInvalidValue;
+                if (e == cudaSuccess) sel = force;
+                else why = T < kGdnTcMin ? "T below the tc minimum (128)" : gdn_chunk_why(true, e, false, sp);
+            } else if (force == kGdnChunked) {
+                cudaError_t e = T >= kGdnChunkedMin ? gdn_rec_chunked(state, h, gate, beta, y, T, cs) : cudaErrorInvalidValue;
+                if (e == cudaSuccess) sel = kGdnChunked;
+                else why = T < kGdnChunkedMin ? "T below the chunked minimum (128)" : gdn_chunk_why(false, e, pr->any_sms);
+            } else if (force == kGdnKeyHead) {
+                if (gdn_keyhead_ok()) {
+                    gdn_rec_kh_kernel<<<HK * NCB, dim3(CB, RG), 0, cs>>>(state, h, gate, beta, y, T);
+                    sel = kGdnKeyHead;
+                } else why = "keyhead kernel not eligible here (needs sm_80+ with all 64 blocks resident, or STRATA_GDN_KEYHEAD=0 is set)";
+            } else if (force == kGdnPipe) {
+                gdn_rec_cols_pipe_kernel<<<HV * NCB, dim3(CB, RG), 0, cs>>>(state, h, gate, beta, y, T);
+                sel = kGdnPipe;
+            } else if (force == kGdnCols) {
+                gdn_rec_cols_kernel<<<HV * NCB, dim3(CB, RG), 0, cs>>>(state, h, gate, beta, y, T);
+                sel = kGdnCols;
+            } else why = "unknown path";
+        } else {
+            if (tc && T >= kGdnTcMin) {
+                wanted = kGdnTc;
+                cudaError_t e = gdn_rec_tc(state, h, gate, beta, y, T, cs);
+                if (e == cudaSuccess) sel = kGdnTc;
+                else {   // the 99-KB cards (sm_86 / 89 / 120): the single-buffered v / T / P plan
+                    if (pr) why = gdn_chunk_why(true, e, false);
+                    e = gdn_rec_tc(state, h, gate, beta, y, T, cs, true);
+                    if (e == cudaSuccess) { sel = kGdnTcSplit; why = ""; }
+                }
+            }
+            if (sel == kGdnNone && chunked && T >= kGdnChunkedMin) {
+                if (wanted == kGdnAuto) wanted = kGdnChunked;
+                const cudaError_t e = gdn_rec_chunked(state, h, gate, beta, y, T, cs);
+                if (e == cudaSuccess) sel = kGdnChunked;
+                else if (pr && wanted == kGdnChunked) why = gdn_chunk_why(false, e, false);
+            }
+            if (sel == kGdnNone) {
+                if (pipe && gdn_keyhead_ok()) {   // the value heads of a key head in one thread (same bits)
+                    gdn_rec_kh_kernel<<<HK * NCB, dim3(CB, RG), 0, cs>>>(state, h, gate, beta, y, T);
+                    sel = kGdnKeyHead;
+                } else if (pipe) {   // the software-pipelined loads (same bits)
+                    gdn_rec_cols_pipe_kernel<<<HV * NCB, dim3(CB, RG), 0, cs>>>(state, h, gate, beta, y, T);
+                    sel = kGdnPipe;
+                } else {
+                    gdn_rec_cols_kernel<<<HV * NCB, dim3(CB, RG), 0, cs>>>(state, h, gate, beta, y, T);
+                    sel = kGdnCols;
+                }
+                if (wanted == kGdnAuto) wanted = sel;
+            }
+        }
+        if (pr) { pr->selected = sel; pr->wanted = wanted == kGdnAuto ? sel : wanted; pr->reason = why; ++pr->calls; }
+        if (sel == kGdnNone) { check("gdn_recurrence (forced path not eligible: nothing launched)"); return; }
+#else
         if (pipe)   // the software-pipelined loads (same bits)
             gdn_rec_cols_pipe_kernel<<<HV * NCB, dim3(CB, RG), 0, (cudaStream_t) stream>>>(state, h, gate, beta, y, T);
         else
             gdn_rec_cols_kernel<<<HV * NCB, dim3(CB, RG), 0, (cudaStream_t) stream>>>(state, h, gate, beta, y, T);
+#endif
         if (with_out)
             gdn_out_norm_kernel<<<dim3((unsigned) T, HV), S, 0, (cudaStream_t) stream>>>(z, gamma, eps, y, y16, ld16);
     }
