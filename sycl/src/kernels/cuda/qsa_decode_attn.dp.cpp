@@ -1,6 +1,7 @@
 // src/kernels/cuda/qsa_decode_attn.cu - see include/strata/kernels/qsa_decode_attn.hpp.
 #define DPCT_PROFILING_ENABLED
 #include <sycl/sycl.hpp>
+#include "strata/kprof.hpp"
 #include "strata/core/geometry.hpp"
 #include <dpct/dpct.hpp>
 #include "strata/sycl_queue.hpp"
@@ -688,7 +689,7 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
             sycl::ext::oneapi::experimental::use_root_sync};                   \
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});  \
                                                                                \
-        st->submit([&](sycl::handler &cgh) {                                   \
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->submit([&](sycl::handler &cgh) {                                   \
             auto q_ct0 = q;                                                    \
             QsaAttnPools pools_ct1 = pools;                                    \
             auto ids_ct2 = ids;                                                \
@@ -725,7 +726,7 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
             sycl::ext::oneapi::experimental::use_root_sync};                   \
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});  \
                                                                                \
-        st->submit([&](sycl::handler &cgh) {                                   \
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->submit([&](sycl::handler &cgh) {                                   \
             auto q_ct0 = q;                                                    \
             QsaAttnPools pools_ct1 = pools;                                    \
             auto ids_ct2 = ids;                                                \
@@ -785,7 +786,7 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_dfacfc,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_dfacfc,
                                           dpct_kernel_scalar<3>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -801,7 +802,7 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_b0d448,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_b0d448,
                                           dpct_kernel_scalar<2>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -817,7 +818,7 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_2ad0a4,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_2ad0a4,
                                           dpct_kernel_scalar<1>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -832,7 +833,7 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_5c04f7,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_5c04f7,
                                           dpct_kernel_scalar<0>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -847,7 +848,7 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        st->parallel_for<dpct_kernel_name<class attn_merge_kernel_338175>>(
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_merge_kernel_338175>>(
             sycl::nd_range<3>(
                 sycl::range(1, (unsigned)n_q, (unsigned)s.n_head) *
                     sycl::range(1, 1, HD),
@@ -875,7 +876,7 @@ void attn_rows_chunks(dpct::queue_ptr st, const dpct::dim3& grid, const float* q
     dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
     const QsaAttnPools p0 = pools;
     const QsaAttnPoolsRows rr = rows;
-    st->parallel_for<dpct_kernel_name<class attn_rows_chunk_kernel_9f2, dpct_kernel_scalar<M>>>(
+    strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_rows_chunk_kernel_9f2, dpct_kernel_scalar<M>>>(
         sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS), sycl::range(1, 1, THREADS)), exp_props,
         [=](sycl::nd_item<3> item_ct1) [[sycl::reqd_sub_group_size(32)]] {
             attn_chunk_kernel<M, false, 2>(q, p0, ids, steps, n_kv_heads, page_size, scale, part_acc, part_m, part_l,
@@ -921,7 +922,7 @@ void qsa_decode_attn_batch_rows(const float* q, const QsaAttnPoolsRows& rows, co
     else attn_rows_chunks<0>(st, grid, q, pools, ids, steps, (int)s.n_head_kv, (int)s.page_size, scale, part_acc, part_m, part_l, n_chunks, (int)cap, stride, rows);
     {
         auto exp_props = sycl::ext::oneapi::experimental::properties{sycl::ext::oneapi::experimental::use_root_sync};
-        st->parallel_for<dpct_kernel_name<class attn_merge_rows_kernel_9f2>>(
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_merge_rows_kernel_9f2>>(
             sycl::nd_range<3>(sycl::range(1, (unsigned)n_q, (unsigned)s.n_head) * sycl::range(1, 1, HD),
                               sycl::range(1, 1, HD)),
             exp_props, [=](sycl::nd_item<3> item_ct1) {
@@ -963,7 +964,7 @@ void qsa_decode_attn_step(const float* q, const QsaAttnPools& pools, const int32
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_f262e6,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_f262e6,
                                           dpct_kernel_scalar<3>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -979,7 +980,7 @@ void qsa_decode_attn_step(const float* q, const QsaAttnPools& pools, const int32
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_4fd923,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_4fd923,
                                           dpct_kernel_scalar<2>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -995,7 +996,7 @@ void qsa_decode_attn_step(const float* q, const QsaAttnPools& pools, const int32
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_f6855e,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_f6855e,
                                           dpct_kernel_scalar<1>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -1010,7 +1011,7 @@ void qsa_decode_attn_step(const float* q, const QsaAttnPools& pools, const int32
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class attn_chunk_kernel_7c8e09,
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_chunk_kernel_7c8e09,
                                           dpct_kernel_scalar<0>>>(
             sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS),
                               sycl::range(1, 1, THREADS)),
@@ -1025,7 +1026,7 @@ void qsa_decode_attn_step(const float* q, const QsaAttnPools& pools, const int32
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        st->parallel_for<dpct_kernel_name<class attn_merge_kernel_c055e7>>(
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class attn_merge_kernel_c055e7>>(
             sycl::nd_range<3>(sycl::range(1, 1, (unsigned)s.n_head) *
                                   sycl::range(1, 1, HD),
                               sycl::range(1, 1, HD)),

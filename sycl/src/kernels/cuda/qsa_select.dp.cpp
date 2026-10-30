@@ -1,6 +1,7 @@
 // src/kernels/cuda/qsa_select.cu - see include/strata/kernels/qsa_select.hpp.
 #define DPCT_PROFILING_ENABLED
 #include <sycl/sycl.hpp>
+#include "strata/kprof.hpp"
 #include "strata/core/geometry.hpp"
 #include <dpct/dpct.hpp>
 #include "strata/sycl_queue.hpp"
@@ -1580,7 +1581,7 @@ void qsa_block_scores_rows(const QsaScoreRows& rows, const float* q_idx, const i
     static const bool early = [] { const char* v = std::getenv("STRATA_QSA_EARLY_EXIT"); return v == nullptr || std::atoi(v) != 0; }();
     const QsaScoreRows srow = rows;
     auto exp_props = sycl::ext::oneapi::experimental::properties{sycl::ext::oneapi::experimental::use_root_sync};
-    strata::q_of(stream)->submit([&](sycl::handler &cgh) {
+    strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)->submit([&](sycl::handler &cgh) {
         auto early_ct7 = early;
         cgh.parallel_for<dpct_kernel_name<class block_scores_rows_kernel_a3>>(
             sycl::nd_range<3>(sycl::range(1, 1, 256) * sycl::range(1, 1, SCORE_WARPS * 32),
@@ -1607,7 +1608,7 @@ void qsa_block_scores(const float* pooled, const float* dead, const float* q_idx
             auto exp_props = sycl::ext::oneapi::experimental::properties{
                 sycl::ext::oneapi::experimental::use_root_sync};
 
-            strata::q_of(stream)
+            strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
                 ->submit([&](sycl::handler &cgh) {
                     auto early_ct7 = early;
 
@@ -1647,8 +1648,8 @@ void qsa_block_scores(const float* pooled, const float* dead, const float* q_idx
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        strata::q_of(stream)
-            ->parallel_for<dpct_kernel_name<class block_scores_kernel_925c9d>>(
+        strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
+            ->template parallel_for<dpct_kernel_name<class block_scores_kernel_925c9d>>(
                 sycl::nd_range<3>(grid * sycl::range(1, 1, SCORE_WARPS * 32),
                                   sycl::range(1, 1, SCORE_WARPS * 32)),
                 exp_props,
@@ -1755,7 +1756,7 @@ bool qsa_block_scores_tc(const float *pooled, const float *dead,
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        strata::q_of(stream)
+        strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
             ->submit([&](sycl::handler &cgh) {
                 sycl::local_accessor<uint8_t, 1> dpct_local_acc_ct1(
                     sycl::range(bytes), cgh);
@@ -1777,8 +1778,8 @@ bool qsa_block_scores_tc(const float *pooled, const float *dead,
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        strata::q_of(stream)
-            ->parallel_for<
+        strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
+            ->template parallel_for<
                 dpct_kernel_name<class block_scores_tail_kernel_70dfaa>>(
                 sycl::nd_range<3>(sycl::range(1, 1, (unsigned)nq) *
                                       sycl::range(1, 1, 32),
@@ -1822,8 +1823,8 @@ void qsa_block_topk_ref(const float* scores, const int32_t* steps, int64_t nq, i
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        strata::q_of(stream)
-            ->parallel_for<dpct_kernel_name<class block_topk_kernel_213104>>(
+        strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
+            ->template parallel_for<dpct_kernel_name<class block_topk_kernel_213104>>(
                 sycl::nd_range<3>(sycl::range(1, 1, (unsigned)nq) *
                                       sycl::range(1, 1, TOPK_T),
                                   sycl::range(1, 1, TOPK_T)),
@@ -2046,8 +2047,8 @@ void qsa_block_topk(const float* scores, const int32_t* steps, int64_t nq, int64
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        strata::q_of(stream)
-            ->parallel_for<
+        strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
+            ->template parallel_for<
                 dpct_kernel_name<class block_topk_wide_kernel_5162c4>>(
                 sycl::nd_range<3>(sycl::range(1, 1, (unsigned)nq) *
                                       sycl::range(1, 1, TK_T),
@@ -2070,8 +2071,8 @@ void qsa_block_topk(const float* scores, const int32_t* steps, int64_t nq, int64
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        strata::q_of(stream)
-            ->parallel_for<dpct_kernel_name<class block_topk_reg_kernel_6ae5f0,
+        strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
+            ->template parallel_for<dpct_kernel_name<class block_topk_reg_kernel_6ae5f0,
                                             dpct_kernel_scalar<TK_PER>>>(
                 sycl::nd_range<3>(sycl::range(1, 1, (unsigned)nq) *
                                       sycl::range(1, 1, TK_T),
@@ -2092,8 +2093,8 @@ void qsa_block_topk(const float* scores, const int32_t* steps, int64_t nq, int64
         auto exp_props = sycl::ext::oneapi::experimental::properties{
             sycl::ext::oneapi::experimental::use_root_sync};
 
-        strata::q_of(stream)
-            ->parallel_for<dpct_kernel_name<class block_topk_reg_kernel_10a848,
+        strata::kprof::kp(strata::q_of(stream), __FILE__, __func__, __LINE__)
+            ->template parallel_for<dpct_kernel_name<class block_topk_reg_kernel_10a848,
                                             dpct_kernel_scalar<TK_PER_MAX>>>(
                 sycl::nd_range<3>(sycl::range(1, 1, (unsigned)nq) *
                                       sycl::range(1, 1, TK_T),

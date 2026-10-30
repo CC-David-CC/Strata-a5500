@@ -3,6 +3,7 @@
 #include <sycl/sycl.hpp>
 #include <dpct/dpct.hpp>
 #include "strata/sycl_queue.hpp"
+#include "strata/kprof.hpp"
 #include "strata/core/verify.hpp"
 #include "strata/core/remote_expert_opt.hpp"
 #include "strata/core/dma_batch.hpp"
@@ -2106,6 +2107,7 @@ void Verifier::accumulate_profile(const unsigned long long* stamps) {
 bool Verifier::run(int T, const int32_t *tokens, int64_t pos0, PoolMultiFn pool,
                    void *user, int32_t *out, std::string &err) try {
     using namespace strata::kernels;
+    strata::kprof::phase("decode");
     prof_S_ = 0;
     const OnDevice on_device(device_);
     last_batch_ = false;
@@ -2517,6 +2519,7 @@ bool Verifier::run(int T, const int32_t *tokens, int64_t pos0, PoolMultiFn pool,
                        // the next one
         copy_used_ = false;
     }
+    strata::kprof::window_end("decode");   // STRATA_KPROF=1 (with STRATA_VERIFY_EAGER=1): this window's per-kernel times
     if (prof_on_ && G == 1) {   // the window's GPU stage stamps
         collect_profile();
         if (std::getenv("STRATA_VERIFY_EAGER") != nullptr)   // SYCL port: the stage table per window, host-clocked

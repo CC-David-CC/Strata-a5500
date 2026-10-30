@@ -1,6 +1,7 @@
 // src/kernels/cuda/qsa_prompt_attn.cu - see include/strata/kernels/qsa_prompt_attn.hpp.
 #define DPCT_PROFILING_ENABLED
 #include <sycl/sycl.hpp>
+#include "strata/kprof.hpp"
 #include "strata/core/geometry.hpp"
 #include <dpct/dpct.hpp>
 #include "strata/sycl_queue.hpp"
@@ -1129,7 +1130,7 @@ bool launch_i8(const float *q, const QsaAttnPools &pools, const int32_t *ids,
             dpct::has_capability_or_fail(st->get_device(),
                                          {sycl::aspect::fp16});
 
-            st->submit([&](sycl::handler &cgh) {
+            strata::kprof::kp(st, __FILE__, __func__, __LINE__)->submit([&](sycl::handler &cgh) {
                 sycl::local_accessor<uint8_t, 1> dpct_local_acc_ct1(
                     sycl::range(bytes), cgh);
 
@@ -1211,7 +1212,7 @@ bool launch(const float *q, const QsaAttnPools &pools, const int32_t *ids,
             dpct::has_capability_or_fail(st->get_device(),
                                          {sycl::aspect::fp16});
 
-            st->submit([&](sycl::handler &cgh) {
+            strata::kprof::kp(st, __FILE__, __func__, __LINE__)->submit([&](sycl::handler &cgh) {
                 sycl::local_accessor<uint8_t, 1> dpct_local_acc_ct1(
                     sycl::range(bytes), cgh);
 

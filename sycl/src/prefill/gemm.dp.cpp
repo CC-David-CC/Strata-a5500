@@ -1,6 +1,7 @@
 // src/prefill/gemm.cu - see include/strata/prefill/gemm.hpp.
 #define DPCT_PROFILING_ENABLED
 #include <sycl/sycl.hpp>
+#include "strata/kprof.hpp"
 #include <dpct/dpct.hpp>
 #include "strata/sycl_queue.hpp"
 #include "strata/prefill/gemm.hpp"
@@ -565,7 +566,7 @@ void bf16_to_f16(const uint16_t *in, uint16_t *out, int64_t n,
             sycl::ext::oneapi::experimental::use_root_sync};
         dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
 
-        st->parallel_for<dpct_kernel_name<class bf16_to_f16_kernel_a0031a>>(
+        strata::kprof::kp(st, __FILE__, __func__, __LINE__)->template parallel_for<dpct_kernel_name<class bf16_to_f16_kernel_a0031a>>(
             sycl::nd_range<3>(sycl::range(1, 1, (unsigned)((n + 255) / 256)) *
                                   sycl::range(1, 1, 256),
                               sycl::range(1, 1, 256)),
