@@ -2734,12 +2734,12 @@ namespace {
 // are folded at every MoE layer's host sync, after which all of them have completed.
 enum PfPhase { kPfStart, kPfHc, kPfGdn, kPfQsa, kPfQsaIdx, kPfQsaSel, kPfQsaAttn, kPfRouter, kPfHostGroup, kPfGather,
                kPfWaitCopy, kPfDequant, kPfGemmGU, kPfGemmD, kPfCombine, kPfPle, kPfKvStage, kPfGdnConv, kPfGdnRec, kPfGdnOut, kPfHcWrite,
-               kPfHcDown, kPfHcUp, kPfHcInj, kPfHcMix,
+               kPfHcDown, kPfHcUp, kPfHcInj, kPfHcMix, kPfQsaIdxG, kPfQsaPrep,
                kPfCount };
 const char* const kPfNames[kPfCount] = {"embed+steps", "hc read", "gdn", "qsa proj", "qsa indexer", "qsa select",
                                         "qsa attn", "router+shared", "host grouping", "gather", "wait copy", "dequant",
                                         "gemm gate/up", "gemm down", "combine", "ple", "kv stage", "gdn conv+gates",
-                                        "gdn recurrence", "gdn out proj", "hc write", "hc read: down+silu", "hc read: up", "hc read: inject", "hc read: mix"};
+                                        "gdn recurrence", "gdn out proj", "hc write", "hc read: down+silu", "hc read: up", "hc read: inject", "hc read: mix", "qsa: indexer gemms", "qsa: norm/rope/kv append/q prep"};
 struct PfTimer {
     bool on = std::getenv("STRATA_PREFILL_TIMING") != nullptr;
     std::vector<cudaEvent_t> ev;
@@ -3848,8 +3848,10 @@ bool Prefill::run_impl(const int64_t* tokens, int64_t n, int64_t pos0, std::stri
                     if (!native_proj(m.gemm, wv, m.mixed_h, m.Vc, T, v.name("attn_v.weight"), err)) return false;
                     // KVA: the query projections have no consumer when only the KV/indexer state advances
                     if (!kva_state_only && !native_proj(m.gemm, wq, m.mixed_h, m.Qf, T, v.name("attn_q.weight"), err)) return false;
+                    pt.mark(kPfQsaIdxG, cs);   // STRATA_PREFILL_TIMING: "qsa proj" is the k, v and q projections
                     if (!bf16_proj(m.gemm, wik, m.mixed_bf, m.idx_raw, T, v.name("indexer.k_proj.weight"), err, 0, m.mixed_bf_lo)) return false;
                     if (!kva_state_only && !bf16_proj(m.gemm, wiq, m.mixed_bf, m.q_idx, T, v.name("indexer.q_proj.weight"), err, 0, m.mixed_bf_lo)) return false;
+                    pt.mark(kPfQsaPrep, cs);
                     rms_rows(m.Kc, (const float*) wkn->data, T * 2, 256, 256, EPS, m.cs);
                     rope(m.Kc, T, 2, 256, 512, p0, strata::kernels::rope_scaling(), m.cs);
                     // KV streaming: this layer's cells [0, p0) come in from the host copy to the staging pool, and the
