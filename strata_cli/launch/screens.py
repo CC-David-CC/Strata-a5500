@@ -559,10 +559,9 @@ class ModelScreen(Base):
         if found is None:
             return False
         model, d, folder = found
-        legacy = getattr(mod, "DSV41_LEGACY_NAMES", {})
-        missing = [n for n in d["shards"] if not (folder / n).exists() and not (legacy.get(n) and (folder / legacy[n]).exists())]
+        _layout, names, missing = mod.dsv41_parts(d, lambda n: (folder / n).exists())       # the pinned four-shard layout, or ISTA's six-shard one (0.2.8.1)
         if missing:
-            self.say(f"These are DeepSeek-V4.1-Flash {d.get('label', model)} files, but {len(missing)} of {len(d['shards'])} parts are not in {folder} "
+            self.say(f"These are DeepSeek-V4.1-Flash {d.get('label', model)} files, but {len(missing)} of {len(names)} parts are not in {folder} "
                      f"(first missing: {missing[0]}). Put every part in the folder, or pick a model from the list.", True)
             return True
         s = self.ctx.settings

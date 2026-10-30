@@ -673,6 +673,10 @@ def _dsv41_plan(path: Path, details) -> dict | None:
             messages.append("The n-gram table (111 GB) is not in this folder: setup downloads it, or put engram-IQ4_NL.gguf beside the model files.")
         if row["legacy"]:
             messages.append("These are the file names of the first release; Strata uses them as they are.")
+        if row.get("layout") == "six":
+            messages.append("These are ISTA-DASLab's six-shard files of 27 October 2026 (the Engram is the sixth part); Strata uses them as they are.")
+        if row.get("newer_first"):
+            messages.append("The first part is the version ISTA-DASLab re-published on 26 October 2026 (a larger chat template); Strata uses it as it is.")
         messages.append("Strata checks the files once when it sets them up (about 5 minutes on a fast drive); nothing is copied or downloaded for them.")
     sizes = _dsv41_files(place)
     wanted = list(row["present"]) + ([row["engram"]] if row["engram"] else [])
