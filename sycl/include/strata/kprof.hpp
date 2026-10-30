@@ -14,6 +14,7 @@
 // Disabled (the default) kp() is a pointer wrapper and the launch is the plain queue call.
 #pragma once
 #include <sycl/sycl.hpp>
+#include <sycl/ext/oneapi/experimental/profiling_tag.hpp>
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -38,6 +39,9 @@ struct Rec {
     const char* fn;
     int line;
     sycl::event ev;
+    sycl::event ev1;        // sections: the closing profiling tag (ev is the opening one)
+    std::string label;      // sections: the name
+    bool section = false;
 };
 
 struct Agg {
@@ -78,8 +82,32 @@ inline void record(sycl::queue* q, const char* file, const char* fn, int line, c
     if (q->ext_oneapi_get_state() != sycl::ext::oneapi::experimental::queue_state::executing) return;   // graph recording
     State& s = st();
     std::lock_guard<std::mutex> lk(s.mu);
-    s.recs.push_back(Rec{q, file, fn, line, ev});
+    s.recs.push_back(Rec{q, file, fn, line, ev, sycl::event{}, std::string(), false});
 }
+
+// a stretch of queue work without events of its own (a oneMKL call ...): the GPU time between two profiling tags
+struct Section {
+    sycl::queue* q = nullptr;
+    sycl::event e0;
+    std::string label;
+    Section(sycl::queue* q_, std::string label_) {
+        if (!enabled()) return;
+        if (q_->ext_oneapi_get_state() != sycl::ext::oneapi::experimental::queue_state::executing) return;
+        q = q_;
+        label = std::move(label_);
+        e0 = sycl::ext::oneapi::experimental::submit_profiling_tag(*q);
+    }
+    ~Section() {
+        if (!q) return;
+        sycl::event e1 = sycl::ext::oneapi::experimental::submit_profiling_tag(*q);
+        State& s = st();
+        std::lock_guard<std::mutex> lk(s.mu);
+        Rec r{q, nullptr, nullptr, 0, e0, e1, label, true};
+        s.recs.push_back(std::move(r));
+    }
+    Section(const Section&) = delete;
+    Section& operator=(const Section&) = delete;
+};
 
 // a library call (oneMKL ...) that returns an event
 inline void note(sycl::queue* q, const sycl::event& ev, const char* name) {
@@ -119,12 +147,20 @@ inline void flush_locked(State& s, const std::string& phase) {
     for (Rec& r : s.recs) {
         try {
             r.ev.wait();
-            const uint64_t t0 = r.ev.get_profiling_info<sycl::info::event_profiling::command_start>();
-            const uint64_t t1 = r.ev.get_profiling_info<sycl::info::event_profiling::command_end>();
+            uint64_t t0, t1;
+            char nm[240];
+            if (r.section) {
+                r.ev1.wait();
+                t0 = r.ev.get_profiling_info<sycl::info::event_profiling::command_end>();
+                t1 = r.ev1.get_profiling_info<sycl::info::event_profiling::command_end>();
+                std::snprintf(nm, sizeof nm, "section %s", r.label.c_str());
+            } else {
+                t0 = r.ev.get_profiling_info<sycl::info::event_profiling::command_start>();
+                t1 = r.ev.get_profiling_info<sycl::info::event_profiling::command_end>();
+                if (r.line == 0) std::snprintf(nm, sizeof nm, "%s", r.file);
+                else std::snprintf(nm, sizeof nm, "%s:%s:%d", base(r.file), r.fn, r.line);
+            }
             if (t1 < t0) continue;
-            char nm[200];
-            if (r.line == 0) std::snprintf(nm, sizeof nm, "%s", r.file);
-            else std::snprintf(nm, sizeof nm, "%s:%s:%d", base(r.file), r.fn, r.line);
             Agg& a = ps.sites[nm];
             a.ns += (double) (t1 - t0);
             ++a.n;
