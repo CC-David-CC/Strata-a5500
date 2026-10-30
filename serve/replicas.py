@@ -20,12 +20,15 @@ the prompts and answers it served (the engine itself checks the real prefix, as 
 
 Host RAM.  Every engine keeps its own copy of the experts in RAM (about 47 GiB for Qwen3.8-Flash-Next IQ3_S), so two
 replicas need two copies and four need four.  "replica_shared_arena": true (or STRATA_REPLICA_SHARED_ARENA=1; opt-in)
-backs the experts' arena of all replicas with ONE file in /dev/shm (the engine's --shared-expert-arena, MAP_SHARED):
-the experts are in RAM once, whatever the number of replicas.  Every engine still reads the experts into the file
-itself (the same bytes, so a replica that starts, restarts or dies at any time never leaves another one with half an
-arena), the pack hash in the file's header refuses another model, the file is unlinked when the server ends (a
-running engine keeps its mapping: the kernel frees the pages with the last one) and a file whose server is gone is
-removed at the next start.  See shared_arena_plan.
+backs the experts' arena of all replicas with ONE shared memory object (the engine's --shared-expert-arena, MAP_SHARED):
+the experts are in RAM once, whatever the number of replicas.  On Linux the object is a memfd the server creates
+(os.memfd_create): it is not a file on a mount, so the size of /dev/shm does not limit it; the engines open it as
+/proc/<server pid>/fd/<n>.  Without memfd (an old kernel, a sandbox that refuses it) a file in /dev/shm is used instead.
+The pack hash in the header refuses another model; the first engine to start reads the experts into it and the others
+wait for it and skip the read (a state word in the header: nobody / a pid reading / filled; an engine whose reader died
+takes the read over); the server closes the memfd (or unlinks the file) when it ends - an engine that still maps it
+keeps its pages, the kernel frees them with the last mapping - and a /dev/shm file whose server is gone is removed at
+the next start.  See shared_arena_plan.
 
 CPU cores.  On Linux the replicas get disjoint physical cores (serve/cpu_affinity.py, from PR #1436 by agorevski), so
 the host threads of the engines (the expert workers) do not compete.  "replica_cpus": false turns it off.
@@ -92,6 +95,8 @@ def _cards(g) -> list[int]:
 
 
 ARENA_PREFIX = "strata-replicas-"
+_MEMFDS: dict = {}                   # the memfds this server created: path (/proc/<pid>/fd/<n>) -> fd
+ARENA_MIN_RAM = 8 << 30              # a memfd arena: at least this much free RAM to try (the engine reserves the real size)
 ARENA_MIN_FREE = 8 << 30             # /dev/shm must have at least this much free to try (the engine reserves the real size)
 ARENA_INCOMPATIBLE = ("--mmap-experts", "--resident-experts", "--shared-expert-arena", "--resident-budget-gib")
 
@@ -142,8 +147,19 @@ def _free(path: str) -> int:
         return 0
 
 
+def _mem_available() -> int:
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) * 1024
+    except (OSError, ValueError, IndexError):
+        pass
+    return 0
+
+
 def shared_arena_plan(cfg: dict, n_replicas: int, *, shm: str = "/dev/shm", platform: str | None = None,
-                      environ=None, free_bytes=None) -> tuple[str | None, str]:
+                      environ=None, free_bytes=None, use_memfd: bool | None = None) -> tuple[str | None, str]:
     """(the file for --shared-expert-arena or None, a line for the log).  Opt-in: "replica_shared_arena": true (or
     STRATA_REPLICA_SHARED_ARENA=1).  Only on Linux (the engine's MAP_SHARED backing), for Qwen's arena (not DeepSeek,
     not the mapped or budgeted RAM modes, which have no arena), and with room in /dev/shm.  The engine checks the real
@@ -164,6 +180,22 @@ def shared_arena_plan(cfg: dict, n_replicas: int, *, shm: str = "/dev/shm", plat
                 args += [str(a) for a in e.get("args") or []]
     if cfg.get("arch") == "deepseek41" or any(a in args for a in ARENA_INCOMPATIBLE):
         return None, "shared expert arena: this model/config has no private expert arena to share; each replica as before"
+    if use_memfd is None:
+        use_memfd = hasattr(os, "memfd_create") and str(cfg.get("replica_shared_arena")).lower() != "devshm"
+    if use_memfd:
+        avail = free_bytes if free_bytes is not None else _mem_available()
+        if avail < ARENA_MIN_RAM:
+            return None, (f"shared expert arena: only {avail / 2**30:.1f} GiB of RAM is free; each replica keeps its own "
+                          "copy of the experts in RAM")
+        try:
+            fd = os.memfd_create("strata-replicas-arena", os.MFD_CLOEXEC)
+        except OSError:
+            fd = -1
+        if fd >= 0:
+            path = f"/proc/{os.getpid()}/fd/{fd}"
+            _MEMFDS[path] = fd
+            return path, (f"one shared expert arena for {n_replicas} replicas (memory object of the server, not limited by "
+                          "the size of /dev/shm): the experts are in RAM once")
     if not (os.path.isdir(shm) and os.access(shm, os.W_OK)):
         return None, f"shared expert arena: {shm} is not usable; each replica keeps its own copy of the experts in RAM"
     free = free_bytes if free_bytes is not None else _free(shm)
@@ -177,12 +209,21 @@ def shared_arena_plan(cfg: dict, n_replicas: int, *, shm: str = "/dev/shm", plat
 
 
 def remove_arena(path: str | None) -> None:
-    """Unlink the arena file (the server's end, or a start that fell back): engines that map it keep their pages."""
-    if path:
+    """Close the memfd / unlink the arena file (the server's end, or a start that fell back): engines that map it keep
+    their pages."""
+    if not path:
+        return
+    fd = _MEMFDS.pop(path, None)
+    if fd is not None:
         try:
-            os.unlink(path)
+            os.close(fd)
         except OSError:
             pass
+        return
+    try:
+        os.unlink(path)
+    except OSError:
+        pass
 
 
 def _suffixed(path, i: int):

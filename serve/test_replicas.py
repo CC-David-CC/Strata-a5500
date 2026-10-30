@@ -317,7 +317,8 @@ class SharedArena(unittest.TestCase):
 
     def plan(self, cfg=None, n=2, tmp=None, **kw):
         return shared_arena_plan(cfg or self.CFG, n, shm=tmp, platform=kw.pop("platform", "linux"),
-                                 environ=kw.pop("environ", {}), free_bytes=kw.pop("free_bytes", 100 << 30), **kw)
+                                 environ=kw.pop("environ", {}), free_bytes=kw.pop("free_bytes", 100 << 30),
+                                 use_memfd=kw.pop("use_memfd", False), **kw)
 
     def test_off_by_default_and_for_one_engine(self):
         with tempfile.TemporaryDirectory() as d:
@@ -366,6 +367,27 @@ class SharedArena(unittest.TestCase):
             self.assertEqual(gone, [dead.name])
             self.assertFalse(dead.exists())
             self.assertTrue(live.exists() and other.exists() and junk.exists())
+
+    @unittest.skipUnless(hasattr(__import__("os"), "memfd_create") and sys.platform.startswith("linux"), "Linux memfd")
+    def test_a_memfd_is_not_limited_by_dev_shm_and_is_closed_at_the_end(self):
+        import os
+        path, note = shared_arena_plan(self.CFG, 2, platform="linux", environ={}, free_bytes=100 << 30, use_memfd=True)
+        self.assertTrue(path and path.startswith(f"/proc/{os.getpid()}/fd/"), path)
+        fd = int(path.rsplit("/", 1)[1])
+        os.ftruncate(fd, 1 << 20)
+        self.assertEqual(os.fstat(fd).st_size, 1 << 20)
+        with open(path, "r+b") as other:          # (how an engine opens it)
+            other.seek(100)
+            other.write(b"x")
+        remove_arena(path)
+        with self.assertRaises(OSError):
+            os.fstat(fd)
+        remove_arena(path)                         # (twice: harmless)
+
+    def test_a_memfd_needs_free_ram(self):
+        path, note = shared_arena_plan(self.CFG, 2, platform="linux", environ={}, free_bytes=2 << 30, use_memfd=True)
+        self.assertIsNone(path)
+        self.assertIn("2.0 GiB of RAM", note)
 
     def test_removing_twice_or_nothing_is_harmless(self):
         with tempfile.TemporaryDirectory() as d:
