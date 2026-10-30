@@ -398,6 +398,58 @@ __global__ void gdn_conv_l2_kernel(const float* __restrict__ hist, const float* 
         __syncthreads();
     }
 }
+// STRATA_GDN_CONVL2=2: the conv, SiLU and q / k L2 norm in ONE pass, a warp per (head, run of CONVW_TOK tokens): a lane owns
+// four consecutive channels of the head's 128 (a float4 each way), walks the tokens keeping the three previous inputs in
+// registers, and the head's sum of squares is one 5-step warp reduction a token - no shared memory, no barrier, h written
+// once, normalised.  The conv + SiLU value is the expression of gdn_conv_tiled_kernel (same bits); the sum of squares is
+// added in another order than gdn_l2_kernel's (FP32-level difference).  The first three inputs of a run are re-read from
+// qkv (L2 hits; 3 / CONVW_TOK extra reads).  Bytes a token: 41 KB read, 41 KB written, against 114 KB for conv + l2.
+constexpr int CONVW_TOK = 32;
+__global__ void __launch_bounds__(128) gdn_conv_w_kernel(const float* __restrict__ hist, const float* __restrict__ qkv,
+                                                         const float* __restrict__ w, float* __restrict__ h, int64_t T,
+                                                         float eps) {
+    const int warp = threadIdx.x >> 5, lane = threadIdx.x & 31;
+    const int64_t tb = ((int64_t) blockIdx.y * 4 + warp) * CONVW_TOK;
+    if (tb >= T) return;
+    const int64_t te = tb + CONVW_TOK < T ? tb + CONVW_TOK : T;
+    const int c0 = blockIdx.x * 128 + lane * 4;
+    const bool norm = blockIdx.x < 2 * HK;   // q / k heads
+    float wr[4][4];
+#pragma unroll
+    for (int i = 0; i < 4; ++i)
+#pragma unroll
+        for (int k = 0; k < 4; ++k) wr[i][k] = w[(c0 + i) * 4 + k];
+    float4 p0, p1, p2;   // inputs t - 3, t - 2, t - 1
+    auto input = [&](int64_t t) -> float4 {
+        if (t >= 0) return *reinterpret_cast<const float4*>(qkv + t * C + c0);
+        return make_float4(hist[(c0 + 0) * 3 + (int) (t + 3)], hist[(c0 + 1) * 3 + (int) (t + 3)],
+                           hist[(c0 + 2) * 3 + (int) (t + 3)], hist[(c0 + 3) * 3 + (int) (t + 3)]);
+    };
+    p0 = input(tb - 3); p1 = input(tb - 2); p2 = input(tb - 1);
+#pragma unroll 4
+    for (int64_t t = tb; t < te; ++t) {
+        const float4 x = *reinterpret_cast<const float4*>(qkv + t * C + c0);
+        const float xv[4] = {x.x, x.y, x.z, x.w}, a0[4] = {p0.x, p0.y, p0.z, p0.w}, a1[4] = {p1.x, p1.y, p1.z, p1.w},
+                    a2[4] = {p2.x, p2.y, p2.z, p2.w};
+        float o[4];
+        float sq = 0.0f;
+#pragma unroll
+        for (int i = 0; i < 4; ++i) {
+            const float s = a0[i] * wr[i][0] + a1[i] * wr[i][1] + a2[i] * wr[i][2] + xv[i] * wr[i][3];
+            o[i] = s / (1.0f + __expf(-s));
+            sq = fmaf(o[i], o[i], sq);
+        }
+        if (norm) {
+#pragma unroll
+            for (int m = 16; m > 0; m >>= 1) sq += __shfl_xor_sync(0xffffffffu, sq, m);
+            const float rn = rsqrtf(sq + eps);
+#pragma unroll
+            for (int i = 0; i < 4; ++i) o[i] *= rn;
+        }
+        *reinterpret_cast<float4*>(h + t * C + c0) = make_float4(o[0], o[1], o[2], o[3]);
+        p0 = p1; p1 = p2; p2 = x;
+    }
+}
 // the history after the chunk: its last three inputs (the older history where the chunk is shorter than 3)
 __global__ void gdn_conv_hist_kernel(float* __restrict__ hist, const float* __restrict__ qkv, int64_t T) {
     const int c = blockIdx.x * blockDim.x + threadIdx.x;
@@ -2715,7 +2767,15 @@ void gdn_conv(float* history, const float* qkv, const float* conv_w, float* h, i
     if (serial || T <= CONV_TILE) {
         gdn_conv_kernel<<<C / 128, 128, 0, (cudaStream_t) stream>>>(history, qkv, conv_w, h, T);
     } else {
-        static const bool fused = [] { const char* v = std::getenv("STRATA_GDN_CONVL2"); return v && std::atoi(v) != 0; }();
+        static const int fused_mode = [] { const char* v = std::getenv("STRATA_GDN_CONVL2"); return v ? std::atoi(v) : 0; }();
+        const bool fused = fused_mode != 0;
+        if (fused_mode >= 2) {
+            gdn_conv_w_kernel<<<dim3(C / 128, (unsigned) ((T + 4 * CONVW_TOK - 1) / (4 * CONVW_TOK))), 128, 0,
+                                (cudaStream_t) stream>>>(history, qkv, conv_w, h, T, eps);
+            gdn_conv_hist_kernel<<<C / 128, 128, 0, (cudaStream_t) stream>>>(history, qkv, T);
+            check("gdn_conv");
+            return;
+        }
         if (fused) {
             gdn_conv_l2_kernel<<<dim3(C / 128, (unsigned) ((T + CONV_TILE - 1) / CONV_TILE)), 128, 0,
                                  (cudaStream_t) stream>>>(history, qkv, conv_w, h, T, eps);
