@@ -8653,10 +8653,16 @@ def with_current_reader(cfg: dict, package: Path) -> dict:
     fixed = dict(vision)
     for key in ("exe", "cpu_exe"):
         old = fixed.get(key)
-        if isinstance(old, str) and old and not engine_component.is_reference(old) and os.path.isabs(old) and not os.path.exists(old):
+        if isinstance(old, str) and old and not engine_component.is_reference(old) and os.path.isabs(old):
             new = package / old.replace("\\", "/").rsplit("/", 1)[-1]
-            if new.is_file():
-                print(f"[strata] the picture reader {old} is not there any more; using {new} from the engine package in use", flush=True)
+            gone = not os.path.exists(old)
+            # #4658: the old engine folder is kept after `strata update`, so the old reader still exists; one in a SIBLING engine folder
+            # (components/engine/<version>-...) is the engine's reader from before the update, and the engine in use has its own
+            older = (not gone and Path(old).parent != package and Path(old).parent.parent == package.parent
+                     and package.parent.name.lower() == "engine")
+            if (gone or older) and new.is_file():
+                print(f"[strata] the picture reader {old} " + ("is not there any more" if gone else "belongs to an older engine")
+                      + f"; using {new} from the engine package in use", flush=True)
                 fixed[key] = str(new)
     if fixed == vision:
         return cfg
