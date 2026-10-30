@@ -3715,6 +3715,37 @@ def card_note(cfg: dict, env: dict) -> str | None:
             f"{', '.join(names)} - the first runs the first layers and the picture reader, the last runs the head and the draft layer")
 
 
+def engine_arch_note(cfg: dict, cards: dict[int, int] | None = None, built: dict | None = None) -> str | None:
+    """#4662: a compiled engine holds code for the architectures it was built for (BUILD.json "archs"); on a card of another one a long prompt
+    ends in "unspecified launch failure" (the kernels it needs are a trap there).  One plain line when a card this run uses is not covered
+    (NVIDIA; a build with PTX also covers newer cards).  Said, never refused: the engine is started as asked.  `cards`: {nvidia-smi number:
+    compute capability x 10}; `built`: the BUILD.json dict - both read here when not given.  None when everything is covered or unknown."""
+    try:
+        if cfg.get("backend") == "hip":
+            return None
+        if built is None:
+            exe = cfg.get("exe")
+            if not isinstance(exe, str) or engine_component.is_reference(exe):
+                return None
+            built = json.loads((Path(exe).parent / "BUILD.json").read_text(encoding="utf-8-sig"))
+        archs = sorted({int(re.sub(r"\D", "", str(a))) for a in built.get("archs") or [] if re.sub(r"\D", "", str(a))})
+        if not archs:
+            return None
+        if cards is None:
+            r = subprocess.run(["nvidia-smi", "--query-gpu=index,compute_cap", "--format=csv,noheader"], capture_output=True, text=True,
+                               errors="replace", timeout=10)
+            cards = {int(i): int(round(float(c) * 10)) for i, c in (ln.split(",") for ln in (r.stdout or "").strip().splitlines())}
+        used = gpu_list(cfg) or sorted(cards)
+        miss = sorted({cards[i] for i in used if i in cards and cards[i] not in archs and not (built.get("ptx") and cards[i] > max(archs))})
+        if not miss:
+            return None
+        names = ", ".join(f"sm_{m}" for m in miss)
+        return (f"[strata] this engine was built for {', '.join(f'sm_{a}' for a in archs)}, but a graphics card in use is {names}: long prompts "
+                "can stop with \"unspecified launch failure\". Update the engine (./update.sh, or `strata update`) so it is built for every card in this PC.")
+    except Exception:
+        return None
+
+
 def vision_card_off_igpu(env: dict, archs: dict[int, str] | None = None) -> int | None:
     """AMD: the picture reader is a separate program that sees the engine's HIP_VISIBLE_DEVICES and runs on the FIRST visible card.  With a
     layer split that starts on a built-in Radeon (Strix Halo beside an R9700) that is the iGPU: the card that draws the desktop and whose
@@ -9007,6 +9038,9 @@ def main(argv=None, *, lifecycle_event=None, interrupt_exit_code: int = 0) -> in
         note = card_note(cfg, env)
         if note:
             print(note, flush=True)
+        arch_line = engine_arch_note(cfg)
+        if arch_line:
+            print(arch_line, flush=True)
         igpu_line = igpu_split_warning(cfg)
         if igpu_line:
             print(igpu_line, flush=True)
