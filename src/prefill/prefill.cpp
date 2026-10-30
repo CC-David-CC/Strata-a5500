@@ -6368,7 +6368,10 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
                 continue;
             }
             const uint8_t* b = m.src->blob_stable(l, e);
-            if (!b) { err = "prefill (layer-major): expert source has no blob"; return false; }
+            if (!b) {   // #4695: no contiguous mapped blob (Windows, the mapping dropped for unbuffered reads): the source copies it itself
+                js.push_back({nullptr, (size_t) lay.blob_bytes(l), m.src, (int32_t) l, e});
+                continue;
+            }
             js.push_back({b, (size_t) lay.blob_bytes(l)});
         }
         m.stager->start(std::move(js));
@@ -6431,7 +6434,10 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
                     continue;
                 }
                 const uint8_t* b = m.src->blob_stable(l, e);
-                if (!b) { err = "prefill (layer-major): expert source has no blob"; return false; }
+                if (!b) {   // #4695: as in lm_prefetch
+                    js.push_back({nullptr, (size_t) lay.blob_bytes(l), m.src, (int32_t) l, e});
+                    continue;
+                }
                 js.push_back({b, (size_t) lay.blob_bytes(l)});
             }
             m.stager->start(std::move(js));
