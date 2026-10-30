@@ -328,6 +328,107 @@ template [[host_name("gdn_scanr_8_4")]] kernel decltype(gdn_scan_r<8, 4>) gdn_sc
 template [[host_name("gdn_scanr_2_8")]] kernel decltype(gdn_scan_r<2, 8>) gdn_scan_r<2, 8>;
 template [[host_name("gdn_scanr_2_4")]] kernel decltype(gdn_scan_r<2, 4>) gdn_scan_r<2, 4>;
 
+// ---- gdn_scanf: gdn_scan_r<4, TB> with gdn_post folded in.  One threadgroup a value head (grid h_v), 16 simdgroups =
+// 4 column blocks x 4 row blocks, 512 threads.  The scan is gdn_scan_r's, token for token (the same operations in the
+// same order, so o is the same bits); a column block's row-block-0 simdgroup holds o for its 32 columns, writes them and
+// their simd_sum of squares to threadgroup memory, and once every TB tokens the whole threadgroup runs gdn_post's
+// arithmetic on those tokens (the sum of the four partials in gdn_post's order: the same bits as gdn_post).  Outputs:
+// y (fp16) and, with `f32`, fp32 y; o itself never reaches device memory.
+template <int TB>
+kernel void gdn_scan_f(device float* state [[buffer(0)]], device const float4* qn [[buffer(1)]],
+                       device const float4* kn [[buffer(2)]], device const float* vc [[buffer(3)]],
+                       device const float2* gb [[buffer(4)]], device const float* kq [[buffer(5)]],
+                       device const float* z [[buffer(6)]], device const float* gamma [[buffer(7)]],
+                       device half* yh [[buffer(8)]], device float* y32 [[buffer(9)]], constant GdnPArgs& a [[buffer(10)]],
+                       uint3 tg [[threadgroup_position_in_grid]], ushort tid [[thread_index_in_threadgroup]],
+                       ushort sg [[simdgroup_index_in_threadgroup]], ushort lane [[thread_index_in_simdgroup]]) {
+    constexpr int S = 128, IB = 4, R = S / IB, R4 = R / 4;
+    threadgroup float4 qs[TB][32], ks[TB][32];
+    threadgroup float2 red[2][16][32];
+    threadgroup float vs[TB][128];
+    threadgroup float4 gk[TB];
+    threadgroup float ot[TB][128];
+    threadgroup float osq[TB][4];
+    const int h = int(tg.x), hk = h % int(a.h_k), hv = int(a.h_v), hkn = int(a.h_k);
+    const int cb = sg >> 2, ib = sg & 3;
+    const int j = cb * 32 + lane, i0 = ib * R;
+    const int T = int(a.n_tok);
+    const float scale = 1.0f / sqrt(float(S));
+    float st[R];
+#pragma clang loop unroll(full)
+    for (int i = 0; i < R; ++i) st[i] = state[((i0 + i) * hv + h) * S + j];
+    for (int t0 = 0; t0 < T; t0 += TB) {
+        const int nb = min(TB, T - t0);
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        for (int idx = tid; idx < nb * 32; idx += 512) {
+            const int tt = idx >> 5, w = idx & 31;
+            qs[tt][w] = qn[((t0 + tt) * hkn + hk) * 32 + w];
+            ks[tt][w] = kn[((t0 + tt) * hkn + hk) * 32 + w];
+        }
+        for (int idx = tid; idx < nb * 128; idx += 512) {
+            const int tt = idx >> 7, w = idx & 127;
+            vs[tt][w] = vc[((t0 + tt) * hv + h) * S + w];
+        }
+        for (int tt = tid; tt < nb; tt += 512) {
+            const float2 g_b = gb[(t0 + tt) * hv + h];
+            gk[tt] = float4(g_b.x, g_b.y, kq[(t0 + tt) * hkn + hk], 0.0f);
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        for (int tt = 0; tt < nb; ++tt) {
+            const int t = t0 + tt, slot = t & 1;
+            float ka = 0.0f, qa = 0.0f;
+#pragma clang loop unroll(full)
+            for (int w = 0; w < R4; ++w) {
+                const float4 k4 = ks[tt][i0 / 4 + w], q4 = qs[tt][i0 / 4 + w];
+                ka = fma(st[4 * w], k4.x, ka); ka = fma(st[4 * w + 1], k4.y, ka);
+                ka = fma(st[4 * w + 2], k4.z, ka); ka = fma(st[4 * w + 3], k4.w, ka);
+                qa = fma(st[4 * w], q4.x, qa); qa = fma(st[4 * w + 1], q4.y, qa);
+                qa = fma(st[4 * w + 2], q4.z, qa); qa = fma(st[4 * w + 3], q4.w, qa);
+            }
+            const float4 g_b = gk[tt];
+            const float v = vs[tt][j];
+            red[slot][sg][lane] = float2(ka, qa);
+            threadgroup_barrier(mem_flags::mem_threadgroup);
+            float2 s = red[slot][cb * 4][lane];
+#pragma clang loop unroll(full)
+            for (int b = 1; b < IB; ++b) s += red[slot][cb * 4 + b][lane];
+            const float g = g_b.x;
+            const float delta = (v - g * s.x) * g_b.y;
+            if (ib == 0) {
+                const float ov = fma(g, s.y, delta * g_b.z) * scale;
+                ot[tt][j] = ov;
+                const float ss = simd_sum(ov * ov);
+                if (lane == 0) osq[tt][cb] = ss;
+            }
+#pragma clang loop unroll(full)
+            for (int w = 0; w < R4; ++w) {
+                const float4 k4 = ks[tt][i0 / 4 + w];
+                st[4 * w] = fma(g, st[4 * w], k4.x * delta);
+                st[4 * w + 1] = fma(g, st[4 * w + 1], k4.y * delta);
+                st[4 * w + 2] = fma(g, st[4 * w + 2], k4.z * delta);
+                st[4 * w + 3] = fma(g, st[4 * w + 3], k4.w * delta);
+            }
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        // gdn_post for these tokens
+        for (int idx = tid; idx < nb * 128; idx += 512) {
+            const int tt = idx >> 7, c = idx & 127;
+            const float tot = (osq[tt][0] + osq[tt][1]) + (osq[tt][2] + osq[tt][3]);
+            const float rs = rsqrt(tot / 128.0f + a.eps);
+            const ulong i = ulong((t0 + tt) * hv + h) * 128 + c;
+            const float ov = ot[tt][c];
+            const float yv = ((rs * ov) * gamma[c]) * (1.0f / (1.0f + exp(-z[i])));
+            yh[i] = half(yv);
+            if (a.f32) y32[i] = yv;
+        }
+    }
+#pragma clang loop unroll(full)
+    for (int i = 0; i < R; ++i) state[((i0 + i) * hv + h) * S + j] = st[i];
+}
+template [[host_name("gdn_scanf_8")]] kernel decltype(gdn_scan_f<8>) gdn_scan_f<8>;
+template [[host_name("gdn_scanf_4")]] kernel decltype(gdn_scan_f<4>) gdn_scan_f<4>;
+template [[host_name("gdn_scanf_2")]] kernel decltype(gdn_scan_f<2>) gdn_scan_f<2>;
+
 // ---- the chunked form (chunks of GC = 32 tokens), the WY / UT form of the gated delta rule.  With G_t the product
 // of the chunk's gates up to t (log space: lg_t) and S0 the state entering the chunk:
 //   (I + A) D = B,  A_ts = beta_t (k_t . k_s) G_t / G_s (s < t),  B = [beta v | beta G k]   ->   D = [U | W]

@@ -135,6 +135,20 @@ int main(int argc, char** argv) {
         d.grid[0] = HV; d.grid[1] = n; d.tg[0] = 128;
         ds.push_back(d);
     };
+    mtl::Pipeline pf[3] = {cx.pipeline(lib, "gdn_scanf_4"), cx.pipeline(lib, "gdn_scanf_8"), cx.pipeline(lib, "gdn_scanf_2")};
+    std::printf("fused scan+post pipelines (max threads / static tg mem; 512 asked): TB4 %d/%d  TB8 %d/%d  TB2  %d/%d\n", pf[0].max_threads,
+                pf[0].static_tg_mem, pf[1].max_threads, pf[1].static_tg_mem, pf[2].max_threads, pf[2].static_tg_mem);
+    auto fused_d = [&](int which, int t0, int n, const mtl::Buffer& st, std::vector<mtl::Dispatch>& ds) {
+        GdnPArgs a{(uint32_t)n, HK, HV, CH, 1e-6f, 1u};
+        mtl::Dispatch d;
+        d.p = &pf[which];
+        d.args = {mtl::Arg::B(st), mtl::Arg::B(qn, (size_t)t0 * HK * S * 4), mtl::Arg::B(kn, (size_t)t0 * HK * S * 4),
+                  mtl::Arg::B(vc, (size_t)t0 * HV * S * 4), mtl::Arg::B(gb, (size_t)t0 * HV * 8), mtl::Arg::B(kq, (size_t)t0 * HK * 4),
+                  mtl::Arg::B(z, (size_t)t0 * HV * S * 4), mtl::Arg::B(gam), mtl::Arg::B(yh, (size_t)t0 * HV * S * 2),
+                  mtl::Arg::B(yB, (size_t)t0 * HV * S * 4), mtl::Arg::V(a)};
+        d.grid[0] = HV; d.tg[0] = 512;
+        ds.push_back(d);
+    };
     auto timeit = [&](const std::vector<mtl::Dispatch>& ds) {
         cx.warm(ds, 0.3);
         std::vector<double> t;
@@ -249,6 +263,25 @@ int main(int argc, char** argv) {
                 }
             }
         }
+        std::printf("== fused scan+post vs pre/scanr_4/post: y rel L2, fp16 y mismatches, state rel L2\n");
+        for (int T : Ts) {
+            if (T > 8192) continue;
+            copy_st0(stX);
+            std::vector<mtl::Dispatch> d0; scan_d(1, 0, T, stX, o, d0); post_d(0, T, o, d0); cx.run(d0);
+            std::vector<float> yref(yB.as<float>(), yB.as<float>() + (size_t)T * HV * S), sref(stX.as<float>(), stX.as<float>() + (size_t)S * HV * S);
+            std::vector<uint16_t> href(yh.as<uint16_t>(), yh.as<uint16_t>() + (size_t)T * HV * S);
+            for (int w = 0; w < 3; ++w) {
+                copy_st0(stX);
+                std::memset(yB.ptr, 0, (size_t)T * HV * S * 4);
+                std::vector<mtl::Dispatch> d1; fused_d(w, 0, T, stX, d1); cx.run(d1);
+                double se = 0, sr = 0, ss = 0, ssr = 0; size_t hm = 0;
+                for (size_t i = 0; i < (size_t)T * HV * S; ++i) { const double e = yB.as<float>()[i] - yref[i]; se += e * e; sr += (double)yref[i] * yref[i]; hm += yh.as<uint16_t>()[i] != href[i]; }
+                for (size_t i = 0; i < (size_t)S * HV * S; ++i) { const double e = stX.as<float>()[i] - sref[i]; ss += e * e; ssr += (double)sref[i] * sref[i]; }
+                const bool ok = std::sqrt(se / sr) < 1e-5 && std::sqrt(ss / ssr) < 1e-5;
+                fails += !ok;
+                std::printf("T %5d fused TB%-2d: y rel %.2e, fp16 mismatches %zu, state rel %.2e  %s\n", T, w == 0 ? 4 : w == 1 ? 8 : 2, std::sqrt(se / sr), hm, std::sqrt(ss / ssr), ok ? "PASS" : "FAIL");
+            }
+        }
         std::printf("%s\n", fails ? "SOME FAILED" : "ALL PASS");
     }
     // timing: gdn_pre, the scan variants, chunked parts, gdn_post; the stage = pre + scan + post
@@ -276,6 +309,12 @@ int main(int argc, char** argv) {
         const double tc = timeit(dc), tc1 = timeit({dc[0]}), tc2 = timeit({dc[1]}), tc3 = timeit({dc[2]});
         const double base = tp + ts1 + tpo, ch = tp + tc + tpo;
         std::printf(" | %8.3f (%7.3f %7.3f %7.3f) | %8.3f %8.3f %5.2f | best %s stage %.3f = x%.3f (scan x%.3f)\n", tc, tc1, tc2, tc3, base, ch, base / ch, svs[wbest].nm, tp + tbest + tpo, base / (tp + tbest + tpo), ts1 / tbest);
+        {
+            double tf[3];
+            for (int w = 0; w < 3; ++w) { std::vector<mtl::Dispatch> d1; fused_d(w, 0, T, stX, d1); tf[w] = timeit(d1); }
+            const double fb = tp + std::min(tf[0], std::min(tf[1], tf[2]));
+            std::printf("       fused scan+post TB4 %.3f TB8 %.3f TB2  %.3f ms; stage pre+fused best %.3f = x%.3f vs scanr_4 stage\n", tf[0], tf[1], tf[2], fb, base / fb);
+        }
         std::fflush(stdout);
     }
     return fails ? 1 : 0;
