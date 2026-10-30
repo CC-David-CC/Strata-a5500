@@ -33,7 +33,9 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#ifdef __linux__
 #include <sys/vfs.h>
+#endif
 #include <unistd.h>
 #include <linux/mman.h>
 #ifndef MAP_HUGE_2MB
@@ -384,6 +386,7 @@ void* reserve(uint64_t bytes, PageBacking& got, std::string& note, const std::st
         // tmpfs: take the pages now (ftruncate only sets the length).  With /dev/shm too small the load would die with a bus
         // error part-way; here a full tmpfs is a plain error at start, for every engine that maps the file (pages already
         // taken cost nothing), and the server then starts its replicas with private copies.  A file on a disk stays sparse.
+#ifdef __linux__
         {
             struct statfs sf{};
             if (fstatfs(fd, &sf) == 0 && (unsigned long) sf.f_type == 0x01021994ul) {
@@ -411,6 +414,7 @@ void* reserve(uint64_t bytes, PageBacking& got, std::string& note, const std::st
                 }
             }
         }
+#endif
         void* map = mmap(nullptr, (size_t) file_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         const int e = errno;
         close(fd);
