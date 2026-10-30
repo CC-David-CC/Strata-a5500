@@ -6008,7 +6008,7 @@ int64_t Prefill::lm_prepare(int64_t n, std::string& why, int64_t cap) {
     int64_t S = std::max<int64_t>(min_s, want / m.T * m.T);
     S = std::min<int64_t>(S, (n + m.T - 1) / m.T * m.T);
     if (cap > 0) {
-        if (cap % m.T != 0 || cap < min_s) { why = "the layer split's stages read different chunks"; return 0; }
+        if ((!lm_force_ && cap % m.T != 0) || cap < min_s) { why = "the layer split's stages read different chunks"; return 0; }
         S = std::min(S, cap);
     }
     const int64_t G = m.T * K;
@@ -6233,6 +6233,10 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
     // sub-chunks of m.T tokens from the piece's start; pieces of several segments are packed into one super-chunk while
     // their rows fit S.  One segment: exactly the usual super-chunks.
     const int64_t S = m.lm.S;
+    // the sub-chunk size of a multi-prompt read: what every stage of the chain can take (the stages' chunks may differ)
+    int64_t tsub = m.T;
+    if (lm_force_)
+        for (const Prefill* q = this; q != nullptr; q = q->next_) tsub = std::min(tsub, q->impl_->T);
     std::vector<std::vector<LmSub>> supers_own;
     const std::vector<std::vector<LmSub>>* supers_p = &supers_own;
     std::vector<std::vector<LmSub>> one_given;
@@ -6250,11 +6254,11 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
                     cur.clear();
                     cur_rows = 0;
                 }
-                for (int64_t c0s = 0; c0s < piece; c0s += m.T) {
+                for (int64_t c0s = 0; c0s < piece; c0s += tsub) {
                     LmSub sb;
                     sb.seg = (int) si;
                     sb.c0 = p0s + c0s;
-                    sb.T = std::min(m.T, piece - c0s);
+                    sb.T = std::min(tsub, piece - c0s);
                     sb.t0 = cur_rows + c0s;
                     cur.push_back(sb);
                 }
