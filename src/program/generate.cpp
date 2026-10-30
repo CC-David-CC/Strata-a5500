@@ -15070,6 +15070,70 @@ int main(int argc, char** argv) {
                     }
                     return run_ok;
                 };
+                // STRATA_BATCH_CONCURRENT_READ=1 (opt-in, one GPU, --batch with --no-prefill-borrow): the prompt is read on a
+                // thread of its own while this thread keeps the slots' batch windows going, so the decoding slots do not
+                // stop for an admission.  The prompt writes the main session, the windows the slots' sessions; the prompt
+                // borrows no cache slots (--no-prefill-borrow), so the windows' experts stay where they are.  The same
+                // bytes are computed as in the serial form (a window's rows do not depend on what else is on the GPU).
+                static const bool conc1 = [] {
+                    const char* v = std::getenv("STRATA_BATCH_CONCURRENT_READ");
+                    return v != nullptr && std::atoi(v) != 0;
+                }();
+                auto run_conc = [&](int64_t q, int64_t r) -> bool {
+                    if (!conc1 || piped || !stages.empty() || o.batch <= 0 || !o.no_prefill_borrow || !batch_on() ||
+                        !req_imgs.empty() || kvg.on)
+                        return run(q, r);
+                    std::atomic<bool> done{false};
+                    bool read_ok = false;
+                    in_prompt_read = true;
+                    std::thread reader([&] {
+                        try {   // (an exception leaving a std::thread ends the process: a failed read instead)
+                            read_ok = run(q, r);
+                        } catch (const std::exception& x) {
+                            read_ok = false;
+                            e = std::string("the prompt read failed: ") + x.what();
+                        } catch (...) {
+                            read_ok = false;
+                            e = "the prompt read failed";
+                        }
+                        done.store(true, std::memory_order_release);
+                        { std::lock_guard<std::mutex> lk(in_mu); }
+                        in_cv.notify_all();
+                    });
+                    bool step_ok = true;
+                    int64_t windows0 = bt_windows;
+                    const auto tc = Clock::now();
+                    while (!done.load(std::memory_order_acquire)) {
+                        if (step_ok && batch_on()) {
+                            step_ok = batch_step();
+                        } else {
+                            std::unique_lock<std::mutex> lk(in_mu);
+                            in_cv.wait_for(lk, std::chrono::milliseconds(2),
+                                           [&] { return done.load(std::memory_order_acquire); });
+                        }
+                        std::lock_guard<std::mutex> lk(in_mu);   // a BSTOP that came meanwhile ends its slot at its next window
+                        for (auto it = in_lines.begin(); it != in_lines.end();) {
+                            if (it->rfind("BSTOP ", 0) == 0) {
+                                const int b = std::atoi(it->c_str() + 6);
+                                if (b >= 0 && b < (int) bs.size()) bs[(size_t) b].stop = true;
+                                it = in_lines.erase(it);
+                            } else {
+                                ++it;
+                            }
+                        }
+                    }
+                    reader.join();
+                    in_prompt_read = false;
+                    std::fprintf(stderr, "strata batch: read %lld tokens on a thread of its own in %.0f ms; the slots ran %lld windows meanwhile\n",
+                                 (long long) (r - q), std::chrono::duration<double, std::milli>(Clock::now() - tc).count(),
+                                 (long long) (bt_windows - windows0));
+                    if (!step_ok) {
+                        batch_fatal = true;
+                        e = "a batch window failed";
+                        return false;
+                    }
+                    return read_ok;
+                };
                 // (a layer split reads its stages as a pipeline over one run's chunks: beside slots a chunk at a time, with
                 // none decoding in pieces of STRATA_BATCH_YIELD_CHUNKS chunks (default 8; 0 = one run) so a BYIELD is taken)
                 static const int64_t yield_chunks = [] {
@@ -15450,7 +15514,7 @@ int main(int argc, char** argv) {
                 for (int64_t q = a0; q < b0;) {
                     const int64_t r = std::min(b0, q + piece);
                     const auto tq = Clock::now();
-                    if (!run(q, r)) return false;
+                    if (!run_conc(q, r)) return false;
                     const double piece_ms = std::chrono::duration<double, std::milli>(Clock::now() - tq).count();
                     if (pr_on && r < b0) pr_prev_piece_ms = piece_ms;
                     const int64_t piece_tokens = r - q;
