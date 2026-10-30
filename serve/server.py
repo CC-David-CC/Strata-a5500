@@ -3677,6 +3677,9 @@ PARALLEL_STACK_ENV = {
     "STRATA_SLOT_COPY_BATCHSYNC": "1", "STRATA_BATCH_GDN_GROUPS": "1", "STRATA_BATCH_ATTN_ROWS": "1",
     "STRATA_BATCH_SELF_COMMIT": "1", "STRATA_QSA_SLOTS": "1",
 }
+# Only where the stack was run: Linux CUDA all nine; Linux HIP seven (the two one-launch-for-all-rows switches were not run there);
+# nothing on Windows (no run; its host-arena / pinned-memory path differs).
+PARALLEL_STACK_NOT_HIP = ("STRATA_BATCH_GDN_GROUPS", "STRATA_BATCH_ATTN_ROWS")
 
 
 def parallel_slots(cfg: dict) -> int:
@@ -3692,12 +3695,22 @@ def parallel_slots(cfg: dict) -> int:
     return n if isinstance(n, int) and not isinstance(n, bool) and n > 1 else 0
 
 
+def parallel_stack_platform() -> bool:
+    """Linux only: the stack was run on Linux CUDA and HIP; Windows (own host-arena path) and macOS were not."""
+    return sys.platform.startswith("linux")
+
+
 def parallel_stack_env(env: dict, cfg: dict) -> None:
     """Switch the exact parallel stack on (setdefault: a value the user or the config set stays) when the config runs batch
     slots on a CUDA or HIP Qwen engine.  Other engines (DeepSeek, SYCL, Metal) do not read these."""
     if parallel_slots(cfg) < 2 or (cfg.get("arch") or "") == "deepseek41" or cfg.get("backend") in ("sycl", "metal", "vulkan"):
         return
+    if not parallel_stack_platform():
+        return
+    hip = cfg.get("backend") == "hip"
     for k, v in PARALLEL_STACK_ENV.items():
+        if hip and k in PARALLEL_STACK_NOT_HIP:
+            continue
         env.setdefault(k, v)
 
 
