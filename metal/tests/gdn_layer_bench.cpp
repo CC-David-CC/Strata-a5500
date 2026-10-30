@@ -146,6 +146,7 @@ int main(int argc, char** argv) {
     dpost.grid[0] = HV; dpost.grid[1] = T; dpost.tg[0] = 128;
     const double tpre = timeit({dpre}), tscan = timeit({dscan}), tpost = timeit({dpost});
     std::printf("== gdn_pre %.3f, scan %.3f, gdn_post %.3f ms (stage %.3f)\n", tpre, tscan, tpost, tpre + tscan + tpost);
+    double tF = 0;
     {   // the fused-stride kernels (function constant 7) against the separate ones: bit for bit
         for (int t = 0; t < T; ++t) {
             std::memcpy(YF.as<float>() + (size_t)t * NF, qkv.as<float>() + (size_t)t * CH, 4 * CH);
@@ -172,7 +173,7 @@ int main(int argc, char** argv) {
                     std::memcmp(qn.ptr, rqn.data(), rqn.size()) == 0 ? "equal" : "DIFFER", std::memcmp(vc.ptr, rvc.data(), rvc.size()) == 0 ? "equal" : "DIFFER",
                     std::memcmp(gb.ptr, rgb.data(), rgb.size()) == 0 ? "equal" : "DIFFER", std::memcmp(h1.ptr, rh.data(), rh.size()) == 0 ? "equal" : "DIFFER",
                     std::memcmp(yh.ptr, ryh.data(), ryh.size()) == 0 ? "equal" : "DIFFER");
-        const double tF = timeit({fpre}) + timeit({fpost});
+        tF = timeit({fpre}) + timeit({fpost});
         std::printf("fused-stride pre + post %.3f ms (separate %.3f)\n", tF, tpre + tpost);
     }
     const double tout = timeit({gemm_d(ygh, Wh[4], Y[4], T, N, ZD, 64, 64)});
@@ -180,5 +181,14 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 5; ++i) dqall += timeit({dq_d(i)});
     std::printf("== layer in engine order (GPU ms): dq %.3f + input GEMMs %.3f + pre/scan/post %.3f + out GEMM %.3f = %.3f (sum of parts)\n",
                 dqall, sep, tpre + tscan + tpost, tout, dqall + sep + tpre + tscan + tpost + tout);
+    {   // the layer as the engine now runs it on the M5 family: fused input GEMM, fused-stride pre/post, tiled out GEMM
+        double tout_best = 1e9;
+        for (auto [tm, tn] : std::vector<std::pair<int, int>>{{64, 64}, {128, 64}, {64, 128}})
+            tout_best = std::min(tout_best, timeit({gemm_d(ygh, Wh[4], Y[4], T, N, ZD, tm, tn)}));
+        const double base_l = dqall + sep + tpre + tscan + tpost + tout;
+        const double new_l = dqall + best_f + tF + tscan + tout_best;
+        std::printf("== layer: before %.3f ms, after (fused input GEMM %.3f, fused-stride pre+post %.3f, scan %.3f, out GEMM %.3f) %.3f ms = x%.3f\n",
+                    base_l, best_f, tF, tscan, tout_best, new_l, base_l / new_l);
+    }
     return 0;
 }
