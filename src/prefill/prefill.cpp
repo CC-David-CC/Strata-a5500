@@ -6221,13 +6221,13 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
     // (none without an MMQ layer: the FP16 path has no such table)
     if (m.ids_identity) mmq::iota(m.ids_identity, m.T * K, m.cs);
     // ---- the PLE rows, read per chunk on a thread as run_impl does (the same state machine, in chunk order)
-    const bool ple_on = ssp->ple.ready();
+    const bool ple_on = m.ss->ple.ready();
     static const bool ple_batch_env = [] {
         const char* v = std::getenv("STRATA_PLE_BATCH");
         return v == nullptr || std::atoi(v) != 0;
     }();
     const bool ple_batch = ple_on && ple_batch_env && strata::kernels::ple_native_postops_enabled() &&
-                           (ssp->ple.w.key_bf16 != nullptr || ssp->ple.w.key_native_data != nullptr) &&
+                           (m.ss->ple.w.key_bf16 != nullptr || m.ss->ple.w.key_native_data != nullptr) &&
                            m.region_bytes / ((uint64_t) (3 * strata::kernels::NG_HC_DIM + N + 4) * 4 + (uint64_t) N * 2 + 4096) >= 64;
     // ---- the plan.  A segment is cut into pieces of at most S tokens (the usual super-chunks), each piece into
     // sub-chunks of m.T tokens from the piece's start; pieces of several segments are packed into one super-chunk while
@@ -6282,12 +6282,12 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
         int32_t pv[2] = {at(c0), at(c0 + 1)};
         for (int64_t t = 0; t < T; ++t) {
             const int32_t tok = (int32_t) tokens[c0 + t];
-            strata::kernels::ngram_rows(&tok, pv, 1, ssq->ple.consts,
+            strata::kernels::ngram_rows(&tok, pv, 1, m.ss->ple.consts,
                                         m.ple_rows[buf].data() + t * strata::kernels::PLE_N_HEADS);
             pv[0] = pv[1];
             pv[1] = tok;
         }
-        return ssq->ple.table->gather_batch(m.ple_rows[buf].data(), (size_t) T, m.ple_emb_host[buf], e);
+        return m.ss->ple.table->gather_batch(m.ple_rows[buf].data(), (size_t) T, m.ple_emb_host[buf], e);
     };
     std::string ple_next_err;
     std::future<bool> ple_next;
@@ -6805,7 +6805,7 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
                 if (l == 1 && ple_on && ple_batch) {
                     pt.mark(kPfPle, cs);
                     const auto tp = Clock::now();
-                    const strata::kernels::PleWeights& pw = ssp->ple.w;
+                    const strata::kernels::PleWeights& pw = m.ss->ple.w;
                     constexpr int64_t HD = strata::kernels::NG_HC_DIM;
                     const uint64_t per_token = (uint64_t) (3 * HD + N + 4) * 4 + (uint64_t) N * (bf16x2(m.f16_io) ? 4 : 2) + 4096;
                     const int64_t SB = std::min<int64_t>(T, (int64_t) (m.region_bytes / per_token));
@@ -6833,7 +6833,7 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
                         m.gemm.bf16(e16, pw.value_bf16, val, nb, N, N);
                         if (e16_lo) m.gemm.bf16(e16_lo, pw.value_bf16, val, nb, N, N, 0, 1.0f);
                         try {
-                            strata::kernels::native_ple_postops_batch(key, m.R + s0 * D, val, ssp->ple.hist, pw, qn, gated,
+                            strata::kernels::native_ple_postops_batch(key, m.R + s0 * D, val, ssp->ple_hist, pw, qn, gated,
                                                                       gate, (int) nb, cs);
                         } catch (const std::exception& e) { err = std::string("prefill PLE: ") + e.what(); return false; }
                     }
@@ -6846,10 +6846,10 @@ bool Prefill::lm_run(const std::vector<Seg>& segs, int depth, const std::vector<
                         po.normalized = m.ple_norm;
                         po.result = m.R + t * D;
                         try {
-                            strata::kernels::ple_block(m.ple_emb + t * N, m.R + t * D, ssp->ple.hist, ssp->ple.w, po,
-                                                       ssp->ple.scratch, cs);
+                            strata::kernels::ple_block(m.ple_emb + t * N, m.R + t * D, ssp->ple_hist, m.ss->ple.w, po,
+                                                       m.ss->ple.scratch, cs);
                         } catch (const std::exception& e) { err = std::string("prefill PLE: ") + e.what(); return false; }
-                        strata::kernels::ple_history_advance(ssp->ple.hist, m.ple_norm, cs);
+                        strata::kernels::ple_history_advance(ssp->ple_hist, m.ple_norm, cs);
                     }
                     stats_.ms_ple += ms_since(tp);
                 }
