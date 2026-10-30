@@ -185,7 +185,7 @@ int main() {
         // 0.2.8: Strix Halo (gfx1151, integrated) gets the matrix-core prompt set on Windows; the 780M and the 890M are
         // not measured there and stay off
         const bool win_on = m.expect_on && m.integrated && std::string(m.gcn).rfind("gfx1151", 0) == 0;
-        CHECK(igpu_default_env(m.gcn, m.integrated).size() == (win_on ? 5u : 0u));
+        CHECK(igpu_default_env(m.gcn, m.integrated).size() == (win_on ? 6u : 0u));
 #else
         CHECK(igpu_default_env(m.gcn, m.integrated).size() == (want ? 5u : 0u));
 #endif
@@ -215,21 +215,21 @@ int main() {
         const auto t = igpu_default_env(m.gcn, m.integrated);
         CHECK(t.empty() == !m.expect_on);
         if (m.expect_on) {
-            CHECK(t.size() == 5);
             bool halo_win = false;
 #if defined(_WIN32)
             halo_win = std::string(m.gcn).rfind("gfx1151", 0) == 0;
 #endif
+            CHECK(t.size() == (halo_win ? 6u : 5u));
             std::vector<const char*> want = {"STRATA_HIP_WMMA", "STRATA_PF_GEMM", "STRATA_PA_FAST", "STRATA_HC_UPMIX"};
-            want.push_back(halo_win ? "STRATA_PF_FUSED" : "STRATA_SELECT_WMMA");
+            want.push_back("STRATA_SELECT_WMMA");
+            if (halo_win) want.push_back("STRATA_PF_FUSED");
             for (const char* w : want) {
                 bool found = false;
                 for (const auto& kv : t) found = found || (kv.first == w && kv.second == "1");
                 CHECK(found);
             }
             for (const auto& kv : t) CHECK(kv.first != "STRATA_HC_Q8" && kv.first != "STRATA_PF_HCDOWN");
-            if (halo_win) { for (const auto& kv : t) CHECK(kv.first != "STRATA_SELECT_WMMA"); }
-            else { for (const auto& kv : t) CHECK(kv.first != "STRATA_PF_FUSED"); }
+            if (!halo_win) { for (const auto& kv : t) CHECK(kv.first != "STRATA_PF_FUSED"); }
         }
         if (!m.expect_on) std::printf("  (not on) %s\n", m.name);
     }
@@ -284,22 +284,21 @@ int main() {
     CHECK(!igpu_prompt_set_enabled("gfx1103", true));
     {
         const auto t = igpu_default_env("gfx1151", true);
-        CHECK(t.size() == 5);
+        CHECK(t.size() == 6);
         auto has = [&t](const char* k) {
             for (const auto& kv : t) if (kv.first == k) return kv.second == "1";
             return false;
         };
         CHECK(has("STRATA_HIP_WMMA") && has("STRATA_PF_GEMM") && has("STRATA_PA_FAST") && has("STRATA_HC_UPMIX") &&
-              has("STRATA_PF_FUSED"));
-        CHECK(!has("STRATA_SELECT_WMMA"));
+              has("STRATA_PF_FUSED") && has("STRATA_SELECT_WMMA"));
         CHECK(igpu_default_env("gfx1151", false).empty());   // a gfx1151 reported as a discrete card
         CHECK(igpu_default_env("gfx1150", true).empty());    // 890M: unchanged
         CHECK(igpu_default_env("gfx1103", true).empty());    // 780M on Windows: unchanged
     }
     {
-        const char* halo[] = {"STRATA_HIP_WMMA", "STRATA_PF_GEMM", "STRATA_PA_FAST", "STRATA_HC_UPMIX", "STRATA_PF_FUSED"};
+        const char* halo[] = {"STRATA_HIP_WMMA", "STRATA_PF_GEMM", "STRATA_PA_FAST", "STRATA_HC_UPMIX", "STRATA_PF_FUSED",
+                              "STRATA_SELECT_WMMA"};
         for (const char* k : halo) unset(k);
-        unset("STRATA_SELECT_WMMA");
         const auto set = apply_arch_defaults("gfx1151", true);
         for (const char* k : halo) {
             bool in = false;
@@ -307,7 +306,6 @@ int main() {
             CHECK(in);
             CHECK(std::getenv(k) != nullptr && std::string(std::getenv(k)) == "1");
         }
-        for (const auto& n : set) CHECK(n != "STRATA_SELECT_WMMA");
         // a switch the user set (even to 0) is kept, and the whole set turns off with either switch
         for (const char* k : halo) unset(k);
         put("STRATA_HC_UPMIX", "0");

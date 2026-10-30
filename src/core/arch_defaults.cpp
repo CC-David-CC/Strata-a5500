@@ -142,7 +142,7 @@ std::vector<std::pair<std::string, std::string>> igpu_default_env(const char* gc
         {"STRATA_SELECT_WMMA", "1"},   // the block scorer on matrix cores
         {"STRATA_HC_UPMIX", "1"},      // the hyper-connection up projection with its epilogue
     };
-    // gfx1151 (Strix Halo) on Windows: SELECT_WMMA measured x1.003 at 8K on the branch and is left out, and PF_FUSED (the
+    // gfx1151 (Strix Halo) on Windows: SELECT_WMMA is in since 0.2.9 (x1.008 at 8K, x1.037 at 32K, x1.077 at 64K), and PF_FUSED (the
     // fused int8 gate/up prompt experts, #136) measured x1.12 there and joins the set.  The 780M and the 890M keep the
     // table above exactly as measured on them.
     if (win && strata::kernels::gfx_arch_is(gcn_arch, "gfx1151")) {
@@ -152,6 +152,8 @@ std::vector<std::pair<std::string, std::string>> igpu_default_env(const char* gc
             {"STRATA_PA_FAST", "1"},
             {"STRATA_HC_UPMIX", "1"},
             {"STRATA_PF_FUSED", "1"},
+            {"STRATA_SELECT_WMMA", "1"},   // 0.2.9: the block scorer on matrix cores; not bitwise (about 10 of 2,051 selected cells flip at the cutoff
+                                           // for queries past ~5K tokens), x1.008 at 8K, x1.037 at 32K, x1.077 at 64K (STRIX-Q-RESULTS.md)
         };
     }
     return t;
