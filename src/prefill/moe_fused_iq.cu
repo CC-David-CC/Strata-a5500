@@ -1651,6 +1651,7 @@ unsigned blocks(int64_t n, int per) { return (unsigned) ((n + per - 1) / per); }
 // per device: whether every kernel here runs (sm_80+, device code in this build, fits), and their occupancy
 struct DevInfo {
     bool done = false, ok = false;
+    bool g1151 = false; // gfx1151 (Strix Halo): Q8_0 down layers on the F16 kernel by default (q8d_f16_default)
     bool w12 = false;   // gfx12 (RDNA4): the native kernels only - the Q2_0 pack's (moe_fused.cu) are not ported there
     bool t75 = false;   // Turing (STRATA_PF_FUSED_SM75): the Q2_0 / Q2_0 layers only (what was set up and checked there)
     bool q2n = false;   // sm_80+ with STRATA_PF_FUSED_Q2N=1: the native Q2_0 pack's Q2_0 gate/up is set up as well (opt-in)
@@ -1762,6 +1763,7 @@ const DevInfo& dev_info() {
         hipFuncAttributes fa{};
         const bool props = cudaGetDeviceProperties(&prop, dev) == cudaSuccess;
         d.w12 = props && strata::kernels::gfx_arch_is_gfx12_wmma(prop.gcnArchName);
+        d.g1151 = props && strata::kernels::gfx_arch_is_gfx1151(prop.gcnArchName);
         // the arch lists of STRATA_NAT_W11 / STRATA_NAT_W12 (gfx_arch.hpp: never a prefix - another gfx11 / gfx12 part
         // has the trapping body, which hipFuncGetAttributes and the occupancy query still accept).  And the body this
         // build loaded for the device is the real one: the __builtin_trap() stub (a gfx11-generic / gfx12-generic or
@@ -1865,9 +1867,23 @@ bool d_covered(int t) {
 // d_covered on this device: STRATA_PF_F16=1 also takes Q8_0 down on gfx11 without STRATA_PF_FUSED_KQ - the F16 kernel
 // has no minimum term, and its output already differs from the int8 kernels' (UD-IQ4_XS: the five Q8_0-down layers
 // would otherwise leave the fused path for MMQ).
+// gfx1151: a Q8_0 down (UD-IQ4_XS and UD-Q4_K_XL keep five layers of it) takes the F16 matrix-core kernel without STRATA_PF_F16,
+// whose output differs from the int8 kernels' only for that layer; every other format keeps the bits it has.  Without it those
+// layers leave the fused path for MMQ: UD-IQ4_XS 4K / 8K prompts 1,057 / 1,128 against 1,192 / 1,257 tok/s with it (Windows
+// gfx1151, eng034 with STRATA_PF_F16=1, which also covers these layers; A/B in phaseA-tests/strix-u).  STRATA_PF_Q8D_F16=0 turns it off.
+bool q8d_f16_default(const DevInfo& d) {
+#if defined(__HIPCC__)
+    if (d.w12 || !d.g1151) return false;
+    static const bool off = [] { const char* v = std::getenv("STRATA_PF_Q8D_F16"); return v != nullptr && v[0] == '0'; }();
+    return !off;
+#else
+    (void) d;
+    return false;
+#endif
+}
 bool d_covered_on(int t, const DevInfo& d) {
 #if defined(__HIPCC__)
-    if (t == T_Q8_0 && !d.w12 && f16::requested()) return true;
+    if (t == T_Q8_0 && !d.w12 && (f16::requested() || q8d_f16_default(d))) return true;
 #endif
     (void) d;
     return d_covered(t);
@@ -2022,6 +2038,7 @@ void experts_native(const Batch& b, const NativeGeom& g, int n_expert, int64_t n
         // STRATA_PF_F16=1: gfx11's F16 matrix cores - the K-quants' kernels (moe_f16_kq.cu) and native_f16_kernel for
         // f16_gu / f16_d (gfx12's WMMA layout differs, so it keeps the int8 kernels)
         const bool f16 = !d.w12 && f16::requested();
+        const bool f16_q8d = !f16 && g.d_type == T_Q8_0 && q8d_f16_default(d);   // (the Q8_0 down only)
         const bool f16_wide = f16::pick_bn(n, n_expert) == 2 * kTileRows;
 #define STRATA_F16_LAUNCH(T, GU, NFB, ACT, OUT, DM) do { \
     const unsigned grid_f = (unsigned) std::max<int64_t>(1, tiles * (NFB)); \
@@ -2055,7 +2072,7 @@ void experts_native(const Batch& b, const NativeGeom& g, int n_expert, int64_t n
 #undef STRATA_NW_GU
 #define STRATA_NW_D(T) do { if (occ_d) native_w11_kernel<T, false, true, NW_LB><<<g_d, NW_THREADS, 0, s>>>(b, g, tb, ha8, src, nullptr, dm); else native_w11_kernel<T, false><<<g_d, NW_THREADS, 0, s>>>(b, g, tb, ha8, src, nullptr, dm); } while (0)
         if (f16 && f16kq::covers_down(g.d_type)) f16kq::down(b, g, tb.ts, tb.tiles, tb.off, n, n_expert, tiles, ha8, dm, s);
-        else if (f16 && f16_d(g.d_type)) {
+        else if ((f16 && f16_d(g.d_type)) || f16_q8d) {
             if (g.d_type == T_Q2_0) STRATA_F16_LAUNCH(T_Q2_0, false, f16::D_NFB, ha8, nullptr, dm);
             else if (g.d_type == T_Q8_0) STRATA_F16_LAUNCH(T_Q8_0, false, f16::D_NFB, ha8, nullptr, dm);
             else STRATA_F16_LAUNCH(T_IQ4_NL, false, f16::D_NFB, ha8, nullptr, dm);
