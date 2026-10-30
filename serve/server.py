@@ -342,6 +342,7 @@ ADMIT_MAX_WAIT_S = _timeout_env("STRATA_ADMIT_MAX_WAIT_S", 30.0) or 0.0
 # read once for all of them, and each waiting request then finds its prompt in its slot.  0 / unset: off.
 COALESCE_PREFILL = max(0, int(os.environ.get("STRATA_COALESCE_PREFILL") or 0))
 COALESCE_TOKENS = max(256, int(os.environ.get("STRATA_COALESCE_TOKENS") or 16384))   # prompt tokens read together at most
+COALESCE_WAIT_MS = max(0, int(os.environ.get("STRATA_COALESCE_WAIT_MS") or 0))       # a burst's later requests register within this long
 STALL_CPU_EPS_S = 0.5       # CPU seconds the engine may use in the whole stall window and still count as frozen
 STALL_IO_EPS_B = 1 << 20    # bytes read or written in that window
 
@@ -1809,6 +1810,8 @@ class StrataEngine:
         same layer-major pass as the BGEN's prompt.  Each follower finds its slot in cancel._strata_preslot."""
         picked = []
         total = len(lead_prompt)
+        if COALESCE_WAIT_MS > 0:
+            time.sleep(COALESCE_WAIT_MS / 1000.0)    # the requests of a burst reach the server a few ms apart
         with self.slot_cv:
             for e in list(self.wait_lens):
                 if len(picked) >= COALESCE_PREFILL - 1:
