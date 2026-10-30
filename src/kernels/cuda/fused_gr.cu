@@ -800,10 +800,13 @@ __global__ void __launch_bounds__(THREADS) gr_down_v3_kernel(GrMulti m, float* _
                 if (EXACT_T || k < T) acc[k] += dot8u_ptr(wvq, xs + (size_t) k * SL + j * 8);
         }
         const int prow = inject_block ? LR + warp : row0 + r;
-        if constexpr (EXACT_T && MAX_T == 8) {   // warp_sum8: token k's total sits in lanes 4k..4k+3
-            const float d8 = warp_sum8(acc, lane);
+        if constexpr (EXACT_T && MAX_T >= 5 && MAX_T <= 8) {   // warp_sum8: token k's total sits in lanes 4k..4k+3
+            float accs[8] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+#pragma unroll
+            for (int k = 0; k < MAX_T; ++k) accs[k] = acc[k];
+            const float d8 = warp_sum8(accs, lane);
             const int k = (lane >> 2) & 7;
-            if ((lane & 3) == 0) part[(((size_t) k * HC + c) * S + h) * PR + prow] = d8;
+            if ((lane & 3) == 0 && k < MAX_T) part[(((size_t) k * HC + c) * S + h) * PR + prow] = d8;
         } else {
 #pragma unroll
         for (int k = 0; k < MAX_T; ++k) {
@@ -880,10 +883,10 @@ __global__ void __launch_bounds__(THREADS) gr_up_v3_kernel(GrMulti m, const floa
             if (apply) { bo = a.bo_prev[d0 + dd]; ip = a.inj_prev[c]; }
         }
         float mine = 0.0f;
-        if constexpr (EXACT_T && MAX_T == 8) {   // the 8 tokens' warp sums together (warp_sum8): the same bits
-            float accs[8];
+        if constexpr (EXACT_T && MAX_T >= 5 && MAX_T <= 8) {   // the tokens' warp sums together (warp_sum8, missing tokens 0): the same bits
+            float accs[8] = {0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f};
 #pragma unroll
-            for (int k = 0; k < 8; ++k) {
+            for (int k = 0; k < MAX_T; ++k) {
                 float acc = dot8u_ptr(wa, lo[k] + lane * 8);
                 if (lane < LR / 8 - 32) acc += dot8u_ptr(wb, lo[k] + (32 + lane) * 8);
                 accs[k] = acc;
