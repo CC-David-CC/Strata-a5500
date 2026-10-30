@@ -194,8 +194,19 @@ def shared_arena_plan(cfg: dict, n_replicas: int, *, shm: str = "/dev/shm", plat
         if fd >= 0:
             path = f"/proc/{os.getpid()}/fd/{fd}"
             _MEMFDS[path] = fd
+            warn = ""
+            try:                 # the arena once plus about 7 GB of private RAM per engine (measured); a warning, never a refusal
+                from strata_control import replica_profile as _rp
+                q = _rp.quant_of(cfg)
+                if q:
+                    need = _rp.ARENA_GB[q] + n_replicas * _rp.PER_REPLICA_GB
+                    if avail / 2**30 < need + 4:
+                        warn = (f" WARNING: about {need:.0f} GB are needed for {n_replicas} engines and {avail / 2**30:.0f} GB "
+                                "are free: the last engine may not fit (fewer replicas, or the layer split, is safer)")
+            except Exception:    # noqa: BLE001
+                pass
             return path, (f"one shared expert arena for {n_replicas} replicas (memory object of the server, not limited by "
-                          "the size of /dev/shm): the experts are in RAM once")
+                          f"the size of /dev/shm): the experts are in RAM once.{warn}")
     if not (os.path.isdir(shm) and os.access(shm, os.W_OK)):
         return None, f"shared expert arena: {shm} is not usable; each replica keeps its own copy of the experts in RAM"
     free = free_bytes if free_bytes is not None else _free(shm)

@@ -384,6 +384,22 @@ class SharedArena(unittest.TestCase):
             os.fstat(fd)
         remove_arena(path)                         # (twice: harmless)
 
+    @unittest.skipUnless(hasattr(__import__("os"), "memfd_create") and sys.platform.startswith("linux"), "Linux memfd")
+    def test_a_memfd_arena_warns_when_the_engines_will_not_all_fit(self):
+        cfg = {**self.CFG, "model_name": "qwen3.8-flash-next-iq3_s"}
+        path, note = shared_arena_plan(cfg, 2, platform="linux", environ={}, free_bytes=57 << 30, use_memfd=True)
+        try:
+            self.assertTrue(path)
+            self.assertIn("WARNING", note)
+            self.assertIn("may not fit", note)
+        finally:
+            remove_arena(path)
+        path, note = shared_arena_plan(cfg, 2, platform="linux", environ={}, free_bytes=120 << 30, use_memfd=True)
+        try:
+            self.assertNotIn("WARNING", note)
+        finally:
+            remove_arena(path)
+
     def test_a_memfd_needs_free_ram(self):
         path, note = shared_arena_plan(self.CFG, 2, platform="linux", environ={}, free_bytes=2 << 30, use_memfd=True)
         self.assertIsNone(path)
