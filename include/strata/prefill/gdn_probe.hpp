@@ -21,7 +21,9 @@ enum GdnPath : int {
     kGdnChunked = 4,   // STRATA_GDN_CHUNKED: FP32 chunked prep + scan (CUDA, C = 32)
     kGdnTc = 5,        // STRATA_GDN_TC=1: chunked, scan on the tensor cores (CUDA sm_80+, 125 KB of shared memory a block)
     kGdnTcSplit = 6,   // the same scan with v / T / P single-buffered: 98 KB, fits the 99-KB cards (sm_86, sm_89, sm_120)
-    kGdnPathCount = 7
+    kGdnTcS2 = 7,      // experiment: the split scan with 2 passes a product (lo.hi + hi.hi), not for production
+    kGdnTcS1 = 8,      // experiment: the split scan with plain f16 operands (1 pass), not for production
+    kGdnPathCount = 9
 };
 
 struct GdnProbe {
@@ -48,6 +50,8 @@ inline const char* gdn_path_name(int p) {
         case kGdnChunked: return "chunked";
         case kGdnTc: return "tc";
         case kGdnTcSplit: return "tcs";
+        case kGdnTcS2: return "tcs2";
+        case kGdnTcS1: return "tcs1";
         case kGdnAuto: return "auto";
         default: return "none";
     }
