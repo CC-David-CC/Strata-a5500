@@ -383,6 +383,8 @@ class Catalog:
             near = S.closest(family, list(families))
             raise ValueError(f"There is no model family called '{family}'." + (f" Did you mean '{near}'?" if near else "")
                              + " Families: " + ", ".join(families) + ".")
+        if match in self.strata.dsv41_not_on_mac() and self._mac_hardware():
+            raise ValueError(self.strata.dsv41_not_on_mac_line() + " Use ist-das-2.00bpw or ist-das-2.25bpw.")
         offered = [f for f in families if match in self.strata.sizes_of(models, f)]
         if family is not None:
             if family not in offered:
@@ -496,6 +498,12 @@ class Catalog:
         comp = self.computer()
         vram = comp.main_vram_gb
         return VR.default_mode(vram, "intel" if comp.engine_vendor == "intel" else "") if vram > 0 else "cpu"      # no usable card: nothing to read on, the CPU reader
+
+    def _mac_hardware(self) -> bool:
+        try:
+            return bool(self.hardware().get("mac"))
+        except Exception:                                    # noqa: BLE001 - no hardware report: not a Mac as far as this check knows
+            return False
 
     def is_mac(self) -> bool:
         """An Apple Silicon Mac: the chip's memory is the system's (the Metal engine; strata_control/vision_reader.py)."""

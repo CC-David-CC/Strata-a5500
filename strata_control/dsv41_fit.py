@@ -607,6 +607,11 @@ def mac_plan(ram_gb: float, quant: str = "IQ2_XS", disk_free_gb: float | None = 
 # the 1.75 bpw set shares the 2.00 set's IQ1_M kernel but was never run there, so it is not offered on a Mac.
 
 MAC_SET_PACK = {"IST-DAS-2.00bpw": "IQ2_XXS", "IST-DAS-2.25bpw": "IQ2_XS"}
+# Unsloth's UD-IQ1_S / UD-IQ1_M (0.2.9) carry IQ1_S experts, which the Metal DeepSeek engine has no kernel for yet (metal/src/engine/msl/ds4_iq.metal:
+# IQ1_S and IQ4_NL are CUDA / HIP only).  They are kept off the Mac everywhere: the model lists (MAC_SET_PACK above does that on its own), setup, the
+# launch and the "I already have the model" check, with this one line.  Remove a name here when its Metal kernel lands.
+MAC_NOT_YET = ("UD-IQ1_S", "UD-IQ1_M")
+MAC_NOT_YET_LINE = "Unsloth's 1-bit DeepSeek sets don't run on a Mac yet; the 2.00 and 2.25 sets do."
 MAC_SMALL_RAM_GB = 64.0     # below this the measured M5 Max numbers do not apply (nothing smaller than 32 GB was ever started)
 
 

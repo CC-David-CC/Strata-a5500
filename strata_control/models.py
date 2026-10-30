@@ -19,6 +19,7 @@ import json
 import os
 import re
 import stat
+import sys
 from pathlib import Path
 
 from strata_control import discovery
@@ -336,6 +337,7 @@ def _already_set_up(shards: list[Path], candidate: dict | None) -> dict | None:
 
 
 ISSUE_WORDS = {
+    "not_on_this_mac": "Unsloth's 1-bit DeepSeek sets don't run on a Mac yet; the 2.00 and 2.25 sets do",
     "multiple_model_groups": "the folder holds more than one model",
     "incomplete_or_invalid_shard_set": "some parts of the model are missing",
     "unrecognized_or_unsupported_model_variant": "this is not a model size Strata knows",
@@ -364,6 +366,20 @@ _REASON_WORDS = (
     ("unsupported_architecture", "this model type is not supported by the Strata engine (add it as a Custom model API with llama-server instead)"),
     ("symlink", "this is a shortcut (symbolic link) that cannot be followed"),
 )
+
+
+def _on_mac() -> bool:
+    return sys.platform == "darwin"
+
+
+def _mac_not_yet() -> tuple:
+    from strata_control import dsv41_fit
+    return dsv41_fit.MAC_NOT_YET
+
+
+def _mac_not_yet_line() -> str:
+    from strata_control import dsv41_fit
+    return dsv41_fit.MAC_NOT_YET_LINE
 
 
 def plain_issue(code: str) -> str:
@@ -667,6 +683,10 @@ def _dsv41_plan(path: Path, details) -> dict | None:
         candidate = {"family": dsv41_sets.FAMILY, "model": row["model"], "basis": "known_names_and_sizes", "expected_expert_types": [],
                      "expected_tensor_count": None,
                      "setup_args_hint": ["--family", dsv41_sets.FAMILY, "--model", row["model"], "--gguf-dir", str(place)]}
+        if _on_mac() and row["model"] in _mac_not_yet():       # recommend, never force: say what does work and stop before anything is copied or packed
+            issues.append("not_on_this_mac")
+            candidate = None
+            messages.append(_mac_not_yet_line())
         messages.append(f"This is DeepSeek-V4.1-Flash, {row['label']}: all {len(row['present'])} model files are here"
                         + (", and the n-gram table." if row["engram"] else "."))
         if not row["engram"]:

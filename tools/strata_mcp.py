@@ -1339,6 +1339,17 @@ class Strata:
         return out
 
     @staticmethod
+    def dsv41_not_on_mac() -> tuple:
+        """The DeepSeek sets the Metal engine cannot run yet (IQ1_S experts): strata_control/dsv41_fit.MAC_NOT_YET."""
+        from strata_control import dsv41_fit
+        return dsv41_fit.MAC_NOT_YET
+
+    @staticmethod
+    def dsv41_not_on_mac_line() -> str:
+        from strata_control import dsv41_fit
+        return dsv41_fit.MAC_NOT_YET_LINE
+
+    @staticmethod
     def dsv41_disk_gb(d: dict) -> float:
         """The free disk a DeepSeek set needs: its whole download plus the pack and room to work (the card text says "about")."""
         from strata_control import dsv41_fit
@@ -2274,6 +2285,8 @@ class Tools:
             gpu = gpus = kv = low_ram = None
             if md.get("multi_file"):                    # DeepSeek on a Mac (0.2.7.1): the sets that were run there, 8K like everywhere, text only
                 from strata_control import dsv41_fit
+                if model in dsv41_fit.MAC_NOT_YET:
+                    raise ToolError(dsv41_fit.MAC_NOT_YET_LINE)
                 if model not in dsv41_fit.MAC_SET_PACK:
                     raise ToolError(f"{model} is not offered on a Mac: DeepSeek runs there as " + " or ".join(dsv41_fit.MAC_SET_PACK))
                 if vision in ("yes", "gpu", "cpu"):
