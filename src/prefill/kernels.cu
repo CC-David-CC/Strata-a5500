@@ -2509,7 +2509,7 @@ __device__ __forceinline__ um_f8 um_wmma(um_b16 a, um_b16 b, um_f8 c) {
     (void) a; (void) b; return c;   // not a gfx11 device pass: never launched (runtime gate)
 #endif
 }
-constexpr int UM_T = 128, UM_D = 16, UM_LD = LR + 8;   // a block: 128 tokens x 16 columns x the 4 streams
+constexpr int UM_T = 256, UM_D = 16, UM_LD = LR + 8;   // a block: 256 tokens x 16 columns x the 4 streams
 __device__ __forceinline__ um_b16 um_frag(const uint16_t* p) {   // 16 BF16 (32 bytes, 16-byte aligned)
     const uint4 a = *reinterpret_cast<const uint4*>(p), b = *reinterpret_cast<const uint4*>(p + 8);
     const uint32_t w[8] = {a.x, a.y, a.z, a.w, b.x, b.y, b.z, b.w};
@@ -2517,7 +2517,7 @@ __device__ __forceinline__ um_b16 um_frag(const uint16_t* p) {   // 16 BF16 (32 
 }
 // The block's w_up rows (16 columns x 4 streams x all 320 k) are staged in LDS once; each wave streams its own 16
 // tokens' lo16 rows from global memory (every A fragment feeds the 4 streams' WMMAs) - one barrier per block.
-__global__ void __launch_bounds__(256) gr_upmix_kernel(const uint16_t* __restrict__ lo16, const uint16_t* __restrict__ wu,
+__global__ void __launch_bounds__(512) gr_upmix_kernel(const uint16_t* __restrict__ lo16, const uint16_t* __restrict__ wu,
                                                        const float* __restrict__ R, const float* __restrict__ rs,
                                                        const float* __restrict__ w, float* __restrict__ mixed,
                                                        uint16_t* __restrict__ mixed16, uint16_t* __restrict__ mixed_h,
@@ -2528,7 +2528,7 @@ __global__ void __launch_bounds__(256) gr_upmix_kernel(const uint16_t* __restric
     // along rows (token-tile fastest scattered them over 512 rows x 40 KB per block: 28 ms instead of 3.7 at 8K)
     const int64_t t0 = (int64_t) blockIdx.y * UM_T + 16 * wave;
     const int d0 = blockIdx.x * UM_D;
-    for (int i = tid; i < HC * UM_D * (LR / 8); i += 256) {
+    for (int i = tid; i < HC * UM_D * (LR / 8); i += 512) {
         const int rr = i / (LR / 8), q = i % (LR / 8);
         const int c = rr / UM_D, dd = rr % UM_D;
         *reinterpret_cast<uint4*>(&sB[rr][8 * q]) = *reinterpret_cast<const uint4*>(wu + (size_t) (c * N + d0 + dd) * LR + 8 * q);
@@ -2789,7 +2789,7 @@ bool gr_upmix(const uint16_t* lo16, const uint16_t* w_up, const float* R, const 
         return strata::kernels::gfx_arch_is_gfx11_wmma(p.gcnArchName);
     }();
     if (!gfx11 || T <= 0) return false;
-    gr_upmix_kernel<<<dim3(N / UM_D, (unsigned) ((T + UM_T - 1) / UM_T)), 256, 0, (cudaStream_t) stream>>>(
+    gr_upmix_kernel<<<dim3(N / UM_D, (unsigned) ((T + UM_T - 1) / UM_T)), 512, 0, (cudaStream_t) stream>>>(
         lo16, w_up, R, rs, w_norm, mixed, mixed16, mixed_h, T);
     check("gr_upmix");
     return true;
