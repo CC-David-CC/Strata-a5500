@@ -3677,9 +3677,8 @@ PARALLEL_STACK_ENV = {
     "STRATA_SLOT_COPY_BATCHSYNC": "1", "STRATA_BATCH_GDN_GROUPS": "1", "STRATA_BATCH_ATTN_ROWS": "1",
     "STRATA_BATCH_SELF_COMMIT": "1", "STRATA_QSA_SLOTS": "1",
 }
-# Only where the stack was run: Linux CUDA all nine; Linux HIP seven (the two one-launch-for-all-rows switches were not run there);
-# nothing on Windows (no run; its host-arena / pinned-memory path differs).
-PARALLEL_STACK_NOT_HIP = ("STRATA_BATCH_GDN_GROUPS", "STRATA_BATCH_ATTN_ROWS")
+# Only where the stack was run alone: Linux CUDA, all nine.  HIP got no measurement without replicas (its only run was inside the
+# replica config), Windows none at all (its host-arena / pinned-memory path differs): nothing there.
 
 
 def parallel_slots(cfg: dict) -> int:
@@ -3696,7 +3695,7 @@ def parallel_slots(cfg: dict) -> int:
 
 
 def parallel_stack_platform() -> bool:
-    """Linux only: the stack was run on Linux CUDA and HIP; Windows (own host-arena path) and macOS were not."""
+    """Linux only: the stack was run on Linux CUDA; Windows (own host-arena path) and macOS were not."""
     return sys.platform.startswith("linux")
 
 
@@ -3707,10 +3706,9 @@ def parallel_stack_env(env: dict, cfg: dict) -> None:
         return
     if not parallel_stack_platform():
         return
-    hip = cfg.get("backend") == "hip"
+    if cfg.get("backend") == "hip":
+        return
     for k, v in PARALLEL_STACK_ENV.items():
-        if hip and k in PARALLEL_STACK_NOT_HIP:
-            continue
         env.setdefault(k, v)
 
 
