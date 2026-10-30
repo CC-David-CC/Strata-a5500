@@ -1127,7 +1127,7 @@ register pressure.
 __dpct_inline__ void block_scores_multi_kernel(
     const float *__restrict__ pooled, const float *__restrict__ dead,
     const float *__restrict__ q_idx, const int32_t *__restrict__ steps, int nq,
-    int64_t max_blocks, float *__restrict__ out, bool early_exit) {
+    int64_t max_blocks, float *__restrict__ out, bool early_exit, QsaScoreRows srow = {}) {
     auto item_ct1 = sycl::ext::oneapi::this_work_item::get_nd_item<3>();
 auto &qs = *sycl::ext::oneapi::group_local_memory_for_overwrite<
     float[MQ * IDX_HEADS * IDX_DIM]>(
@@ -1171,14 +1171,18 @@ auto &qs = *sycl::ext::oneapi::group_local_memory_for_overwrite<
     for (int64_t b = (int64_t)item_ct1.get_group(2) * SCORE_WARPS +
                      (item_ct1.get_local_id(2) >> 5);
          b <= top && b < max_blocks; b += wstride) {
-        const sycl::float4 kp = *reinterpret_cast<const sycl::float4 *>(
+        // srow.n > 0: each query reads its own sequence's keys; else one set of keys for every query
+        const bool own = srow.n > 0;
+        const sycl::float4 kp = own ? sycl::float4{} : *reinterpret_cast<const sycl::float4 *>(
             pooled + b * IDX_DIM + lane * 4);
-        const sycl::float4 kd =
+        const sycl::float4 kd = own ? sycl::float4{} :
             *reinterpret_cast<const sycl::float4 *>(dead + lane * 4);
         for (int qi = 0; qi < nq; ++qi) {
             const int64_t n_bid = s_nbid[qi];
             if (b > n_bid) continue;
-            const sycl::float4 k4 = (b == n_bid) ? kd : kp;
+            const sycl::float4 k4 = !own ? ((b == n_bid) ? kd : kp)
+                : (b == n_bid) ? *reinterpret_cast<const sycl::float4 *>(srow.dead[qi] + lane * 4)
+                               : *reinterpret_cast<const sycl::float4 *>(srow.pooled[qi] + b * IDX_DIM + lane * 4);
             const float* q = qs + qi * IDX_HEADS * IDX_DIM + lane * 4;
             float score = 0.0f;
 #pragma unroll
@@ -1565,6 +1569,27 @@ void block_topk_cluster_kernel(const float *__restrict__ scores,
 }
 #endif  // !__HIPCC__
 }  // namespace
+
+void qsa_block_scores_rows(const QsaScoreRows& rows, const float* q_idx, const int32_t* steps, int64_t nq,
+                           int64_t max_blocks, const QsaShapes& s, float* scores, void* stream) {
+    if (nq <= 0) return;
+    if (s.idx_dim != IDX_DIM || s.idx_n_head != IDX_HEADS || s.idx_block != R || nq > MQ || rows.n != nq) {
+        std::fprintf(stderr, "qsa_block_scores_rows: unsupported geometry\n");
+        std::exit(1);
+    }
+    static const bool early = [] { const char* v = std::getenv("STRATA_QSA_EARLY_EXIT"); return v == nullptr || std::atoi(v) != 0; }();
+    const QsaScoreRows srow = rows;
+    auto exp_props = sycl::ext::oneapi::experimental::properties{sycl::ext::oneapi::experimental::use_root_sync};
+    strata::q_of(stream)->submit([&](sycl::handler &cgh) {
+        auto early_ct7 = early;
+        cgh.parallel_for<dpct_kernel_name<class block_scores_rows_kernel_a3>>(
+            sycl::nd_range<3>(sycl::range(1, 1, 256) * sycl::range(1, 1, SCORE_WARPS * 32),
+                              sycl::range(1, 1, SCORE_WARPS * 32)),
+            exp_props, [=](sycl::nd_item<3> item_ct1) [[sycl::reqd_sub_group_size(32)]] {
+                block_scores_multi_kernel(nullptr, nullptr, q_idx, steps, (int)nq, max_blocks, scores, early_ct7, srow);
+            });
+    });
+}
 
 void qsa_block_scores(const float* pooled, const float* dead, const float* q_idx, const int32_t* steps, int64_t nq,
                       int64_t max_blocks, const QsaShapes& s, float* scores, void* stream, int64_t active_blocks) {
