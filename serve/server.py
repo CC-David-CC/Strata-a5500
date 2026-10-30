@@ -3712,6 +3712,38 @@ def parallel_stack_env(env: dict, cfg: dict) -> None:
         env.setdefault(k, v)
 
 
+# 0.2.9: the qualified GDN prompt speedups (QUAL-GDN, Qwen3.8 IQ3_S).  Linux only.
+#   CUDA: STRATA_GDN_TC=1 (the recurrence scan on the tensor cores) + STRATA_GDN_CONVL2=2 (conv, SiLU and q/k norm in one pass):
+#         KL mean 0.0019 / max 0.0125, 61-task suite 55 vs 54, prompt +4.4% at 4K, +5.5% at 16K, +5.7% at 32K (l620).  The engine
+#         gates TC at run time (compute capability 8 or more, one SM per value head, shared memory) and falls back to the old
+#         kernels on anything else, so an older card or a CUDA 12 build simply does not use it.
+#   AMD gfx12 (RDNA4) only: STRATA_GDN_CHUNKED=1 (the chunked recurrence on the matrix cores): KL mean 0.0025, suite 55 vs 56,
+#         +3.5% at 4K, +5.5% at 16K (R9700).  The same variable also turns the gfx11 path on in the engine and only gfx12 was
+#         qualified, so it is set only when every card the engine will see is gfx12.
+# Other engines (Qwen3.6, DeepSeek), SYCL, Metal, Vulkan, Windows: nothing.  An explicit variable (or the config's env) wins.
+GDN_STACK_CUDA = {"STRATA_GDN_TC": "1", "STRATA_GDN_CONVL2": "2"}
+GDN_STACK_GFX12 = {"STRATA_GDN_CHUNKED": "1"}
+
+
+def gdn_stack_env(env: dict, cfg: dict, archs: dict | None = None) -> None:
+    if not parallel_stack_platform():                                   # Linux only (same rule as the parallel stack)
+        return
+    if (cfg.get("arch") or "qwen4exp") != "qwen4exp" or cfg.get("backend") in ("sycl", "metal", "vulkan"):
+        return                                                          # only the model the numbers are from
+    if cfg.get("backend") != "hip":
+        for k, v in GDN_STACK_CUDA.items():
+            env.setdefault(k, v)
+        return
+    ar = archs if archs is not None else hip_gpu_archs()
+    if not ar:
+        return                                                          # cannot tell the card: leave AMD out
+    want = hip_visible(cfg) or list(ar)
+    seen = [ar.get(i, "") for i in want]
+    if seen and all(a.startswith("gfx12") for a in seen):
+        for k, v in GDN_STACK_GFX12.items():
+            env.setdefault(k, v)
+
+
 def child_env(cfg: dict, *, offline: bool = False) -> dict:
     """The engine's environment: the CUDA libraries setup installed (pip's nvidia packages, or the toolkit that
     compiled it) first on the library search path."""
@@ -3729,6 +3761,7 @@ def child_env(cfg: dict, *, offline: bool = False) -> dict:
     if (cfg.get("arch") or "") == "deepseek41":      # (only this engine reads these; Qwen's environment is untouched)
         deepseek_slot_env(env, cfg)
     parallel_stack_env(env, cfg)
+    gdn_stack_env(env, cfg)
     # Strict offline reaches children through the environment, because a tool subprocess or a model
     # loader is code this server does not own. Applied last so a profile's own `env` cannot remove
     # the policy by naming the same variable.

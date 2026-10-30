@@ -847,5 +847,55 @@ class ParallelStackDefaults(unittest.TestCase):
         self.assertNotIn("STRATA_CKPT_POOL", self.env_for({"parallel": 8, "args": [], "arch": "deepseek41"}))
         self.assertNotIn("STRATA_CKPT_POOL", self.env_for({"parallel": 8, "args": [], "backend": "sycl"}))
 
+
+class GdnStackDefaults(unittest.TestCase):
+    """The qualified GDN speedups are on from the server (Linux CUDA; Linux HIP gfx12 only); an explicit value wins."""
+    def env_for(self, cfg, archs=None, linux=True, base=None):
+        import os
+        from unittest import mock
+        env = {k: v for k, v in (base or {}).items()}
+        with mock.patch.object(server, "parallel_stack_platform", return_value=linux):
+            server.gdn_stack_env(env, cfg, archs)
+        return env
+
+    def test_cuda_on(self):
+        for cfg in ({"backend": "cuda"}, {}, {"arch": "qwen4exp"}):
+            env = self.env_for(cfg)
+            self.assertEqual(env.get("STRATA_GDN_TC"), "1")
+            self.assertEqual(env.get("STRATA_GDN_CONVL2"), "2")
+            self.assertNotIn("STRATA_GDN_CHUNKED", env)
+
+    def test_explicit_wins(self):
+        env = self.env_for({}, base={"STRATA_GDN_TC": "0"})
+        self.assertEqual(env["STRATA_GDN_TC"], "0")
+        self.assertEqual(env["STRATA_GDN_CONVL2"], "2")
+
+    def test_other_models_and_backends_off(self):
+        for cfg in ({"arch": "qwen35moe"}, {"arch": "deepseek41"}, {"backend": "sycl"}, {"backend": "metal"}, {"backend": "vulkan"}):
+            self.assertEqual(self.env_for(cfg), {}, cfg)
+
+    def test_windows_and_mac_off(self):
+        self.assertEqual(self.env_for({}, linux=False), {})
+        self.assertEqual(self.env_for({"backend": "hip"}, archs={0: "gfx1201"}, linux=False), {})
+
+    def test_hip_gfx12_only(self):
+        hip = {"backend": "hip", "gpu": [0, 1]}
+        env = self.env_for(hip, archs={0: "gfx1201", 1: "gfx1200"})
+        self.assertEqual(env, {"STRATA_GDN_CHUNKED": "1"})            # and nothing of the CUDA pair
+        for archs in ({0: "gfx1100", 1: "gfx1100"}, {0: "gfx1151"}, {0: "gfx1030", 1: "gfx1030"}, {0: "gfx1201", 1: "gfx1151"}, {}, None):
+            self.assertEqual(self.env_for(hip, archs=archs), {}, archs)
+
+    def test_hip_selected_cards_decide(self):
+        cfg = {"backend": "hip", "gpu": [1]}
+        self.assertEqual(self.env_for(cfg, archs={0: "gfx1151", 1: "gfx1201"}), {"STRATA_GDN_CHUNKED": "1"})
+        cfg = {"backend": "hip", "gpu": [0]}
+        self.assertEqual(self.env_for(cfg, archs={0: "gfx1151", 1: "gfx1201"}), {})
+
+    def test_child_env_wiring(self):
+        from unittest import mock
+        with mock.patch.object(server, "parallel_stack_platform", return_value=True):
+            env = server.child_env({"args": []})
+        self.assertEqual(env.get("STRATA_GDN_TC"), "1")
+
 if __name__ == "__main__":
     unittest.main()
