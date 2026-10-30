@@ -39,7 +39,7 @@ class VersionBump(unittest.TestCase):
         host = json.loads((ROOT / "apps/host/package.json").read_text(encoding="utf-8"))
         self.assertEqual(host["version"], "0.2.9")
         locked = json.loads((ROOT / "apps/host/package-lock.json").read_text(encoding="utf-8"))
-        self.assertEqual((locked["version"], locked["packages"][""]["version"]), ("0.2.8", "0.2.9"))
+        self.assertEqual((locked["version"], locked["packages"][""]["version"]), ("0.2.9", "0.2.9"))
 
     def test_the_documents_that_state_the_current_version_agree(self):
         self.assertIn("Version 0.2.9, engine 0.1.55.", (ROOT / "AGENTS.md").read_text(encoding="utf-8"))
