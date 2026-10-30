@@ -1683,9 +1683,10 @@ constexpr int GW_AHEAD = 3;        // the scan warms the cache this many chunks 
 constexpr int64_t kGdnWmmaMin = 64;   // STRATA_GDN_CHUNKED=1 takes prompt chunks of this many tokens and more
 // gfx12: the chunked kernels are faster than the sequential ones at every call length from 64 tokens up (1.7x to 2.5x on the
 // layer), but the prompt-speed gain depends on the prompt: IQ3_S on an R9700, +3.9% at 4K, +5.0% at 8K (median of 7 pairs: borderline), +6.9% at 16K, +10.1% at
-// 32K.  The owner's bar for a non-bitwise path is +5%, so gfx12 takes the chunked path only from calls of this many tokens (a
-// prompt of 12K and more; longer prompts arrive in calls of up to 16K).  gfx11 keeps kGdnWmmaMin (not measured at model level).
-constexpr int64_t kGdnW12MinT = 12000;
+// 32K.  It first started at 12000 tokens for the old +5% bar; the owner then chose every gain (2026-10-30), and the final gate
+// with the start at 64 measured +1.7% to +3.2% at 1-3K, +3.5% at 4K, +4.7% at 16K, +6.1% at 32K (20 pairs), KL 0.0025 mean /
+// 0.0381 max, 55 of 61 tasks, a 30-minute soak clean.  So gfx12 takes it from the same 64 tokens as gfx11.
+constexpr int64_t kGdnW12MinT = kGdnWmmaMin;
 typedef _Float16 gw_h16 __attribute__((ext_vector_type(16)));
 typedef _Float16 gw_h8 __attribute__((ext_vector_type(8)));
 typedef _Float16 gw_h2 __attribute__((ext_vector_type(2)));
