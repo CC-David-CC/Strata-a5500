@@ -8586,6 +8586,16 @@ def start_replicas(cfg: dict, groups: list[list[int]], exe: str, effort_end: lis
             t.start()
         for t in ts:
             t.join()
+    if errors and arena and len(errors) < n:
+        # a replica that died while it was reading the experts into the shared arena (or any other one that failed) while
+        # another one is up: the living engine took the read over (the state word in the arena), so start the failed ones
+        # once more on the same arena instead of giving up the sharing
+        failed = sorted(i for i, _ in errors)
+        errors.clear()
+        print(f"[strata] replica(s) {', '.join(map(str, failed))} did not start; starting again on the shared expert arena",
+              flush=True)
+        for i in failed:
+            one(i)
     if errors:
         for e in engines:
             if e is not None:
