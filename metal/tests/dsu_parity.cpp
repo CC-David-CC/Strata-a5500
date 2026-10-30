@@ -47,9 +47,10 @@ int main(int argc, char** argv) {
     struct Case { const char* kern; int type; int nc; };
     const std::vector<Case> dummy;
     const std::vector<Case> cases = {{"ds4_iq1s_mvn1", 19, 1}, {"ds4_iq1s_mvn2", 19, 2}, {"ds4_iq1s_mvn4", 19, 4}, {"ds4_iq1s_mvn8", 19, 8},
-                                     {"ds4_iq1m_mvn4", 29, 4}, {"ds4_iq2xxs_mvn4", 16, 4}, {"ds4_iq_mv_k", 14, 8}, {"ds4_iq_mv_k", 14, 1}};
+                                     {"ds4_iq1m_mvn4", 29, 4}, {"ds4_iq2xxs_mvn4", 16, 4}, {"ds4_iq_mv_k", 14, 8}, {"ds4_iq_mv_k", 14, 1},
+                                     {"ds4_q6k_mvn1", 14, 1}, {"ds4_q6k_mvn2", 14, 2}, {"ds4_q6k_mvn4", 14, 4}, {"ds4_q6k_mvn8", 14, 8}};
     if (bench) {   // dense decode matvec speed on a real attention-sized matrix: Q5_K (the 2.00 set's) against Q6_K (the Unsloth sets')
-        for (const Case& cs : std::vector<Case>{{"ds4_q5k_mvn1", 13, 1}, {"ds4_iq_mv_k", 14, 1}, {"ds4_iq1s_mvn1", 19, 1}, {"ds4_iq2xxs_mvn1", 16, 1}, {"ds4_iq_mv_k", 14, 8}, {"ds4_q5k_mvn8", 13, 8}}) {
+        for (const Case& cs : std::vector<Case>{{"ds4_q5k_mvn1", 13, 1}, {"ds4_iq_mv_k", 14, 1}, {"ds4_iq1s_mvn1", 19, 1}, {"ds4_iq2xxs_mvn1", 16, 1}, {"ds4_iq_mv_k", 14, 8}, {"ds4_q5k_mvn8", 13, 8}, {"ds4_q6k_mvn1", 14, 1}, {"ds4_q6k_mvn8", 14, 8}}) {
             const int k = 4096, n = 16384, nc = cs.nc;
             const size_t rb = ref::row_bytes(cs.type, k);
             std::vector<uint8_t> w(rb * n);

@@ -746,6 +746,7 @@ bool iq_mv(const void* jobs, int nj) {
         const char* tn = nullptr;
         switch (q.type) {
             case 13: tn = "ds4_q5k_mvn"; break;
+            case 14: tn = "ds4_q6k_mvn"; break;   // (the Unsloth sets' Q6_K dense matrices)
             case 16: tn = "ds4_iq2xxs_mvn"; break;
             case 17: tn = "ds4_iq2xs_mvn"; break;
             case 18: tn = "ds4_iq3xxs_mvn"; break;
