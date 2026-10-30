@@ -618,8 +618,9 @@ MAC_SET_PACK = {"IST-DAS-2.00bpw": "IQ2_XXS", "IST-DAS-2.25bpw": "IQ2_XS", "UD-I
 # Remove a name here when its set has run on a Mac.
 MAC_NOT_YET = ("UD-IQ1_M",)
 MAC_NOT_YET_LINE = "Unsloth's UD-IQ1_M set doesn't run on a Mac yet; the UD-IQ1_S, 2.00 and 2.25 sets do."
-# The same two sets were never run on a DGX Spark (linux-aarch64, GB10) either: kept off it the same way until a Spark run passes (remove the names then).
-AARCH64_NOT_YET = ("UD-IQ1_S", "UD-IQ1_M")
+# The same two sets were kept off a DGX Spark (linux-aarch64, GB10) until a Spark run passed: both passed there on 2026-10-30 (real `strata launch --model-path`,
+# 10 of 10 answers, tool call correct), so the tuple is empty.  Put a name back here to hide a set from the Spark again.
+AARCH64_NOT_YET = ()
 AARCH64_NOT_YET_LINE = "Unsloth's 1-bit DeepSeek sets were not tested on a DGX Spark yet; the 2.00 and 2.25 sets were."
 
 

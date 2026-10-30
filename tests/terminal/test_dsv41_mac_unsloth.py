@@ -22,7 +22,7 @@ MAC = {**HW_12, "mac": True, "ram_gb": 128.0, "disk_free_gb": 900.0, "gpus": [],
 PC = {**HW_12, "ram_gb": 64.0, "disk_free_gb": 900.0, "engine_vendor": "nvidia"}
 UD = ("UD-IQ1_M",)          # the sets kept off a Mac
 RUNS = "UD-IQ1_S"            # the one that was run there
-BOTH = ("UD-IQ1_S", "UD-IQ1_M")   # both are still kept off a DGX Spark
+BOTH = ("UD-IQ1_S", "UD-IQ1_M")   # both ran on a DGX Spark (10-30): AARCH64_NOT_YET is empty; SparkGate patches it back to test the mechanism
 
 
 def ud_files(model):
@@ -213,6 +213,9 @@ class SparkGate(unittest.TestCase):
         p = mock.patch.object(Catalog, "hardware", lambda s, fresh=False: dict(self.hw))
         p.start()
         self.addCleanup(p.stop)
+        q = mock.patch.object(dsv41_fit, "AARCH64_NOT_YET", BOTH)     # the mechanism, as it was while the sets were kept off
+        q.start()
+        self.addCleanup(q.stop)
 
     def test_the_rule(self):
         self.assertEqual(dsv41_fit.AARCH64_NOT_YET, BOTH)
@@ -270,6 +273,16 @@ class SparkGate(unittest.TestCase):
             self.assertEqual(exc, "SystemExit", (model, text[-300:]))
             self.assertIn(SPARK_LINE, text)
             self.assertIn("nothing has been downloaded", text)
+
+
+class SparkOffered(unittest.TestCase):
+    """Both Unsloth sets ran on a DGX Spark (2026-10-30): the production rule hides nothing there."""
+
+    def test_nothing_is_hidden_on_a_spark(self):
+        self.assertEqual(dsv41_fit.AARCH64_NOT_YET, ())
+        with spark():
+            for m in BOTH + ("IST-DAS-2.25bpw",):
+                self.assertIsNone(dsv41_fit.not_here(m))
 
 
 if __name__ == "__main__":
