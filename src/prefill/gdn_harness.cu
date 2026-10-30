@@ -372,8 +372,9 @@ int run_case(const Args& a, const FixtureSpec& spec, const char* fname, const cu
         }
         char tb[120] = "";
         if (a.bench) std::snprintf(tb, sizeof tb, "%.3f/%.3f/%.3f (tot med %.3f min %.3f)", r.ms_gates, r.ms_conv, r.ms_rec, med, mn);
-        std::printf("%-8s %-6s %-9s %9.2e %9.2e %9.2e %9.2e  %-34s %s  %s\n", name, "yes", exact ? "identical" : "differs", cr.y_nmax, cr.s_nmax,
-                    ci.y_nmax, ci.s_nmax, tb, join(r.logged).c_str(), verdict);
+        std::printf("%-8s %-6s %-9s %9.2e %9.2e %9.2e %9.2e  %-34s %s  %s h=%08llx\n", name, "yes", exact ? "identical" : "differs", cr.y_nmax, cr.s_nmax,
+                    ci.y_nmax, ci.s_nmax, tb, join(r.logged).c_str(), verdict,
+                    (unsigned long long) (fnv1a(r.y16.data(), r.y16.size() * 2) & 0xffffffffULL));
         if (r.fallback_calls) std::printf("         (%d call(s) ran on the incumbent: the forced path could not take them)\n", r.fallback_calls);
         json_line(a, "case", fname, T, r, have_ref ? &cr : nullptr, &ci, exact, med, mn, verdict, pr);
     }
