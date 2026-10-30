@@ -1682,7 +1682,7 @@ constexpr int GW_KP = S + 8;       // the scan's padded FP16 k / q rows
 constexpr int GW_AHEAD = 3;        // the scan warms the cache this many chunks ahead
 constexpr int64_t kGdnWmmaMin = 64;   // STRATA_GDN_CHUNKED=1 takes prompt chunks of this many tokens and more
 // gfx12: the chunked kernels are faster than the sequential ones at every call length from 64 tokens up (1.7x to 2.5x on the
-// layer), but the prompt-speed gain depends on the prompt: IQ3_S on an R9700, +3.9% at 4K, +5.2% at 8K, +6.9% at 16K, +10.1% at
+// layer), but the prompt-speed gain depends on the prompt: IQ3_S on an R9700, +3.9% at 4K, +5.0% at 8K (median of 7 pairs: borderline), +6.9% at 16K, +10.1% at
 // 32K.  The owner's bar for a non-bitwise path is +5%, so gfx12 takes the chunked path only from calls of this many tokens (a
 // prompt of 12K and more; longer prompts arrive in calls of up to 16K).  gfx11 keeps kGdnWmmaMin (not measured at model level).
 constexpr int64_t kGdnW12MinT = 12000;
