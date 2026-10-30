@@ -178,20 +178,6 @@ void* reserve(uint64_t bytes, PageBacking& got, std::string& note, const std::st
                 note = "cannot size shared arena " + shared_file + ": " + std::strerror(e);
                 return nullptr;
             }
-            // tmpfs: take the pages now.  ftruncate only sets the length; with /dev/shm too small the load would die
-            // with a bus error part-way, whereas here a full tmpfs is a plain error at start (the server then starts
-            // its replicas with private copies).  A file on a disk is left sparse, as before.
-            struct statfs sf{};
-            if (fstatfs(fd, &sf) == 0 && (unsigned long) sf.f_type == 0x01021994ul) {
-                const int fe = posix_fallocate(fd, 0, (off_t) file_bytes);
-                if (fe != 0 && fe != EOPNOTSUPP && fe != EINVAL) {
-                    close(fd);
-                    unlink(shared_file.c_str());   // (created by this call, never filled: nobody maps it yet)
-                    note = "not enough room for the shared arena " + shared_file + " (" +
-                           std::to_string((unsigned long long) (file_bytes >> 20)) + " MiB): " + std::strerror(fe);
-                    return nullptr;
-                }
-            }
             SharedArenaHeader hdr{};
             std::memcpy(hdr.magic, kSharedArenaMagic, sizeof hdr.magic);
             hdr.version = 1;
@@ -215,7 +201,27 @@ void* reserve(uint64_t bytes, PageBacking& got, std::string& note, const std::st
                 return nullptr;
             }
             SharedArenaHeader hdr{};
-            const ssize_t got_header = pread(fd, &hdr, sizeof hdr, 0);
+            ssize_t got_header = pread(fd, &hdr, sizeof hdr, 0);
+            // the creator sizes the file first and writes the header right after: an engine that starts in that gap waits
+            // for it (up to 10 s) instead of calling the file broken
+            for (int w = 0; w < 100 && got_header == (ssize_t) sizeof hdr &&
+                                std::memcmp(hdr.magic, kSharedArenaMagic, sizeof hdr.magic) != 0 &&
+                                hdr.magic[0] == 0 && hdr.magic[1] == 0; ++w) {
+                usleep(100 * 1000);
+                got_header = pread(fd, &hdr, sizeof hdr, 0);
+            }
+            if (got_header == (ssize_t) sizeof hdr && std::memcmp(hdr.magic, kSharedArenaMagic, sizeof hdr.magic) != 0 &&
+                hdr.magic[0] == 0 && hdr.magic[1] == 0) {
+                // still no header after 10 s: the engine that sized the file died before writing it.  Every engine
+                // fills the arena itself, so nothing in the file is worth keeping: write the header as the creator would
+                std::memset(&hdr, 0, sizeof hdr);
+                std::memcpy(hdr.magic, kSharedArenaMagic, sizeof hdr.magic);
+                hdr.version = 1;
+                hdr.header_bytes = (uint32_t) kSharedArenaHeaderBytes;
+                hdr.arena_bytes = bytes;
+                hdr.pack_hash = shared_pack_hash;
+                got_header = pwrite(fd, &hdr, sizeof hdr, 0);
+            }
             if (got_header != (ssize_t) sizeof hdr ||
                 std::memcmp(hdr.magic, kSharedArenaMagic, sizeof hdr.magic) != 0 ||
                 hdr.version != 1 || hdr.header_bytes != kSharedArenaHeaderBytes || hdr.arena_bytes != bytes) {
@@ -235,6 +241,21 @@ void* reserve(uint64_t bytes, PageBacking& got, std::string& note, const std::st
             }
         }
 
+        // tmpfs: take the pages now (ftruncate only sets the length).  With /dev/shm too small the load would die with a bus
+        // error part-way; here a full tmpfs is a plain error at start, for every engine that maps the file (pages already
+        // taken cost nothing), and the server then starts its replicas with private copies.  A file on a disk stays sparse.
+        {
+            struct statfs sf{};
+            if (fstatfs(fd, &sf) == 0 && (unsigned long) sf.f_type == 0x01021994ul) {
+                const int fe = posix_fallocate(fd, 0, (off_t) file_bytes);
+                if (fe != 0 && fe != EOPNOTSUPP && fe != EINVAL) {
+                    close(fd);
+                    note = "not enough room for the shared arena " + shared_file + " (" +
+                           std::to_string((unsigned long long) (file_bytes >> 20)) + " MiB): " + std::strerror(fe);
+                    return nullptr;
+                }
+            }
+        }
         void* map = mmap(nullptr, (size_t) file_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         const int e = errno;
         close(fd);
