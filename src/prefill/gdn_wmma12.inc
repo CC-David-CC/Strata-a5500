@@ -24,6 +24,22 @@ __device__ __forceinline__ gw_h8 gw_acc_to_b12(gw_f8 x) {
     for (int i = 0; i < 8; ++i) r[i] = (_Float16) x[i];
     return r;
 }
+// A barrier over LDS only (LB): __syncthreads() is a workgroup fence over all memory, which also waits for the global loads of the
+// next chunk that the scan keeps in flight (the same reason gfx11 has gw_lds_barrier).  gfx12: wait for this wave's LDS accesses
+// (DScnt), then the barrier; the compiler still waits for each load before its first use.
+template<bool LB> __device__ __forceinline__ void gw12_barrier() {
+#if defined(STRATA_GDN_WMMA12)
+    if (LB) {
+        __asm__ volatile("s_wait_dscnt 0x0" ::: "memory");
+        __builtin_amdgcn_s_barrier();
+        __asm__ volatile("" ::: "memory");
+    } else {
+        __syncthreads();
+    }
+#else
+    __syncthreads();
+#endif
+}
 __device__ __forceinline__ gw_h8 gw_ld8(const _Float16* p) { return *reinterpret_cast<const gw_h8*>(p); }   // 16 bytes of LDS
 
 __global__ void __launch_bounds__(32 * GW_VPK) gdn_w12_prep_kernel(const float* __restrict__ h, const float* __restrict__ gate,
@@ -87,6 +103,7 @@ __global__ void __launch_bounds__(32 * GW_VPK) gdn_w12_prep_kernel(const float* 
     }
 }
 
+template<bool LB>
 __global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restrict__ state, const float* __restrict__ h,
                                                                   const float* __restrict__ gate, const float* __restrict__ beta,
                                                                   const float* __restrict__ z, const float* __restrict__ gamma,
@@ -148,7 +165,7 @@ __global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restr
         }
         if (t0 + GW_CK < T) gw_load(cur, h, gate, beta, tp, t0 + GW_CK, T, vh, qh);
         const unsigned touch_now = gw_touch(h, z, t0 + GW_AHEAD * GW_CK, T, vh, qh);
-        __syncthreads();   // (1) this chunk staged; the previous chunk's norm in so
+        gw12_barrier<LB>();   // (1) this chunk staged; the previous chunk's norm in so
         if (t0 > 0) store_rows(t0 - GW_CK);
         __asm__ volatile("" ::"v"(touched));
         touched = touch_now;
@@ -191,7 +208,7 @@ __global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restr
         const float eg = __expf(gl);
 #pragma unroll
         for (int j = 0; j < S / 16; ++j) s[j] = gw_mma12(gw_ld8(skt + (16 * j + c) * GW_CK + 8 * hi), db, s[j] * eg);
-        __syncthreads();   // (2) the sums of o^2
+        gw12_barrier<LB>();   // (2) the sums of o^2
         const float g_col = sgam[col];
 #pragma unroll
         for (int v = 0; v < 8; ++v) {
@@ -202,7 +219,7 @@ __global__ void __launch_bounds__(GW_NW * 32) gdn_w12_scan_kernel(float* __restr
         }
     }
     __asm__ volatile("" ::"v"(touched));
-    __syncthreads();
+    gw12_barrier<LB>();
     store_rows((T - 1) / GW_CK * GW_CK);
     __asm__ volatile("" : "+s"(state));
 #pragma unroll

@@ -11,6 +11,7 @@
 #include "strata/prefill/kernels.hpp"
 #include "strata/kernels/gfx_arch.hpp"
 #include <cuda_runtime.h>
+#include <cuda_fp16.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -92,19 +93,76 @@ int main(int argc, char** argv) {
     };
     auto layer = [&](int64_t t0, int64_t n) {   // the prompt-path order: gates, conv, recurrence (+ norm)
         strata::prefill::gdn_gates(dab + t0 * 2 * HV, ddt, dssm, dgate + t0 * HV, dbeta + t0 * HV, n, nullptr);
+        if (strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv + t0 * C, dcw, dstate, dgate + t0 * HV, dbeta + t0 * HV,
+                                                       dz + t0 * ROW, dgamma, 1e-6f, 1e-6f, dy, dy16 + t0 * ld, n, nullptr, ld))
+            return;
         strata::prefill::gdn_conv(dhist, dqkv + t0 * C, dcw, dh + t0 * C, n, 1e-6f, nullptr);
         strata::prefill::gdn_recurrence(dstate, dh + t0 * C, dgate + t0 * HV, dbeta + t0 * HV, dz + t0 * ROW, dgamma, 1e-6f,
                                         dy, dy16 + t0 * ld, n, nullptr, ld);
     };
+    if (std::getenv("GDN_BENCH_CHECK")) {   // fused / unfused chunked path against the FP32 sequential kernels, and a split-call check
+        for (int64_t T : lens) {
+            auto half = [](uint16_t b) { __half_raw x; x.x = b; return __half2float(__half(x)); };
+            struct R { std::vector<uint16_t> y; std::vector<float> st, hist; };
+            auto grab = [&] { return R{down(dy16, T * ld), down(dstate, S * ROW), down(dhist, C * 3)}; };
+            auto prep = [&] { reset(); strata::prefill::gdn_gates(dab, ddt, dssm, dgate, dbeta, T, nullptr); };
+            prep();
+            strata::prefill::gdn_conv(dhist, dqkv, dcw, dh, T, 1e-6f, nullptr);
+            strata::prefill::gdn_recurrence_variant(5, dstate, dh, dgate, dbeta, dz, dgamma, 1e-6f, dy, dy16, T, nullptr, ld);
+            ck(cudaDeviceSynchronize(), "sync");
+            const R ref = grab();
+            prep();
+            strata::prefill::gdn_conv(dhist, dqkv, dcw, dh, T, 1e-6f, nullptr);
+            strata::prefill::gdn_recurrence(dstate, dh, dgate, dbeta, dz, dgamma, 1e-6f, dy, dy16, T, nullptr, ld);
+            ck(cudaDeviceSynchronize(), "sync");
+            const R unf = grab();
+            prep();
+            const bool f = strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv, dcw, dstate, dgate, dbeta, dz, dgamma, 1e-6f,
+                                                                      1e-6f, dy, dy16, T, nullptr, ld);
+            ck(cudaDeviceSynchronize(), "sync");
+            const R fus = grab();
+            auto err = [&](const R& a, const R& b, const char* what) {
+                double sq = 0, rf = 0, mx = 0, mr = 0, ssq = 0, srf = 0;
+                for (int64_t t = 0; t < T; ++t)
+                    for (int d = 0; d < ROW; ++d) {
+                        const double x = half(a.y[t * ld + d]), y = half(b.y[t * ld + d]);
+                        sq += (x - y) * (x - y); rf += x * x; mx = std::max(mx, std::fabs(x - y)); mr = std::max(mr, std::fabs(x));
+                    }
+                for (size_t i = 0; i < a.st.size(); ++i) { const double x = a.st[i], y = b.st[i]; ssq += (x - y) * (x - y); srf += x * x; }
+                double hm = 0;
+                for (size_t i = 0; i < a.hist.size(); ++i) hm = std::max(hm, (double) std::fabs(a.hist[i] - b.hist[i]));
+                std::printf("CHECK T=%lld %s: y_rms=%.3e y_max=%.3e (ref max %.3e) state_rms=%.3e hist_maxdiff=%.1e\n", (long long) T, what,
+                            std::sqrt(sq / std::max(rf, 1e-30)), mx, mr, std::sqrt(ssq / std::max(srf, 1e-30)), hm);
+            };
+            err(ref, unf, "unfused-vs-fp32");
+            if (f) err(ref, fus, "fused-vs-fp32"); else std::printf("CHECK T=%lld fused path not taken\n", (long long) T);
+            if (f) err(unf, fus, "fused-vs-unfused");
+            if (f) {   // continuation: the fused path in two calls (odd cut) against one call
+                reset();
+                const int64_t cut = (T / 2) | 1;
+                auto call = [&](int64_t t0, int64_t n) {
+                    strata::prefill::gdn_gates(dab + t0 * 2 * HV, ddt, dssm, dgate + t0 * HV, dbeta + t0 * HV, n, nullptr);
+                    strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv + t0 * C, dcw, dstate, dgate + t0 * HV, dbeta + t0 * HV,
+                                                               dz + t0 * ROW, dgamma, 1e-6f, 1e-6f, dy, dy16 + t0 * ld, n, nullptr, ld);
+                };
+                call(0, cut); call(cut, T - cut);
+                ck(cudaDeviceSynchronize(), "sync");
+                err(fus, grab(), "fused split-vs-whole");
+            }
+        }
+        return 0;
+    }
     for (int64_t T : lens) {
         std::vector<float> conv_ms, rec_ms;
         for (int round = -2; round < reps; ++round) {
             reset();
             ck(cudaEventRecord(e0), "ev");
             strata::prefill::gdn_gates(dab, ddt, dssm, dgate, dbeta, T, nullptr);
-            strata::prefill::gdn_conv(dhist, dqkv, dcw, dh, T, 1e-6f, nullptr);
-            ck(cudaEventRecord(e1), "ev");
-            strata::prefill::gdn_recurrence(dstate, dh, dgate, dbeta, dz, dgamma, 1e-6f, dy, dy16, T, nullptr, ld);
+            const bool fused = strata::prefill::gdn_conv_recurrence_fused(dhist, dqkv, dcw, dstate, dgate, dbeta, dz, dgamma,
+                                                                          1e-6f, 1e-6f, dy, dy16, T, nullptr, ld);
+            if (!fused) strata::prefill::gdn_conv(dhist, dqkv, dcw, dh, T, 1e-6f, nullptr);
+            ck(cudaEventRecord(e1), "ev");   // fused: conv and recurrence are both inside the FIRST piece
+            if (!fused) strata::prefill::gdn_recurrence(dstate, dh, dgate, dbeta, dz, dgamma, 1e-6f, dy, dy16, T, nullptr, ld);
             ck(cudaEventRecord(e2), "ev");
             ck(cudaEventSynchronize(e2), "sync");
             float a = 0, b = 0;

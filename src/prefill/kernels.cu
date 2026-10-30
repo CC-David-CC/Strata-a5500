@@ -1971,6 +1971,7 @@ __global__ void __launch_bounds__(GW_NW * 32) gdn_wmma_scan_kernel(float* __rest
         for (int v = 0; v < 8; ++v) state[(size_t) (16 * j + 2 * v + hi) * rs + (size_t) vh * S + col] = s[j][v];
 }
 #include "gdn_wmma12.inc"
+#include "gdn_wmma12f.inc"
 // The opt-in chunked recurrence on gfx11 and gfx12 (STRATA_GDN_CHUNKED=1): false (nothing launched) on another part.  y, the
 // FP32 scratch of the other kernels (T x 6144 floats), holds T and P (1 KB per chunk and value head: T x 3 KB).
 bool gdn_rec_wmma(float* state, const float* h, const float* gate, const float* beta, const float* z, const float* gamma,
@@ -1994,13 +1995,58 @@ bool gdn_rec_wmma(float* state, const float* h, const float* gate, const float* 
     _Float16* tp = reinterpret_cast<_Float16*>(y);
     if (gfx12) {
         gdn_w12_prep_kernel<<<dim3(HK, (unsigned) nch), 32 * GW_VPK, 0, s>>>(h, gate, beta, tp, T);
-        gdn_w12_scan_kernel<<<HV, GW_NW * 32, 0, s>>>(state, h, gate, beta, z, gamma, reinterpret_cast<const unsigned*>(tp), eps,
-                                                      y16, T, ld16);
+        static const bool lb = [] { const char* v = std::getenv("STRATA_GDN_W12_LB"); return v == nullptr || std::atoi(v) != 0; }();
+        if (lb)
+            gdn_w12_scan_kernel<true><<<HV, GW_NW * 32, 0, s>>>(state, h, gate, beta, z, gamma, reinterpret_cast<const unsigned*>(tp),
+                                                                eps, y16, T, ld16);
+        else
+            gdn_w12_scan_kernel<false><<<HV, GW_NW * 32, 0, s>>>(state, h, gate, beta, z, gamma, reinterpret_cast<const unsigned*>(tp),
+                                                                 eps, y16, T, ld16);
         return true;
     }
     gdn_wmma_prep_kernel<<<dim3(HK, (unsigned) nch), 32 * GW_VPK, 0, s>>>(h, gate, beta, tp, T);
     gdn_wmma_scan_kernel<<<HV, GW_NW * 32, 0, s>>>(state, h, gate, beta, z, gamma, reinterpret_cast<const unsigned*>(tp),
                                                    eps, y16, T, ld16);
+    return true;
+}
+// STRATA_GDN_CHUNKED=1 on gfx12 with the conv folded in (gdn_wmma12f.inc; STRATA_GDN_FUSE=0 keeps conv and recurrence apart):
+// the work of gdn_conv + gdn_recurrence in three launches, no h buffer.  False (nothing launched) when the chunked path or
+// the fusion is off, the device is not gfx12, or the call is short / unaligned: the caller then runs the two entry points.
+bool gdn_fused_impl(float* history, const float* qkv, const float* conv_w, float* state, const float* gate,
+                               const float* beta, const float* z, const float* gamma, float eps, float l2eps, float* y,
+                               uint16_t* y16, int64_t T, void* stream, int64_t ld16) {
+    static const bool on = [] {
+        const char* c = std::getenv("STRATA_GDN_CHUNKED");
+        const char* f = std::getenv("STRATA_GDN_FUSE");
+        return c != nullptr && std::atoi(c) != 0 && (f == nullptr || std::atoi(f) != 0);
+    }();
+    if (!on || T < kGdnWmmaMin) return false;
+    if (ld16 <= 0) ld16 = (int64_t) HV * S;
+    if (ld16 % 8 != 0) return false;
+    static thread_local int last_device = -1;
+    static thread_local bool gfx12 = false;
+    int dev = 0;
+    if (cudaGetDevice(&dev) != cudaSuccess) return false;
+    if (dev != last_device) {
+        cudaDeviceProp p{};
+        if (cudaGetDeviceProperties(&p, dev) != cudaSuccess) return false;
+        gfx12 = strata::kernels::gfx_arch_is_gfx12_wmma(p.gcnArchName);
+        last_device = dev;
+    }
+    if (!gfx12) return false;
+    cudaStream_t s = (cudaStream_t) stream;
+    const int64_t nch = (T + GW_CK - 1) / GW_CK;
+    _Float16* tp = reinterpret_cast<_Float16*>(y);
+    gdn_w12f_prep_kernel<<<dim3(HK, (unsigned) nch), 128, 0, s>>>(history, qkv, conv_w, gate, beta, tp, T, l2eps);
+    static const bool lb = [] { const char* v = std::getenv("STRATA_GDN_W12_LB"); return v == nullptr || std::atoi(v) != 0; }();
+    if (lb)
+        gdn_w12f_scan_kernel<true><<<HV, GW_NW * 32, 0, s>>>(state, history, qkv, conv_w, gate, beta, z, gamma,
+                                                             reinterpret_cast<const unsigned*>(tp), eps, l2eps, y16, T, ld16);
+    else
+        gdn_w12f_scan_kernel<false><<<HV, GW_NW * 32, 0, s>>>(state, history, qkv, conv_w, gate, beta, z, gamma,
+                                                              reinterpret_cast<const unsigned*>(tp), eps, l2eps, y16, T, ld16);
+    gdn_conv_hist_kernel<<<C / 128, 128, 0, s>>>(history, qkv, T);   // after the scan: it reads the old history
+    check("gdn_conv_recurrence_fused");
     return true;
 }
 #endif   // __HIPCC__
@@ -2817,6 +2863,17 @@ void gdn_recurrence(float* state, const float* h, const float* gate, const float
 /// KVA: the same recurrence, bit for bit, without the output normalisation (its readers - the output projection
 /// and the gated residual write - have no consumer when only the state advances).  `y` is still the scratch the
 /// recurrence kernels write; `z`/`gamma` are not read.
+bool gdn_conv_recurrence_fused(float* history, const float* qkv, const float* conv_w, float* state, const float* gate,
+                               const float* beta, const float* z, const float* gamma, float eps, float l2eps, float* y,
+                               uint16_t* y16, int64_t T, void* stream, int64_t ld16) {
+#if defined(__HIPCC__)
+    return gdn_fused_impl(history, qkv, conv_w, state, gate, beta, z, gamma, eps, l2eps, y, y16, T, stream, ld16);
+#else
+    (void) history; (void) qkv; (void) conv_w; (void) state; (void) gate; (void) beta; (void) z; (void) gamma; (void) eps;
+    (void) l2eps; (void) y; (void) y16; (void) T; (void) stream; (void) ld16;
+    return false;
+#endif
+}
 void gdn_recurrence_state_only(float* state, const float* h, const float* gate, const float* beta, float* y,
                                int64_t T, void* stream) {
     static const bool head = [] { const char* v = std::getenv("STRATA_GDN_HEAD"); return v != nullptr && std::atoi(v) != 0; }();
