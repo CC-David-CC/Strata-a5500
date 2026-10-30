@@ -908,7 +908,11 @@ def _test_start_failure(component: ec.EngineComponent, started: dict, ctx: Conte
         return TestStartFailed(component.version, f"it was still loading the model after {minutes} minutes", busy=True,
                                hint="Nothing was changed. A slow disk or a card that other programs are using can do this: close them and run "
                                     "`strata update` again." + kept)
-    return TestStartFailed(component.version, f"it did not answer a one-token probe ({error or started.get('state')}){tail}")
+    reason = f"it did not answer a one-token probe ({error or started.get('state')}){tail}"
+    # #4692: "report it with the log" named no log. The engine's words stay out of the sentence, but the person is told where the kept log is.
+    hint = (None if TestStartFailed.BUSY.search(reason) else
+            f"Run `strata update --force` to try again; if it fails again, report it with the log: {log}")
+    return TestStartFailed(component.version, reason, hint=hint)
 
 
 TEST_CONTEXT = 4096
