@@ -1626,10 +1626,11 @@ bool Verifier::record_window(int T, cudaStream_t cs, std::string& err) {
                         gg.state[gg.n] = sx.gdn_state + (size_t) (gi - sx.gdn_ord0) * gdn_floats;
                         gg.first[gg.n] = first;
                         gg.ntok[gg.n] = t - first;
+                        gg.keep[gg.n] = keep_rows ? one_ : nullptr;   // STRATA_BATCH_SELF_COMMIT: the window keeps its one-row groups itself
                         ++gg.n;
                     }
                     strata::kernels::gdn_step_norm_groups(gg, hb, (int) C, gate, beta, z_, (const float*) wnm->data, EPS,
-                                                          y_, (int) HK, (int) HV, false, cs);
+                                                          y_, (int) HK, (int) HV, keep_rows, cs);
                 } else
                 if (batch_rec_) {   // each slot's recurrence over its own proposed-token group
                     for (int t = tb; t < te;) {
