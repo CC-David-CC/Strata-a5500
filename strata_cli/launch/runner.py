@@ -1309,8 +1309,8 @@ class Runner:
         if found is None:
             return False
         model, d, folder = found
-        if sys.platform == "darwin" and model in self.catalog.strata.dsv41_not_on_mac():     # IQ1_S experts: no Metal kernel yet; said before an engine or a download is touched
-            raise LaunchError(self.catalog.strata.dsv41_not_on_mac_line(),
+        if self.catalog.strata.dsv41_not_here(model):     # Mac: no Metal IQ1_S kernel yet; DGX Spark: never run; said before an engine or a download is touched
+            raise LaunchError(self.catalog.strata.dsv41_not_here(model),
                               "Use the 2.00 or 2.25 files (--model ist-das-2.00bpw or --model ist-das-2.25bpw, or --model-path to those files). "
                               "Nothing was downloaded or changed.", 2)
         if s.family and s.family != "deepseek41":
