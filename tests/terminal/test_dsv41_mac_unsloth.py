@@ -1,5 +1,6 @@
-"""Unsloth's UD-IQ1_S / UD-IQ1_M DeepSeek sets on a Mac (0.2.9): their IQ1_S experts have no Metal kernel yet, so the sets are not offered there
-(model list, `--model`, `--model-path`, the app's "I already have the model" check, setup), and the line says what does work.
+"""Unsloth's DeepSeek sets on a Mac: UD-IQ1_S runs on the Metal engine (IQ1_S kernels, run on an M5 Max) and is offered like the IST-DAS sets;
+UD-IQ1_M was never run on a Mac, so it is not offered there (model list, `--model`, `--model-path`, the app's "I already have the model"
+check, setup), and the line says what does work.
 On every other computer nothing changes."""
 
 from __future__ import annotations
@@ -16,10 +17,11 @@ from strata_cli.launch.runner import LaunchError, Runner
 from strata_control import dsv41_fit, dsv41_sets, models
 from tests.terminal.launch_support import HW_12, Home, catalog
 
-LINE = "Unsloth's 1-bit DeepSeek sets don't run on a Mac yet; the 2.00 and 2.25 sets do."
+LINE = "Unsloth's UD-IQ1_M set doesn't run on a Mac yet; the UD-IQ1_S, 2.00 and 2.25 sets do."
 MAC = {**HW_12, "mac": True, "ram_gb": 128.0, "disk_free_gb": 900.0, "gpus": [], "engine_vendor": "apple"}
 PC = {**HW_12, "ram_gb": 64.0, "disk_free_gb": 900.0, "engine_vendor": "nvidia"}
-UD = ("UD-IQ1_S", "UD-IQ1_M")
+UD = ("UD-IQ1_M",)          # the sets kept off a Mac
+RUNS = "UD-IQ1_S"            # the one that was run there
 
 
 def ud_files(model):
@@ -51,10 +53,17 @@ class Lists(unittest.TestCase):
             self.assertNotIn(m, got)
         self.assertFalse(set(got) - set(dsv41_fit.MAC_SET_PACK), got)
 
+    def test_a_mac_is_offered_ud_iq1_s(self):
+        self.assertIn(RUNS, self.models())
+        self.assertEqual(catalog(self.hw).resolve("ud-iq1_s"), ("deepseek41", RUNS))
+        plan = dsv41_fit.plan([{"vendor": "apple", "unified_gb": 128.0, "name": "Apple M5 Max"}], 128.0, 900.0, model=RUNS)
+        self.assertTrue(plan.get("mac"))
+        self.assertIn("UD-IQ1_S", plan["words"])
+
     def test_a_pc_is_offered_them(self):
         self.hw = dict(PC)
         got = self.models()
-        for m in UD:
+        for m in UD + (RUNS,):
             self.assertIn(m, got)
 
     def test_model_flag_on_a_mac_says_what_works(self):
@@ -63,6 +72,7 @@ class Lists(unittest.TestCase):
         self.assertIn(LINE, str(cm.exception))
         self.assertIn("ist-das-2.25bpw", str(cm.exception))
         self.assertEqual(catalog(self.hw).resolve("ist-das-2.25bpw"), ("deepseek41", "IST-DAS-2.25bpw"))
+        self.assertEqual(catalog(self.hw).resolve("ud-iq1_s"), ("deepseek41", RUNS))
 
     def test_model_flag_on_a_pc_is_unchanged(self):
         self.hw = dict(PC)
@@ -94,6 +104,13 @@ class OwnFiles(unittest.TestCase):
             self.assertIn(LINE, cm.exception.text)
             self.assertIn("2.25", cm.exception.hint if hasattr(cm.exception, "hint") else cm.exception.text)
 
+    def test_model_path_of_the_ud_iq1_s_folder_on_a_mac_is_the_model(self):
+        folder = self.folder(RUNS)
+        with mock.patch.object(sys, "platform", "darwin"):
+            r = Runner(S.LaunchSettings(model_path=str(folder)), catalog=catalog(self.hw))
+            r.check_own_files()
+        self.assertEqual((r.s.family, r.s.model), ("deepseek41", RUNS))
+
     def test_the_same_folder_on_another_computer_is_the_model(self):
         folder = self.folder("UD-IQ1_S")
         with mock.patch.object(sys, "platform", "linux"):
@@ -117,8 +134,14 @@ class AppCheck(unittest.TestCase):
             self.assertIsNone(plan["candidate_selection"])
             self.assertIn(LINE.rstrip("."), plan["plain_issues"])
 
+    def test_on_a_mac_the_ud_iq1_s_preview_is_the_set(self):
+        plan = self.preview(RUNS, "darwin")
+        self.assertEqual(plan["file_set_status"], "plausible", plan["issues"])
+        self.assertEqual(plan["candidate_selection"]["model"], RUNS)
+        self.assertNotIn(LINE, plan["messages"])
+
     def test_on_a_pc_the_preview_is_the_set(self):
-        for model in UD:
+        for model in UD + (RUNS,):
             plan = self.preview(model, "linux")
             self.assertEqual(plan["file_set_status"], "plausible", plan["issues"])
             self.assertEqual(plan["candidate_selection"]["model"], model)
