@@ -50,6 +50,28 @@ __device__ __forceinline__ float warp_sum(float v) {
     for (int o = 16; o > 0; o >>= 1) v += __shfl_xor_sync(0xffffffffu, v, o);
     return v;
 }
+// warp_sum of 8 independent values at once, token t's total ending in every lane whose bits 4..2 spell t ((lane >> 2) & 7).  The same
+// additions as warp_sum(a[t]) in the same order (offset 16, 8, 4, 2, 1; a + b = b + a, so a lane adding its partner's value to its own gets the
+// bits the plain butterfly gets): each level only exchanges the half of the values the partner keeps, 4 + 2 + 1 + 1 + 1 shuffles instead of 40.
+__device__ __forceinline__ float warp_sum8(const float (&a)[8], int lane) {
+    const bool h4 = (lane & 16) != 0, h3 = (lane & 8) != 0, h2 = (lane & 4) != 0;
+    float b[4], c[2];
+#pragma unroll
+    for (int j = 0; j < 4; ++j) {
+        const float send = h4 ? a[j] : a[j + 4], keep = h4 ? a[j + 4] : a[j];
+        b[j] = keep + __shfl_xor_sync(0xffffffffu, send, 16);
+    }
+#pragma unroll
+    for (int j = 0; j < 2; ++j) {
+        const float send = h3 ? b[j] : b[j + 2], keep = h3 ? b[j + 2] : b[j];
+        c[j] = keep + __shfl_xor_sync(0xffffffffu, send, 8);
+    }
+    const float send = h2 ? c[0] : c[1], keep = h2 ? c[1] : c[0];
+    float d = keep + __shfl_xor_sync(0xffffffffu, send, 4);
+    d += __shfl_xor_sync(0xffffffffu, d, 2);
+    d += __shfl_xor_sync(0xffffffffu, d, 1);
+    return d;
+}
 __device__ __forceinline__ float sigmoidf_(float x) { return 1.0f / (1.0f + __expf(-x)); }
 
 // 8 bf16 packed in a uint4, unpacked to two float4 once when reused across tokens.
@@ -778,11 +800,17 @@ __global__ void __launch_bounds__(THREADS) gr_down_v3_kernel(GrMulti m, float* _
                 if (EXACT_T || k < T) acc[k] += dot8u_ptr(wvq, xs + (size_t) k * SL + j * 8);
         }
         const int prow = inject_block ? LR + warp : row0 + r;
+        if constexpr (EXACT_T && MAX_T == 8) {   // warp_sum8: token k's total sits in lanes 4k..4k+3
+            const float d8 = warp_sum8(acc, lane);
+            const int k = (lane >> 2) & 7;
+            if ((lane & 3) == 0) part[(((size_t) k * HC + c) * S + h) * PR + prow] = d8;
+        } else {
 #pragma unroll
         for (int k = 0; k < MAX_T; ++k) {
             if (!EXACT_T && k >= T) break;
             const float v = warp_sum(acc[k]);
             if (lane == 0) part[(((size_t) k * HC + c) * S + h) * PR + prow] = v;
+        }
         }
     }
 }
@@ -852,6 +880,17 @@ __global__ void __launch_bounds__(THREADS) gr_up_v3_kernel(GrMulti m, const floa
             if (apply) { bo = a.bo_prev[d0 + dd]; ip = a.inj_prev[c]; }
         }
         float mine = 0.0f;
+        if constexpr (EXACT_T && MAX_T == 8) {   // the 8 tokens' warp sums together (warp_sum8): the same bits
+            float accs[8];
+#pragma unroll
+            for (int k = 0; k < 8; ++k) {
+                float acc = dot8u_ptr(wa, lo[k] + lane * 8);
+                if (lane < LR / 8 - 32) acc += dot8u_ptr(wb, lo[k] + (32 + lane) * 8);
+                accs[k] = acc;
+            }
+            const float d8 = warp_sum8(accs, lane);
+            mine = __shfl_sync(0xffffffffu, d8, (lane & 7) << 2);
+        } else {
 #pragma unroll
         for (int k = 0; k < MAX_T; ++k) {
             if (!EXACT_T && k >= T) break;
@@ -859,6 +898,7 @@ __global__ void __launch_bounds__(THREADS) gr_up_v3_kernel(GrMulti m, const floa
             if (lane < LR / 8 - 32) acc += dot8u_ptr(wb, lo[k] + (32 + lane) * 8);
             acc = warp_sum(acc);
             if (lane == k) mine = acc;
+        }
         }
         if (lane < T) {
             if (apply) {
