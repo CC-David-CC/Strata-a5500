@@ -22,6 +22,7 @@ MAC = {**HW_12, "mac": True, "ram_gb": 128.0, "disk_free_gb": 900.0, "gpus": [],
 PC = {**HW_12, "ram_gb": 64.0, "disk_free_gb": 900.0, "engine_vendor": "nvidia"}
 UD = ("UD-IQ1_M",)          # the sets kept off a Mac
 RUNS = "UD-IQ1_S"            # the one that was run there
+BOTH = ("UD-IQ1_S", "UD-IQ1_M")   # both are still kept off a DGX Spark
 
 
 def ud_files(model):
@@ -214,25 +215,26 @@ class SparkGate(unittest.TestCase):
         self.addCleanup(p.stop)
 
     def test_the_rule(self):
-        self.assertEqual(dsv41_fit.AARCH64_NOT_YET, UD)
+        self.assertEqual(dsv41_fit.AARCH64_NOT_YET, BOTH)
         self.assertEqual(dsv41_fit.AARCH64_NOT_YET_LINE, SPARK_LINE)
         with spark():
-            for m in UD:
+            for m in BOTH:
                 self.assertEqual(dsv41_fit.not_here(m), SPARK_LINE)
             self.assertIsNone(dsv41_fit.not_here("IST-DAS-2.25bpw"))
         with mock.patch.object(sys, "platform", "linux"), mock.patch("platform.machine", return_value="x86_64"):
             self.assertIsNone(dsv41_fit.not_here("UD-IQ1_S"))
         with mock.patch.object(sys, "platform", "darwin"):
-            self.assertEqual(dsv41_fit.not_here("UD-IQ1_S"), LINE)
+            self.assertIsNone(dsv41_fit.not_here("UD-IQ1_S"))
+            self.assertEqual(dsv41_fit.not_here("UD-IQ1_M"), LINE)
 
     def test_not_in_the_list_on_a_spark_but_on_a_pc(self):
         with spark():
             got = [r.model for r in catalog(self.hw).rows() if r.family == "deepseek41"]
-        for m in UD:
+        for m in BOTH:
             self.assertNotIn(m, got)
         self.assertIn("IST-DAS-2.25bpw", got)
         pc = [r.model for r in catalog(self.hw).rows() if r.family == "deepseek41"]
-        for m in UD:
+        for m in BOTH:
             self.assertIn(m, pc)
 
     def test_model_flag_on_a_spark_says_what_works(self):
