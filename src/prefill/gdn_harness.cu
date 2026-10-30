@@ -60,6 +60,7 @@ struct Args {
     int reps = 7, warmup = 2;
     bool any_sms = false;
     int gsb = 0;
+    int tiles = 0;
     bool fallback_incumbent = false;          // a forced path takes the incumbent for calls it cannot run (mirrors production)
     int64_t ld16 = 0;
     FixtureSpec fx;
@@ -164,6 +165,7 @@ RunOut run_path(Dev& d, const Args& a, const std::vector<int64_t>& calls, int pa
     sp::GdnProbe probe;
     probe.any_sms = a.any_sms;
     probe.gsb = a.gsb;
+    probe.tc_tiles = a.tiles;
     sp::gdn_probe_install(&probe);
     std::vector<cudaEvent_t> ev;
     if (timed) {
@@ -415,6 +417,7 @@ int main(int argc, char** argv) {
         else if (k == "--warmup") a.warmup = std::atoi(val());
         else if (k == "--any-sms") a.any_sms = true;
         else if (k == "--gsb") a.gsb = std::atoi(val());
+        else if (k == "--tiles") a.tiles = std::atoi(val());
         else if (k == "--fallback-incumbent") a.fallback_incumbent = true;
         else if (k == "--ld16") a.ld16 = parse_list(val())[0];
         else if (k == "--state") a.fx.state = argv[++i];
