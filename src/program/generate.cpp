@@ -12491,6 +12491,12 @@ int main(int argc, char** argv) {
         };
         int admit_slot = -1;               ///< the slot the request being read will continue in (BGEN)
         long long admit_max_new = 0;
+        // BCO <slot> <ids> (research, PAR-H; STRATA_COALESCE_PREFILL on the server): prompts of waiting requests, read in
+        // the SAME layer-major pass as the next BGEN's prompt into the named idle slots' sessions (the experts a layer
+        // streams are shared), so their own admissions find the prompt in the slot and read nothing.  BCOK <slot> <tokens>
+        // says a slot holds its prompt; a declined or failed co-read says nothing and costs nothing.
+        struct CoReq { int slot = -1; std::vector<int64_t> ids; };
+        std::vector<CoReq> co_pending, co_set;
         auto batch_on = [&] { for (const BSlot& b : bs) if (b.active) return true; return false; };
         auto try_next_line = [&](std::string& out) -> bool {
             std::lock_guard<std::mutex> lk(in_mu);
@@ -13430,6 +13436,21 @@ int main(int argc, char** argv) {
                 if (b >= 0 && b < (int) bs.size()) bs[(size_t) b].stop = true;
                 continue;
             }
+            if (line.rfind("BCO ", 0) == 0) {   // BCO <slot> <id,id,...>: kept for the next BGEN
+                CoReq cr;
+                char* e1 = nullptr;
+                cr.slot = (int) std::strtol(line.c_str() + 4, &e1, 10);
+                for (const char* q = e1; q != nullptr && *q != '\0';) {
+                    while (*q == ' ' || *q == ',') ++q;
+                    if (*q == '\0') break;
+                    char* e2 = nullptr;
+                    cr.ids.push_back((int64_t) std::strtoll(q, &e2, 10));
+                    if (e2 == q) { cr.ids.clear(); break; }
+                    q = e2;
+                }
+                if (cr.slot >= 0 && cr.slot < (int) bs.size() && cr.ids.size() >= 3) co_pending.push_back(std::move(cr));
+                continue;
+            }
             if (line.rfind("BYIELD", 0) == 0) {   // for a prompt read that has ended meanwhile
                 if (trace && piped)
                     std::fprintf(stderr, "strata trace: BYIELD dropped, %d groups in flight\n",
@@ -13465,6 +13486,8 @@ int main(int argc, char** argv) {
                 admit_slot = (int) b;
                 admit_max_new = mn;
                 adm_drain_ms = line_drain_ms;
+                co_set = std::move(co_pending);
+                co_pending.clear();
                 line = std::string(bimg ? "GENI 1" : "GEN 1") + e2;
             }
             // #477: every --expert-profile-save-every minutes, before the next request (at QUIT: after the loop)
@@ -15061,9 +15084,74 @@ int main(int argc, char** argv) {
                     ConvCheckpoint::PromptPlan& p;
                     ~SegPlanScope() { p = {}; }
                 } seg_plan_scope{seg_plan};
+                // the first run of a BGEN with co-reads: the waiting prompts are read in the same layer-major pass
+                bool co_tried = false;
+                auto co_run = [&](int64_t q, int64_t r, std::string& ce) -> bool {
+                    using PSeg = strata::prefill::Prefill::Seg;
+                    std::vector<PSeg> segs;
+                    PSeg lead;
+                    lead.tokens = ids.data() + q;
+                    lead.n = r - q;
+                    lead.pos0 = q;
+                    segs.push_back(lead);
+                    std::vector<const CoReq*> used;
+                    for (const CoReq& c : co_set) {
+                        if (c.slot < 0 || c.slot >= (int) bs.size() || c.slot == admit_slot || bs[(size_t) c.slot].active ||
+                            bs[(size_t) c.slot].partial)
+                            continue;
+                        bool dup = false;
+                        for (const CoReq* u : used) dup = dup || u->slot == c.slot;
+                        if (dup) continue;
+                        PSeg sg;
+                        sg.tokens = c.ids.data();
+                        sg.n = (int64_t) c.ids.size() - 1;   // (the last token goes through the slot's own first window)
+                        sg.pos0 = 0;
+                        for (size_t k = 0; k < bslot_ss.size(); ++k) sg.stage_ss.push_back(bslot_ss[k][(size_t) c.slot].get());
+                        segs.push_back(sg);
+                        used.push_back(&c);
+                    }
+                    if (segs.size() < 2) return sp.run(lead.tokens, lead.n, lead.pos0, ce);
+                    for (const CoReq* c : used) {
+                        park_slot(c->slot);   // the conversation the slot holds, before this read overwrites it
+                        for (size_t k = 0; k < bslot_ss.size(); ++k) {
+                            const strata::core::OnDevice on_k(k == 0 ? 0 : stages[k - 1]->dev);
+                            strata::core::session_zero(*bslot_ss[k][(size_t) c->slot], g, nullptr, nullptr);
+                            cudaDeviceSynchronize();
+                        }
+                        bs[(size_t) c->slot] = BSlot{};   // (it holds nothing until the read is done)
+                    }
+                    const auto tco = Clock::now();
+                    if (!sp.run_multi(segs, ce)) {
+                        if (ce.rfind("prefill: multi-prompt read declined", 0) == 0) {   // nothing was read: the usual run
+                            std::fprintf(stderr, "strata batch: co-read of %zu prompt(s) declined (%s)\n", used.size(), ce.c_str());
+                            ce.clear();
+                            return sp.run(lead.tokens, lead.n, lead.pos0, ce);
+                        }
+                        return false;
+                    }
+                    for (const CoReq* c : used) {
+                        BSlot& sl = bs[(size_t) c->slot];
+                        sl = BSlot{};
+                        sl.ids.assign(c->ids.begin(), c->ids.end() - 1);
+                        sl.cached = true;
+                        sl.cvec = want_cvec;
+                        std::printf("BCOK %d %lld\n", c->slot, (long long) sl.ids.size());
+                    }
+                    std::fflush(stdout);
+                    std::fprintf(stderr, "strata batch: co-read: %zu more prompt(s) read in the same pass as this request's %lld tokens "
+                                         "(%.0f ms)\n", used.size(), (long long) lead.n,
+                                 std::chrono::duration<double, std::milli>(Clock::now() - tco).count());
+                    return true;
+                };
                 auto run = [&](int64_t q, int64_t r) -> bool {
                     if (planned) sp.force_chunk(plan.chunk, plan_single, plan.chunked);
-                    const bool run_ok = sp.run(ids.data() + q, r - q, q, e);
+                    bool run_ok;
+                    if (!co_set.empty() && !co_tried && admit_slot >= 0 && req_imgs.empty()) {
+                        co_tried = true;
+                        run_ok = co_run(q, r, e);
+                    } else {
+                        run_ok = sp.run(ids.data() + q, r - q, q, e);
+                    }
                     if (run_ok && q == 0 && sp.kva_floor() > 0) {   // KVA approximated the start of this prompt: remember which tokens
                         kva_floors.note(ids.data(), sp.kva_floor());
                         if (use_mtp && mtp.cell_floor_enabled()) mtp.set_cell_floor(sp.kva_floor());
