@@ -515,6 +515,7 @@ MAC_PACKS: dict[str, dict[str, Any]] = {
     "IQ2_XXS": {"name": "2.00 bpw (IQ2_XXS), the default for most users", "routed_gb": 132.07, "backbone_gb": 138.24, "bpw": 2.00},
     "IQ2_XS": {"name": "2.25 bpw (IQ2_XS), the quality one", "routed_gb": 149.06, "backbone_gb": 155.23, "bpw": 2.25},
     "UD-IQ1_S": {"name": "Unsloth UD-IQ1_S (1-bit experts)", "routed_gb": 115.23, "backbone_gb": 122.38, "bpw": 1.75},
+    "UD-IQ1_M": {"name": "Unsloth UD-IQ1_M (1-bit experts)", "routed_gb": 132.21, "backbone_gb": 139.81, "bpw": 2.00},
 }
 MAC_ENGRAM_GB = 110.60          # the same Engram table for all three, read row by row off the SSD
 MAC_ENGINE_FOOTPRINT_GB = 12.0  # the process' anonymous memory after the load (Metal buffers, host buffers, the KV cache)
@@ -533,6 +534,7 @@ MAC_MEASURED_PACK = {
     "IQ2_XS": MAC_MEASURED,
     "UD-IQ1_S": ("M5 Max, 128 GB, Unsloth UD-IQ1_S: 15-18 tokens/s for a short answer (16-18 after a 3,000-token prompt), a 3,000-token prompt at "
                  "about 230-310 tokens/s, 14,000 at about 520; the engine kept about 68 GB of the experts resident and the process used about 79 GB"),
+    "UD-IQ1_M": "Not run on a Mac yet; UD-IQ1_S was. It keeps fewer experts in memory, so expect it to be slower.",
 }
 
 
@@ -612,11 +614,11 @@ def mac_plan(ram_gb: float, quant: str = "IQ2_XS", disk_free_gb: float | None = 
 # the 1.75 bpw set shares the 2.00 set's IQ1_M kernel but was never run there, so it is not offered on a Mac.
 
 
-MAC_SET_PACK = {"IST-DAS-2.00bpw": "IQ2_XXS", "IST-DAS-2.25bpw": "IQ2_XS", "UD-IQ1_S": "UD-IQ1_S"}
-# Unsloth's UD-IQ1_S runs on the Metal engine since the IQ1_S kernels (f-039-mac-dsu).  UD-IQ1_M has the same kernels but was never run on a Mac, so it is kept off
-# the Mac everywhere: the model lists (MAC_SET_PACK above does that on its own), setup, the launch and the "I already have the model" check, with this one line.
-# Remove a name here when its set has run on a Mac.
-MAC_NOT_YET = ("UD-IQ1_M",)
+MAC_SET_PACK = {"IST-DAS-2.00bpw": "IQ2_XXS", "IST-DAS-2.25bpw": "IQ2_XS", "UD-IQ1_S": "UD-IQ1_S", "UD-IQ1_M": "UD-IQ1_M"}
+# Unsloth's UD-IQ1_S was run on an M5 Max (f-039-mac-dsu).  UD-IQ1_M has the same kernels and was not run there; the owner chose to offer it anyway ("they
+# will tell if it works"), with a plain "not run yet" line in its plan.  The gate stays as a mechanism, empty: put a name here to keep a set off a Mac
+# (the model lists, setup, the launch and the "I already have the model" check all read it through not_here()).
+MAC_NOT_YET = ()
 MAC_NOT_YET_LINE = "Unsloth's UD-IQ1_M set doesn't run on a Mac yet; the UD-IQ1_S, 2.00 and 2.25 sets do."
 # The same two sets were kept off a DGX Spark (linux-aarch64, GB10) until a Spark run passed: both passed there on 2026-10-30 (real `strata launch --model-path`,
 # 10 of 10 answers, tool call correct), so the tuple is empty.  Put a name back here to hide a set from the Spark again.
@@ -672,8 +674,9 @@ def _plan_mac(key: str, model: str, card: dict, ram_gb: float | None, disk_free_
     lines.append(f"DeepSeek-V4.1-Flash, {v['title']}: a {download:.0f} GB download ({v['set_bytes'] / GB:.0f} GB of model, "
                  f"{ISTA_ENGRAM_BYTES / GB:.0f} GB n-gram table, {ISTA_DSPARK_BYTES / GB:.0f} GB drafter). Quality: {v['quality']}.")
     lines.extend(l for l in mp["lines"][1:] if not l.startswith("Measured on "))
-    lines.append("Measured on " + MAC_MEASURED_PACK[MAC_SET_PACK[key]] + ".")
-    out["measured"] = MAC_MEASURED_PACK[MAC_SET_PACK[key]]
+    measured = MAC_MEASURED_PACK[MAC_SET_PACK[key]]
+    lines.append(measured if measured.startswith("Not run") else "Measured on " + measured + ".")
+    out["measured"] = measured
     warns.extend(mp["warnings"])
     if ram and ram < MAC_SMALL_RAM_GB and mp["verdict"] != "small":
         warns.append(f"This Mac has {ram:.0f} GB of memory and the set was measured on one with 128 GB: with less, more experts come from "
