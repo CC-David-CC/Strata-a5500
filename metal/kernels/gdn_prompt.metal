@@ -23,6 +23,12 @@ struct GdnPArgs {
     uint f32;        // gdn_post: also write fp32 y
 };
 
+// function constant 7 (optional): the row stride in floats of ONE fused output [qkv | z | alpha | beta] of the four input
+// projections (16480).  gdn_pre then reads qkv / alpha / beta and gdn_post reads z at that stride (the buffers bound at offsets);
+// undefined (every other caller): the separate buffers of channels / h_v / h_v * 128 floats a row.
+constant int GDN_LD [[function_constant(7)]];
+constant bool gdn_ld_on = is_function_constant_defined(GDN_LD);
+
 static inline float gp_conv(device const float* qkv, device const float* hist, device const float* cw, int ch, int t,
                             int channels) {
     float s = 0.0f;
@@ -52,11 +58,12 @@ kernel void gdn_pre(device const float* qkv [[buffer(0)]], device const float* h
     int ch;
     if (x < hk_n) ch = tid < 128 ? x * S + tid : hk_n * S + x * S + (tid - 128);
     else ch = 2 * hk_n * S + (2 * (x - hk_n) + (tid >> 7)) * S + (tid & 127);
-    const float cv = gp_conv(qkv, hist, conv_w, ch, t, C);
+    const int QL = gdn_ld_on ? GDN_LD : C;
+    const float cv = gp_conv(qkv, hist, conv_w, ch, t, QL);
     if (t == T - 1)
         for (int k = 0; k < 3; ++k) {
             const int src = T - 3 + k;
-            hist_out[ch * 3 + k] = src >= 0 ? qkv[src * C + ch] : hist[ch * 3 + (src + 3)];
+            hist_out[ch * 3 + k] = src >= 0 ? qkv[src * QL + ch] : hist[ch * 3 + (src + 3)];
         }
     if (x < hk_n) {
         const float ssq = simd_sum(cv * cv);
@@ -82,10 +89,11 @@ kernel void gdn_pre(device const float* qkv [[buffer(0)]], device const float* h
         const int h = 2 * (x - hk_n) + (tid >> 7);
         vc[(t * hv + h) * S + (tid & 127)] = cv;
         if ((tid & 127) == 0) {
-            const float v = alpha[t * hv + h] + dt[h];
+            const int AL = gdn_ld_on ? GDN_LD : hv;
+            const float v = alpha[t * AL + h] + dt[h];
             const float e = exp(v), u = 1.0f + e;
             const float sp = v > 20.0f ? v : (u == 1.0f ? e : log(u) * e / (u - 1.0f));
-            gb[t * hv + h] = float2(exp(sp * ssm_a[h]), 1.0f / (1.0f + exp(-beta[t * hv + h])));
+            gb[t * hv + h] = float2(exp(sp * ssm_a[h]), 1.0f / (1.0f + exp(-beta[t * AL + h])));
         }
     }
 }
@@ -309,7 +317,8 @@ kernel void gdn_post(device const float* o [[buffer(0)]], device const float* z 
     threadgroup_barrier(mem_flags::mem_threadgroup);
     const float tot = (part[0] + part[1]) + (part[2] + part[3]);
     const float rs = rsqrt(tot / 128.0f + a.eps);
-    const float yv = ((rs * ov) * gamma[tid]) * (1.0f / (1.0f + exp(-z[i])));
+    const float zv = gdn_ld_on ? z[uint(t) * uint(GDN_LD) + uint(h) * 128u + tid] : z[i];
+    const float yv = ((rs * ov) * gamma[tid]) * (1.0f / (1.0f + exp(-zv)));
     yh[i] = half(yv);
     if (a.f32) y[i] = yv;
 }
@@ -589,4 +598,192 @@ kernel void gdn_cout(device const float* qn [[buffer(0)]], device const float* k
         for (int u = 0; u <= t; ++u) s = fma(M[t][u], dv[u], s);
         o[((t0 + t) * hv + h) * S + j] = s * scale;
     }
+}
+
+// ---- the chunked form v2: the same algebra as gdn_cprep / gdn_cstate / gdn_cout (WY / UT, chunks of GC = 32), organised for the
+// GPU.  Staging the chunk's k in threadgroup memory removes the redundant device loads of gdn_cprep, the state update, the
+// inter-chunk and the intra-chunk products run as 8x8 simdgroup_matrix products (fp32), and the intra-chunk part is folded into
+// the state kernel (no gdn_cout, no delta buffer).  The chunk's q.k matrix M (with the decay factors) comes from the prep.
+//   gdn_cprep2   per (head, chunk): lg, A, the forward substitution for U and W, and M_ts = (q_t . k_s) G_t / G_s (s <= t)
+//   gdn_cstate2  per (head, 32 state columns): the chunks in order - delta = U - W S, o = (G q S + M delta) / sqrt(128),
+//                S = G_L S + sum_s (G_L / G_s) k_s delta_s^T.  The q and k rows of the last chunk's 32 tokens are read in
+//                full (rows past n_tok are read and multiplied by zero): the caller's buffers hold a multiple of 32 rows.
+kernel void gdn_cprep2(device const float* qn [[buffer(0)]], device const float* kn [[buffer(1)]],
+                       device const float* vc [[buffer(2)]], device const float2* gb [[buffer(3)]],
+                       device float* U [[buffer(4)]], device float* W [[buffer(5)]], device float* lgo [[buffer(6)]],
+                       device float* Mo [[buffer(7)]], constant GdnPArgs& a [[buffer(8)]],
+                       uint3 tg [[threadgroup_position_in_grid]], ushort tid [[thread_index_in_threadgroup]]) {
+    constexpr int S = 128;
+    threadgroup float4 Ks[GC * 32];
+    threadgroup float4 A4[GC * 8];
+    threadgroup float* A = (threadgroup float*)A4;
+    threadgroup float lg[GC], bt[GC];
+    const int h = int(tg.x), c = int(tg.y), hv = int(a.h_v), hkn = int(a.h_k), hk = h % hkn, T = int(a.n_tok);
+    const int NC = (T + GC - 1) / GC, t0 = c * GC, nb = min(GC, T - t0);
+    if (tid == 0) {
+        float s = 0.0f;
+        for (int t = 0; t < GC; ++t) {
+            if (t < nb) s += max(log(gb[(t0 + t) * hv + h].x), -80.0f);
+            lg[t] = s;
+            bt[t] = t < nb ? gb[(t0 + t) * hv + h].y : 0.0f;
+        }
+    }
+    device const float4* kn4 = (device const float4*)kn;
+    for (int idx = tid; idx < GC * 32; idx += 256) {
+        const int t = idx >> 5, w = idx & 31;
+        Ks[idx] = t < nb ? kn4[((t0 + t) * hkn + hk) * 32 + w] : float4(0.0f);
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    for (int idx = tid; idx < GC * GC; idx += 256) {
+        const int t = idx / GC, s = idx % GC;
+        float av = 0.0f, mv = 0.0f;
+        if (t < nb && s <= t && gdn_probe != 1) {
+            device const float4* qt = (device const float4*)(qn + ((t0 + t) * hkn + hk) * S);
+            float dm = 0.0f, da = 0.0f;
+            for (int i = 0; i < S / 4; ++i) {
+                const float4 ks = Ks[s * 32 + i];
+                dm += dot(qt[i], ks);
+                da += dot(Ks[t * 32 + i], ks);
+            }
+            const float f = exp(lg[t] - lg[s]);
+            mv = dm * f;
+            if (s < t) av = bt[t] * da * f;
+        }
+        A[t * GC + s] = av;
+        Mo[((ulong(h) * NC + c) * GC + t) * GC + s] = mv;
+    }
+    threadgroup_barrier(mem_flags::mem_threadgroup);
+    const int j = tid & 127;
+    const bool isw = tid >= 128;
+    threadgroup const float* Kf = (threadgroup const float*)Ks;
+    float x[GC];
+#pragma clang loop unroll(full)
+    for (int t = 0; t < GC; ++t) x[t] = 0.0f;
+#pragma clang loop unroll(full)
+    for (int t = 0; t < GC; ++t) {
+        float b = 0.0f;
+        if (t < nb) b = isw ? bt[t] * exp(lg[t]) * Kf[t * S + j] : bt[t] * vc[((t0 + t) * hv + h) * S + j];
+#pragma clang loop unroll(full)
+        for (int s4 = 0; s4 < (t + 3) / 4; ++s4) {
+            const float4 ar = A4[t * 8 + s4];
+            b = fma(-ar.x, x[4 * s4], b);
+            b = fma(-ar.y, x[4 * s4 + 1], b);
+            b = fma(-ar.z, x[4 * s4 + 2], b);
+            b = fma(-ar.w, x[4 * s4 + 3], b);
+        }
+        x[t] = b;
+    }
+    device float* o = (isw ? W : U) + (ulong(h) * NC + c) * GC * S + j;
+#pragma clang loop unroll(full)
+    for (int t = 0; t < GC; ++t) o[t * S] = x[t];
+    if (tid < GC) lgo[(h * NC + c) * GC + tid] = lg[tid];
+}
+
+
+// grid (h_v * 4), 128 threads = 4 simdgroups.  A simdgroup owns rows 32 sg .. 32 sg + 31 of the 128 x 32 state block as 4 x 4
+// simdgroup matrices that stay in registers for the whole call; each chunk the block is stored to threadgroup memory (Sm) once,
+// where the two products that need all 128 rows (W S and Q S, sharing the S tiles) read it.
+kernel void gdn_cstate2(device float* state [[buffer(0)]], device const float* qn [[buffer(1)]],
+                        device const float* kn [[buffer(2)]], device const float* U [[buffer(3)]],
+                        device const float* W [[buffer(4)]], device const float* lgo [[buffer(5)]],
+                        device const float* Mo [[buffer(6)]], device float* o [[buffer(7)]], constant GdnPArgs& a [[buffer(8)]],
+                        uint3 tg [[threadgroup_position_in_grid]], ushort tid [[thread_index_in_threadgroup]],
+                        ushort sg [[simdgroup_index_in_threadgroup]]) {
+    constexpr int S = 128;
+    threadgroup float Sm[S][32];
+    threadgroup float Dl[GC][32];
+    threadgroup float X[GC][32];
+    threadgroup float Y[GC][32];
+    const int h = int(tg.x) / 4, hv = int(a.h_v), hkn = int(a.h_k), hk = h % hkn, T = int(a.n_tok);
+    const int NC = (T + GC - 1) / GC, j0 = (int(tg.x) % 4) * 32;
+    const float scale = 1.0f / sqrt(float(S));
+    simdgroup_float8x8 st[4][4];
+    for (int rt = 0; rt < 4; ++rt)
+        for (int jt = 0; jt < 4; ++jt)
+            simdgroup_load(st[rt][jt], state + ((32 * sg + 8 * rt) * hv + h) * S + j0 + 8 * jt, hv * S);
+    for (int c = 0; c < NC; ++c) {
+        const int t0 = c * GC, nb = min(GC, T - t0);
+        device const float* Uc = U + (ulong(h) * NC + c) * GC * S;
+        device const float* Wc = W + (ulong(h) * NC + c) * GC * S;
+        device const float* Mc = Mo + (ulong(h) * NC + c) * GC * GC;
+        device const float* lg = lgo + (h * NC + c) * GC;
+        for (int rt = 0; rt < 4; ++rt)
+            for (int jt = 0; jt < 4; ++jt) simdgroup_store(st[rt][jt], &Sm[32 * sg + 8 * rt][8 * jt], 32);
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        // P1 = W S0 (into X) and P2 = Q S0 (into Y), the S tiles read once for both
+        simdgroup_float8x8 acc1[4], acc2[4];
+        for (int jt = 0; jt < 4; ++jt) {
+            acc1[jt] = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+            acc2[jt] = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+        }
+        device const float* qrow = qn + ((t0 + 8 * sg) * hkn + hk) * S;
+        if (gdn_probe != 1)
+#pragma clang loop unroll(full)
+        for (int kb = 0; kb < 16; ++kb) {
+            simdgroup_float8x8 aw, aq, bs;
+            simdgroup_load(aw, Wc + (8 * sg) * S + 8 * kb, S);
+            simdgroup_load(aq, qrow + 8 * kb, hkn * S);
+            for (int jt = 0; jt < 4; ++jt) {
+                simdgroup_load(bs, &Sm[8 * kb][8 * jt], 32);
+                simdgroup_multiply_accumulate(acc1[jt], aw, bs, acc1[jt]);
+                simdgroup_multiply_accumulate(acc2[jt], aq, bs, acc2[jt]);
+            }
+        }
+        for (int jt = 0; jt < 4; ++jt) {
+            simdgroup_store(acc1[jt], &X[8 * sg][8 * jt], 32);
+            simdgroup_store(acc2[jt], &Y[8 * sg][8 * jt], 32);
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        for (int idx = tid; idx < GC * 32; idx += 128) {
+            const int t = idx >> 5, j = idx & 31;
+            Dl[t][j] = t < nb ? Uc[t * S + j0 + j] - X[t][j] : 0.0f;
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        // intra = M delta (into X)
+        for (int jt = 0; jt < 4; ++jt) acc1[jt] = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+        if (gdn_probe != 2)
+#pragma clang loop unroll(full)
+        for (int kb = 0; kb < 4; ++kb) {
+            simdgroup_float8x8 am, bd;
+            simdgroup_load(am, Mc + (8 * sg) * GC + 8 * kb, GC);
+            for (int jt = 0; jt < 4; ++jt) {
+                simdgroup_load(bd, &Dl[8 * kb][8 * jt], 32);
+                simdgroup_multiply_accumulate(acc1[jt], am, bd, acc1[jt]);
+            }
+        }
+        for (int jt = 0; jt < 4; ++jt) simdgroup_store(acc1[jt], &X[8 * sg][8 * jt], 32);
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        const float lgl = lg[nb - 1], gl = exp(lgl);
+        if (gdn_probe != 4)
+        for (int idx = tid; idx < GC * 32; idx += 128) {
+            const int t = idx >> 5, j = idx & 31;
+            if (t < nb) {
+                o[((t0 + t) * hv + h) * S + j0 + j] = fma(exp(lg[t]), Y[t][j], X[t][j]) * scale;
+                Dl[t][j] *= exp(lgl - lg[t]);
+            } else {
+                Dl[t][j] = 0.0f;
+            }
+        }
+        threadgroup_barrier(mem_flags::mem_threadgroup);
+        // S = G_L S + K^T delta'
+        for (int rt = 0; rt < 4; ++rt)
+            for (int jt = 0; jt < 4; ++jt) {
+                st[rt][jt].thread_elements()[0] *= gl;
+                st[rt][jt].thread_elements()[1] *= gl;
+            }
+        if (gdn_probe != 3)
+#pragma clang loop unroll(full)
+        for (int kb = 0; kb < 4; ++kb) {
+            simdgroup_float8x8 bd[4];
+            for (int jt = 0; jt < 4; ++jt) simdgroup_load(bd[jt], &Dl[8 * kb][8 * jt], 32);
+            for (int rt = 0; rt < 4; ++rt) {
+                simdgroup_float8x8 ak;
+                simdgroup_load(ak, kn + ((t0 + 8 * kb) * hkn + hk) * S + 32 * sg + 8 * rt, hkn * S, ulong2(0, 0), true);
+                for (int jt = 0; jt < 4; ++jt) simdgroup_multiply_accumulate(st[rt][jt], ak, bd[jt], st[rt][jt]);
+            }
+        }
+    }
+    for (int rt = 0; rt < 4; ++rt)
+        for (int jt = 0; jt < 4; ++jt)
+            simdgroup_store(st[rt][jt], state + ((32 * sg + 8 * rt) * hv + h) * S + j0 + 8 * jt, hv * S);
 }

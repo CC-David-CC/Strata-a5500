@@ -49,10 +49,10 @@ int main(int argc, char** argv) {
     mtl::Buffer qkv = F((size_t)TMAX * CH), al = F((size_t)TMAX * HV), be = F((size_t)TMAX * HV), z = F((size_t)TMAX * HV * S),
                 cw = F(CH * 4), dt = F(HV), sa = F(HV), gam = F(S), st0 = F((size_t)S * HV * S), stX = F((size_t)S * HV * S),
                 stRef = F((size_t)S * HV * S), h0 = F(CH * 3), hOut = F(CH * 3), yh = cx.alloc(2 * (size_t)TMAX * HV * S),
-                yB = F((size_t)TMAX * HV * S), qn = F((size_t)TMAX * HK * S), kn = F((size_t)TMAX * HK * S),
+                yB = F((size_t)TMAX * HV * S), qn = F((size_t)(TMAX + 32) * HK * S), kn = F((size_t)(TMAX + 32) * HK * S),
                 vc = F((size_t)TMAX * HV * S), gb = F(2 * (size_t)TMAX * HV), kq = F((size_t)TMAX * HK),
                 o = F((size_t)TMAX * HV * S), oRef = F((size_t)TMAX * HV * S), cU = F((size_t)HV * NCM * GC * S),
-                cW = F((size_t)HV * NCM * GC * S), clg = F((size_t)HV * NCM * GC), cD = F((size_t)HV * NCM * GC * S);
+                cW = F((size_t)HV * NCM * GC * S), clg = F((size_t)HV * NCM * GC), cD = F((size_t)HV * NCM * GC * S), cM = F((size_t)HV * NCM * GC * GC);
     ref::Rng r(21);
     for (size_t i = 0; i < (size_t)TMAX * CH; ++i) qkv.as<float>()[i] = r.sym() * 2.0f;
     for (size_t i = 0; i < (size_t)TMAX * HV; ++i) { al.as<float>()[i] = r.sym() * 3.0f; be.as<float>()[i] = r.sym() * 2.0f; }
@@ -73,7 +73,8 @@ int main(int argc, char** argv) {
                          {"gdn_scanr_8_4", HV * 4, 256}, {"gdn_scanr_2_8", HV * 4, 64}, {"gdn_scanr_2_4", HV * 4, 64}};
     std::vector<mtl::Pipeline> scan;
     for (const Sv& v : svs) scan.push_back(cx.pipeline(lib, v.nm, std::string(v.nm) == "gdn_scan_v" || std::string(v.nm).find("scanr") != std::string::npos ? mtl::Constants().i(6, 0) : mtl::Constants()));
-    mtl::Pipeline pcp = cx.pipeline(lib, "gdn_cprep"), pcs = cx.pipeline(lib, "gdn_cstate"), pco = cx.pipeline(lib, "gdn_cout");
+    mtl::Pipeline pcp = cx.pipeline(lib, "gdn_cprep"), pcs = cx.pipeline(lib, "gdn_cstate"), pco = cx.pipeline(lib, "gdn_cout"), pcp2 = cx.pipeline(lib, "gdn_cprep2"), pcs2 = cx.pipeline(lib, "gdn_cstate2");
+    bool v2 = false;   // chunk_d builds the v2 chunked form (gdn_cprep2 + gdn_cstate2)
     std::printf("pipeline limits (max threads / simd / static tg mem; threads asked):");
     for (size_t i = 0; i < scan.size(); ++i) std::printf(" %s %d/%d/%d (%d)", svs[i].nm, scan[i].max_threads, scan[i].simd_width, scan[i].static_tg_mem, svs[i].tg);
     std::printf("\n  pre %d/%d/%d (256)  cprep %d/%d/%d (256)  cstate %d/%d/%d (256)  cout %d/%d/%d (128)  post %d/%d/%d (128)\n",
@@ -111,6 +112,19 @@ int main(int argc, char** argv) {
     auto chunk_d = [&](int t0, int n, const mtl::Buffer& st, const mtl::Buffer& out, std::vector<mtl::Dispatch>& ds) {
         GdnPArgs a{(uint32_t)n, HK, HV, CH, 1e-6f, 1u};
         const uint32_t nc = (n + GC - 1) / GC;
+        if (v2) {
+            mtl::Dispatch f1; f1.p = &pcp2;
+            f1.args = {mtl::Arg::B(qn, (size_t)t0 * HK * S * 4), mtl::Arg::B(kn, (size_t)t0 * HK * S * 4),
+                       mtl::Arg::B(vc, (size_t)t0 * HV * S * 4), mtl::Arg::B(gb, (size_t)t0 * HV * 8), mtl::Arg::B(cU), mtl::Arg::B(cW),
+                       mtl::Arg::B(clg), mtl::Arg::B(cM), mtl::Arg::V(a)};
+            f1.grid[0] = HV; f1.grid[1] = nc; f1.tg[0] = 256; ds.push_back(f1);
+            mtl::Dispatch f2; f2.p = &pcs2;
+            f2.args = {mtl::Arg::B(st), mtl::Arg::B(qn, (size_t)t0 * HK * S * 4), mtl::Arg::B(kn, (size_t)t0 * HK * S * 4),
+                       mtl::Arg::B(cU), mtl::Arg::B(cW), mtl::Arg::B(clg), mtl::Arg::B(cM), mtl::Arg::B(out, (size_t)t0 * HV * S * 4),
+                       mtl::Arg::V(a)};
+            f2.grid[0] = HV * 4; f2.tg[0] = 128; ds.push_back(f2);
+            return;
+        }
         mtl::Dispatch e1; e1.p = &pcp;
         e1.args = {mtl::Arg::B(qn, (size_t)t0 * HK * S * 4), mtl::Arg::B(kn, (size_t)t0 * HK * S * 4),
                    mtl::Arg::B(vc, (size_t)t0 * HV * S * 4), mtl::Arg::B(gb, (size_t)t0 * HV * 8), mtl::Arg::B(cU), mtl::Arg::B(cW),
@@ -226,10 +240,10 @@ int main(int argc, char** argv) {
         for (int T : Ts) {
             // the variants, each from st0, over tokens [0, T)
             struct V { const char* name; int kind; };  // kind: 0..2 scanr IB 2/4/8, 10 chunked
-            for (V v : {V{"scanr_4", 1}, V{"chunked", 10}}) {
+            for (V v : {V{"scanr_4", 1}, V{"chunked", 10}, V{"chunked2", 11}}) {
                 copy_st0(stX);
                 std::vector<mtl::Dispatch> ds;
-                if (v.kind == 10) chunk_d(0, T, stX, o, ds); else scan_d(v.kind, 0, T, stX, o, ds);
+                v2 = v.kind == 11; if (v.kind >= 10) chunk_d(0, T, stX, o, ds); else scan_d(v.kind, 0, T, stX, o, ds); v2 = false;
                 cx.run(ds);
                 for (int h : heads) {
                     std::vector<double> St, ro; initial(h, St); oracle(h, 0, T, St, ro);
@@ -247,20 +261,37 @@ int main(int argc, char** argv) {
         const std::pair<int, int> splits[] = {{37, 963}, {1024, 1024}, {2048, 2047}, {31, 33}, {1, 4095}};
         for (auto [A, B] : splits) {
             if (A + B > TMAX) continue;
-            const char* nm[4] = {"chunk+chunk", "scan+chunk", "chunk+scan", "scan+scan"};
-            for (int m = 0; m < 4; ++m) {
+            const char* nm[8] = {"chunk+chunk", "scan+chunk", "chunk+scan", "scan+scan", "chunk2+chunk2", "scan+chunk2", "chunk2+scan", "-"};
+            for (int m = 0; m < 8; ++m) {
+                v2 = m >= 4;
+                if (v2 && m == 7) continue;   // scan+scan has no chunked part
                 copy_st0(stX);
                 std::vector<mtl::Dispatch> d1, d2;
-                if (m == 0 || m == 2) chunk_d(0, A, stX, o, d1); else scan_d(1, 0, A, stX, o, d1);
-                if (m == 0 || m == 1) chunk_d(A, B, stX, o, d2); else scan_d(1, A, B, stX, o, d2);
-                cx.run(d1); cx.run(d2);
+                if (m % 4 == 0 || m % 4 == 2) chunk_d(0, A, stX, o, d1); else scan_d(1, 0, A, stX, o, d1);
+                if (m % 4 == 0 || m % 4 == 1) chunk_d(A, B, stX, o, d2); else scan_d(1, A, B, stX, o, d2);
+                cx.run(d1); cx.run(d2); v2 = false;
                 for (int h : {heads[0], heads.back()}) {
                     std::vector<double> St, ro; initial(h, St); oracle(h, 0, A + B, St, ro);
                     Err eo = cmp_o(o, h, 0, A + B, ro), es = cmp_s(stX, h, St);
                     const bool ok = eo.l2 < 3e-3 && es.l2 < 3e-3 && !eo.nonfinite && !es.nonfinite;
                     fails += !ok;
-                    std::printf("split %5d + %5d %-12s head %2d: o rel %.2e  state rel %.2e  %s\n", A, B, nm[m], h, eo.l2, es.l2, ok ? "PASS" : "FAIL");
+                    std::printf("split %5d + %5d %-14s head %2d: o rel %.2e  state rel %.2e  %s\n", A, B, nm[m], h, eo.l2, es.l2, ok ? "PASS" : "FAIL");
                 }
+            }
+        }
+        std::printf("== bitwise: gdn_scanr_4_8 / _4_4 / _4_2 / _8_8 / _2_8 o and state vs gdn_scanr_4\n");
+        for (int T : Ts) {
+            if (T > 16384) continue;
+            copy_st0(stX);
+            std::vector<mtl::Dispatch> d0; scan_d(1, 0, T, stX, o, d0); cx.run(d0);
+            std::vector<float> oref(o.as<float>(), o.as<float>() + (size_t)T * HV * S), sref(stX.as<float>(), stX.as<float>() + (size_t)S * HV * S);
+            for (int w : {3, 8, 9, 10, 12}) {
+                copy_st0(stX);
+                std::memset(o.ptr, 0, (size_t)T * HV * S * 4);
+                std::vector<mtl::Dispatch> d1; scan_d(w, 0, T, stX, o, d1); cx.run(d1);
+                const bool eq = std::memcmp(o.ptr, oref.data(), oref.size() * 4) == 0 && std::memcmp(stX.ptr, sref.data(), sref.size() * 4) == 0;
+                fails += !eq;
+                std::printf("T %5d %-14s %s\n", T, svs[w].nm, eq ? "BITWISE EQUAL" : "DIFFERS");
             }
         }
         std::printf("== fused scan+post vs pre/scanr_4/post: y rel L2, fp16 y mismatches, state rel L2\n");
@@ -309,6 +340,28 @@ int main(int argc, char** argv) {
         const double tc = timeit(dc), tc1 = timeit({dc[0]}), tc2 = timeit({dc[1]}), tc3 = timeit({dc[2]});
         const double base = tp + ts1 + tpo, ch = tp + tc + tpo;
         std::printf(" | %8.3f (%7.3f %7.3f %7.3f) | %8.3f %8.3f %5.2f | best %s stage %.3f = x%.3f (scan x%.3f)\n", tc, tc1, tc2, tc3, base, ch, base / ch, svs[wbest].nm, tp + tbest + tpo, base / (tp + tbest + tpo), ts1 / tbest);
+        {
+            v2 = true;
+            std::vector<mtl::Dispatch> dc2;
+            chunk_d(0, T, stX, o, dc2);
+            const double t2 = timeit(dc2), t2a = timeit({dc2[0]}), t2b = timeit({dc2[1]});
+            v2 = false;
+            std::printf("       chunked v2 %.3f (cprep2 %.3f cstate2 %.3f); stage pre+v2+post %.3f = x%.3f vs scanr_4 stage (scan x%.3f)\n", t2, t2a, t2b,
+                        tp + t2 + tpo, base / (tp + t2 + tpo), ts1 / t2);
+        }
+        if (std::getenv("GDN_PROBE_RUN")) {
+            v2 = true;
+            std::vector<mtl::Dispatch> dd;
+            chunk_d(0, T, stX, o, dd);
+            for (int pr = 1; pr <= 3; ++pr) {
+                mtl::Pipeline a1 = cx.pipeline(lib, "gdn_cprep2", mtl::Constants().i(6, pr)), a2 = cx.pipeline(lib, "gdn_cstate2", mtl::Constants().i(6, pr));
+                mtl::Dispatch d1 = dd[0], d2 = dd[1];
+                d1.p = &a1; d2.p = &a2;
+                const double x1 = timeit({d1}), x2 = timeit({d2});
+                std::printf("       probe %d: cprep2 %.3f cstate2 %.3f ms\n", pr, x1, x2);
+            }
+            v2 = false;
+        }
         {
             double tf[3];
             for (int w = 0; w < 3; ++w) { std::vector<mtl::Dispatch> d1; fused_d(w, 0, T, stX, d1); tf[w] = timeit(d1); }
