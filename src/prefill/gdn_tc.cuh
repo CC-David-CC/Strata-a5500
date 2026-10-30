@@ -154,8 +154,9 @@ __device__ __forceinline__ void gtc_mma3_f16(float (&c)[4], const uint32_t (&ah)
     gtc_mma_f16(c, ah, bl0, bl1);
     gtc_mma_f16(c, ah, bh0, bh1);
 }
-// NP passes of a split product (experiment, STRATA_GDN_TC split kernels only): 3 = the three above (the default); 2 = lo.hi and
-// hi.hi (the A operand split, B in f16 only); 1 = hi.hi (plain f16 operands, as the gfx11 WMMA path).  B's lo image is not read for NP < 3.
+// NP (experiment, STRATA_GDN_TC split kernels only): 3 = every product on the three passes above (the default); 2 = only the products
+// that reach the OUTPUT alone (q.S and D.P) on one pass, the state's products (k.S, Y.T, the update) on three; 1 = every product on one pass
+// (hi.hi, plain f16 operands as the gfx11 WMMA path).  A single-pass product does not read its B operand's lo image.
 template <int NP>
 __device__ __forceinline__ void gtc_mmaN(float (&c)[4], const uint32_t (&ah)[4], const uint32_t (&al)[4], uint32_t bh0,
                                          uint32_t bh1, uint32_t bl0, uint32_t bl1) {
@@ -202,7 +203,7 @@ __device__ __forceinline__ float4 gtc_lds128(const float4* p) {
 // (tiles 2kk and 2kk + 1 of S^T are that step's A fragment), B = the f16 hi / lo images of k and q ([GCH][GTC_KP] in
 // shared memory, rows = tokens) by ldmatrix: matrices (n-tile 2hf + (lane >> 4), k-half (lane >> 3) & 1), a lane's
 // row is token 8 n-tile + (lane & 7).  The accumulators come out as 2^(8 + es) times the products.  2 x 96 mma.
-template <int NP = 3>
+template <int NPK = 3, int NPQ = 3>
 __device__ __forceinline__ void gtc_prod_state(const float (&s)[16][4], float sA, const uint16_t* kh, const uint16_t* kl,
                                                const uint16_t* qh, const uint16_t* ql, float (&xt)[4][4], float (&qs)[4][4]) {
     const int lane = threadIdx.x & 31;
@@ -219,13 +220,13 @@ __device__ __forceinline__ void gtc_prod_state(const float (&s)[16][4], float sA
             const int o = off + 16 * hf * GTC_KP + 16 * kk;
             uint32_t bh[4], bl[4] = {0u, 0u, 0u, 0u};
             gtc_ldsm_x4(bh, kh + o);
-            if constexpr (NP == 3) gtc_ldsm_x4(bl, kl + o);
-            gtc_mmaN<NP>(xt[2 * hf], ah, al, bh[0], bh[1], bl[0], bl[1]);
-            gtc_mmaN<NP>(xt[2 * hf + 1], ah, al, bh[2], bh[3], bl[2], bl[3]);
+            if constexpr (NPK == 3) gtc_ldsm_x4(bl, kl + o);
+            gtc_mmaN<NPK>(xt[2 * hf], ah, al, bh[0], bh[1], bl[0], bl[1]);
+            gtc_mmaN<NPK>(xt[2 * hf + 1], ah, al, bh[2], bh[3], bl[2], bl[3]);
             gtc_ldsm_x4(bh, qh + o);
-            if constexpr (NP == 3) gtc_ldsm_x4(bl, ql + o);
-            gtc_mmaN<NP>(qs[2 * hf], ah, al, bh[0], bh[1], bl[0], bl[1]);
-            gtc_mmaN<NP>(qs[2 * hf + 1], ah, al, bh[2], bh[3], bl[2], bl[3]);
+            if constexpr (NPQ == 3) gtc_ldsm_x4(bl, ql + o);
+            gtc_mmaN<NPQ>(qs[2 * hf], ah, al, bh[0], bh[1], bl[0], bl[1]);
+            gtc_mmaN<NPQ>(qs[2 * hf + 1], ah, al, bh[2], bh[3], bl[2], bl[3]);
         }
     }
 }
@@ -540,7 +541,7 @@ gdn_tc_scan_kernel(float* __restrict__ state, const float* __restrict__ h, const
         const float m = fmaxf(fmaxf(fmaxf(m8[0], m8[1]), fmaxf(m8[2], m8[3])), fmaxf(fmaxf(m8[4], m8[5]), fmaxf(m8[6], m8[7])));
         const int es = gtc_scale_exp(gtc_warp_max(m));
         float xt[4][4] = {}, qs[4][4] = {};
-        gtc_prod_state<NP>(s, gtc_pow2(es), bkh, bkl, bqh, bql, xt, qs);
+        gtc_prod_state<(NP == 1 ? 1 : 3), (NP == 3 ? 3 : 1)>(s, gtc_pow2(es), bkh, bkl, bqh, bql, xt, qs);
         // (b) Y^T = beta_i (V^T - e'_i X^T), e'_i = exp(gamma_i) 2^-(8 + es): lane (gid, tig) holds tokens
         // 8nt + 2tig and + 1, columns c0 + gid and + 8
         const float eS = gtc_pow2(-(8 + es));
@@ -564,7 +565,7 @@ gdn_tc_scan_kernel(float* __restrict__ state, const float* __restrict__ h, const
             for (int q = 0; q < 4; ++q) my4[q] = fmaxf(my4[q], fabsf(yt[nt][q]));
         const int ey = gtc_scale_exp(gtc_warp_max(fmaxf(fmaxf(my4[0], my4[1]), fmaxf(my4[2], my4[3]))));
         float dt[4][4] = {};
-        gtc_prod_dt<true, NP>(yt, gtc_pow2(ey), bth, btl, dt);
+        gtc_prod_dt<true, (NP == 1 ? 1 : 3)>(yt, gtc_pow2(ey), bth, btl, dt);
         const float sYT = gtc_pow2(-ey) * ste[b];
 #pragma unroll
         for (int nt = 0; nt < 4; ++nt)
@@ -585,7 +586,7 @@ gdn_tc_scan_kernel(float* __restrict__ state, const float* __restrict__ h, const
             const float e0 = gtc_lds128(bsc + 8 * nt + 2 * tig).y * eO, e1 = gtc_lds128(bsc + 8 * nt + 2 * tig + 1).y * eO;
             ot[nt][0] = qs[nt][0] * e0; ot[nt][1] = qs[nt][1] * e1; ot[nt][2] = qs[nt][2] * e0; ot[nt][3] = qs[nt][3] * e1;
         }
-        gtc_prod_dt<true, NP>(dt, sD, bph, bpl, ot);
+        gtc_prod_dt<true, (NP == 3 ? 3 : 1)>(dt, sD, bph, bpl, ot);
         float zr[4][4] = {}, gm2[2] = {};
         if constexpr (NORM) {
             // the z values and gamma of this lane's elements are loaded now, so that their latency is spent in the barrier below
@@ -658,7 +659,7 @@ gdn_tc_scan_kernel(float* __restrict__ state, const float* __restrict__ h, const
             const float f0 = gtc_lds128(bsc + 8 * nt + 2 * tig).z * sD, f1 = gtc_lds128(bsc + 8 * nt + 2 * tig + 1).z * sD;
             dd[nt][0] = dt[nt][0] * f0; dd[nt][1] = dt[nt][1] * f1; dd[nt][2] = dt[nt][2] * f0; dd[nt][3] = dt[nt][3] * f1;
         }
-        gtc_update_state<NP>(s, dd, bkh, bkl);
+        gtc_update_state<(NP == 1 ? 1 : 3)>(s, dd, bkh, bkl);
 #pragma unroll
         for (int j = 0; j < 16; ++j)
 #pragma unroll
