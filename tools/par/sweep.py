@@ -16,6 +16,7 @@ ap.add_argument("--repo", default=None)
 ap.add_argument("--out", required=True)
 ap.add_argument("--rounds", default="2")
 ap.add_argument("--default-work", default="w1;w2:4,8@--max-tokens 128")
+ap.add_argument("--exe-base", default=None)
 a = ap.parse_args()
 repo = a.repo or a.root + "/main"
 here = os.path.dirname(os.path.abspath(__file__))
@@ -23,8 +24,8 @@ for line in open(a.variants):
     line = line.strip()
     if not line or line.startswith("#"):
         continue
-    f = [x.strip() for x in line.split("|")] + [""] * 7
-    tag, gpus, par, groups, env, extra, work = f[:7]
+    f = [x.strip() for x in line.split("|")] + [""] * 8
+    tag, gpus, par, groups, env, extra, work, srv = f[:8]
     cmd = [sys.executable, f"{here}/../par_run.py", "--box", a.box, "--tag", tag, "--exe", a.exe, "--repo", repo, "--gpus", gpus or "0,1",
            "--out", a.out, "--rounds", a.rounds, "--work", work or a.default_work]
     if par:
@@ -35,6 +36,8 @@ for line in open(a.variants):
         cmd += ["--env", env]
     if extra:
         cmd += ["--extra", extra]
+    if srv:
+        cmd += ["--server-extra", srv]
     r = subprocess.run(cmd, capture_output=True, text=True)
     out = [l for l in r.stdout.splitlines() if l.startswith(("w1 ", "w2 ", "w4 ", "w6 ", "SERVER", "ABORT", "DONE", "[", "par_load"))]
     print(f"## {tag}: rc={r.returncode}", flush=True)
