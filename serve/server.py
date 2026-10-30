@@ -327,6 +327,7 @@ def _timeout_env(name: str, default: float) -> float | None:
 # still working is never ended by this, only reported once (the recommendation: engine_silence_s, or this variable).
 # STRATA_ENGINE_STALL_S overrides it (0 = off).  Needs psutil (setup installs it); without it nothing is ended.
 ENGINE_STALL_S = _timeout_env("STRATA_ENGINE_STALL_S", 90.0)
+PAR_COUNTERS = os.environ.get("STRATA_PAR_COUNTERS") == "1"   # research counters (queue wait for a slot), shown in /v1/status
 # --batch: new requests take the control lines (one prompt read at a time) short prompts first: a prompt of at most
 # STRATA_ADMIT_SHORT_FIRST tokens goes before longer ones (opt-in; unset or 0: whoever gets the lock first), and a
 # longer one that waited STRATA_ADMIT_MAX_WAIT_S (default 30) counts as short.  A chat question then waits for the one
@@ -336,6 +337,13 @@ try:
 except ValueError:
     ADMIT_SHORT_FIRST = 0
 ADMIT_MAX_WAIT_S = _timeout_env("STRATA_ADMIT_MAX_WAIT_S", 30.0) or 0.0
+# STRATA_COALESCE_PREFILL=N (research, PAR-H; needs the engine's BCO / BCOK lines): a request that takes the control lines
+# for its admission also sends the prompts of up to N-1 requests still waiting for them (BCO <slot> <ids>, into free slots
+# it reserves for them); the engine reads all the prompts in ONE layer-major pass, so the experts a layer streams are
+# read once for all of them, and each waiting request then finds its prompt in its slot.  0 / unset: off.
+COALESCE_PREFILL = max(0, int(os.environ.get("STRATA_COALESCE_PREFILL") or 0))
+COALESCE_TOKENS = max(256, int(os.environ.get("STRATA_COALESCE_TOKENS") or 16384))   # prompt tokens read together at most
+COALESCE_WAIT_MS = max(0, int(os.environ.get("STRATA_COALESCE_WAIT_MS") or 0))       # a burst's later requests register within this long
 STALL_CPU_EPS_S = 0.5       # CPU seconds the engine may use in the whole stall window and still count as frozen
 STALL_IO_EPS_B = 1 << 20    # bytes read or written in that window
 
@@ -1193,6 +1201,7 @@ class StrataEngine:
             self.slot_cv = threading.Condition()
             self.waiting = 0                            # requests waiting for the control lines (ctl)
             self.admitting = 0                          # #1603: ... and those that gave the lines back to wait for a slot
+            self.par_counters = {"queued": 0, "queue_wait_s": 0.0}
             self.wait_lens: list[list[int]] = []        # ... their prompt lengths (a long read gives way to short ones)
             self.ctl_epoch = 0                          # how often the control lines were taken
             self.ctl = threading.Lock()                 # one admission or solo request on the control lines at a time
@@ -1575,6 +1584,8 @@ class StrataEngine:
                 f = line.split()
                 self._ctl_result = ("badm", len(f) >= 3 and f[2] == "1")
                 return
+            elif line.startswith("BCOK "):               # STRATA_COALESCE_PREFILL: <slot> <tokens>: the slot holds a waiting prompt
+                pass
             elif line.startswith("YIELDED "):            # the read gave way (BYIELD): <slot> <tokens read>
                 f = line.split()
                 if len(f) >= 3 and f[1].lstrip("-").isdigit() and f[2].isdigit():
@@ -1726,11 +1737,11 @@ class StrataEngine:
 
     YIELDS_MAX = 2   # #656: how often one request's prompt read gives way to a shorter waiting one
 
-    def _take_control(self, cancel, plen: int, after_epoch: int | None = None, new: bool = False):
+    def _take_control(self, cancel, plen: int, after_epoch: int | None = None, new: bool = False, prompt=None):
         """Waits for the control lines (one prompt read at a time), yielding None heartbeats; False when cancelled.
         `after_epoch`: a request whose read gave way lets the requests waiting then go first.
         `new`: the request's first admission (STRATA_ADMIT_SHORT_FIRST orders only these)."""
-        entry = [plen, time.monotonic(), new]           # (length, arrival, ordered: STRATA_ADMIT_SHORT_FIRST)
+        entry = [plen, time.monotonic(), new, prompt, cancel]           # (length, arrival, ordered: STRATA_ADMIT_SHORT_FIRST; the prompt and request, for STRATA_COALESCE_PREFILL)
         with self.slot_cv:
             self.waiting += 1
             self.wait_lens.append(entry)
@@ -1783,6 +1794,51 @@ class StrataEngine:
             self.ctl_epoch += 1
             self.slot_cv.notify_all()
         return True
+
+    def _release_preslot(self, cancel):
+        """STRATA_COALESCE_PREFILL: the request that was given a slot ahead of its turn left before using it."""
+        slot = getattr(cancel, "_strata_preslot", None)
+        if slot is None:
+            return
+        cancel._strata_preslot = None
+        with self.slot_cv:
+            self.slot_busy[slot] = False
+            self.slot_claims.discard(slot)
+            self.slot_cv.notify_all()
+
+    def _coalesce(self, cancel, lead_prompt):
+        """STRATA_COALESCE_PREFILL (the caller holds the control lines and sends its BGEN right after): reserve free slots
+        for requests still waiting for the control lines and send their prompts as BCO lines; the engine reads them in the
+        same layer-major pass as the BGEN's prompt.  Each follower finds its slot in cancel._strata_preslot."""
+        picked = []
+        total = len(lead_prompt)
+        if COALESCE_WAIT_MS > 0:
+            time.sleep(COALESCE_WAIT_MS / 1000.0)    # the requests of a burst reach the server a few ms apart
+        with self.slot_cv:
+            for e in list(self.wait_lens):
+                if len(picked) >= COALESCE_PREFILL - 1:
+                    break
+                prompt = e[3] if len(e) > 4 else None
+                rq = e[4] if len(e) > 4 else None
+                if prompt is None or rq is None or rq is cancel or getattr(rq, "_strata_preslot", None) is not None:
+                    continue
+                if getattr(rq, "_strata_co", False) or len(prompt) < 32 or total + len(prompt) > COALESCE_TOKENS:
+                    continue
+                slot = self.pick_slot(prompt)
+                if slot is None:
+                    break
+                self.slot_busy[slot] = True
+                self.slot_claims.add(slot)
+                self.slot_held[slot] = []
+                rq._strata_preslot = slot
+                rq._strata_co = True
+                total += len(prompt)
+                picked.append((slot, prompt))
+        for slot, prompt in picked:
+            self._send(f"BCO {slot} {','.join(str(int(t)) for t in prompt)}")
+        if picked:
+            print(f"[strata] coalesce: {len(picked)} waiting prompt(s) ({total - len(lead_prompt)} tokens) read with this "
+                  f"request's {len(lead_prompt)}", flush=True)
 
     def _admit_next(self):
         """STRATA_ADMIT_SHORT_FIRST=<tokens> (the caller holds slot_cv): the new request that takes the control lines
@@ -1839,12 +1895,17 @@ class StrataEngine:
         prompt, left = list(ids), int(max_new)
         reused0 = None      # the first read's reused tokens: a continued leg's count includes this request's own output
         carry = {}          # #1869: the figures of the legs that ended in a hand-back to the solo path (the final DONE adds to them)
-        ok = yield from self._take_control(cancel, len(prompt), new=True)
+        ok = yield from self._take_control(cancel, len(prompt), new=True,
+                                           prompt=prompt if (COALESCE_PREFILL > 1 and not embeddings) else None)
         if not ok:
+            self._release_preslot(cancel)
             return
         holding, born = True, self.gen                  # (the engine it now has the control lines of)
         btrace("ctl acquired")
         slot, gen0, reserved = None, None, None
+        pre = getattr(cancel, "_strata_preslot", None)
+        if pre is not None:                             # STRATA_COALESCE_PREFILL: a request before this one read the prompt into this slot
+            slot, cancel._strata_preslot = pre, None
         phase = "none"            # solo -> (admit -> slot) ; "done" once the engine has finished with this request
         stop_sent = False
         yields, solo_again, refused = 0, 0, 0
@@ -1941,6 +2002,9 @@ class StrataEngine:
                                     if admit_wait:
                                         admit_wait = False
                                         self.admitting = max(0, self.admitting - 1)
+                                        if PAR_COUNTERS:                # STRATA_PAR_COUNTERS=1: time spent waiting for a free slot
+                                            self.par_counters["queued"] += 1
+                                            self.par_counters["queue_wait_s"] += time.monotonic() - admit_since
                                     break
                                 if not admit_wait:          # #1603: counted while it waits for a slot (it holds no
                                     admit_wait, admit_since = True, time.monotonic()   # control lines then)
@@ -1993,6 +2057,8 @@ class StrataEngine:
                         raise QueueWaitExpired("the inference queue wait deadline expired; retry later")
                     self.slot_live[slot] = live
                     self._last_done = None                  # (#879: this admission's DONE decides below)
+                    if COALESCE_PREFILL > 1 and not embeddings:
+                        self._coalesce(cancel, prompt)
                     self._send(f"{head} {','.join(str(int(t)) for t in prompt)}")
                     if deadline is not None:
                         cancel._strata_queue_deadline = None
@@ -4795,6 +4861,8 @@ class Service:
             slots = self.engine.slots_view() if hasattr(self.engine, "slots_view") else []
             # the requests in flight that are not in a slot: the one alone on the solo path, or waiting their turn
             in_slots = sum(1 for x in slots if x["state"] != "idle")
+            if PAR_COUNTERS:
+                live["par_counters"] = dict(self.par_counters)
             live.update(parallel=par, running=running, slots=slots, outside_slots=max(0, running - in_slots),
                         waiting=int(getattr(self.engine, "waiting", 0) or 0),
                         admitting=int(getattr(self.engine, "admitting", 0) or 0))
