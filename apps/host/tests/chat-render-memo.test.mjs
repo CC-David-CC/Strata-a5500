@@ -19,3 +19,15 @@ test('the list passes handlers whose identity never changes', () => {
     assert.match(chat, new RegExp(`${name}=\{messageHandlers\.${name}\}`), name);
   assert.doesNotMatch(chat, /onEditPrompt=\{editPrompt\}/);
 });
+
+const store = readFileSync(resolve(import.meta.dirname, '../src/lib/store.ts'), 'utf8');
+
+test('streamed text and reasoning are applied in groups, and everything else applies what is waiting first', () => {
+  assert.match(store, /const queueText = \(kind: 'reasoning' \| 'delta', text: string\)/);
+  assert.match(store, /waitingTimer \?\?= setTimeout\(flushWaiting, 90\)/);
+  // the order of frames the person sees is the order written: a frame of any other kind flushes first
+  assert.match(store, /if \(type === 'delta' \|\| type === 'reasoning'\) \{ queueText\(type, String\(frame\.text \?\? ''\)\); return; \}\s*flushWaiting\(\);/);
+  // a failure or the end of the turn never leaves text behind
+  assert.match(store, /\} catch \(err\) \{\s*flushWaiting\(\);/);
+  assert.match(store, /\} finally \{\s*flushWaiting\(\);/);
+});
