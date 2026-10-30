@@ -1076,6 +1076,10 @@ if(STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP)
     add_test(NAME hip_gdn_chunked_off COMMAND hip_gdn_chunked --off)
     add_test(NAME hip_gdn_chunked_default COMMAND hip_gdn_chunked --default)
     list(APPEND _strata_hip_tests hip_gdn_chunked hip_gdn_chunked_off hip_gdn_chunked_default)
+    # GDN prompt stage bench (gates + conv + recurrence, per-piece times and output/state hashes at 4K/16K/32K); a measurement
+    # tool, run by hand with the STRATA_GDN_* knobs under test - no add_test
+    add_executable(hip_gdn_stage_bench tests/hip/gdn_stage_bench.cpp)
+    target_link_libraries(hip_gdn_stage_bench PRIVATE strata_prefill strata_hip_runtime)
     # #313: the RDNA3 / RDNA3.5 WMMA dense GEMMs (opt-in STRATA_WMMA_GEMM=1) against a reference
     add_executable(hip_prefill_wmma_gemm_parity tests/hip/prefill_wmma_gemm_parity.cpp)
     target_include_directories(hip_prefill_wmma_gemm_parity PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/prefill")
