@@ -344,6 +344,12 @@ ADMIT_MAX_WAIT_S = _timeout_env("STRATA_ADMIT_MAX_WAIT_S", 30.0) or 0.0
 COALESCE_PREFILL = max(0, int(os.environ.get("STRATA_COALESCE_PREFILL") or 0))
 COALESCE_TOKENS = max(256, int(os.environ.get("STRATA_COALESCE_TOKENS") or 16384))   # prompt tokens read together at most
 COALESCE_WAIT_MS = max(0, int(os.environ.get("STRATA_COALESCE_WAIT_MS") or 0))       # a burst's later requests register within this long
+# Adaptive: a read is shared (and the leader waits for its followers) only when this engine has seen at least
+# COALESCE_MIN_REQS requests arrive within COALESCE_BURST_MS (the leader's own included).  Fewer than that - one or two
+# requests per engine, as 8 requests on 4 replicas - read plainly, with no wait: nothing to share, and the wait and the
+# longer pass only cost (measured 4 x 1 replicas at 8 requests: 168 against 196 tok/s with an unconditional wait).
+COALESCE_MIN_REQS = max(2, int(os.environ.get("STRATA_COALESCE_MIN_REQS") or 3))
+COALESCE_BURST_MS = max(10, int(os.environ.get("STRATA_COALESCE_BURST_MS") or 250))
 STALL_CPU_EPS_S = 0.5       # CPU seconds the engine may use in the whole stall window and still count as frozen
 STALL_IO_EPS_B = 1 << 20    # bytes read or written in that window
 
@@ -1203,6 +1209,7 @@ class StrataEngine:
             self.admitting = 0                          # #1603: ... and those that gave the lines back to wait for a slot
             self.par_counters = {"queued": 0, "queue_wait_s": 0.0}
             self.wait_lens: list[list[int]] = []        # ... their prompt lengths (a long read gives way to short ones)
+            self.arrivals = collections.deque(maxlen=64)   # monotonic times of the last requests that came for the control lines (STRATA_COALESCE_*)
             self.ctl_epoch = 0                          # how often the control lines were taken
             self.ctl = threading.Lock()                 # one admission or solo request on the control lines at a time
         self.gen = self.__dict__.get("gen", 0) + 1      # which engine process this is (a request notes its own)
@@ -1745,6 +1752,7 @@ class StrataEngine:
         with self.slot_cv:
             self.waiting += 1
             self.wait_lens.append(entry)
+            self.arrivals.append(entry[1])
         beat = time.monotonic()
         try:
             while True:
@@ -1812,6 +1820,16 @@ class StrataEngine:
         same layer-major pass as the BGEN's prompt.  Each follower finds its slot in cancel._strata_preslot."""
         picked = []
         total = len(lead_prompt)
+        def seen() -> int:
+            now = time.monotonic()
+            with self.slot_cv:
+                return max(sum(1 for t in self.arrivals if now - t <= COALESCE_BURST_MS / 1000.0), 1 + len(self.wait_lens))
+        recent = seen()
+        if recent < COALESCE_MIN_REQS and COALESCE_WAIT_MS > 0:
+            time.sleep(0.010)                        # (the first request of a burst holds the lines before its neighbours have arrived)
+            recent = seen()
+        if recent < COALESCE_MIN_REQS:
+            return                                   # one or two requests on this engine: a plain read, at most 10 ms lost
         if COALESCE_WAIT_MS > 0:
             time.sleep(COALESCE_WAIT_MS / 1000.0)    # the requests of a burst reach the server a few ms apart
         with self.slot_cv:
@@ -8569,9 +8587,14 @@ def start_replicas(cfg: dict, groups: list[list[int]], exe: str, effort_end: lis
           flush=True)
     engines: list = [None] * n
     errors: list = []
+    arena, arena_note = rp.shared_arena_plan(cfg, n)         # opt-in: one copy of the experts in RAM for all replicas
+    if arena_note:
+        print(f"[strata] {arena_note}", flush=True)
 
     def one(i: int):
         rc = rp.replica_cfg(cfg, i, groups[i])
+        if arena:
+            rc["args"] = list(rc["args"]) + ["--shared-expert-arena", arena]
         try:
             engines[i] = StrataEngine(exe, engine_args(rc) + effort_end, cwd=rc.get("cwd"), log=rc.get("log"),
                                       env=child_env(rc, offline=offline), lazy=lazy, cpus=cpus[i] if cpus else None)
@@ -8588,6 +8611,16 @@ def start_replicas(cfg: dict, groups: list[list[int]], exe: str, effort_end: lis
             t.start()
         for t in ts:
             t.join()
+    if errors and arena and len(errors) < n:
+        # a replica that died while it was reading the experts into the shared arena (or any other one that failed) while
+        # another one is up: the living engine took the read over (the state word in the arena), so start the failed ones
+        # once more on the same arena instead of giving up the sharing
+        failed = sorted(i for i, _ in errors)
+        errors.clear()
+        print(f"[strata] replica(s) {', '.join(map(str, failed))} did not start; starting again on the shared expert arena",
+              flush=True)
+        for i in failed:
+            one(i)
     if errors:
         for e in engines:
             if e is not None:
@@ -8595,10 +8628,20 @@ def start_replicas(cfg: dict, groups: list[list[int]], exe: str, effort_end: lis
                     e.close()
                 except Exception:        # noqa: BLE001
                     pass
+        rp.remove_arena(arena)
         i, e = errors[0]
+        if arena:       # a shared arena that could not be made (no room in /dev/shm, a file of another pack): as before
+            print(f"[strata] replica {i} did not start with the shared expert arena ({e}); starting every replica with "
+                  "its own copy of the experts instead", flush=True)
+            return start_replicas({**cfg, "replica_shared_arena": False}, groups, exe, effort_end, lazy, offline=offline)
         raise SystemExit(f"[strata] replica {i} did not start: {e}")
     load = int(cfg.get("replica_load_tokens") or rp.LOAD_TOKENS)
-    return rp.ReplicaEngine(engines, load_tokens=load)
+    eng = rp.ReplicaEngine(engines, load_tokens=load)
+    if arena:
+        eng.__dict__["arena_file"] = arena
+        import atexit
+        atexit.register(rp.remove_arena, arena)             # (a killed server leaves the file: the next start sweeps it)
+    return eng
 
 
 def start_split(cfg: dict, spec: dict, exe: str, effort_end: list[str], lazy: bool, *, offline: bool = False):

@@ -5949,9 +5949,15 @@ int64_t Prefill::lm_prepare(int64_t n, std::string& why, int64_t cap) {
     Impl& m = *impl_;
     if (m.g == nullptr) { why = "not initialized"; return 0; }
 #if defined(STRATA_USE_HIP) || defined(STRATA_HIP_GFX906)
-    // only NVIDIA CUDA has run this path; on an AMD build the prompt stays on the chunk-major path
-    why = "layer-major prefill has only been run on NVIDIA CUDA";
-    return 0;
+    // only NVIDIA CUDA has run this path by default; on an AMD build the prompt stays on the chunk-major path unless
+    // STRATA_LM_HIP=1 (opt-in, PAR-A 2026-10-30: gfx1201 is being qualified)
+    {
+        static const bool lm_hip = [] { const char* v = std::getenv("STRATA_LM_HIP"); return v != nullptr && v[0] == '1'; }();
+        if (!lm_hip) {
+            why = "layer-major prefill has only been run on NVIDIA CUDA";
+            return 0;
+        }
+    }
 #endif
     const core::ModelGeometry& g = *m.g;
     const core::OnDevice on_device(m.device);   // a layer split's later stage is sized on its own GPU
