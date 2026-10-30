@@ -560,8 +560,9 @@ class ModelScreen(Base):
         if found is None:
             return False
         model, d, folder = found
-        if sys.platform == "darwin" and model in self.ctx.catalog.strata.dsv41_not_on_mac():
-            self.say(self.ctx.catalog.strata.dsv41_not_on_mac_line() + " Pick the 2.00 or 2.25 version from the list, or point to those files.", True)
+        from strata_control import dsv41_fit
+        if dsv41_fit.not_here(model):
+            self.say(dsv41_fit.not_here(model) + " Pick the 2.00 or 2.25 version from the list, or point to those files.", True)
             return True
         _layout, names, missing = mod.dsv41_parts(d, lambda n: (folder / n).exists())       # the pinned four-shard layout, or ISTA's six-shard one (0.2.8.1)
         if missing:

@@ -19,6 +19,8 @@ setup.py, tools/strata_mcp.py and strata_cli/launch import it.  Recommend, never
 
 from __future__ import annotations
 
+import platform
+import sys
 from typing import Any
 
 from strata_control import gpu_fit
@@ -612,6 +614,19 @@ MAC_SET_PACK = {"IST-DAS-2.00bpw": "IQ2_XXS", "IST-DAS-2.25bpw": "IQ2_XS"}
 # launch and the "I already have the model" check, with this one line.  Remove a name here when its Metal kernel lands.
 MAC_NOT_YET = ("UD-IQ1_S", "UD-IQ1_M")
 MAC_NOT_YET_LINE = "Unsloth's 1-bit DeepSeek sets don't run on a Mac yet; the 2.00 and 2.25 sets do."
+# The same two sets were never run on a DGX Spark (linux-aarch64, GB10) either: kept off it the same way until a Spark run passes (remove the names then).
+AARCH64_NOT_YET = ("UD-IQ1_S", "UD-IQ1_M")
+AARCH64_NOT_YET_LINE = "Unsloth's 1-bit DeepSeek sets were not tested on a DGX Spark yet; the 2.00 and 2.25 sets were."
+
+
+def not_here(model: str | None) -> str | None:
+    """The plain line when `model` is not offered on THIS computer (a Mac: MAC_NOT_YET; linux-aarch64, the DGX Spark: AARCH64_NOT_YET), else None.
+    Read at call time from sys.platform and platform.machine(), so one rule serves the model lists, setup, `strata launch` and the app's file check."""
+    if sys.platform == "darwin" and model in MAC_NOT_YET:
+        return MAC_NOT_YET_LINE
+    if sys.platform.startswith("linux") and platform.machine().lower() in ("aarch64", "arm64") and model in AARCH64_NOT_YET:
+        return AARCH64_NOT_YET_LINE
+    return None
 MAC_SMALL_RAM_GB = 64.0     # below this the measured M5 Max numbers do not apply (nothing smaller than 32 GB was ever started)
 
 

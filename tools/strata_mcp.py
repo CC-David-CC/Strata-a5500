@@ -1288,6 +1288,8 @@ class Strata:
         for f, fd in families.items():
             sizes = []
             for m in self.sizes_of(models, f):
+                if f == "deepseek41" and self.dsv41_not_here(m):      # the Unsloth 1-bit sets on a DGX Spark: not offered until a Spark run passes
+                    continue
                 own = self.own_size(f, m)
                 d = own or models[m]
                 tag = (fd.get("tag", "") + m).lower()
@@ -1345,6 +1347,12 @@ class Strata:
         """The DeepSeek sets the Metal engine cannot run yet (IQ1_S experts): strata_control/dsv41_fit.MAC_NOT_YET."""
         from strata_control import dsv41_fit
         return dsv41_fit.MAC_NOT_YET
+
+    @staticmethod
+    def dsv41_not_here(model: str) -> str | None:
+        """The plain line when this computer (a Mac, a DGX Spark) is not offered `model`, else None: strata_control/dsv41_fit.not_here."""
+        from strata_control import dsv41_fit
+        return dsv41_fit.not_here(model)
 
     @staticmethod
     def dsv41_not_on_mac_line() -> str:
