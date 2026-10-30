@@ -32,6 +32,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <sys/vfs.h>
 #include <unistd.h>
 #include <linux/mman.h>
 #ifndef MAP_HUGE_2MB
@@ -176,6 +177,20 @@ void* reserve(uint64_t bytes, PageBacking& got, std::string& note, const std::st
                 close(fd);
                 note = "cannot size shared arena " + shared_file + ": " + std::strerror(e);
                 return nullptr;
+            }
+            // tmpfs: take the pages now.  ftruncate only sets the length; with /dev/shm too small the load would die
+            // with a bus error part-way, whereas here a full tmpfs is a plain error at start (the server then starts
+            // its replicas with private copies).  A file on a disk is left sparse, as before.
+            struct statfs sf{};
+            if (fstatfs(fd, &sf) == 0 && (unsigned long) sf.f_type == 0x01021994ul) {
+                const int fe = posix_fallocate(fd, 0, (off_t) file_bytes);
+                if (fe != 0 && fe != EOPNOTSUPP && fe != EINVAL) {
+                    close(fd);
+                    unlink(shared_file.c_str());   // (created by this call, never filled: nobody maps it yet)
+                    note = "not enough room for the shared arena " + shared_file + " (" +
+                           std::to_string((unsigned long long) (file_bytes >> 20)) + " MiB): " + std::strerror(fe);
+                    return nullptr;
+                }
             }
             SharedArenaHeader hdr{};
             std::memcpy(hdr.magic, kSharedArenaMagic, sizeof hdr.magic);

@@ -8559,9 +8559,14 @@ def start_replicas(cfg: dict, groups: list[list[int]], exe: str, effort_end: lis
           flush=True)
     engines: list = [None] * n
     errors: list = []
+    arena, arena_note = rp.shared_arena_plan(cfg, n)         # opt-in: one copy of the experts in RAM for all replicas
+    if arena_note:
+        print(f"[strata] {arena_note}", flush=True)
 
     def one(i: int):
         rc = rp.replica_cfg(cfg, i, groups[i])
+        if arena:
+            rc["args"] = list(rc["args"]) + ["--shared-expert-arena", arena]
         try:
             engines[i] = StrataEngine(exe, engine_args(rc) + effort_end, cwd=rc.get("cwd"), log=rc.get("log"),
                                       env=child_env(rc, offline=offline), lazy=lazy, cpus=cpus[i] if cpus else None)
@@ -8585,10 +8590,20 @@ def start_replicas(cfg: dict, groups: list[list[int]], exe: str, effort_end: lis
                     e.close()
                 except Exception:        # noqa: BLE001
                     pass
+        rp.remove_arena(arena)
         i, e = errors[0]
+        if arena:       # a shared arena that could not be made (no room in /dev/shm, a file of another pack): as before
+            print(f"[strata] replica {i} did not start with the shared expert arena ({e}); starting every replica with "
+                  "its own copy of the experts instead", flush=True)
+            return start_replicas({**cfg, "replica_shared_arena": False}, groups, exe, effort_end, lazy, offline=offline)
         raise SystemExit(f"[strata] replica {i} did not start: {e}")
     load = int(cfg.get("replica_load_tokens") or rp.LOAD_TOKENS)
-    return rp.ReplicaEngine(engines, load_tokens=load)
+    eng = rp.ReplicaEngine(engines, load_tokens=load)
+    if arena:
+        eng.__dict__["arena_file"] = arena
+        import atexit
+        atexit.register(rp.remove_arena, arena)             # (a killed server leaves the file: the next start sweeps it)
+    return eng
 
 
 def start_split(cfg: dict, spec: dict, exe: str, effort_end: list[str], lazy: bool, *, offline: bool = False):

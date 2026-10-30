@@ -11,7 +11,8 @@ from pathlib import Path
 from unittest import mock
 
 from serve.frontend import ChatTemplate
-from serve.replicas import BLOCK, ReplicaConfigError, ReplicaEngine, Router, cpu_sets, gpu_groups, replica_cfg
+from serve.replicas import (BLOCK, ReplicaConfigError, ReplicaEngine, Router, cpu_sets, gpu_groups, remove_arena,
+                            replica_cfg, shared_arena_plan, sweep_stale_arenas)
 from serve.server import ByteTokenizer, Service, StrataEngine, serve
 from serve.test_parallel import FAKE_BATCH
 
@@ -307,6 +308,86 @@ class ReplicaService(unittest.TestCase):
         for i in range(3):
             self.assertIn("ok, done.", self.chat(f"after the loss {i}"))
         self.assertEqual(self.served()[1], 3)
+
+
+class SharedArena(unittest.TestCase):
+    """The opt-in shared expert arena of the replicas (shared_arena_plan): when it is used, when it is not, what a stale
+    file means."""
+    CFG = {"replica_shared_arena": True, "args": ["--pack", "/p"], "gpu": [0, 1]}
+
+    def plan(self, cfg=None, n=2, tmp=None, **kw):
+        return shared_arena_plan(cfg or self.CFG, n, shm=tmp, platform=kw.pop("platform", "linux"),
+                                 environ=kw.pop("environ", {}), free_bytes=kw.pop("free_bytes", 100 << 30), **kw)
+
+    def test_off_by_default_and_for_one_engine(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(self.plan({"args": []}, tmp=d), (None, ""))
+            self.assertEqual(self.plan(n=1, tmp=d), (None, ""))
+            self.assertEqual(self.plan({"args": []}, tmp=d, environ={"STRATA_REPLICA_SHARED_ARENA": "0"}), (None, ""))
+
+    def test_on_by_config_or_environment(self):
+        with tempfile.TemporaryDirectory() as d:
+            path, note = self.plan(tmp=d)
+            self.assertTrue(path and path.startswith(d) and path.endswith(".bin"), path)
+            self.assertIn("once", note)
+            path2, _ = self.plan({"args": []}, tmp=d, environ={"STRATA_REPLICA_SHARED_ARENA": "1"})
+            self.assertTrue(path2)
+            self.assertEqual(path, path2)      # (one server: one file)
+
+    def test_only_where_there_is_an_arena_to_share(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(self.plan(tmp=d, platform="win32")[0])
+            self.assertIsNone(self.plan(tmp=d, platform="darwin")[0])
+            for flag in ("--mmap-experts", "--resident-experts", "--resident-budget-gib", "--shared-expert-arena"):
+                self.assertIsNone(self.plan({**self.CFG, "args": ["--pack", "/p", flag]}, tmp=d)[0], flag)
+            self.assertIsNone(self.plan({**self.CFG, "replicas": [{"gpus": [0], "args": ["--mmap-experts"]}, {"gpus": [1]}]}, tmp=d)[0])
+            self.assertIsNone(self.plan({**self.CFG, "arch": "deepseek41"}, tmp=d)[0])
+
+    def test_no_room_or_no_shm_says_so_and_falls_back(self):
+        with tempfile.TemporaryDirectory() as d:
+            path, note = self.plan(tmp=d, free_bytes=2 << 30)
+            self.assertIsNone(path)
+            self.assertIn("2.0 GiB free", note)
+            path, note = self.plan(tmp=d + "/nope")
+            self.assertIsNone(path)
+            self.assertIn("not usable", note)
+
+    def test_a_stale_file_goes_a_live_one_stays(self):
+        with tempfile.TemporaryDirectory() as d:
+            uid = __import__("os").getuid() if hasattr(__import__("os"), "getuid") else 0
+            dead = Path(d) / f"strata-replicas-{uid}-2999999.bin"
+            live = Path(d) / f"strata-replicas-{uid}-{__import__('os').getpid()}.bin"
+            other = Path(d) / f"strata-replicas-{uid + 1}-2999999.bin"
+            junk = Path(d) / "strata-replicas-x.bin"
+            for f in (dead, live, other, junk):
+                f.write_bytes(b"x")
+            with mock.patch("serve.replicas._pid_alive", side_effect=lambda pid: pid != 2999999):
+                gone = sweep_stale_arenas(d, uid)
+            self.assertEqual(gone, [dead.name])
+            self.assertFalse(dead.exists())
+            self.assertTrue(live.exists() and other.exists() and junk.exists())
+
+    def test_removing_twice_or_nothing_is_harmless(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "a.bin"
+            f.write_bytes(b"x")
+            remove_arena(str(f))
+            remove_arena(str(f))
+            remove_arena(None)
+            self.assertFalse(f.exists())
+
+    def test_the_replica_engine_unlinks_the_file_at_close(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "a.bin"
+            f.write_bytes(b"x")
+
+            class E:
+                def close(self):
+                    pass
+            r = ReplicaEngine([E(), E()])
+            r.__dict__["arena_file"] = str(f)
+            r.close()
+            self.assertFalse(f.exists())
 
 
 if __name__ == "__main__":

@@ -18,6 +18,15 @@ conversation's next turn therefore goes back to its replica, until that replica 
 reading the prompt again is cheaper than waiting.  What each replica holds is tracked as hashes of 64-token blocks of
 the prompts and answers it served (the engine itself checks the real prefix, as it always does).
 
+Host RAM.  Every engine keeps its own copy of the experts in RAM (about 47 GiB for Qwen3.8-Flash-Next IQ3_S), so two
+replicas need two copies and four need four.  "replica_shared_arena": true (or STRATA_REPLICA_SHARED_ARENA=1; opt-in)
+backs the experts' arena of all replicas with ONE file in /dev/shm (the engine's --shared-expert-arena, MAP_SHARED):
+the experts are in RAM once, whatever the number of replicas.  Every engine still reads the experts into the file
+itself (the same bytes, so a replica that starts, restarts or dies at any time never leaves another one with half an
+arena), the pack hash in the file's header refuses another model, the file is unlinked when the server ends (a
+running engine keeps its mapping: the kernel frees the pages with the last one) and a file whose server is gone is
+removed at the next start.  See shared_arena_plan.
+
 CPU cores.  On Linux the replicas get disjoint physical cores (serve/cpu_affinity.py, from PR #1436 by agorevski), so
 the host threads of the engines (the expert workers) do not compete.  "replica_cpus": false turns it off.
 """
@@ -26,6 +35,7 @@ from __future__ import annotations
 import collections
 import copy
 import os
+import sys
 import threading
 import time
 
@@ -79,6 +89,100 @@ def _cards(g) -> list[int]:
         return [int(str(x).strip()) for x in items if str(x).strip() != ""]
     except ValueError:
         raise ReplicaConfigError(f"cards must be numbers, not {g!r}") from None
+
+
+ARENA_PREFIX = "strata-replicas-"
+ARENA_MIN_FREE = 8 << 30             # /dev/shm must have at least this much free to try (the engine reserves the real size)
+ARENA_INCOMPATIBLE = ("--mmap-experts", "--resident-experts", "--shared-expert-arena", "--resident-budget-gib")
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def sweep_stale_arenas(shm: str = "/dev/shm", uid: int | None = None) -> list[str]:
+    """Remove the arena files of servers that no longer run (a killed server cannot unlink its own).  A file of a living
+    server, or of another user, is never touched; a mapping an engine still holds stays valid either way."""
+    if uid is None:
+        uid = os.getuid() if hasattr(os, "getuid") else 0
+    gone = []
+    try:
+        names = os.listdir(shm)
+    except OSError:
+        return gone
+    head = f"{ARENA_PREFIX}{uid}-"
+    for n in names:
+        if not (n.startswith(head) and n.endswith(".bin")):
+            continue
+        try:
+            pid = int(n[len(head):-4])
+        except ValueError:
+            continue
+        if _pid_alive(pid):
+            continue
+        try:
+            os.unlink(os.path.join(shm, n))
+            gone.append(n)
+        except OSError:
+            pass
+    return gone
+
+
+def _free(path: str) -> int:
+    try:
+        st = os.statvfs(path)
+        return st.f_bavail * st.f_frsize
+    except OSError:
+        return 0
+
+
+def shared_arena_plan(cfg: dict, n_replicas: int, *, shm: str = "/dev/shm", platform: str | None = None,
+                      environ=None, free_bytes=None) -> tuple[str | None, str]:
+    """(the file for --shared-expert-arena or None, a line for the log).  Opt-in: "replica_shared_arena": true (or
+    STRATA_REPLICA_SHARED_ARENA=1).  Only on Linux (the engine's MAP_SHARED backing), for Qwen's arena (not DeepSeek,
+    not the mapped or budgeted RAM modes, which have no arena), and with room in /dev/shm.  The engine checks the real
+    size and reserves it before it loads (a tmpfs that is too small is an error at start, not a bus error later)."""
+    environ = os.environ if environ is None else environ
+    platform = sys.platform if platform is None else platform
+    want = cfg.get("replica_shared_arena")
+    if want is None:
+        want = str(environ.get("STRATA_REPLICA_SHARED_ARENA", "")).strip().lower() in ("1", "true", "on", "yes")
+    if not want or n_replicas < 2:
+        return None, ""
+    if not platform.startswith("linux"):
+        return None, "shared expert arena: Linux only; each replica keeps its own copy of the experts in RAM"
+    args = [str(a) for a in cfg.get("args") or []]
+    if isinstance(cfg.get("replicas"), list):
+        for e in cfg["replicas"]:
+            if isinstance(e, dict):
+                args += [str(a) for a in e.get("args") or []]
+    if cfg.get("arch") == "deepseek41" or any(a in args for a in ARENA_INCOMPATIBLE):
+        return None, "shared expert arena: this model/config has no private expert arena to share; each replica as before"
+    if not (os.path.isdir(shm) and os.access(shm, os.W_OK)):
+        return None, f"shared expert arena: {shm} is not usable; each replica keeps its own copy of the experts in RAM"
+    free = free_bytes if free_bytes is not None else _free(shm)
+    if free < ARENA_MIN_FREE:
+        return None, (f"shared expert arena: {shm} has only {free / 2**30:.1f} GiB free (a tmpfs is half the RAM by "
+                      "default); each replica keeps its own copy of the experts in RAM")
+    sweep_stale_arenas(shm)
+    uid = os.getuid() if hasattr(os, "getuid") else 0
+    path = os.path.join(shm, f"{ARENA_PREFIX}{uid}-{os.getpid()}.bin")
+    return path, f"one shared expert arena for {n_replicas} replicas ({path}): the experts are in RAM once"
+
+
+def remove_arena(path: str | None) -> None:
+    """Unlink the arena file (the server's end, or a start that fell back): engines that map it keep their pages."""
+    if path:
+        try:
+            os.unlink(path)
+        except OSError:
+            pass
 
 
 def _suffixed(path, i: int):
@@ -337,6 +441,7 @@ class ReplicaEngine:
                 e.close()
             except BaseException as x:           # noqa: BLE001
                 err = err or x
+        remove_arena(self.__dict__.get("arena_file"))   # (an engine that still maps it keeps its pages)
         if err:
             raise err
 
