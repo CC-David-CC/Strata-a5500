@@ -7059,10 +7059,15 @@ struct Model::Impl {
     // after a chunked prompt: the expert cache catches up with what the prompt picked at once - a window prompt gets
     // its swaps one tick at a time over its hundreds of windows, a chunked one has a single tick - so the decode that
     // follows finds the hot experts in VRAM.  Rounds of the ordinary swap rule (the hottest CPU-lane pick of each layer
-    // in, its coldest VRAM expert out) until nothing is worth moving or DS4_SETTLE_MS (6000) is spent
+    // in, its coldest VRAM expert out) until nothing is worth moving or DS4_SETTLE_MS is spent.
+    // The budget was 6,000 ms, and it sits inside the prompt's own time ("prompt: N tokens in X ms"): measured on Strix Halo
+    // 2026-10-28, the same p4k fixture took 26.6 s with it and 20.4 s without, +30.5% on the prompt (153.9 -> 200.8 tok/s).
+    // What the swaps buy is decode: about 10% on a 256-token answer, i.e. 6.2 s of prompt against 1.6 s of decode on that
+    // answer and nothing at all on a 50-300-token tool-call answer.  800 ms keeps the hottest of them and gives the prompt
+    // back about 5 s (the plan's own table: prompt + 256 tokens, 27.2 s at 6,000 ms, 23.9 s at 800, 23.4 s at 0).
     void cache_settle() {
         if (!o.expert_cache || cache_ths.empty()) return;
-        static const double budget = env_f("DS4_SETTLE_MS", 6000.0f);
+        static const double budget = env_f("DS4_SETTLE_MS", 800.0f);
         if (budget <= 0.0) return;
         const double t0 = now_ms();
         const int64_t s0 = st.swaps;
@@ -7105,6 +7110,31 @@ struct Model::Impl {
         if (o.verbose && st.swaps > s0)
             std::fprintf(stderr, "ds4: expert cache: %lld swaps after the prompt (%.0f ms)\n", (long long) (st.swaps - s0),
                          now_ms() - t0);
+    }
+    // WP-8's option (1): the same swap rounds, run on a thread while the server has no request in flight, stopped by `cancel`.
+    // The prompt path keeps its 800 ms (a run with no server has no idle to use), so this is pure addition: an agent's turn
+    // ends, the swaps go in while it runs its tool, and the next turn's answer finds them.  Interrupting costs one round (a
+    // swap of ~9 MB, a millisecond or two) because cancel is tested between rounds, and cache_tick_swaps is the same call the
+    // prompt path makes, so the state it leaves is the state a decode window already handles.
+    void cache_settle_idle(const std::atomic<bool>& cancel) {
+        if (!o.expert_cache || cache_ths.empty()) return;
+        static const double budget = env_f("DS4_SETTLE_IDLE_MS", 6000.0f);
+        const double t0 = now_ms();
+        const int64_t s0 = st.swaps;
+        while (!cancel.load(std::memory_order_acquire) && now_ms() - t0 < budget) {
+            for (Layer& l : L) {
+                if (l.mtp || l.spare_vram < 0 || l.swap_pending) continue;
+                l.cpu_hits.clear();
+                for (int e = 0; e < l.n_exp; ++e)
+                    if (l.slot[(size_t) e] < 0 && l.heat[(size_t) e] >= 2.0f) l.cpu_hits.push_back(e);
+            }
+            cache_tick_swaps(0);
+            if (sw_inflight == 0) break;   // (nothing queued: no layer's best CPU-lane expert is hotter than its coldest VRAM one)
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        if (o.verbose)
+            std::fprintf(stderr, "ds4: expert cache: %lld swaps in the idle (%.0f ms, cancelled %d)\n",
+                         (long long) (st.swaps - s0), now_ms() - t0, cancel.load() ? 1 : 0);
     }
     void cache_tick(int T) {
         cache_tick_swaps(T);
@@ -10629,6 +10659,7 @@ bool Model::slot_load(const uint8_t* data, size_t bytes, int64_t n_pos, std::str
     return p_->slot_load(data, bytes, n_pos, err);
 }
 std::string Model::slot_identity() const { return p_->slot_identity(); }
+void Model::settle_idle(const std::atomic<bool>& cancel) { p_->cache_settle_idle(cancel); }
 void Model::save_profile() const { p_->save_profile(); }
 const Stats& Model::stats() const {
     Stats& st = p_->st;
