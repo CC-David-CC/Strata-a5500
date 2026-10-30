@@ -1264,6 +1264,19 @@ typedef uint4 nw_frag;
 typedef nw_i4 nw_ab;
 __device__ __forceinline__ nw_ab nw_v(uint4 v) { return nw_ab{(int) v.x, (int) v.y, (int) v.z, (int) v.w}; }
 #endif
+// Workgroup barrier with the LDS wait written out (idea and wording of libstrix's barrier(), asf0/libstrix, MIT): in WGP mode
+// the compiler may drop the s_waitcnt before __syncthreads()'s s_barrier (llvm/llvm-project#220357), so a read after the
+// barrier can overtake another wave's LDS store.  Release/acquire fences keep LDS accesses from moving across it.
+__device__ __forceinline__ void nw_barrier() {
+#if STRATA_NAT_W11
+    __builtin_amdgcn_fence(__ATOMIC_RELEASE, "workgroup", "local");
+    __builtin_amdgcn_s_waitcnt(0x7 | (0x3f << 10));   // gfx11 simm16: expcnt [2:0], lgkmcnt [9:4], vmcnt [15:10]: lgkmcnt(0) only
+    __builtin_amdgcn_s_barrier();
+    __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "workgroup", "local");
+#else
+    __syncthreads();
+#endif
+}
 __device__ __forceinline__ nw_i8 nw_wmma(nw_ab a, nw_ab b, nw_i8 c) {
 #if STRATA_NAT_W11
     return __builtin_amdgcn_wmma_i32_16x16x16_iu8_w32(true, a, true, b, c, false);
@@ -1377,7 +1390,11 @@ native_w11_kernel(const Batch b, const NativeGeom geo, const Tables tb, const ui
         };
         if (on) fetch_b(0, bq, bx, bsum);
         for (int s = 0; s < NS; ++s) {
+#ifndef STRATA_Q_TWOBAR
+            nw_barrier();                                         // stage s's weights are in buffer s & 1
+#else
             __syncthreads();                                      // stage s's weights are in buffer s & 1
+#endif
             nw_frag nbq[2][4];
             float2 nbx[2], nbsum[2];
             if (on && s + 1 < NS) fetch_b(s + 1, nbq, nbx, nbsum);
@@ -1428,7 +1445,11 @@ native_w11_kernel(const Batch b, const NativeGeom geo, const Tables tb, const ui
             }
             if (s + 1 < NS) {
                 put(raw, (s + 1) & 1);                            // the other buffer: its readers passed this barrier
+#ifndef STRATA_Q_TWOBAR
+                // (the next stage's first barrier orders these writes: nw_barrier waits for them explicitly)
+#else
                 __syncthreads();                                      // the writes of every thread are in LDS before the next stage reads them (#1180)
+#endif
                 if (s + 2 < NS) load_unit<WT>(unit(s + 2), sub(s + 2), raw);
                 if (on) {
 #pragma unroll
@@ -1741,7 +1762,9 @@ static int occ_blocks(bool w12, int type, bool gu) {
         return v != nullptr ? std::atoi(v) : 0;
     }();
     if (env > 0) return env;
-    return w12 && gu && (type == T_IQ2_S || type == T_IQ2_XS) ? 3 : 4;
+    // gfx11 too (gfx1151, IQ2_S gate/up: 235 VGPRs and 37,120 B of LDS leave room for 3 blocks of 8 waves per WGP; a grid of 4 per WGP
+    // ran a second, lopsided wave: 16K tokens, one layer, IQ2_S / IQ4_NL 81.7 -> 76.5 ms)
+    return gu && (type == T_IQ2_S || type == T_IQ2_XS) ? 3 : 4;
 }
 #endif
 const DevInfo& dev_info() {
