@@ -350,8 +350,19 @@ __dpct_inline__ void gdn_step_norm_multi_kernel(
     const float *__restrict__ z, const float *__restrict__ gamma, float eps,
     float *__restrict__ y, int h_k, int h_v, int T,
     const int32_t *__restrict__ n_keep, int t_out_begin,
-    GdnQ81 *__restrict__ xq) {
+    GdnQ81 *__restrict__ xq, GdnGroups grp = {}) {
     auto item_ct1 = sycl::ext::oneapi::this_work_item::get_nd_item<3>();
+    if (grp.n > 0) {   // group get_group(1) - its slot's state and its rows of the window's buffers
+        const int gi = item_ct1.get_group(1), f = grp.first[gi];
+        state = grp.state[gi];
+        hbuf += (size_t)f * C;
+        gate += (size_t)f * h_v;
+        beta += (size_t)f * h_v;
+        z += (size_t)f * S * h_v;
+        y += (size_t)f * S * h_v;
+        T = grp.ntok[gi];
+        n_keep = grp.keep[gi];
+    }
 auto &sk = *sycl::ext::oneapi::group_local_memory_for_overwrite<float[2][S]>(
     sycl::ext::oneapi::this_work_item::get_work_group<3>());
     auto &sq =
@@ -1828,6 +1839,37 @@ void gdn_ab_multi(const float* x, const uint16_t* w_alpha, const uint16_t* w_bet
     } break;
     }
     check("gdn_ab_multi");
+}
+
+void gdn_step_norm_groups(const GdnGroups& groups, const float* h, int conv_channels, const float* gate, const float* beta,
+                          const float* z, const float* gamma, float eps, float* y, int h_k, int h_v, bool commit,
+                          void* stream) {
+    if (groups.n < 1 || groups.n > 8 || !h || !gate || !beta || !z || !gamma || !y || h_k <= 0 || h_v % h_k) {
+        std::fprintf(stderr, "gdn_step_norm_groups: invalid arguments\n");
+        std::exit(1);
+    }
+    for (int i = 0; i < groups.n; ++i)
+        if (!groups.state[i] || groups.ntok[i] < 1 || groups.ntok[i] > kVerifyMaxT || (commit && !groups.keep[i])) {
+            std::fprintf(stderr, "gdn_step_norm_groups: invalid group %d\n", i);
+            std::exit(1);
+        }
+    const dpct::dim3 g1((unsigned)h_v, (unsigned)groups.n), b1(S, RG);
+    const GdnGroups grp = groups;
+    auto exp_props = sycl::ext::oneapi::experimental::properties{sycl::ext::oneapi::experimental::use_root_sync};
+    // the kernel gdn_step_norm_multi picks for these calls: a window's rows (all outputs, no keep) or a commit of
+    // one-row groups (keep, t_out_begin 0)
+    if (commit)
+        strata::q_of(stream)->parallel_for<dpct_kernel_name<class gdn_step_norm_groups_kernel_b1, dpct_kernel_scalar<false>>>(
+            sycl::nd_range<3>(g1 * b1, b1), exp_props, [=](sycl::nd_item<3> item_ct1) [[sycl::reqd_sub_group_size(32)]] {
+                gdn_step_norm_multi_kernel<false, false>(nullptr, h, conv_channels, gate, beta, z, gamma, eps, y, h_k,
+                                                         h_v, 0, nullptr, 0, nullptr, grp);
+            });
+    else
+        strata::q_of(stream)->parallel_for<dpct_kernel_name<class gdn_step_norm_groups_kernel_b2, dpct_kernel_scalar<true>>>(
+            sycl::nd_range<3>(g1 * b1, b1), exp_props, [=](sycl::nd_item<3> item_ct1) [[sycl::reqd_sub_group_size(32)]] {
+                gdn_step_norm_multi_kernel<true, false>(nullptr, h, conv_channels, gate, beta, z, gamma, eps, y, h_k,
+                                                        h_v, 0, nullptr, 0, nullptr, grp);
+            });
 }
 
 void gdn_step_norm_multi(float* state, const float* h, int conv_channels, const float* gate, const float* beta,

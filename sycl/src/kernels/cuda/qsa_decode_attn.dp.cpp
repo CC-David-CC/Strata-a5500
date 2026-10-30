@@ -122,9 +122,11 @@ attn_chunk_kernel(const float *__restrict__ q, QsaAttnPools p,
                   const int32_t *__restrict__ step, int n_kv_heads,
                   int page_size, float scale, float *__restrict__ part_acc,
                   float *__restrict__ part_m, float *__restrict__ part_l,
-                  int n_chunks, int cap = 0, long long scratch_stride = 0) {
+                  int n_chunks, int cap = 0, long long scratch_stride = 0,
+                  QsaAttnPoolsRows prow = {}) {
     // batched form: query blockIdx.z, with its own q row, selection, step and scratch
     auto item_ct1 = sycl::ext::oneapi::this_work_item::get_nd_item<3>();
+    if (prow.n > 0) p = prow.p[item_ct1.get_group(0)];   // a batch window's query attends over its own slot's pools
     q += (size_t)item_ct1.get_group(0) * (size_t)(n_kv_heads * G) * HD;
     ids += (size_t)item_ct1.get_group(0) * (size_t)cap;
     step += (size_t)item_ct1.get_group(0) * kStepCount;
@@ -861,6 +863,71 @@ void qsa_decode_attn_batch(const float* q, const QsaAttnPools& pools, const int3
     need to rewrite this code.
     */
     const dpct::err0 e = 0;
+}
+
+namespace {
+template <int M>
+void attn_rows_chunks(dpct::queue_ptr st, const dpct::dim3& grid, const float* q, const QsaAttnPools& pools,
+                      const int32_t* ids, const int32_t* steps, int n_kv_heads, int page_size, float scale,
+                      float* part_acc, float* part_m, float* part_l, int n_chunks, int cap, long long stride,
+                      const QsaAttnPoolsRows& rows) {
+    auto exp_props = sycl::ext::oneapi::experimental::properties{sycl::ext::oneapi::experimental::use_root_sync};
+    dpct::has_capability_or_fail(st->get_device(), {sycl::aspect::fp16});
+    const QsaAttnPools p0 = pools;
+    const QsaAttnPoolsRows rr = rows;
+    st->parallel_for<dpct_kernel_name<class attn_rows_chunk_kernel_9f2, dpct_kernel_scalar<M>>>(
+        sycl::nd_range<3>(grid * sycl::range(1, 1, THREADS), sycl::range(1, 1, THREADS)), exp_props,
+        [=](sycl::nd_item<3> item_ct1) [[sycl::reqd_sub_group_size(32)]] {
+            attn_chunk_kernel<M, false, 2>(q, p0, ids, steps, n_kv_heads, page_size, scale, part_acc, part_m, part_l,
+                                           n_chunks, cap, stride, rr);
+        });
+}
+}  // namespace
+
+void qsa_decode_attn_batch_rows(const float* q, const QsaAttnPoolsRows& rows, const int32_t* ids, const int32_t* steps,
+                                int64_t cap, const QsaShapes& s, float* scratch, float* attn, int64_t n_q, void* stream) {
+    if (n_q <= 0) return;
+    const QsaAttnPools& pools = rows.p[0];
+    if (rows.n != n_q || n_q > kAttnRowsMax || s.head_dim != HD || s.n_head != (int64_t) G * s.n_head_kv || cap <= 0 ||
+        !scratch || !ids || !steps) {
+        std::fprintf(stderr, "qsa_decode_attn_batch_rows: unsupported geometry or missing buffers\n");
+        std::exit(1);
+    }
+    static const int rs_on = [] { const char* v = std::getenv("STRATA_ATTN_RS"); return v ? std::atoi(v) : 2; }();
+    static const int lane_cell_env = [] {
+        const char* v = std::getenv("STRATA_ATTN_LANECELL");
+        return v != nullptr && v[0] != '\0' ? std::atoi(v) : -1;
+    }();
+    const long long stride = (long long) qsa_decode_attn_scratch_floats(cap, s);
+    if (rs_on != 2 || lane_cell_env == 1) {   // a non-default per-row kernel is selected: the per-row calls
+        for (int64_t z = 0; z < n_q; ++z)
+            qsa_decode_attn_batch(q + (size_t) z * s.n_head * HD, rows.p[z], ids + (size_t) z * cap,
+                                  steps + (size_t) z * kStepCount, cap, s, scratch + (size_t) z * stride,
+                                  attn + (size_t) z * s.n_head * HD, 1, stream);
+        return;
+    }
+    const int kv_mode = pools.k_q4 != nullptr ? 2 : (pools.k_q != nullptr && pools.v_q4 != nullptr ? 3
+                        : (pools.k_q != nullptr ? 1 : 0));
+    const int n_chunks = (int) ((cap + CHUNK - 1) / CHUNK);
+    float* part_acc = scratch;
+    float* part_m = scratch + (size_t) n_chunks * s.n_head * HD;
+    float* part_l = part_m + (size_t) n_chunks * s.n_head;
+    const float scale = 1.0f / sqrtf((float) HD);
+    const dpct::dim3 grid((unsigned)n_chunks, (unsigned)s.n_head_kv, (unsigned)n_q);
+    dpct::queue_ptr st = strata::q_of(stream);
+    if (kv_mode == 3) attn_rows_chunks<3>(st, grid, q, pools, ids, steps, (int)s.n_head_kv, (int)s.page_size, scale, part_acc, part_m, part_l, n_chunks, (int)cap, stride, rows);
+    else if (kv_mode == 2) attn_rows_chunks<2>(st, grid, q, pools, ids, steps, (int)s.n_head_kv, (int)s.page_size, scale, part_acc, part_m, part_l, n_chunks, (int)cap, stride, rows);
+    else if (kv_mode == 1) attn_rows_chunks<1>(st, grid, q, pools, ids, steps, (int)s.n_head_kv, (int)s.page_size, scale, part_acc, part_m, part_l, n_chunks, (int)cap, stride, rows);
+    else attn_rows_chunks<0>(st, grid, q, pools, ids, steps, (int)s.n_head_kv, (int)s.page_size, scale, part_acc, part_m, part_l, n_chunks, (int)cap, stride, rows);
+    {
+        auto exp_props = sycl::ext::oneapi::experimental::properties{sycl::ext::oneapi::experimental::use_root_sync};
+        st->parallel_for<dpct_kernel_name<class attn_merge_rows_kernel_9f2>>(
+            sycl::nd_range<3>(sycl::range(1, (unsigned)n_q, (unsigned)s.n_head) * sycl::range(1, 1, HD),
+                              sycl::range(1, 1, HD)),
+            exp_props, [=](sycl::nd_item<3> item_ct1) {
+                attn_merge_kernel(part_acc, part_m, part_l, n_chunks, attn, stride);
+            });
+    }
 }
 
 uint64_t qsa_decode_attn_scratch_floats(int64_t cap, const QsaShapes& s) {
