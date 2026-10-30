@@ -50,6 +50,42 @@ namespace strata::gpu { uint64_t purge_device_allocations(size_t min_bytes); }  
 
 namespace strata::metal_engine {
 
+// The prompt GDN scan kernel, chosen by chip and prompt length (gdn_prompt.metal, gdn_scan_r<IB, TB>; every choice is
+// bit-identical to gdn_scanr_4: the token order and the arithmetic are the same, only the staged block size TB changes, which
+// changes the threadgroup memory a core can hold at once).  Measured by metal/tests/gdn_chunk_bench:
+//   Apple M4 (the base chip): gdn_scanr_4_8, 1.16x on the scan, 1.11x on the GDN prompt stage, T 512..32K
+//   Apple M5 Max: gdn_scanr_4_4 from T >= 4096 (1.04x at 4K, 1.10x at 16K); below that the default is as fast
+//   anything else (other chips, unknown names): gdn_scanr_4 as before
+// STRATA_METAL_GDN_SCAN=<gdn_scanr_4 | gdn_scanr_4_8 | gdn_scanr_4_4 | gdn_scanr_4_2> forces a kernel (A/B and diagnosis).
+static const char* gdn_scan_name(const std::string& device, int T) {
+    static const std::string forced = [] {
+        const char* e = std::getenv("STRATA_METAL_GDN_SCAN");
+        const std::string s = e ? e : "";
+        return (s == "gdn_scanr_4" || s == "gdn_scanr_4_8" || s == "gdn_scanr_4_4" || s == "gdn_scanr_4_2") ? s : std::string();
+    }();
+    if (!forced.empty()) return forced.c_str();
+    if (device == "Apple M4") return "gdn_scanr_4_8";
+    if (device == "Apple M5 Max" && T >= 4096) return "gdn_scanr_4_4";
+    return "gdn_scanr_4";
+}
+
+// The M5 family's dense GEMM tiles for the prompt (bit-identical to the 64 x 64 tile: the tile only splits the output; measured on
+// an M5 Max, T = 2048 / 4096): the GDN out projection (N 2560, K 6144) 64 x 128 (1.17 -> 0.99 ms), the wide input projections
+// (N >= 6144) 128 x 64.  Other chips keep 64 x 64 (M4: no gain).  STRATA_METAL_GEMM_TILES=0 keeps the old tiles everywhere.
+static void gemm_tile(const std::string& device, int Nn, int K, int& tm, int& tn) {
+    static const bool off = [] { const char* e = std::getenv("STRATA_METAL_GEMM_TILES"); return e && std::string(e) == "0"; }();
+    if (off || device.rfind("Apple M5", 0) != 0) return;
+    if (Nn == 2560 && K == 6144) { tm = 64; tn = 128; }
+    else if (Nn >= 6144) { tm = 128; tn = 64; }
+}
+// The four GDN input projections (qkv, z, alpha, beta) as ONE GEMM with a 16480 float output row (M5 family: 3.09 -> 2.87 ms a layer at
+// T = 2048; gdn_pre / gdn_post read the pieces at that stride, function constant 7).  Bit-identical to the separate GEMMs.
+// STRATA_METAL_GDN_FUSE=0 keeps the separate ones.
+static bool gdn_fused_inputs(const std::string& device) {
+    static const bool off = [] { const char* e = std::getenv("STRATA_METAL_GDN_FUSE"); return e && std::string(e) == "0"; }();
+    return !off && device.rfind("Apple M5", 0) == 0;
+}
+
 namespace {
 
 constexpr int N = 2560, HC = 4, LR = 320, NFF = 640, TOPK = 10, NEXP = 512, MAXT = 8, NVOCAB_MAX = 248320;
@@ -99,14 +135,15 @@ double now_ms() { return std::chrono::duration<double, std::milli>(std::chrono::
 struct PromptBufs {
     int lib = -1, lgdn = -1, lqsa = -1;
     bool k4 = false;
-    bool v3e = false;            // the M5's expert kernels (v3): not for the trellis types, which have only v2
+    bool v3e = false;
+    bool fused = false;          // the GDN input projections as one GEMM (gdn_fused_inputs)            // the M5's expert kernels (v3): not for the trellis types, which have only v2
     int C = 0, maxrows = 0;
     double gpu_ms = 0, host_ms = 0, mtp_ms = 0;
     int gu3[4] = {}, dn3[4] = {};
     mtl::Buffer R, bo, inj[2], xn, xnh, V, loh, mixed, mixh, qkv, z, al, be, yg, ygh, gqn, gkn, gvc, ggb, gkq, go, qfull,
         kcur, vcur, iqr, ikr, qcur, qcurh, qidx, scores, qids, part, XQ, xqh, logits, ids, wts, bcnt, boff, eoff, tiles, meta,
         stok, sw, pos, XS, HS, YE, yr, gsh, ush, hh, ys, sgv, WD, WU, Wqkv, Wz, Wal, Wbe, Wout, Wq, Wk, Wv, Wiq, Wik, Wr,
-        Wsg, Wshg, Wshu, Wshd, pemb, pembh, pkey, pval, keyn, qn, gated, normW, Wpk, Wpv, mixr;
+        Wsg, Wshg, Wshu, Wshd, yf, Wcat, pemb, pembh, pkey, pval, keyn, qn, gated, normW, Wpk, Wpv, mixr;
 };
 
 // The vision path (--vision, GENI requests), from the shared host code: the image rows of the prompt being read
@@ -2358,7 +2395,7 @@ bool Window::prompt_chunk(const int32_t* tokens, int Tn, int64_t pos0, std::stri
                mtl::Arg::B(p.al), mtl::Arg::B(p.be), mtl::Arg::B(W_, TN(b + "ssm_dt.bias").offset), mtl::Arg::B(W_, TN(b + "ssm_a").offset),
                mtl::Arg::B(p.gqn), mtl::Arg::B(p.gkn), mtl::Arg::B(p.gvc), mtl::Arg::B(p.ggb), mtl::Arg::B(p.gkq),
                mtl::Arg::B(ghist_[1 - hp_][(size_t) gi]), mtl::Arg::V(ga)}, 16 + 24, T, 256);
-            D(PP(p.lgdn, "gdn_scanr_4", mtl::Constants().i(6, 0), "gdn_scanr_4"),
+            D(PP(p.lgdn, gdn_scan_name(cx_->device_name(), T), mtl::Constants().i(6, 0), gdn_scan_name(cx_->device_name(), T)),
               {mtl::Arg::B(gst_[(size_t) gi]), mtl::Arg::B(p.gqn), mtl::Arg::B(p.gkn), mtl::Arg::B(p.gvc), mtl::Arg::B(p.ggb),
                mtl::Arg::B(p.gkq), mtl::Arg::B(p.go), mtl::Arg::V(ga)}, 48 * 4, 1, 32 * 4);
             D(PP(p.lgdn, "gdn_post"), {mtl::Arg::B(p.go), mtl::Arg::B(p.z), mtl::Arg::B(W_, TN(b + "ssm_norm.weight").offset),
