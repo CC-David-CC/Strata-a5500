@@ -1227,8 +1227,16 @@ cudaError_t gdn_rec_chunked(float* state, const float* h, const float* gate, con
 // STRATA_GDN_TC=1: gdn_rec_chunked with the scan on the tensor cores (gdn_tc_scan_kernel, gdn_tc.cuh) and the prep
 // that also writes its f16 images (gdn_tc_prep_kernel, scratch gdn_tc_scratch), 48 blocks of 256 threads in one wave.  An error return means nothing was launched: the card is below
 // sm_80, has fewer than 48 SMs, or less than 122 KB of shared memory a block.
+// the output norm's operands, when the split scan fuses it (see gdn_tc_scan_kernel NORM)
+struct GdnTcNorm {
+    const float* z;
+    const float* gamma;
+    float eps;
+    uint16_t* y16;
+    int64_t ld16;
+};
 cudaError_t gdn_rec_tc(float* state, const float* h, const float* gate, const float* beta, float* y, int64_t T,
-                       cudaStream_t s, bool split = false) {
+                       cudaStream_t s, bool split = false, int np = 3, const GdnTcNorm* nm = nullptr) {
     if (T <= 0) return cudaSuccess;
     {
         int dev = 0, major = 0, sms = 0, smem = 0;
@@ -1242,25 +1250,44 @@ cudaError_t gdn_rec_tc(float* state, const float* h, const float* gate, const fl
         const GdnProbe* pr = gdn_probe_get();   // tests only: fewer SMs than value heads run the 48 blocks in several waves
         const bool any_sms = pr != nullptr && pr->any_sms;
         if (strata::cc_major_of(major) < 8 || (!any_sms && sms < HV) ||
-            (size_t) strata::smem_optin_of(smem) < (split ? kTcScanSmemSplit : kTcScanSmem<false>))
+            (size_t) strata::smem_optin_of(smem) < (split ? (nm ? kTcScanSmemSplitNorm : kTcScanSmemSplit) : kTcScanSmem<false>))
             return cudaErrorNotSupported;
     }
     const GtcScratch sc = gdn_tc_scratch();
     if (sc.ti == nullptr) return cudaErrorMemoryAllocation;
     {   // once a device
-        static bool attrs[2][64] = {};
+        static bool attrs[3][64] = {};
+        const int ai = nm && split ? 2 : (split ? 1 : 0);
         int dev = 0;
         cudaGetDevice(&dev);
-        if (dev >= 0 && dev < 64 && !attrs[split][dev]) {
-            if (split) cudaFuncSetAttribute(gdn_tc_scan_kernel<false, true>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplit);
+        if (dev >= 0 && dev < 64 && !attrs[ai][dev]) {
+            if (ai == 2) {
+                cudaFuncSetAttribute(gdn_tc_scan_kernel<true, true>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplitNorm);
+                cudaFuncSetAttribute(gdn_tc_scan_kernel<true, true, 2>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplitNorm);
+                cudaFuncSetAttribute(gdn_tc_scan_kernel<true, true, 1>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplitNorm);
+            } else if (split) {
+                cudaFuncSetAttribute(gdn_tc_scan_kernel<false, true>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplit);
+                cudaFuncSetAttribute(gdn_tc_scan_kernel<false, true, 2>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplit);
+                cudaFuncSetAttribute(gdn_tc_scan_kernel<false, true, 1>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmemSplit);
+            }
             else cudaFuncSetAttribute(gdn_tc_scan_kernel<false>, cudaFuncAttributeMaxDynamicSharedMemorySize, (int) kTcScanSmem<false>);
-            attrs[split][dev] = true;
+            attrs[ai][dev] = true;
         }
     }
     for (int64_t t0 = 0; t0 < T; t0 += GSB) {
         const int nch = (int) ((std::min<int64_t>(GSB, T - t0) + GCH - 1) / GCH);
         gdn_tc_prep_kernel<<<dim3((unsigned) nch, HK), 256, kTcPrepSmem, s>>>(h, gate, beta, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, t0, T);
-        if (split)
+        if (nm && split) {
+#define STRATA_TCN(NPV) gdn_tc_scan_kernel<true, true, NPV><<<HV, GTC_CW * 32, kTcScanSmemSplitNorm, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T, nm->z, nm->gamma, nm->eps, nm->y16, nm->ld16)
+            if (np == 2) STRATA_TCN(2);
+            else if (np == 1) STRATA_TCN(1);
+            else STRATA_TCN(3);
+#undef STRATA_TCN
+        } else if (split && np == 2)
+            gdn_tc_scan_kernel<false, true, 2><<<HV, GTC_CW * 32, kTcScanSmemSplit, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T);
+        else if (split && np == 1)
+            gdn_tc_scan_kernel<false, true, 1><<<HV, GTC_CW * 32, kTcScanSmemSplit, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T);
+        else if (split)
             gdn_tc_scan_kernel<false, true><<<HV, GTC_CW * 32, kTcScanSmemSplit, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T);
         else
             gdn_tc_scan_kernel<false><<<HV, GTC_CW * 32, kTcScanSmem<false>, s>>>(state, h, sc.ti, sc.te, sc.sc, sc.kq, sc.pi, y, t0, nch, T);
@@ -2808,6 +2835,7 @@ static void gdn_recurrence_impl(int variant, float* state, const float* h, const
         gdn_rec_kernel<<<HV, dim3(S, RG), 0, (cudaStream_t) stream>>>(state, h, gate, beta, z, gamma, eps, y, y16, T, ld16);
     } else {
         static const bool pipe = [] { const char* v = std::getenv("STRATA_GDN_PIPELINE"); return v == nullptr || std::atoi(v) != 0; }();
+        bool normed_any = false;   // the tensor-core scan wrote y16 (the norm kernel below is skipped)
 #if !defined(__HIPCC__)
         // STRATA_GDN_CHUNKED=1 (opt-in): the recurrence in chunks for prompt chunks of kGdnChunkedMin+ tokens (other
         // bits; a shorter chunk, a card it does not fit or a failed scratch allocation takes the kernels below)
@@ -2821,13 +2849,19 @@ static void gdn_recurrence_impl(int variant, float* state, const float* h, const
         GdnProbe* pr = gdn_probe_get();
         const int force = pr ? pr->force : (int) kGdnAuto;
         int sel = kGdnNone, wanted = force;
+        bool normed = false;   // the scan wrote y16 itself
         const char* why = "";
         const cudaStream_t cs = (cudaStream_t) stream;
+        // the split tensor-core scan can write y16 itself (STRATA_GDN_TC_FUSE=0 off): then the norm kernel below is skipped
+        static const bool tc_fuse = [] { const char* v = std::getenv("STRATA_GDN_TC_FUSE"); return v == nullptr || std::atoi(v) != 0; }();
+        const GdnTcNorm tcn = {z, gamma, eps, y16, ld16};
+        const GdnTcNorm* tcnp = with_out && tc_fuse ? &tcn : nullptr;
         if (force != kGdnAuto) {
-            if (force == kGdnTc || force == kGdnTcSplit) {
-                const bool sp = force == kGdnTcSplit;
-                cudaError_t e = T >= kGdnTcMin ? gdn_rec_tc(state, h, gate, beta, y, T, cs, sp) : cudaErrorInvalidValue;
-                if (e == cudaSuccess) sel = force;
+            if (force == kGdnTc || force == kGdnTcSplit || force == kGdnTcS2 || force == kGdnTcS1) {
+                const bool sp = force != kGdnTc;
+                const int np = force == kGdnTcS2 ? 2 : force == kGdnTcS1 ? 1 : 3;
+                cudaError_t e = T >= kGdnTcMin ? gdn_rec_tc(state, h, gate, beta, y, T, cs, sp, np, sp ? tcnp : nullptr) : cudaErrorInvalidValue;
+                if (e == cudaSuccess) { sel = force; normed = sp && tcnp != nullptr; }
                 else why = T < kGdnTcMin ? "T below the tc minimum (128)" : gdn_chunk_why(true, e, false, sp);
             } else if (force == kGdnChunked) {
                 cudaError_t e = T >= kGdnChunkedMin ? gdn_rec_chunked(state, h, gate, beta, y, T, cs) : cudaErrorInvalidValue;
@@ -2852,8 +2886,10 @@ static void gdn_recurrence_impl(int variant, float* state, const float* h, const
                 if (e == cudaSuccess) sel = kGdnTc;
                 else {   // the 99-KB cards (sm_86 / 89 / 120): the single-buffered v / T / P plan
                     if (pr) why = gdn_chunk_why(true, e, false);
-                    e = gdn_rec_tc(state, h, gate, beta, y, T, cs, true);
-                    if (e == cudaSuccess) { sel = kGdnTcSplit; why = ""; }
+                    // STRATA_GDN_TC_NP=1|2 (experiment, not a default): fewer split passes a product on this plan, other bits
+                    static const int tc_np = [] { const char* v = std::getenv("STRATA_GDN_TC_NP"); const int x = v ? std::atoi(v) : 3; return x == 1 || x == 2 ? x : 3; }();
+                    e = gdn_rec_tc(state, h, gate, beta, y, T, cs, true, tc_np, tcnp);
+                    if (e == cudaSuccess) { sel = kGdnTcSplit; why = ""; normed = tcnp != nullptr; }
                 }
             }
             if (sel == kGdnNone && chunked && T >= kGdnChunkedMin) {
@@ -2877,6 +2913,7 @@ static void gdn_recurrence_impl(int variant, float* state, const float* h, const
             }
         }
         if (pr) { pr->selected = sel; pr->wanted = wanted == kGdnAuto ? sel : wanted; pr->reason = why; ++pr->calls; }
+        normed_any = normed;
         if (sel == kGdnNone) { check("gdn_recurrence (forced path not eligible: nothing launched)"); return; }
 #else
         if (pipe)   // the software-pipelined loads (same bits)
@@ -2884,7 +2921,7 @@ static void gdn_recurrence_impl(int variant, float* state, const float* h, const
         else
             gdn_rec_cols_kernel<<<HV * NCB, dim3(CB, RG), 0, (cudaStream_t) stream>>>(state, h, gate, beta, y, T);
 #endif
-        if (with_out)
+        if (with_out && !normed_any)
             gdn_out_norm_kernel<<<dim3((unsigned) T, HV), S, 0, (cudaStream_t) stream>>>(z, gamma, eps, y, y16, ld16);
     }
     check("gdn_recurrence");
