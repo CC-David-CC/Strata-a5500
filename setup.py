@@ -3331,16 +3331,31 @@ def flash_vision_encoder(asked: str, gpu: dict) -> str:
 UMA_EXPERTS = 24576            # the Flash-Next model's experts (48 layers x 512): the most an expert cache can hold
 
 
-def uma_expert_cache(model, ram, budget_gib, kv_ram_gb=0.0):
+UMA_CARVE_OTHER_GB = 14        # what stays in a BIOS carve-out besides experts: the dense weights (~5 GB), the draft layer, the KV cache,
+                               # the verify windows and the prompt path's own buffers (gfx1151 Windows: no borrowed slots)
+
+
+def uma_carveout_slots(model, dedicated_gb) -> int:
+    """Expert slots a BIOS carve-out holds beside the dense weights and buffers (UMA_CARVE_OTHER_GB).  The carve-out is real
+    VRAM that the OS does not have: RAM-budget placement of an Unsloth file put the whole cache in the OS's RAM, so a Strix Halo
+    with a 64 GB carve-out and 64 GB seen by Windows read 55-72 GiB of experts from the SSD."""
+    slot_gib = MODELS[model]["arena_gb"] * 1e9 / UMA_EXPERTS * 1.1 / 2**30
+    return max(0, int((float(dedicated_gb or 0.0) - UMA_CARVE_OTHER_GB) / slot_gib))
+
+
+def uma_expert_cache(model, ram, budget_gib, kv_ram_gb=0.0, dedicated_gb=0.0):
     """#1715: on a unified-memory APU (Strix Halo) the GPU's expert cache and the RAM budget of experts are both RAM.
     `--expert-cache auto` sizes the cache from the memory the OS can give back at start, which counts all the RAM the
     budget has not taken yet: a 128 GB box with a 55 GiB budget and the desktop open was killed by the OOM killer.  So
     there setup writes a number, not `auto`: the RAM less UNSLOTH_RAM_LEFT_GB less the budget (and a KV cache streamed
-    to RAM), in slots (an expert is priced at 1.1x the average one: the Q8_0 downs are bigger).  None when no room is left
-    (the config keeps `auto`).  A recommendation: the number is in the config's args, and --expert-cache N there sets it."""
+    to RAM), in slots (an expert is priced at 1.1x the average one: the Q8_0 downs are bigger).  A BIOS carve-out
+    (`dedicated_gb`) is memory the OS does not have, so its slots (uma_carveout_slots) come on top of those of the RAM.
+    None when no room is left (the config keeps `auto`).  A recommendation: the number is in the config's args, and
+    --expert-cache N there sets it."""
     slot_gib = MODELS[model]["arena_gb"] * 1e9 / UMA_EXPERTS * 1.1 / 2**30
     room = ram - UNSLOTH_RAM_LEFT_GB - budget_gib - math.ceil(kv_ram_gb)
-    slots = min(UMA_EXPERTS, int(room / slot_gib))
+    slots = max(0, int(room / slot_gib)) + uma_carveout_slots(model, dedicated_gb)
+    slots = min(UMA_EXPERTS, slots)
     return slots if slots >= 256 else None
 
 
@@ -9959,12 +9974,15 @@ def main() -> int:
         args += ["--resident-budget-gib", f"{budget:g}"]   # GiB kept in RAM (#498: a layer split had no budget)
         if gpu.get("uma") and "--expert-cache" in args:
             # #1715: the cache and the budget draw on the same RAM: a number that leaves the OS its room, not `auto`
-            slots = uma_expert_cache(model, ram, budget, kv_ram_gb if "--kv-resident" in args else 0.0)
+            slots = uma_expert_cache(model, ram, budget, kv_ram_gb if "--kv-resident" in args else 0.0,
+                                     gpu.get("dedicated_gb", 0.0))
             if slots is not None:
                 args[args.index("--expert-cache") + 1] = str(slots)
+                carve = uma_carveout_slots(model, gpu.get("dedicated_gb", 0.0))
                 ok(f"expert cache: {slots} slots (not auto): this GPU shares the RAM with the {budget:g} GiB budget, "
-                   f"so setup leaves {UNSLOTH_RAM_LEFT_GB} GB of the RAM for the OS and the desktop (#1715). "
-                   "--expert-cache N in the config's args sets it")
+                   f"so setup leaves {UNSLOTH_RAM_LEFT_GB} GB of the RAM for the OS and the desktop (#1715)"
+                   + (f"; {carve} of the slots sit in the {gpu.get('dedicated_gb', 0.0):.0f} GB BIOS carve-out" if carve else "")
+                   + ". --expert-cache N in the config's args sets it")
             else:
                 warn(f"this GPU shares the RAM, and the {budget:g} GiB RAM budget leaves almost none for the expert "
                      "cache: it stays on auto, which may take the room the OS needs (#1715). A smaller "

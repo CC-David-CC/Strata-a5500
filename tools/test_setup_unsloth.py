@@ -613,6 +613,33 @@ class StrixHaloCache(Base):
         self.assertEqual(args[args.index("--expert-cache") + 1], "auto")
         self.assertIn("leaves almost none for the expert cache", out)
 
+    def test_a_big_carveout_holds_experts_too(self):
+        """A Strix Halo with a 64 GB BIOS carve-out and 64 GB seen by Windows: the RAM leaves no room for a cache after the
+        40 GiB budget, but the carve-out is VRAM the OS does not have, so its slots come on top."""
+        slot_gib = 59.5e9 / setup.UMA_EXPERTS * 1.1 / 2**30
+        carve = int((64.0 - setup.UMA_CARVE_OTHER_GB) / slot_gib)
+        self.assertEqual(setup.uma_carveout_slots("UD-IQ4_XS", 64.0), carve)
+        self.assertEqual(setup.uma_expert_cache("UD-IQ4_XS", 64.0, 40, 0.0, 64.0), carve)
+        self.assertIsNone(setup.uma_expert_cache("UD-IQ4_XS", 64.0, 40, 0.0, 2.0))     # a 2 GB carve-out adds nothing
+        big = [dict(self.HALO[0], vram_gb=64.0, dedicated_gb=64.0, shared_gb=32.0)]
+        code, out, cfg = self.run_halo(64.0, ("--context", "8192"), amd=big)
+        self.assertEqual(code, 0, out)
+        args = cfg["args"]
+        self.assertEqual(args[args.index("--resident-budget-gib") + 1], "40")
+        slots = int(args[args.index("--expert-cache") + 1])
+        self.assertEqual(slots, carve)
+        # the cache and the budget together hold every expert: 40 GiB budget + the carve-out's slots x the average expert
+        self.assertGreaterEqual(40 * 2**30 + slots * 59.5e9 / setup.UMA_EXPERTS, 59.5e9)
+        self.assertIn("of the slots sit in the 64 GB BIOS carve-out", out)
+
+    def test_carveout_slots_for_the_q4_k_xl_and_never_past_all_experts(self):
+        q4 = setup.uma_carveout_slots("UD-Q4_K_XL", 64.0)
+        self.assertTrue(10000 < q4 < setup.UMA_EXPERTS)
+        self.assertLess(q4, setup.uma_carveout_slots("UD-IQ4_XS", 64.0))                # bigger experts, fewer slots
+        self.assertEqual(setup.uma_expert_cache("UD-IQ4_XS", 512.0, 55, 0.0, 96.0), setup.UMA_EXPERTS)
+        self.assertEqual(setup.uma_carveout_slots("UD-IQ4_XS", 0.0), 0)
+        self.assertEqual(setup.uma_carveout_slots("UD-IQ4_XS", setup.UMA_CARVE_OTHER_GB), 0)
+
     def test_a_discrete_card_keeps_auto(self):
         r9700 = [{"index": 0, "name": "AMD Radeon AI PRO R9700", "vram_gb": 31.9, "arch": "gfx1201",
                   "driver": "amdgpu"}]
