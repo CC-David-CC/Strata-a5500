@@ -130,6 +130,15 @@ def run_cards(cards: list[dict] | None, vendor: str | None = None, *, windows: b
     small = [c for c in keep if float(c.get("vram_gb") or 0) < SMALLEST_CARD_GB]
     keep = [c for c in keep if float(c.get("vram_gb") or 0) >= SMALLEST_CARD_GB]
     ignored = list(ignored) + [{**c, "why_ignored": f"only {float(c.get('vram_gb') or 0):.0f} GB of graphics memory"} for c in small]
+    if not named and len(keep) > 1 and all(str(c.get("vendor") or "").lower() == "nvidia" for c in keep):
+        # NVIDIA: setup's role rule (gpu_roles.recommend): a card of 8 GB or less starts Off beside a bigger one, so the plan counts what the run uses
+        # (an AMD card of 8 GB counts in both the plan and the run)
+        from strata_control import gpu_roles
+        if any(round(float(c.get("vram_gb") or 0)) > gpu_roles.OFF_AT_OR_BELOW_GB for c in keep):
+            off = [c for c in keep if round(float(c.get("vram_gb") or 0)) <= gpu_roles.OFF_AT_OR_BELOW_GB]
+            ignored += [{**c, "why_ignored": f"a card with {gpu_roles.OFF_AT_OR_BELOW_GB:.0f} GB or less starts Off beside a bigger card (setup does the same)"}
+                        for c in off]
+            keep = [c for c in keep if c not in off]
     amd = not named and bool(keep) and all(str(c.get("vendor") or vendor or "").lower() == "amd" for c in keep)
     if amd:
         win = _on_windows() if windows is None else windows
