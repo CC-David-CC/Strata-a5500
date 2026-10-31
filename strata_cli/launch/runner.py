@@ -356,10 +356,14 @@ def apply_cards(cfg: dict, gpus: "list[int] | dict | None") -> None:
         cfg.pop("layer_split", None)
 
 
-def installed_cards(base: dict | None) -> list[int] | None:
+def installed_cards(base: dict | None, usable: list[dict] | None = None) -> list[int] | None:
     """The cards the installed model's own config names after a choice (setup --gpu / --gpus, the app's card pick: "gpus_asked"), in its order;
-    None when it names none or was never asked."""
+    None when it names none or was never asked, or when setup picked them itself (strata_control/gpu_pick.py: a DeepSeek config of setup 0.2.8
+    and earlier marks setup's one-card pick as asked; `usable`: the cards that count on this PC, needed to tell the two apart)."""
     if not isinstance(base, dict) or not (base.get("gpus_asked") or base.get("gpu_roles")):
+        return None
+    from strata_control import gpu_pick
+    if not gpu_pick.chosen_by_person(base, usable):
         return None
     g = base.get("gpu")
     if g is None or g == "":
@@ -387,7 +391,11 @@ def cards_for_launch(s: S.LaunchSettings, catalog, ram_gb: float | None = None, 
             return None
     if s.gpus:
         return [int(g) for g in s.gpus]
-    if installed_cards(base) or (isinstance(base, dict) and base.get("gpu_roles")):
+    try:
+        usable_now = catalog.computer().usable_gpus
+    except Exception:                                        # noqa: BLE001 - without the card list a saved card is kept, as before
+        usable_now = None
+    if installed_cards(base, usable_now) or (isinstance(base, dict) and base.get("gpu_roles")):
         return None
     try:
         from strata_control import gpu_roles
@@ -948,7 +956,11 @@ class Runner:
             roles = base.get("gpu_roles")
             if isinstance(roles, dict) and roles:
                 return ["--gpu-roles", ",".join(f"{k}={v}" for k, v in sorted(roles.items(), key=lambda kv: int(kv[0])))]
-            cards = installed_cards(base)
+            try:
+                usable_now = self.catalog.computer().usable_gpus
+            except Exception:                                # noqa: BLE001
+                usable_now = None
+            cards = installed_cards(base, usable_now)
             if cards:
                 return ["--gpus", ",".join(str(g) for g in cards)] if len(cards) > 1 else ["--gpu", str(cards[0])]
         except Exception:                                    # noqa: BLE001 - never block a launch over remembering the cards
