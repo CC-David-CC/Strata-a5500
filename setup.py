@@ -1963,6 +1963,10 @@ def choose_gpus(a, found) -> list:
         fail("none of your GPUs can run Strata", "it needs an NVIDIA RTX 20 series or newer (compute capability 7.5+)")
     can = together_ok(found)
     if not can:
+        for g in found:                                # said, not asked: a card that works alone but cannot share a model beside a bigger one
+            if g["index"] != single[0]["index"] and gpu_problem(g) is None:
+                say(f"  GPU {g['index']} ({g['name']}, {g['vram_gb']:.0f} GB) is not used: a card that shares a model needs {SPLIT_MIN_VRAM_GB} GB or more, "
+                    f"so the model runs on GPU {single[0]['index']} alone.")
         return [single[0]["index"]]
     return choose_roles(a, found)
 
