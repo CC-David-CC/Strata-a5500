@@ -19,11 +19,10 @@ setup.py, tools/strata_mcp.py and strata_cli/launch import it.  Recommend, never
 
 from __future__ import annotations
 
+import os
 import platform
 import sys
 from typing import Any
-
-import os
 
 from strata_control import gpu_fit
 
@@ -133,15 +132,20 @@ def run_cards(cards: list[dict] | None, vendor: str | None = None, *, windows: b
     ignored = list(ignored) + [{**c, "why_ignored": f"only {float(c.get('vram_gb') or 0):.0f} GB of graphics memory"} for c in small]
     amd = not named and bool(keep) and all(str(c.get("vendor") or vendor or "").lower() == "amd" for c in keep)
     if amd:
-        archs = tuple(covered if covered is not None else DSV41_HIP_ARCHS)
-        known = [c for c in keep if c.get("arch")]
-        ok = [c for c in keep if not c.get("arch") or c["arch"] in archs]
-        if known and ok and len(ok) < len(keep):
-            ignored += [{**c, "why_ignored": f"the DeepSeek engine has no code for {c['arch']} (it runs on {', '.join(archs)})"}
-                        for c in keep if c not in ok]
-            keep = ok
-        if (_on_windows() if windows is None else windows) and len(keep) > 1:
-            first = min(keep, key=lambda c: (-round(float(c.get("vram_gb") or 0)), c.get("index", 0)))
+        win = _on_windows() if windows is None else windows
+        # the list of architectures: the package's own (`covered`), else the Linux package's (gfx1200, gfx1201).  Windows ships a different
+        # DeepSeek package (hip-rdna3), so without a list of its own nothing is filtered there.
+        archs = tuple(covered) if covered else (() if win else DSV41_HIP_ARCHS)
+        if archs:
+            known = [c for c in keep if c.get("arch")]
+            ok = [c for c in keep if not c.get("arch") or c["arch"] in archs]
+            if known and ok and len(ok) < len(keep):
+                ignored += [{**c, "why_ignored": f"the DeepSeek engine has no code for {c['arch']} (it runs on {', '.join(archs)})"}
+                            for c in keep if c not in ok]
+                keep = ok
+        if win and len(keep) > 1:
+            # the card setup takes (setup.py amd_rank): a card with memory of its own before an APU, then the most memory, then the lower number
+            first = min(keep, key=lambda c: (bool(c.get("uma") or c.get("integrated")), -round(float(c.get("vram_gb") or 0)), c.get("index", 0)))
             ignored += [{**c, "why_ignored": "on Windows a model runs on one AMD card"} for c in keep if c is not first]
             keep = [first]
     keep = sorted(keep, key=lambda c: c.get("index", 0))

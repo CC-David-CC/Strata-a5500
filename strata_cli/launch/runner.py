@@ -403,6 +403,15 @@ def cards_for_launch(s: S.LaunchSettings, catalog, ram_gb: float | None = None, 
         if len(comp.usable_gpus) < 2:
             return None
         cards = gpu_roles.rows(comp.gpus, comp.engine_vendor)
+        if comp.engine_vendor == "amd" and ((isinstance(base, dict) and base.get("arch") == "deepseek41")
+                                            or getattr(s, "family", None) == "deepseek41"):
+            # DeepSeek on AMD: the cards setup and `--plan` use (strata_control/dsv41_fit.run_cards): one card on Windows, only cards the engine
+            # package runs, no integrated chip beside a card with memory of its own
+            from strata_control import dsv41_fit
+            ids = [int(c["index"]) for c in dsv41_fit.run_cards(comp.usable_gpus, comp.engine_vendor)[0]]
+            if len(ids) < 2:
+                return ids or None                           # pinned to that card, exactly as setup pins it
+            cards = [c for c in cards if int(c.get("index", 0)) in ids]
         rec = gpu_roles.recommend(cards, comp.engine_vendor)["roles"]
         return gpu_roles.order(rec, cards) or None
     except Exception:                                        # noqa: BLE001 - never block a launch over the choice of cards
@@ -1431,6 +1440,9 @@ class Runner:
         base = read_config(base_path)
         cfg = derive_config(base, self.s, bool_flags=tune_knobs.BOOL_FLAGS,
                             log=str(launch_dir() / f"{self.name}.engine.log"), gpus=cards_for_launch(self.s, self.catalog, base=base))
+        if self.s.gpus and not self.s.gpu_roles:             # a DeepSeek model on AMD keeps the card the person names from now on (strata_control/gpu_pick.py)
+            from strata_control import gpu_pick
+            gpu_pick.remember(base_path, [int(g) for g in self.s.gpus])
         self.apply_four_card(cfg)
         self.use_own_dsv41_engine(cfg)
         apply_experts(cfg, self.experts_flag(cfg.get("exe")))   # after the engine is settled: only a 0.1.50+ engine is given --experts

@@ -7096,7 +7096,7 @@ def widen_setups_one_card(cfg_path: Path, cfg: dict, amd: list) -> dict:
         new = gpu_pick.widened(cfg, cards)
         write_config(cfg_path, new)
         ok(f"DeepSeek now uses all {len(cards)} of your AMD cards (it was set up on GPU {was} alone by an earlier Strata). Nothing is rebuilt. "
-           f"To keep it on one card: ./setup.sh --gpu {was}")
+           f"To keep it on one card: strata launch --gpu {was} (it is remembered from then on)")
         return new
     except Exception as e:                             # noqa: BLE001 - never stop a start over this
         warn(f"could not check which cards this model should use ({e})")
@@ -7164,6 +7164,12 @@ def _start(cfg_path: Path, port: int | None, gpu: int | list | None = None, open
             gpu = None
         elif gpu is not None:
             cmd += ["--gpu", str(gpu)]
+            if not isinstance(gpu, list):                  # a DeepSeek model on AMD keeps a card the person names (the others: this start only)
+                from strata_control import gpu_pick
+                saved = gpu_pick.remember(cfg_path, [gpu])
+                if saved is not None:
+                    cfg = saved
+                    ok(f"saved for this model: it runs on GPU {gpu} from now on")
         else:
             cfg = widen_setups_one_card(cfg_path, cfg, amd)   # a DeepSeek config from setup 0.2.8 and earlier: setup's own one-card pick
         found = []
@@ -8413,6 +8419,20 @@ def dsv41_smoke(exe: Path, pack: Path, lib_dirs, gpus=None, timeout: int = 5400)
     return r.returncode == 0, text[-1500:].encode(enc, "replace").decode(enc, "replace")
 
 
+def earlier_card_kept(prev: Path) -> bool:
+    """A new copy of Strata set up like an earlier install carries over the card that install was set to.  A card setup picked itself on a
+    DeepSeek model on AMD (strata_control/gpu_pick.py) is not a choice to carry over; every other config keeps its card exactly as before
+    (no AMD listing is read for them, and nothing here can stop a setup)."""
+    try:
+        earlier = json.loads(Path(prev).read_text(encoding="utf-8-sig"))
+        from strata_control import gpu_pick
+        if WIN or not gpu_pick.is_deepseek_amd(earlier):
+            return True
+        return gpu_pick.chosen_by_person(earlier, amd_usable_cards(amd_gpus()))
+    except Exception:                                      # noqa: BLE001 - an unreadable file or listing: keep the card, as before
+        return True
+
+
 def cards_named(a, hip: bool = False) -> bool:
     """Did the person name the cards (--gpu / --gpus)?  On AMD setup's own pick is written into a.gpu further on (other steps rely on it), so
     the AMD branch records the answer first (a._cards_named); NVIDIA keeps its way (choose_gpus sets a.gpu to the cards in use)."""
@@ -8426,9 +8446,9 @@ def amd_usable_cards(amd) -> list:
     return gpu_fit.usable_cards([{**g, "vendor": "amd", "usable": amd_problem(g) is None} for g in amd])[0]
 
 
-def dsv41_covered_archs(eng) -> tuple:
-    """The AMD architectures the installed DeepSeek engine package holds code for (its manifest), else what the release's package is built for."""
-    from strata_control import dsv41_fit
+def dsv41_covered_archs(eng):
+    """The AMD architectures the installed DeepSeek engine package holds code for (its manifest); None when it names none (no package yet, or one
+    without a list): the caller then uses the release's own rule (dsv41_fit.run_cards) and says nothing about a card it cannot know."""
     try:
         from strata_control import engine_component as ec
         exe = dsv41_exe(Path(eng))
@@ -8436,9 +8456,9 @@ def dsv41_covered_archs(eng) -> tuple:
             archs = ec.read_manifest(exe.parent).hip_archs
             if archs:
                 return tuple(archs)
-    except Exception:                                      # noqa: BLE001 - the release's list is the fallback
+    except Exception:                                      # noqa: BLE001 - no list: None
         pass
-    return tuple(dsv41_fit.DSV41_HIP_ARCHS)
+    return None
 
 
 def dsv41_auto_cards(amd, eng) -> list:
@@ -8609,7 +8629,7 @@ def install_dsv41(a, family, gpu, hip, amd, cuda_tk, multi, port, ram, adopted, 
         lib_dirs = [*lib_dirs, *dsv41_engine.lib_dirs(exe)]   # its own package, and the rocm/bin an AMD package keeps the ROCm DLLs in
     if hip and exe is not None and named:                  # cards the person named that this package holds no code for: said, never refused
         covered = dsv41_covered_archs(eng)
-        for c in cards:
+        for c in cards if covered else []:
             if c.get("arch") and c["arch"] not in covered:
                 warn(f"GPU {c['index']} ({c['name']}, {c['arch']}): this DeepSeek engine package holds code for {', '.join(covered)} only, so it may "
                      "not start on that card. Leave it out (--gpus ...) to be sure.")
@@ -8694,7 +8714,7 @@ def install_dsv41(a, family, gpu, hip, amd, cuda_tk, multi, port, ram, adopted, 
             warn("the 16-word test run was skipped (STRATA_DSV41_NO_SMOKE=1)")
         else:
             say("  Testing the model with a short question (a few minutes: the engine reads the first experts from the disk) ...")
-            good, why = dsv41_smoke(exe, pack, lib_dirs, [c["index"] for c in cards] if (named or (hip and len(cards) > 1)) else None)
+            good, why = dsv41_smoke(exe, pack, lib_dirs, [c["index"] for c in cards] if (a.gpu is not None or a.gpus or (hip and len(cards) > 1)) else None)
             if not good:
                 fail("the model does not answer sensibly after the preparation: " + (why.splitlines()[-1] if why else "no answer"),
                      f"delete {pack} and run setup again so the pack is built fresh; if the test fails again, "
@@ -8731,14 +8751,11 @@ def install_dsv41(a, family, gpu, hip, amd, cuda_tk, multi, port, ram, adopted, 
     if mac:
         cfg["backend"] = "metal"
     idx = [c["index"] for c in cards]
-    if len(idx) > 1 or named:
+    if len(idx) > 1 or a.gpu is not None or a.gpus:      # (a.gpu is also setup's own pick: one card pinned when several devices are in the PC)
         cfg["gpu"] = idx if len(idx) > 1 else idx[0]
-        if hip:                                          # who chose them (strata_control/gpu_pick.py): setup's own pick is not "asked"
+        cfg["gpus_asked"] = True
+        if hip:                                          # who chose them (strata_control/gpu_pick.py): the person, or setup itself
             cfg["gpus_by"] = "person" if named else "setup"
-            if named:
-                cfg["gpus_asked"] = True
-        else:
-            cfg["gpus_asked"] = True
     if a.host:
         cfg["host"] = a.host
     if a.api_key:
@@ -9281,13 +9298,7 @@ def main() -> int:
                     a.gpus = a.gpus or ",".join(str(g) for g in ch["gpu"])
                     a.layer_split = a.layer_split or ch.get("layer_split")
                 else:
-                    try:                                  # a card setup picked itself is not a choice to carry over (strata_control/gpu_pick.py)
-                        from strata_control import gpu_pick
-                        earlier = json.loads(prev.read_text(encoding="utf-8-sig"))
-                        keep_card = gpu_pick.chosen_by_person(earlier, amd_usable_cards(amd_gpus()))
-                    except (OSError, ValueError):
-                        keep_card = True
-                    if keep_card:
+                    if earlier_card_kept(prev):
                         a.gpu = a.gpu if a.gpu is not None else ch.get("gpu")
                 a.yes = True
     global GPU_PICK, OLD_GPUS

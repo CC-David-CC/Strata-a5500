@@ -12,8 +12,6 @@ on one).  New configs say who chose in "gpus_by" ("person" or "setup").  A confi
 """
 from __future__ import annotations
 
-from typing import Any
-
 ASKED_BY_PERSON = "person"
 PICKED_BY_SETUP = "setup"
 
@@ -65,14 +63,37 @@ def looks_like_setups_pick(cfg: dict, usable: list[dict] | None) -> bool:
 
 
 def widened(cfg: dict, cards: list[int]) -> dict:
-    """`cfg` with setup's own pick of `cards` (two or more): card list, no 'asked' mark, and the marker that setup chose them."""
+    """`cfg` with setup's own pick of `cards` (two or more): the card list and the marker that setup chose them; nothing else changes."""
     out = dict(cfg)
     out["gpu"] = list(cards) if len(cards) > 1 else cards[0]
-    out.pop("gpus_asked", None)
+    out["gpus_asked"] = True                           # as setup writes it for every card list; "gpus_by" says who chose
     out["gpus_by"] = PICKED_BY_SETUP
     out.pop("hip_ordinal", None)
     return out
 
 
-def describe(cfg: dict, usable: list[dict] | None) -> dict[str, Any]:
-    return {"by_person": chosen_by_person(cfg, usable), "legacy": not cfg.get("gpus_by") and bool(cfg.get("gpus_asked"))}
+def is_deepseek_amd(cfg: dict | None) -> bool:
+    return isinstance(cfg, dict) and _is_deepseek_amd(cfg)
+
+
+def remember(path, cards: list[int]) -> dict | None:
+    """The person named `cards` for a DeepSeek model on AMD (`strata launch --gpu N`, `--gpus ...`, `setup --gpu N`): saved in the installed
+    config as theirs, so no later start widens or moves it.  Returns the new config, or None when the file is not a DeepSeek AMD config
+    (everything else keeps its own rules) or cannot be written.  Nothing else in the file changes."""
+    import json
+    import os
+    from pathlib import Path
+    p = Path(path)
+    try:
+        cfg = json.loads(p.read_text(encoding="utf-8-sig"))
+        if not _is_deepseek_amd(cfg) or not cards:
+            return None
+        cfg["gpu"] = list(cards) if len(cards) > 1 else int(cards[0])
+        cfg["gpus_asked"] = True
+        cfg["gpus_by"] = ASKED_BY_PERSON
+        tmp = p.with_name(p.name + ".tmp")
+        tmp.write_text(json.dumps(cfg, indent=1), encoding="utf-8")
+        os.replace(tmp, p)
+        return cfg
+    except (OSError, ValueError, TypeError):
+        return None
